@@ -1,0 +1,25 @@
+name: "MoneyMateAPI_TransactionService"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs: 
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+  
+  provision_infra_test:
+    name: Provision Infra for Test
+    runs-on: ubuntu-20.04
+    env: 
+      ENVIRONMENT: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform plan
+        run: ./batect -f src/TransactionService/batect.yml terraform_plan

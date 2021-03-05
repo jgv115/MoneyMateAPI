@@ -1,5 +1,10 @@
 project_name: moneymate_api
 
+.aws-creds-envs: &aws-creds-envs
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  AWS_REGION: ${AWS_REGION:-}
+
 containers:
   dotnet_env:
     image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
@@ -22,31 +27,34 @@ containers:
   
   terraform_env:
     image: hashicorp/terraform:latest
+    environment:
+      <<: *aws-creds-envs
     volumes:
-      - local: infra
-        container: /infra
+      - local: .
+        container: /code
         options: cached
+    working_directory: /code/infra
 
 tasks:
-  build_transaction_service:
+  build:
     description: Builds the Transaction Service
     group: Transaction service tasks
     run:
       container: dotnet_env
       command: dotnet build
       
-  run_transaction_service:
+  run:
     description: Runs the Transaction Service
     group: Transaction service tasks
     prerequisites:
-      - build_transaction_service
+      - build
     run:
       container: dotnet_env
-      command: dotnet src/TransactionService/bin/Debug/net5.0/TransactionService.dll
+      command: dotnet bin/Debug/net5.0/TransactionService.dll
       
   terraform_plan:
     description: Runs terraform plan
     group: Terraform
     run:
       container: terraform_env
-      command: sh
+      entrypoint: ../scripts/plan_terraform.sh
