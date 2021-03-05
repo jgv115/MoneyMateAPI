@@ -1,0 +1,52 @@
+project_name: moneymate_api
+
+containers:
+  dotnet_env:
+    image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+    environment:
+      ASPNETCORE_URLS: http://*:5000
+    ports:
+      - container: 5000
+        local: 5000
+    volumes:
+      - local: .
+        container: /code
+        options: cached
+      - type: cache
+        name: nuget-cache
+        container: /home/container-user/.nuget
+    working_directory: /code
+    run_as_current_user:
+      enabled: true
+      home_directory: /home/container-user
+  
+  terraform_env:
+    image: hashicorp/terraform:latest
+    volumes:
+      - local: infra
+        container: /infra
+        options: cached
+
+tasks:
+  build_transaction_service:
+    description: Builds the Transaction Service
+    group: Transaction service tasks
+    run:
+      container: dotnet_env
+      command: dotnet build
+      
+  run_transaction_service:
+    description: Runs the Transaction Service
+    group: Transaction service tasks
+    prerequisites:
+      - build_transaction_service
+    run:
+      container: dotnet_env
+      command: dotnet src/TransactionService/bin/Debug/net5.0/TransactionService.dll
+      
+  terraform_plan:
+    description: Runs terraform plan
+    group: Terraform
+    run:
+      container: terraform_env
+      command: sh
