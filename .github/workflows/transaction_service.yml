@@ -18,8 +18,15 @@ jobs:
     runs-on: ubuntu-20.04
     env: 
       ENVIRONMENT: test
+      AWS_ACCESS_KEY_ID: ${{ secret.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secret.AWS_SECRET_ACCESS_KEY }}
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - shell: bash
+        run: |
+          echo "$AWS_SECRET_ACCESS_KEY"
+        
       - name: Run terraform plan
         run: ./batect -f src/TransactionService/batect.yml terraform_plan
