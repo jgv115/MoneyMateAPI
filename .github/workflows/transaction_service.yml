@@ -19,7 +19,7 @@ jobs:
       - unit_tests
     runs-on: ubuntu-20.04
     env: 
-      TF_WORKSPACE: test
+      ENVIRONMENT: test
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     
@@ -35,7 +35,7 @@ jobs:
       - plan_infra_test
     runs-on: ubuntu-20.04
     env:
-      TF_WORKSPACE: test
+      ENVIRONMENT: test
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 

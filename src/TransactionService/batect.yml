@@ -29,6 +29,7 @@ containers:
     image: hashicorp/terraform:latest
     environment:
       <<: *aws-creds-envs
+      TF_WORKSPACE: $ENVIRONMENT
     volumes:
       - local: .
         container: /code
@@ -38,14 +39,12 @@ containers:
 tasks:
   build:
     description: Builds the Transaction Service
-    group: Transaction service tasks
     run:
       container: dotnet_env
       command: dotnet build
       
   run:
     description: Runs the Transaction Service
-    group: Transaction service tasks
     prerequisites:
       - build
     run:
