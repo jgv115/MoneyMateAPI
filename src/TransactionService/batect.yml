@@ -57,7 +57,7 @@ tasks:
     group: Terraform
     run:
       container: terraform_env
-      entrypoint: ../scripts/plan_terraform.s
+      entrypoint: ../scripts/plan_terraform.sh
 
   terraform_apply:
     description: Runs terraform apply
