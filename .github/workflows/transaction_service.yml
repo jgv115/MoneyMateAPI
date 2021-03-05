@@ -13,20 +13,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
   
-  provision_infra_test:
-    name: Provision Infra for Test
+  plan_infra_test:
+    name: Plan Infra for Test
+    needs:
+      - unit_tests
     runs-on: ubuntu-20.04
     env: 
-      ENVIRONMENT: test
+      TF_WORKSPACE: test
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - shell: bash
-        run: |
-          echo "$AWS_SECRET_ACCESS_KEY"
-        
       - name: Run terraform plan
         run: ./batect -f src/TransactionService/batect.yml terraform_plan
+        
+  provision_infra_test:
+    name: Provision Infra for Test
+    needs: 
+      - plan_infra_test
+    runs-on: ubuntu-20.04
+    env:
+      TF_WORKSPACE: test
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform apply
+        run: ./batect -f src/TransactionService/batect.yml terraform_apply
