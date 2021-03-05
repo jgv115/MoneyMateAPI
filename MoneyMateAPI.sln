@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService.Tests", "test\TransactionService.Tests\TransactionService.Tests.csproj", "{05153ACE-37A0-4342-9EC8-1396BFC1CCD1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService.Tests", "TransactionService\test\TransactionService.Tests\TransactionService.Tests.csproj", "{05153ACE-37A0-4342-9EC8-1396BFC1CCD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService", "src\TransactionService\TransactionService.csproj", "{ACC2F89E-186F-400A-93E8-7E2EE0DE98EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService", "TransactionService\src\TransactionService\TransactionService.csproj", "{ACC2F89E-186F-400A-93E8-7E2EE0DE98EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,7 @@ Global
 		{ACC2F89E-186F-400A-93E8-7E2EE0DE98EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACC2F89E-186F-400A-93E8-7E2EE0DE98EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACC2F89E-186F-400A-93E8-7E2EE0DE98EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal

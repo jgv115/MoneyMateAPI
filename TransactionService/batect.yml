@@ -41,15 +41,21 @@ tasks:
     description: Builds the Transaction Service
     run:
       container: dotnet_env
-      command: dotnet build
-      
+      command: dotnet build src/TransactionService/TransactionService.csproj
+  
+  unit_tests:
+    description: Runs the unit tests
+    run:
+      container: dotnet_env
+      command: dotnet test test/TransactionService.Tests
+  
   run:
     description: Runs the Transaction Service
     prerequisites:
       - build
     run:
       container: dotnet_env
-      command: dotnet bin/Debug/net5.0/TransactionService.dll
+      command: dotnet src/TransactionService/bin/Debug/net5.0/TransactionService.dll
       
   terraform_plan:
     description: Runs terraform plan
