@@ -22,7 +22,6 @@ jobs:
       ENVIRONMENT: test
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -38,7 +37,36 @@ jobs:
       ENVIRONMENT: test
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform apply
+        run: ./batect -f TransactionService/batect.yml terraform_apply
+        
+  plan_infra_prod:
+    name: Plan Infra for Prod
+    needs:
+      - provision_infra_test
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: prod
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform plan
+        run: ./batect -f TransactionService/batect.yml terraform_plan
 
+  provision_infra_prod:
+    name: Provision Infra for Prod
+    needs:
+      - plan_infra_prod
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: prod
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
