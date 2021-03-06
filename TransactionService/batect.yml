@@ -30,6 +30,7 @@ containers:
     environment:
       <<: *aws-creds-envs
       TF_WORKSPACE: $ENVIRONMENT
+      TF_VAR_TRANSACTION_SERVICE_LAMBDA_IMAGE_TAG: $IMAGE_TAG
     volumes:
       - local: .
         container: /code
