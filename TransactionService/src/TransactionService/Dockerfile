@@ -10,8 +10,6 @@ COPY . .
 RUN dotnet build "TransactionService.csproj" --configuration Release --output /app/build
 
 FROM build AS publish
-RUN pwd
-RUN ls
 RUN dotnet publish "TransactionService.csproj" \
             --configuration Release \
             --runtime linux-x64 \
