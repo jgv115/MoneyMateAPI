@@ -12,7 +12,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-  
+      - name: Run unit tests
+        run: ./batect -f TransactionService/batect.yml unit_tests
+
   build_and_push_to_ecr:
     name: Build image and push to ECR
     needs: 

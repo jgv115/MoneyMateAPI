@@ -24,6 +24,7 @@ namespace TransactionService
         {
             builder
                 .UseStartup<Startup>();
+
         }
 
         /// <summary>
@@ -36,5 +37,7 @@ namespace TransactionService
         protected override void Init(IHostBuilder builder)
         {
         }
+        
+        
     }
 }
