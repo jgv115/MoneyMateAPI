@@ -13,5 +13,12 @@ resource "aws_lambda_function" transaction_service_lambda {
   publish = false
   package_type = "Image"
   role = aws_iam_role.transaction_service_lambda.arn
+  
+  environment {
+    variables = {
+      ASPNETCORE_ENVIRONMENT = terraform.workspace
+    }
+  }
+  
   tags = local.tags
 }
