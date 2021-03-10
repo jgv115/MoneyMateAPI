@@ -15,7 +15,8 @@ namespace TransactionService.Tests
 {
     public class ValuesControllerTests
     {
-        [Fact]
+        
+        [Fact(Skip = "skipping")]
         public async Task TestGet()
         {
             var lambdaFunction = new LambdaEntryPoint();

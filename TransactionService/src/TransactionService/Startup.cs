@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TransactionService.Middleware;
+using TransactionService.Models;
+using TransactionService.Settings;
 
 namespace TransactionService
 {
@@ -26,6 +30,21 @@ namespace TransactionService
         // This method gets called by the runtime. Use this method to add services to the container
         public void ConfigureServices(IServiceCollection services)
         {
+            var auth0Settings = Configuration.GetSection(Auth0Settings.Key);
+            Console.WriteLine(auth0Settings.GetSection("Authority").Value);
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = auth0Settings.GetSection("Authority").Value;
+                options.Audience = auth0Settings.GetSection("Audience").Value;
+                options.SaveToken = true;
+            });
+
+            services.AddScoped<CurrentUserContext>();
+
             services.AddControllers();
         }
 
@@ -41,7 +60,11 @@ namespace TransactionService
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/health"),
+                builder => builder.UseMiddleware<UserContextMiddleware>());
 
             app.UseEndpoints(endpoints =>
             {

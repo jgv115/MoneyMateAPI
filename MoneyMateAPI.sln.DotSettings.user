@@ -3,5 +3,8 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=5ac5200f_002D87c6_002D4b12_002D9bdc_002D185a247b7ba0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestGet" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::05153ACE-37A0-4342-9EC8-1396BFC1CCD1::net5.0::TransactionService.Tests.ValuesControllerTests.TestGet&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::05153ACE-37A0-4342-9EC8-1396BFC1CCD1::net5.0::TransactionService.Tests.Controllers.HealthControllerTests&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::05153ACE-37A0-4342-9EC8-1396BFC1CCD1::net5.0::TransactionService.Tests.Middleware.UserContextMiddlewareTests.InvokeAsync_Should&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::05153ACE-37A0-4342-9EC8-1396BFC1CCD1::net5.0::TransactionService.Tests.Middleware.UserContextMiddlewareTests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
