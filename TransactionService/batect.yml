@@ -10,7 +10,7 @@ containers:
     image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
     environment:
       ASPNETCORE_URLS: http://*:5000
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: dev
     ports:
       - container: 5000
         local: 5000
