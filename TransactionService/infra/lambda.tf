@@ -10,6 +10,7 @@ resource "aws_lambda_function" transaction_service_lambda {
     entry_point = ["/lambda-entrypoint.sh"]
   }
   timeout = 30
+  memory_size = 512
   publish = false
   package_type = "Image"
   role = aws_iam_role.transaction_service_lambda.arn
