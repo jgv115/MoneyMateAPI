@@ -6,6 +6,7 @@ resource "aws_apigatewayv2_api" moneymate_api {
 }
 
 data "aws_acm_certificate" moneymate_api_certificate {
+  provider = aws.aws_us_east_1
   domain = lookup(var.domain_names, terraform.workspace, "")
 }
 
