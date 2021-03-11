@@ -10,14 +10,19 @@ data "aws_acm_certificate" moneymate_api_certificate {
   domain = lookup(var.domain_names, terraform.workspace, "")
 }
 
-resource "aws_api_gateway_domain_name" moneymate_api_custom_domain {
-  certificate_arn = data.aws_acm_certificate.moneymate_api_certificate.arn
+resource "aws_apigatewayv2_domain_name" moneymate_api_custom_domain {
   domain_name = data.aws_acm_certificate.moneymate_api_certificate.domain
+  domain_name_configuration {
+    certificate_arn = data.aws_acm_certificate.moneymate_api_certificate.arn
+    endpoint_type = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
 }
 
-resource "aws_api_gateway_base_path_mapping" moneymate_api_mapping {
+resource "aws_apigatewayv2_api_mapping" moneymate_api_mapping {
   api_id = aws_apigatewayv2_api.moneymate_api.id
-  domain_name = aws_api_gateway_domain_name.moneymate_api_custom_domain.domain_name
+  domain_name = aws_apigatewayv2_domain_name.moneymate_api_custom_domain.domain_name
+  stage = "$default"
 }
 
 # API integration with MoneyMate TransactionService Lambda
