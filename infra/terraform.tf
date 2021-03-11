@@ -13,17 +13,23 @@ terraform {
   backend "s3" {
     bucket = "moneymate-api-core-infra"
     key = "moneymate-api-core-infra.tfstate"
-//    profile = "jgv115"
+    profile = "jgv115"
     region = "ap-southeast-2"
   }
 }
 
 provider "aws" {
-//  profile = "jgv115"
+  profile = "jgv115"
   region = "ap-southeast-2"
 }
 
+provider "aws" {
+  alias = "aws_us_east_1"
+  profile = "jgv115"
+  region = "us-east-1"
+}
+
 provider "cloudflare" {
-  email   = "jgv115@gmail.com"
-  api_key = "hidden"
+  email   = var.CLOUDFLARE_EMAIL
+  api_key = var.CLOUDFLARE_API_KEY
 }
