@@ -25,5 +25,5 @@ provider "aws" {
 
 provider "cloudflare" {
   email   = "jgv115@gmail.com"
-  api_key = "30cd54bc0b695b3e519a218b93488b06748d8"
+  api_key = "hidden"
 }

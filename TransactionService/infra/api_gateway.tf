@@ -5,6 +5,20 @@ resource "aws_apigatewayv2_api" moneymate_api {
   protocol_type = "HTTP"
 }
 
+data "aws_acm_certificate" moneymate_api_certificate {
+  domain = lookup(var.domain_names, terraform.workspace, "")
+}
+
+resource "aws_api_gateway_domain_name" moneymate_api_custom_domain {
+  certificate_arn = data.aws_acm_certificate.moneymate_api_certificate.arn
+  domain_name = data.aws_acm_certificate.moneymate_api_certificate.domain
+}
+
+resource "aws_api_gateway_base_path_mapping" moneymate_api_mapping {
+  api_id = aws_apigatewayv2_api.moneymate_api.id
+  domain_name = aws_api_gateway_domain_name.moneymate_api_custom_domain.domain_name
+}
+
 # API integration with MoneyMate TransactionService Lambda
 resource "aws_apigatewayv2_integration" moneymate_api_lambda_integration {
   api_id = aws_apigatewayv2_api.moneymate_api.id
