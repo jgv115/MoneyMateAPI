@@ -32,6 +32,8 @@ containers:
       <<: *aws-creds-envs
       TF_WORKSPACE: $ENVIRONMENT
       TF_VAR_TRANSACTION_SERVICE_LAMBDA_IMAGE_TAG: $IMAGE_TAG
+      TF_VAR_CLOUDFLARE_EMAIL: $CLOUDFLARE_EMAIL
+      TF_VAR_CLOUDFLARE_API_KEY: $CLOUDFLARE_API_KEY
     volumes:
       - local: .
         container: /code
