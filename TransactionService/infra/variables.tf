@@ -9,3 +9,18 @@ variable domain_names {
     "prod": "api.moneymate.benong.id.au"
   }
 }
+
+variable cloudflare_dns_entry_name {
+  default = {
+    "test": "api.test.moneymate"
+    "prod": "api.moneymate"
+  }
+}
+
+variable CLOUDFLARE_EMAIL {
+  description = "Cloudflare email"
+}
+
+variable CLOUDFLARE_API_KEY {
+  description = "Cloudflare master API key"
+}

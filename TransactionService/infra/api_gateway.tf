@@ -5,10 +5,12 @@ resource "aws_apigatewayv2_api" moneymate_api {
   protocol_type = "HTTP"
 }
 
+# AWS certificate
 data "aws_acm_certificate" moneymate_api_certificate {
   domain = lookup(var.domain_names, terraform.workspace, "")
 }
 
+# API Gateway custom domain name
 resource "aws_apigatewayv2_domain_name" moneymate_api_custom_domain {
   domain_name = data.aws_acm_certificate.moneymate_api_certificate.domain
   domain_name_configuration {
@@ -18,6 +20,7 @@ resource "aws_apigatewayv2_domain_name" moneymate_api_custom_domain {
   }
 }
 
+# API Gateway custom domain name API mapping
 resource "aws_apigatewayv2_api_mapping" moneymate_api_mapping {
   api_id = aws_apigatewayv2_api.moneymate_api.id
   domain_name = aws_apigatewayv2_domain_name.moneymate_api_custom_domain.domain_name
@@ -30,6 +33,19 @@ resource "aws_apigatewayv2_integration" moneymate_api_lambda_integration {
   integration_type = "AWS_PROXY"
   integration_uri = aws_lambda_function.transaction_service_lambda.invoke_arn
   payload_format_version = "2.0"
+}
+
+# Cloudflare DNS record for custom domain name
+data "cloudflare_zones" benong_zones {
+  filter {
+    name = "benong.id.au"
+  }
+}
+resource "cloudflare_record" moneymate_cloudflare_record {
+  name = lookup(var.cloudflare_dns_entry_name, terraform.workspace, "")
+  type = "CNAME"
+  value = aws_apigatewayv2_domain_name.moneymate_api_custom_domain.domain_name_configuration.0.target_domain_name
+  zone_id = data.cloudflare_zones.benong_zones.zones[0].id
 }
 
 # API Routes
