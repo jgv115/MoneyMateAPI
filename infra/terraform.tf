@@ -23,12 +23,6 @@ provider "aws" {
   region = "ap-southeast-2"
 }
 
-provider "aws" {
-  alias = "aws_us_east_1"
-//  profile = "jgv115"
-  region = "us-east-1"
-}
-
 provider "cloudflare" {
   email   = var.CLOUDFLARE_EMAIL
   api_key = var.CLOUDFLARE_API_KEY

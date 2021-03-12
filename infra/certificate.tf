@@ -5,7 +5,6 @@ resource "aws_acm_certificate" moneymate_cert {
   lifecycle {
     create_before_destroy = true
   }
-  provider = aws.aws_us_east_1
 }
 
 data "cloudflare_zones" benong_zones {
@@ -24,6 +23,5 @@ resource "cloudflare_record" moneymate_cloudflare_record {
 
 resource "aws_acm_certificate_validation" moneymate_cert_validation {
   certificate_arn = aws_acm_certificate.moneymate_cert.arn
-  provider = aws.aws_us_east_1
   validation_record_fqdns = cloudflare_record.moneymate_cloudflare_record.*.hostname
 }
