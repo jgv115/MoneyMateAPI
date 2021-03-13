@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.DynamoDBv2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,8 +13,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TransactionService.Domain;
 using TransactionService.Middleware;
 using TransactionService.Models;
+using TransactionService.Repositories;
 using TransactionService.Settings;
 
 namespace TransactionService
@@ -44,6 +47,27 @@ namespace TransactionService
             });
 
             services.AddScoped<CurrentUserContext>();
+            services.AddScoped<ITransactionHelperService, TransactionHelperService>();
+
+            // var dynamoDbConfig = Configuration.GetSection("DynamoDb");
+            // var dynamoDbLocalMode = dynamoDbConfig.GetValue<bool>("LocalMode");
+            //
+            // if (dynamoDbLocalMode)
+            // {
+            //     services.AddSingleton<IAmazonDynamoDB>(provider =>
+            //     {
+            //         var clientConfig = new AmazonDynamoDBConfig()
+            //         {
+            //             ServiceURL = dynamoDbConfig.GetValue<string>("ServiceUrl")
+            //         };
+            //         return new AmazonDynamoDBClient(clientConfig);
+            //     });
+            // }
+            // else
+            // {
+            //     services.AddAWSService<IAmazonDynamoDB>();
+            // }
+            services.AddSingleton<ITransactionRepository, MockTransactionRepository>();
 
             services.AddControllers();
         }
