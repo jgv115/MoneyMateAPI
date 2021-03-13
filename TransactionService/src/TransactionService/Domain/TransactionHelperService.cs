@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TransactionService.Models;
 using TransactionService.Repositories;
 
 namespace TransactionService.Domain
