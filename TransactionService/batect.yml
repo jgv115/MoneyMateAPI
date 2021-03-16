@@ -1,12 +1,19 @@
 project_name: moneymate_api
 
-.aws-creds-envs: &aws-creds-envs
+.aws_creds_envs: &aws_creds_envs
   AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
   AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
   AWS_REGION: ${AWS_REGION:-}
 
+.local_dev_envs: &local_dev_envs
+  AWS_ACCESS_KEY_ID: fake
+  AWS_SECRET_ACCESS_KEY: fake
+  AWS_REGION: ap-southeast-2
+  AWS_DEFAULT_REGION: ap-southeast-2
+  DynamoDb__ServiceUrl: "http://localstack:4566"
+
 containers:
-  dotnet_env:
+  dotnet_build_env:
     image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
     environment:
       ASPNETCORE_URLS: http://*:5000
@@ -26,10 +33,26 @@ containers:
       enabled: true
       home_directory: /home/container-user
   
+  dotnet_run_env:
+    image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+    environment:
+      ASPNETCORE_URLS: http://*:5000
+      ASPNETCORE_ENVIRONMENT: dev
+      <<: *local_dev_envs
+    ports:
+      - container: 5000
+        local: 5000
+    volumes:
+      - local: .batect/dotnet_run_env/app
+        container: /app
+        options: cached
+    working_directory: /app
+    entrypoint: dotnet TransactionService.dll
+        
   terraform_env:
     image: hashicorp/terraform:latest
     environment:
-      <<: *aws-creds-envs
+      <<: *aws_creds_envs
       TF_WORKSPACE: $ENVIRONMENT
       TF_VAR_TRANSACTION_SERVICE_LAMBDA_IMAGE_TAG: $IMAGE_TAG
       TF_VAR_CLOUDFLARE_EMAIL: $CLOUDFLARE_EMAIL
@@ -40,27 +63,54 @@ containers:
         options: cached
     working_directory: /code/infra
 
+  localstack:
+    image: localstack/localstack
+    environment:
+      DEFAULT_REGION: ap-southeast-2
+      SERVICES: dynamodb
+      <<: *local_dev_envs
+    volumes:
+      - local: ./.batect/localstack/localstack-bootstrap.sh
+        container: /docker-entrypoint-initaws.d/localstack-bootstrap.sh
+      - local: ./.batect/localstack/healthcheck.sh
+        container: /app/healthcheck.sh
+    ports:
+      - local: 4566
+        container: 4566
+    health_check:
+      command: /app/healthcheck.sh
+      interval: 3s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+
 tasks:
   build:
     description: Builds the Transaction Service
     run:
-      container: dotnet_env
-      command: dotnet build src/TransactionService/TransactionService.csproj
-  
+      container: dotnet_build_env
+      command: dotnet build src/TransactionService/TransactionService.csproj -o .batect/dotnet_run_env/app
+
   unit_tests:
     description: Runs the unit tests
     run:
       container: dotnet_env
       command: dotnet test test/TransactionService.Tests
-  
+
+  start_localstack:
+    description: Starts localstack only
+    run:
+      container: localstack
+
   run:
     description: Runs the Transaction Service
     prerequisites:
       - build
+    dependencies:
+      - localstack
     run:
-      container: dotnet_env
-      command: dotnet src/TransactionService/bin/Debug/net5.0/TransactionService.dll
-      
+      container: dotnet_run_env
+
   terraform_plan:
     description: Runs terraform plan
     group: Terraform
