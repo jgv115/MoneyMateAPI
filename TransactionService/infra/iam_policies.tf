@@ -61,7 +61,7 @@ resource "aws_iam_policy" transaction_service_lambda_dynamodb {
   policy = data.aws_iam_policy_document.dynamodb_access.json
 }
 
-resource "aws_iam_policy_attachment" transaction_service_lambda_cloudwatch {
+resource "aws_iam_policy_attachment" transaction_service_lambda_dynamodb {
 
   name = "${local.transaction_service_lambda_name}_dynamodb_access_attachment_${terraform.workspace}"
   roles = [

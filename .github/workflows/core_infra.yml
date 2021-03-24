@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - 'TransactionService/**'
+    paths: 
+      - 'infra/**'
+      - 'scritps/**'
+      - '.github/workflows/core_infra.yml'
 
 jobs:
   plan_infra_test:
