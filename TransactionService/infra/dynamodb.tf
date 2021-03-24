@@ -1,6 +1,6 @@
 resource "aws_dynamodb_table" transaction_db {
   name = "MoneyMate_TransactionDB_${terraform.workspace}"
-  hash_key = "UserId-TransactionType"
+  hash_key = "UserId"
   range_key = "Date"
   billing_mode = "PAY_PER_REQUEST"
 
@@ -13,7 +13,7 @@ resource "aws_dynamodb_table" transaction_db {
   }
 
   attribute {
-    name = "UserId-TransactionType"
+    name = "UserId"
     type = "S"
   }
   attribute {
