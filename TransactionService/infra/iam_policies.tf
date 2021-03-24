@@ -50,7 +50,8 @@ data "aws_iam_policy_document" dynamodb_access {
       "dynamodb:GetItem",
       "dynamodb:Query",
       "dynamodb:Scan",
-      "dynamodb:PutItem"
+      "dynamodb:PutItem",
+      "dynamodb:Update*"
     ]
     resources = [aws_dynamodb_table.transaction_db.arn]
   }
