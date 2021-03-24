@@ -6,8 +6,15 @@
         <!-- This property makes the build directory similar to a publish directory and helps the AWS .NET Lambda Mock Test Tool find project dependencies. -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
+<!--    <ItemGroup>-->
+<!--        <None Update="appsettings.*.json">-->
+<!--            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>-->
+<!--        </None>-->
+<!--    </ItemGroup>-->
     <ItemGroup>
         <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="5.3.0" />
+        <PackageReference Include="AutoMapper" Version="10.1.1" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
         <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.0.3" />
         <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.101" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.3" />
@@ -18,14 +25,20 @@
     </ItemGroup>
     <ItemGroup>
       <Compile Remove="infra\**" />
+      <Compile Remove=".batect\localstack\**" />
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Remove="infra\**" />
+      <EmbeddedResource Remove=".batect\localstack\**" />
     </ItemGroup>
     <ItemGroup>
       <None Remove="infra\**" />
+      <None Remove=".batect\localstack\**" />
     </ItemGroup>
     <ItemGroup>
       <Content Remove="infra\**" />
+      <Content Include=".batect\localstack\healthcheck.sh" />
+      <Content Include=".batect\localstack\localstack-bootstrap.sh" />
+      <Content Remove=".batect\localstack\**" />
     </ItemGroup>
 </Project>

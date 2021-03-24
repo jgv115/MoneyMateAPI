@@ -37,3 +37,34 @@ resource "aws_iam_policy_attachment" transaction_service_lambda_cloudwatch {
     aws_iam_role.transaction_service_lambda.name]
   policy_arn = aws_iam_policy.transaction_service_lambda_cloudwatch.arn
 }
+
+# DynamoDB
+data "aws_iam_policy_document" dynamodb_access {
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:Describe*",
+      "dynamodb:List*",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:PutItem"
+    ]
+    resources = [aws_dynamodb_table.transaction_db.arn]
+  }
+}
+
+resource "aws_iam_policy" transaction_service_lambda_dynamodb {
+  name = "${local.transaction_service_lambda_name}_dynamodb_acesss_policy_${terraform.workspace}"
+  policy = data.aws_iam_policy_document.dynamodb_access.json
+}
+
+resource "aws_iam_policy_attachment" transaction_service_lambda_cloudwatch {
+
+  name = "${local.transaction_service_lambda_name}_dynamodb_access_attachment_${terraform.workspace}"
+  roles = [
+    aws_iam_role.transaction_service_lambda.name]
+  policy_arn = aws_iam_policy.transaction_service_lambda_dynamodb.arn
+}

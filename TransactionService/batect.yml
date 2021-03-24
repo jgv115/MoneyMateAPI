@@ -94,7 +94,7 @@ tasks:
   unit_tests:
     description: Runs the unit tests
     run:
-      container: dotnet_env
+      container: dotnet_build_env
       command: dotnet test test/TransactionService.Tests
 
   start_localstack:

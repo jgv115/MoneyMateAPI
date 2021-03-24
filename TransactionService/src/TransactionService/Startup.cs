@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
+using Amazon.Extensions.NETCore.Setup;
+using Amazon.Runtime;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using TransactionService.Domain;
 using TransactionService.Middleware;
 using TransactionService.Models;
+using TransactionService.Profiles;
 using TransactionService.Repositories;
 using TransactionService.Settings;
 
@@ -34,6 +31,7 @@ namespace TransactionService
         public void ConfigureServices(IServiceCollection services)
         {
             var auth0Settings = Configuration.GetSection(Auth0Settings.Key);
+            Console.WriteLine(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
             Console.WriteLine(auth0Settings.GetSection("Authority").Value);
             services.AddAuthentication(options =>
             {
@@ -49,25 +47,31 @@ namespace TransactionService
             services.AddScoped<CurrentUserContext>();
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
 
-            // var dynamoDbConfig = Configuration.GetSection("DynamoDb");
-            // var dynamoDbLocalMode = dynamoDbConfig.GetValue<bool>("LocalMode");
-            //
-            // if (dynamoDbLocalMode)
-            // {
-            //     services.AddSingleton<IAmazonDynamoDB>(provider =>
-            //     {
-            //         var clientConfig = new AmazonDynamoDBConfig()
-            //         {
-            //             ServiceURL = dynamoDbConfig.GetValue<string>("ServiceUrl")
-            //         };
-            //         return new AmazonDynamoDBClient(clientConfig);
-            //     });
-            // }
-            // else
-            // {
-            //     services.AddAWSService<IAmazonDynamoDB>();
-            // }
-            services.AddSingleton<ITransactionRepository, MockTransactionRepository>();
+            services.AddAutoMapper(typeof(TransactionProfile));
+
+            var dynamoDbConfig = Configuration.GetSection("DynamoDb");
+            var dynamoDbLocalMode = dynamoDbConfig.GetValue<bool>("LocalMode");
+            
+            if (dynamoDbLocalMode)
+            {
+                services.AddSingleton<IAmazonDynamoDB>(_ =>
+                {
+                    var clientConfig = new AmazonDynamoDBConfig()
+                    {
+                        ServiceURL = dynamoDbConfig.GetValue<string>("ServiceUrl")
+                    };
+                    return new AmazonDynamoDBClient(clientConfig);
+                });
+            }
+            else
+            {
+                IConfigurationRoot configuration = new ConfigurationBuilder().Build();
+                AWSOptions awsOptions = configuration.GetAWSOptions();
+                awsOptions.Credentials = new EnvironmentVariablesAWSCredentials();
+                services.AddDefaultAWSOptions(awsOptions);
+                services.AddAWSService<IAmazonDynamoDB>();
+            }
+            services.AddSingleton<ITransactionRepository, DynamoDbTransactionRepository>();
 
             services.AddControllers();
         }

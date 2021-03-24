@@ -1,12 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Domain;
+using TransactionService.Dtos;
 
 namespace TransactionService.Controllers
 {
+    [ApiController]
     [Authorize]
     [Route("api/[controller]")]
     public class TransactionsController : ControllerBase
@@ -20,10 +21,24 @@ namespace TransactionService.Controllers
 
         // GET api/transactions
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(
+            [FromQuery] DateTime? start = null,
+            [FromQuery] DateTime? end = null
+        )
         {
-            var result = await _transactionHelperService.GetAllTransactionsAsync();
+            Console.WriteLine($">>>> {start} {end}");
+            var result = await _transactionHelperService
+                .GetAllTransactionsAsync(
+                    start.GetValueOrDefault(DateTime.MinValue),
+                    end.GetValueOrDefault(DateTime.MaxValue));
             return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post(StoreTransactionDto storeTransactionDto)
+        {
+            await _transactionHelperService.StoreTransaction(storeTransactionDto);
+            return Ok();
         }
     }
 }

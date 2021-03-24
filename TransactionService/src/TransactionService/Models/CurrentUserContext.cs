@@ -2,6 +2,6 @@ namespace TransactionService.Models
 {
     public class CurrentUserContext
     {
-        public string UserId { get; set; }
+        public virtual string UserId { get; set; }
     }
 }
