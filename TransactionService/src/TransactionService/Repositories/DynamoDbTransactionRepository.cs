@@ -13,6 +13,8 @@ namespace TransactionService.Repositories
         private readonly DynamoDBContext _dbContext;
         private readonly DynamoDBOperationConfig _dbOperationConfig;
 
+        private const string TransactionSuffix = "#Transaction";
+        
         public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient)
         {
             if (dbClient == null)
@@ -30,7 +32,7 @@ namespace TransactionService.Repositories
 
         public async Task<List<Transaction>> GetAllTransactionsAsync(string userId, DateTime start, DateTime end)
         {
-            return await _dbContext.QueryAsync<Transaction>(userId, QueryOperator.Between, new[]
+            return await _dbContext.QueryAsync<Transaction>($"{userId}{TransactionSuffix}", QueryOperator.Between, new[]
             {
                 $"{start:O}", $"{end:O}"
             }, _dbOperationConfig).GetRemainingAsync();
@@ -38,6 +40,7 @@ namespace TransactionService.Repositories
 
         public async Task StoreTransaction(Transaction newTransaction)
         {
+            newTransaction.UserId += TransactionSuffix;
             await _dbContext.SaveAsync(newTransaction, _dbOperationConfig);
         }
     }

@@ -6,10 +6,10 @@ namespace TransactionService.Models
     public record Transaction
 
     {
-        [DynamoDBHashKey("UserId")]
+        [DynamoDBHashKey("UserIdQuery")]
         public string UserId { get; set; }
 
-        [DynamoDBRangeKey("Date")] 
+        [DynamoDBRangeKey("Subquery")] 
         public string Date { get; set; }
         public string TransactionId { get; set; }
         public string TransactionType { get; set; }

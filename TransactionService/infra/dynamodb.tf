@@ -13,11 +13,11 @@ resource "aws_dynamodb_table" transaction_db {
   }
 
   attribute {
-    name = "UserId"
+    name = "UserIdQuery"
     type = "S"
   }
   attribute {
-    name = "Date"
+    name = "Subquery"
     type = "S"
   }
   attribute {
