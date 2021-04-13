@@ -1,7 +1,7 @@
 resource "aws_dynamodb_table" transaction_db {
   name = "MoneyMate_TransactionDB_${terraform.workspace}"
-  hash_key = "UserId"
-  range_key = "Date"
+  hash_key = "UserIdQuery"
+  range_key = "Subquery"
   billing_mode = "PAY_PER_REQUEST"
 
   lifecycle {
