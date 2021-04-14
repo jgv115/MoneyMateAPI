@@ -31,7 +31,6 @@ namespace TransactionService.Domain
             var transaction = _mapper.Map<Transaction>(transactionDto);
             transaction.TransactionId = Guid.NewGuid().ToString();
             transaction.UserId = _userContext.UserId;
-            transaction.Date = DateTime.UtcNow.ToString("O");
             return _repository.StoreTransaction(transaction);
         }
     }

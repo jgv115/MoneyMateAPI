@@ -117,6 +117,7 @@ namespace TransactionService.Tests.Domain
             var inputDto = new StoreTransactionDto
             {
                 Amount = (decimal) 1.0,
+                Date = "2021-04-13T13:15:23.7002027Z",
                 Category = "category-1",
                 SubCategory = "subcategory-1",
                 TransactionType = "transaction-type-1"
@@ -126,6 +127,7 @@ namespace TransactionService.Tests.Domain
                 .Returns(new Transaction
                 {
                     Amount = inputDto.Amount,
+                    Date = inputDto.Date,
                     Category = inputDto.Category,
                     SubCategory = inputDto.SubCategory,
                     TransactionType = inputDto.TransactionType
@@ -140,6 +142,7 @@ namespace TransactionService.Tests.Domain
             _mockTransactionRepository.Verify(repository =>
                 repository.StoreTransaction(It.Is<Transaction>(transaction =>
                     transaction.UserId == expectedUserId &&
+                    transaction.Date == inputDto.Date &&
                     Guid.TryParse(transaction.TransactionId, out guid) &&
                     transaction.Amount == inputDto.Amount &&
                     transaction.Category == inputDto.Category &&
