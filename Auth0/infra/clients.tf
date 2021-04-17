@@ -32,7 +32,7 @@ resource "auth0_client" debug_app {
   callbacks = ["https://eni50qndu1cg3w7.m.pipedream.net"]
   cross_origin_auth = false
   custom_login_page_on = true
-  grant_types = ["authorization_code", "implicit", "refresh_token"]
+  grant_types = ["authorization_code", "implicit", "refresh_token", "password"]
   is_first_party = true
   is_token_endpoint_ip_header_trusted = false
   oidc_conformant = true
