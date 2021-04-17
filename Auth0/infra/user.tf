@@ -8,3 +8,15 @@ resource auth0_user admin_user {
   email_verified = true
   password = var.auth0_admin_user_password
 }
+
+resource auth0_user integration_test_user {
+  count = terraform.workspace == "dev" ? 1 : 0
+  connection_name = auth0_connection.username_password.name
+  user_id = "moneymatetest"
+  given_name = "MoneyMate"
+  family_name = "Test"
+  nickname = "MoneyTest"
+  email = "test@moneymate.com"
+  email_verified = true
+  password = "test123"
+}
