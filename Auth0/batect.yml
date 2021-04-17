@@ -1,0 +1,37 @@
+project_name: moneymate_auth0_tenants
+
+.aws-creds-envs: &aws-creds-envs
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  AWS_REGION: ${AWS_REGION:-}
+
+containers:
+  terraform_env:
+    image: hashicorp/terraform:latest
+    environment:
+      <<: *aws-creds-envs
+      TF_WORKSPACE: $ENVIRONMENT
+      TF_VAR_auth0_management_api_client_id: $AUTH0_MANAGEMENT_CLIENT_ID
+      TF_VAR_auth0_management_api_client_secret: $AUTH0_MANAGEMENT_CLIENT_SECRET
+      TF_VAR_auth0_domain: $AUTH0_DOMAIN
+      TF_VAR_auth0_admin_user_password: $AUTH0_ADMIN_USER_PASSWORD
+    volumes:
+      - local: .
+        container: /code
+        options: cached
+    working_directory: /code/infra
+
+tasks:
+  terraform_plan:
+    description: Runs terraform plan
+    group: Terraform
+    run:
+      container: terraform_env
+      entrypoint: ../scripts/plan_terraform.sh
+
+  terraform_apply:
+    description: Runs terraform apply
+    group: Terraform
+    run:
+      container: terraform_env
+      entrypoint: ../scripts/apply_terraform.sh

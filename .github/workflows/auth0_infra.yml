@@ -1,0 +1,120 @@
+name: "MoneyMate_Auth0_Infra"
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'Auth0/**'
+      - '.github/workflows/auth0_infra.yml'
+
+jobs:
+  plan_infra_dev:
+    name: Plan Infra for Dev
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: dev
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_DEV }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_DEV }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_DEV }}
+      AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform plan
+        run: ./batect -f Auth0/batect.yml terraform_plan
+
+  provision_infra_dev:
+    name: Provision Infra for Dev
+    needs:
+      - plan_infra_dev
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: dev
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_DEV }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_DEV }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_DEV }}
+      AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform apply
+        run: ./batect -f Auth0/batect.yml terraform_apply
+  
+  plan_infra_test:
+    name: Plan Infra for Test
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: dev
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_TEST }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_TEST }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_TEST }}
+      AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform plan
+        run: ./batect -f Auth0/batect.yml terraform_plan
+
+  provision_infra_test:
+    name: Provision Infra for Test
+    needs:
+      - plan_infra_test
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: dev
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_TEST }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_TEST }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_TEST }}
+      AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform apply
+        run: ./batect -f Auth0/batect.yml terraform_apply
+
+  plan_infra_prod:
+    name: Plan Infra for Prod
+    needs:
+      - provision_infra_test
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: dev
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_PROD }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_PROD }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_PROD }}
+      AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform plan
+        run: ./batect -f Auth0/batect.yml terraform_plan
+
+  provision_infra_prod:
+    name: Provision Infra for Prod
+    needs:
+      - plan_infra_prod
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: dev
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_PROD }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_PROD }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_PROD }}
+      AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run terraform apply
+        run: ./batect -f Auth0/batect.yml terraform_apply
