@@ -47,6 +47,8 @@ jobs:
   
   plan_infra_test:
     name: Plan Infra for Test
+    needs:
+      - provision_infra_dev
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: dev
