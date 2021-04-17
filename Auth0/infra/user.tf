@@ -18,5 +18,5 @@ resource auth0_user integration_test_user {
   nickname = "MoneyTest"
   email = "test@moneymate.com"
   email_verified = true
-  password = "test123"
+  password = "/MONEYMATEtest123"
 }
