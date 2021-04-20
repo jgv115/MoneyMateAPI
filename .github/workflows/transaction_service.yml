@@ -20,6 +20,8 @@ jobs:
 
   integration_tests:
     name: Integration Tests
+    needs:
+      - unit_tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,7 +32,7 @@ jobs:
   build_and_push_to_ecr:
     name: Build image and push to ECR
     needs: 
-      - unit_tests
+      - integration_tests
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
