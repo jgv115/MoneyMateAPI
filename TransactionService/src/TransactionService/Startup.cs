@@ -14,7 +14,6 @@ using TransactionService.Middleware;
 using TransactionService.Models;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
-using TransactionService.Settings;
 
 namespace TransactionService
 {
@@ -30,7 +29,7 @@ namespace TransactionService
         // This method gets called by the runtime. Use this method to add services to the container
         public void ConfigureServices(IServiceCollection services)
         {
-            var auth0Settings = Configuration.GetSection(Auth0Settings.Key);
+            var auth0Settings = Configuration.GetSection("Auth0");
             Console.WriteLine(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
             Console.WriteLine(auth0Settings.GetSection("Authority").Value);
             services.AddAuthentication(options =>
@@ -51,7 +50,9 @@ namespace TransactionService
 
             var dynamoDbConfig = Configuration.GetSection("DynamoDb");
             var dynamoDbLocalMode = dynamoDbConfig.GetValue<bool>("LocalMode");
-            
+            Console.WriteLine(dynamoDbConfig.GetSection("LocalMode").Value);
+            Console.WriteLine(dynamoDbConfig.GetSection("ServiceUrl").Value);
+
             if (dynamoDbLocalMode)
             {
                 services.AddSingleton<IAmazonDynamoDB>(_ =>

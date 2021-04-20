@@ -29,7 +29,7 @@ aws --endpoint-url=http://localhost:4566 \
   --table-name MoneyMate_TransactionDB_dev \
   --item \
   "{
-      \"UserIdQuery\": {\"S\": \"auth0|60474554677179006923e9a6#Transaction\"},
+      \"UserIdQuery\": {\"S\": \"auth0|jgv115#Transaction\"},
       \"Subquery\": {\"S\": \"2021-03-15T10:39:41.3123420Z\"},
       \"TransactionId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915a\"},
       \"TransactionType\": {\"S\": \"expense\"},
@@ -39,14 +39,14 @@ aws --endpoint-url=http://localhost:4566 \
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
-  
+
 aws --endpoint-url=http://localhost:4566 \
 	--region ap-southeast-2 \
   dynamodb put-item \
   --table-name MoneyMate_TransactionDB_dev \
   --item \
   "{
-      \"UserIdQuery\": {\"S\": \"auth0|60474554677179006923e9a6#Transaction\"},
+      \"UserIdQuery\": {\"S\": \"auth0|jgv115#Transaction\"},
       \"Subquery\": {\"S\": \"2021-03-14T10:39:41.3123420Z\"},
       \"TransactionId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915a\"},
       \"TransactionType\": {\"S\": \"expense\"},
@@ -56,5 +56,5 @@ aws --endpoint-url=http://localhost:4566 \
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
-  
+
 echo "Created."

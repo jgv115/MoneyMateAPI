@@ -18,6 +18,15 @@ jobs:
       - name: Run unit tests
         run: ./batect -f TransactionService/batect.yml unit_tests
 
+  integration_tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run integration tests
+        run: ./batect -f TransactionService/batect.yml integration_tests
+
   build_and_push_to_ecr:
     name: Build image and push to ECR
     needs: 

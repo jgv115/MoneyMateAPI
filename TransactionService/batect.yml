@@ -18,6 +18,7 @@ containers:
     environment:
       ASPNETCORE_URLS: http://*:5000
       ASPNETCORE_ENVIRONMENT: dev
+      <<: *local_dev_envs
     ports:
       - container: 5000
         local: 5000
@@ -83,7 +84,27 @@ containers:
       retries: 5
       start_period: 10s
       timeout: 10s
-
+      
+  localstack_clean:
+    additional_hostnames:
+      - localstack
+    image: localstack/localstack
+    environment:
+      DEFAULT_REGION: ap-southeast-2
+      SERVICES: dynamodb
+      <<: *local_dev_envs
+    volumes:
+      - local: ./.batect/localstack_clean/healthcheck.sh
+        container: /app/healthcheck.sh
+    ports:
+      - local: 4566
+        container: 4566
+    health_check:
+      command: /app/healthcheck.sh
+      interval: 3s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
 tasks:
   build:
     description: Builds the Transaction Service
@@ -96,6 +117,14 @@ tasks:
     run:
       container: dotnet_build_env
       command: dotnet test test/TransactionService.Tests
+
+  integration_tests:
+    description: Runs integration tests
+    dependencies:
+      - localstack_clean
+    run:
+      container: dotnet_build_env
+      command: dotnet test test/TransactionService.IntegrationTests
 
   start_localstack:
     description: Starts localstack only
