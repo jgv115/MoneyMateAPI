@@ -70,7 +70,7 @@ namespace TransactionService.Tests.Domain
             {
                 Amount = (decimal) 1.0,
                 Category = "category-1",
-                Date = DateTime.Now.ToString("O"),
+                TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-1",
                 TransactionId = "transaction-id-1",
                 TransactionType = "expense",
@@ -81,7 +81,7 @@ namespace TransactionService.Tests.Domain
             {
                 Amount = (decimal) 2.0,
                 Category = "category-2",
-                Date = DateTime.Now.ToString("O"),
+                TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-2",
                 TransactionId = "transaction-id-2",
                 TransactionType = "expense",
@@ -117,7 +117,7 @@ namespace TransactionService.Tests.Domain
             var inputDto = new StoreTransactionDto
             {
                 Amount = (decimal) 1.0,
-                Date = "2021-04-13T13:15:23.7002027Z",
+                TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                 Category = "category-1",
                 SubCategory = "subcategory-1",
                 TransactionType = "transaction-type-1"
@@ -127,7 +127,7 @@ namespace TransactionService.Tests.Domain
                 .Returns(new Transaction
                 {
                     Amount = inputDto.Amount,
-                    Date = inputDto.Date,
+                    TransactionTimestamp = inputDto.TransactionTimestamp,
                     Category = inputDto.Category,
                     SubCategory = inputDto.SubCategory,
                     TransactionType = inputDto.TransactionType
@@ -142,7 +142,7 @@ namespace TransactionService.Tests.Domain
             _mockTransactionRepository.Verify(repository =>
                 repository.StoreTransaction(It.Is<Transaction>(transaction =>
                     transaction.UserId == expectedUserId &&
-                    transaction.Date == inputDto.Date &&
+                    transaction.TransactionTimestamp == inputDto.TransactionTimestamp &&
                     Guid.TryParse(transaction.TransactionId, out guid) &&
                     transaction.Amount == inputDto.Amount &&
                     transaction.Category == inputDto.Category &&

@@ -33,7 +33,13 @@ namespace TransactionService.IntegrationTests.Helpers
             };
 
             _dynamoDbClient = new AmazonDynamoDBClient(awsKey, awsSecret, clientConfig);
-            _dynamoDbContext = new DynamoDBContext(_dynamoDbClient);
+            _dynamoDbContext = new DynamoDBContext(_dynamoDbClient,
+                new DynamoDBOperationConfig {OverrideTableName = TableName});
+        }
+
+        public async Task<List<Transaction>> ScanTable()
+        {
+            return await _dynamoDbContext.ScanAsync<Transaction>(new List<ScanCondition>()).GetRemainingAsync();
         }
 
         public async Task CreateTable()
@@ -54,7 +60,7 @@ namespace TransactionService.IntegrationTests.Helpers
                     },
                     new()
                     {
-                        AttributeName = "TransactionId",
+                        AttributeName = "TransactionTimestamp",
                         AttributeType = "S"
                     }
                 },
@@ -81,7 +87,7 @@ namespace TransactionService.IntegrationTests.Helpers
                     new()
                     {
                         Projection = new Projection {ProjectionType = ProjectionType.ALL},
-                        IndexName = "TransactionIdIndex",
+                        IndexName = "TransactionTimestampIndex",
                         KeySchema = new List<KeySchemaElement>
                         {
                             new()
@@ -91,7 +97,7 @@ namespace TransactionService.IntegrationTests.Helpers
                             },
                             new()
                             {
-                                AttributeName = "TransactionId",
+                                AttributeName = "TransactionTimestamp",
                                 KeyType = KeyType.RANGE
                             }
                         }
@@ -153,7 +159,6 @@ namespace TransactionService.IntegrationTests.Helpers
 
         public async Task WriteTransactionsIntoTable(IEnumerable<Transaction> items)
         {
-            
             // var table = Table.LoadTable(_dynamoDbClient, TableName);
             foreach (var item in items)
             {

@@ -39,7 +39,7 @@ namespace TransactionService.Tests.Controllers
             {
                 Amount = (decimal) 1.0,
                 Category = "category-1",
-                Date = DateTime.Now.ToString("O"),
+                TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-1",
                 TransactionId = "transaction-id-1",
                 TransactionType = "expense",
@@ -50,7 +50,7 @@ namespace TransactionService.Tests.Controllers
             {
                 Amount = (decimal) 2.0,
                 Category = "category-2",
-                Date = DateTime.Now.ToString("O"),
+                TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-2",
                 TransactionId = "transaction-id-2",
                 TransactionType = "expense",

@@ -21,14 +21,14 @@ resource "aws_dynamodb_table" transaction_db {
     type = "S"
   }
   attribute {
-    name = "TransactionId"
+    name = "TransactionTimestamp"
     type = "S"
   }
 
   local_secondary_index {
-    name = "TransactionIdIndex"
+    name = "TransactionTimestampIndex"
     projection_type = "ALL"
-    range_key = "TransactionId"
+    range_key = "TransactionTimestamp"
   }
 
   tags = local.tags

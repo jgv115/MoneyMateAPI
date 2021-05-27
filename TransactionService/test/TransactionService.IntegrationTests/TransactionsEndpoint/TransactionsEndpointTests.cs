@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
+using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.Models;
@@ -57,8 +57,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var transaction1 = new Transaction
             {
                 UserId = "auth0|moneymatetest#Transaction",
-                Date = DateTime.Now.ToString("o"),
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
@@ -67,8 +67,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var transaction2 = new Transaction
             {
                 UserId = "auth0|moneymatetest#Transaction",
-                Date = DateTime.Now.ToString("o"),
-                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
@@ -101,8 +101,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var transaction1 = new Transaction
             {
                 UserId = "auth0|moneymatetest#Transaction",
-                Date = DateTime.Now.ToString("o"),
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
@@ -111,8 +111,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var transaction2 = new Transaction
             {
                 UserId = "auth0|moneymatetest#Transaction",
-                Date = DateTime.Now.ToString("o"),
-                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
@@ -122,8 +122,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var transaction3 = new Transaction
             {
                 UserId = "auth0|moneymatetest#Transaction",
-                Date = new DateTime(2021, 3, 1).ToString("O"),
-                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
+                TransactionTimestamp = new DateTime(2021, 3, 1).ToString("O"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
@@ -166,7 +166,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var transaction1 = new Transaction
             {
                 UserId = "auth0|moneymatetest#Transaction",
-                Date = new DateTime(2021, 3, 1).ToString("O"),
+                TransactionTimestamp = new DateTime(2021, 3, 1).ToString("O"),
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
                 TransactionType = "expense",
                 Amount = 123.45M,
@@ -176,19 +176,29 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var transaction2 = new Transaction
             {
                 UserId = "auth0|moneymatetest#Transaction",
-                Date = new DateTime(2021, 3, 2).ToString("O"),
-                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+                TransactionTimestamp = new DateTime(2021, 3, 2).ToString("O"),
+                TransactionType = "expense",
+                Amount = 123.45M,
+                Category = "Groceries",
+                SubCategory = "Meat"
+            };
+            var transaction3 = new Transaction
+            {
+                UserId = "auth0|moneymatetest#Transaction",
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
+                TransactionTimestamp = new DateTime(2021, 3, 2).ToString("O"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
                 SubCategory = "Meat"
             };
 
-            var transaction3 = new Transaction
+            var transaction4 = new Transaction
             {
                 UserId = "auth0|moneymatetest#Transaction",
-                Date = new DateTime(2021, 3, 5).ToString("O"),
-                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915d",
+                TransactionTimestamp = new DateTime(2021, 3, 5).ToString("O"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
@@ -199,7 +209,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             {
                 transaction1,
                 transaction2,
-                transaction3
+                transaction3,
+                transaction4
             };
 
             await _dynamoDbHelper.WriteTransactionsIntoTable(transactionList);
@@ -218,11 +229,51 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
+            returnedTransactionList!.Sort((transaction, transaction5) =>
+                String.CompareOrdinal(transaction.TransactionId, transaction5.TransactionId));
+
             var expectedTransactionList = new List<Transaction>
             {
-                transaction1, transaction2
+                transaction1, transaction2, transaction3
             };
             Assert.Equal(expectedTransactionList, returnedTransactionList);
+        }
+
+        [Fact]
+        public async Task
+            GivenValidTransactionRequest_WhenPostTransactionsIsCalled_ThenCorrectTransactionsArePersisted()
+        {
+            const decimal expectedAmount = 123M;
+            const string expectedCategory = "Food";
+            const string expectedSubCategory = "Dinner";
+            var expectedTransactionTimestamp = new DateTime(2021, 4, 2).ToString("O");
+            const string expectedTransactionType = "expense";
+            var inputDto = new StoreTransactionDto
+            {
+                Amount = expectedAmount,
+                Category = expectedCategory,
+                SubCategory = expectedSubCategory,
+                TransactionTimestamp = expectedTransactionTimestamp,
+                TransactionType = expectedTransactionType
+            };
+
+            string inputDtoString = JsonSerializer.Serialize(inputDto);
+
+            StringContent httpContent =
+                new StringContent(inputDtoString, System.Text.Encoding.UTF8, "application/json");
+
+
+            var response = await _httpClient.PostAsync($"/api/transactions", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            var returnedTransactions = await _dynamoDbHelper.ScanTable();
+
+            Assert.Single(returnedTransactions);
+            Assert.Equal(expectedAmount, returnedTransactions[0].Amount);
+            Assert.Equal(expectedCategory, returnedTransactions[0].Category);
+            Assert.Equal(expectedSubCategory, returnedTransactions[0].SubCategory);
+            Assert.Equal(expectedTransactionTimestamp, returnedTransactions[0].TransactionTimestamp);
+            Assert.Equal(expectedTransactionType, returnedTransactions[0].TransactionType);
         }
     }
 }

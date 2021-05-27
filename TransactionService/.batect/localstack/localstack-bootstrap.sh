@@ -6,16 +6,16 @@ aws --endpoint-url=http://localhost:4566 \
 	--region ap-southeast-2 \
 	dynamodb create-table \
 	--table-name MoneyMate_TransactionDB_dev \
-	--attribute-definitions AttributeName=UserIdQuery,AttributeType=S AttributeName=Subquery,AttributeType=S AttributeName=TransactionId,AttributeType=S\
+	--attribute-definitions AttributeName=UserIdQuery,AttributeType=S AttributeName=Subquery,AttributeType=S AttributeName=TransactionTimestamp,AttributeType=S\
 	--key-schema AttributeName=UserIdQuery,KeyType=HASH AttributeName=Subquery,KeyType=RANGE \
 	--provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
   --local-secondary-indexes \
     "[
         {
-            \"IndexName\": \"TransactionIdIndex\",
+            \"IndexName\": \"TransactionTimestampIndex\",
             \"KeySchema\": [
                 {\"AttributeName\": \"UserIdQuery\",\"KeyType\":\"HASH\"},
-                {\"AttributeName\": \"TransactionId\",\"KeyType\":\"RANGE\"}
+                {\"AttributeName\": \"TransactionTimestamp\",\"KeyType\":\"RANGE\"}
             ],
             \"Projection\": {
                 \"ProjectionType\": \"ALL\"
@@ -30,8 +30,8 @@ aws --endpoint-url=http://localhost:4566 \
   --item \
   "{
       \"UserIdQuery\": {\"S\": \"auth0|jgv115#Transaction\"},
-      \"Subquery\": {\"S\": \"2021-03-15T10:39:41.3123420Z\"},
-      \"TransactionId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915a\"},
+      \"Subquery\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915a\"},
+      \"TransactionTimestamp\": {\"S\": \"2021-03-15T10:39:41.3123420Z\"},
       \"TransactionType\": {\"S\": \"expense\"},
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Groceries\"},
@@ -47,8 +47,8 @@ aws --endpoint-url=http://localhost:4566 \
   --item \
   "{
       \"UserIdQuery\": {\"S\": \"auth0|jgv115#Transaction\"},
-      \"Subquery\": {\"S\": \"2021-03-14T10:39:41.3123420Z\"},
-      \"TransactionId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915a\"},
+      \"Subquery\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915b\"},
+      \"TransactionTimestamp\": {\"S\": \"2021-03-14T10:39:41.3123420Z\"},
       \"TransactionType\": {\"S\": \"expense\"},
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Groceries\"},
