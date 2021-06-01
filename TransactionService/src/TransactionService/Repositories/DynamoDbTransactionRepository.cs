@@ -46,5 +46,10 @@ namespace TransactionService.Repositories
                 OverrideTableName = _tableName
             });
         }
+
+        public async Task PutTransaction(Transaction newTransaction)
+        {
+            await StoreTransaction(newTransaction);
+        }
     }
 }

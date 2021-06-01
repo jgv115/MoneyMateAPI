@@ -150,5 +150,37 @@ namespace TransactionService.Tests.Domain
                     transaction.TransactionType == inputDto.TransactionType))
             );
         }
+
+        [Fact]
+        public async Task GivenPutTransactionDto_WhenPutTransactionInvoked_ThenCorrectTransactionShouldBeUpdated()
+        {
+            const string expectedUserId = "id123";
+
+            _mockCurrentUserContext.SetupGet(context => context.UserId)
+                .Returns(expectedUserId);
+
+            var expectedTransaction = new Transaction
+            {
+                UserId = expectedUserId,
+                TransactionId = Guid.NewGuid().ToString(),
+                Amount = (decimal) 1.0,
+                TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
+                Category = "category-1",
+                SubCategory = "subcategory-1",
+                TransactionType = "type",
+            };
+
+            _mockMapper.Setup(mapper => mapper.Map<Transaction>(It.IsAny<PutTransactionDto>())).Returns(
+                expectedTransaction
+            );
+
+            var service = new TransactionHelperService(_mockCurrentUserContext.Object,
+                _mockTransactionRepository.Object, _mockMapper.Object);
+
+            await service.PutTransaction(new PutTransactionDto());
+
+            _mockTransactionRepository.Verify(repository =>
+                repository.PutTransaction(expectedTransaction));
+        }
     }
 }

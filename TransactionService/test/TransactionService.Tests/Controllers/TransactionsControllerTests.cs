@@ -28,7 +28,7 @@ namespace TransactionService.Tests.Controllers
 
             var response = await controller.Get(DateTime.MinValue, DateTime.MaxValue);
             var objectResponse = Assert.IsType<OkObjectResult>(response);
-            
+
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
         }
 
@@ -92,6 +92,16 @@ namespace TransactionService.Tests.Controllers
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
             var response = await controller.Post(new StoreTransactionDto());
+
+            var objectResponse = Assert.IsType<OkResult>(response);
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+        }
+
+        [Fact]
+        public async Task GivenValidInputDto_WhenPutIsInvoked_Then200OkIsReturned()
+        {
+            var controller = new TransactionsController(_mockTransactionHelperService.Object);
+            var response = await controller.Put(new PutTransactionDto());
 
             var objectResponse = Assert.IsType<OkResult>(response);
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);

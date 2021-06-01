@@ -42,6 +42,11 @@ namespace TransactionService.IntegrationTests.Helpers
             return await _dynamoDbContext.ScanAsync<Transaction>(new List<ScanCondition>()).GetRemainingAsync();
         }
 
+        public async Task<Transaction> QueryTable(string hashKey, string rangeKey)
+        {
+            return await _dynamoDbContext.LoadAsync<Transaction>(hashKey, rangeKey);
+        }
+
         public async Task CreateTable()
         {
             var createTableRequest = new CreateTableRequest

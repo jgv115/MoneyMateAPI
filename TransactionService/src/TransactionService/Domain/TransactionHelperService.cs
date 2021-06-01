@@ -33,5 +33,12 @@ namespace TransactionService.Domain
             transaction.UserId = _userContext.UserId;
             return _repository.StoreTransaction(transaction);
         }
+
+        public Task PutTransaction(PutTransactionDto putTransactionDto)
+        {
+            var transaction = _mapper.Map<Transaction>(putTransactionDto);
+            transaction.UserId = _userContext.UserId;
+            return _repository.PutTransaction(transaction);
+        }
     }
 }

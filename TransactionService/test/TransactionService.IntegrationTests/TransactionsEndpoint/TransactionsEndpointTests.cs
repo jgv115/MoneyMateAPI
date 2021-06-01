@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
@@ -17,6 +18,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
     {
         private readonly HttpClient _httpClient;
         private readonly DynamoDbHelper _dynamoDbHelper;
+        private const string UserId = "auth0|moneymatetest#Transaction";
 
         public TransactionsEndpointTests(WebApplicationFactory<Startup> factory)
         {
@@ -56,7 +58,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
         {
             var transaction1 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
                 TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
@@ -66,7 +68,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             };
             var transaction2 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
                 TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
@@ -100,7 +102,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
         {
             var transaction1 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
                 TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
@@ -110,7 +112,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             };
             var transaction2 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
                 TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
@@ -121,7 +123,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
 
             var transaction3 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
                 TransactionTimestamp = new DateTime(2021, 3, 1).ToString("O"),
                 TransactionType = "expense",
@@ -165,7 +167,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
         {
             var transaction1 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionTimestamp = new DateTime(2021, 3, 1).ToString("O"),
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
                 TransactionType = "expense",
@@ -175,7 +177,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             };
             var transaction2 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
                 TransactionTimestamp = new DateTime(2021, 3, 2).ToString("O"),
                 TransactionType = "expense",
@@ -185,7 +187,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             };
             var transaction3 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
                 TransactionTimestamp = new DateTime(2021, 3, 2).ToString("O"),
                 TransactionType = "expense",
@@ -196,7 +198,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
 
             var transaction4 = new Transaction
             {
-                UserId = "auth0|moneymatetest#Transaction",
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915d",
                 TransactionTimestamp = new DateTime(2021, 3, 5).ToString("O"),
                 TransactionType = "expense",
@@ -260,8 +262,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             string inputDtoString = JsonSerializer.Serialize(inputDto);
 
             StringContent httpContent =
-                new StringContent(inputDtoString, System.Text.Encoding.UTF8, "application/json");
-
+                new StringContent(inputDtoString, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync($"/api/transactions", httpContent);
             response.EnsureSuccessStatusCode();
@@ -274,6 +275,74 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             Assert.Equal(expectedSubCategory, returnedTransactions[0].SubCategory);
             Assert.Equal(expectedTransactionTimestamp, returnedTransactions[0].TransactionTimestamp);
             Assert.Equal(expectedTransactionType, returnedTransactions[0].TransactionType);
+        }
+
+        [Fact]
+        public async Task GivenValidPutTransactionDto_WhenPutTransactionsIsCalled_ThenCorrecTransactionsArePersisted()
+        {
+            var expectedTransactionId = Guid.NewGuid().ToString();
+
+            var transaction1 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = expectedTransactionId,
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "expense",
+                Amount = 123.45M,
+                Category = "Groceries",
+                SubCategory = "Meat"
+            };
+            var transaction2 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "expense",
+                Amount = 123.45M,
+                Category = "Groceries",
+                SubCategory = "Meat"
+            };
+
+            var transactionList = new List<Transaction>
+            {
+                transaction1,
+                transaction2
+            };
+            await _dynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+
+            const decimal expectedAmount = 123M;
+            const string expectedCategory = "Food";
+            const string expectedSubCategory = "Dinner";
+            var expectedTransactionTimestamp = new DateTime(2021, 4, 2).ToString("O");
+            const string expectedTransactionType = "expense";
+            var inputDto = new PutTransactionDto
+            {
+                TransactionId = expectedTransactionId,
+                Amount = expectedAmount,
+                Category = expectedCategory,
+                SubCategory = expectedSubCategory,
+                TransactionTimestamp = expectedTransactionTimestamp,
+                TransactionType = expectedTransactionType
+            };
+
+            string inputDtoString = JsonSerializer.Serialize(inputDto);
+            StringContent httpContent = new StringContent(inputDtoString, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync("/api/transactions", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            var returnedTransaction = await _dynamoDbHelper.QueryTable(UserId, expectedTransactionId);
+            var expectedTransaction = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = expectedTransactionId,
+                Amount = expectedAmount,
+                Category = expectedCategory,
+                SubCategory = expectedSubCategory,
+                TransactionTimestamp = expectedTransactionTimestamp,
+                TransactionType = expectedTransactionType
+            };
+            Assert.Equal(expectedTransaction, returnedTransaction);
         }
     }
 }

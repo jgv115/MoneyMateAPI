@@ -9,6 +9,7 @@ namespace TransactionService.Profiles
         public TransactionProfile()
         {
             CreateMap<StoreTransactionDto, Transaction>();
+            CreateMap<PutTransactionDto, Transaction>();
         }
     }
 }

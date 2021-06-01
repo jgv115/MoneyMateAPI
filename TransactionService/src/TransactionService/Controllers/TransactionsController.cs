@@ -40,5 +40,12 @@ namespace TransactionService.Controllers
             await _transactionHelperService.StoreTransaction(storeTransactionDto);
             return Ok();
         }
+
+        [HttpPut]
+        public async Task<IActionResult> Put(PutTransactionDto putTransactionDto)
+        {
+            await _transactionHelperService.PutTransaction(putTransactionDto);
+            return Ok();
+        }
     }
 }
