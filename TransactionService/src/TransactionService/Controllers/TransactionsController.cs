@@ -41,10 +41,10 @@ namespace TransactionService.Controllers
             return Ok();
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Put(PutTransactionDto putTransactionDto)
+        [HttpPut("{transactionId}")]
+        public async Task<IActionResult> Put(string transactionId, PutTransactionDto putTransactionDto)
         {
-            await _transactionHelperService.PutTransaction(putTransactionDto);
+            await _transactionHelperService.PutTransaction(transactionId, putTransactionDto);
             return Ok();
         }
     }

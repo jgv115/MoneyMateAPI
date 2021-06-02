@@ -10,6 +10,6 @@ namespace TransactionService.Domain
     {
         public Task<List<Transaction>> GetAllTransactionsAsync(DateTime start, DateTime end);
         public Task StoreTransaction(StoreTransactionDto transactionDto);
-        public Task PutTransaction(PutTransactionDto putTransactionDto);
+        public Task PutTransaction(string transactionId, PutTransactionDto putTransactionDto);
     }
 }

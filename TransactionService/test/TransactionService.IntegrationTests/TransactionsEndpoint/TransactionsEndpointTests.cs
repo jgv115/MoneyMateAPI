@@ -317,7 +317,6 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const string expectedTransactionType = "expense";
             var inputDto = new PutTransactionDto
             {
-                TransactionId = expectedTransactionId,
                 Amount = expectedAmount,
                 Category = expectedCategory,
                 SubCategory = expectedSubCategory,
@@ -328,7 +327,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             string inputDtoString = JsonSerializer.Serialize(inputDto);
             StringContent httpContent = new StringContent(inputDtoString, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync("/api/transactions", httpContent);
+            var response = await _httpClient.PutAsync($"/api/transactions/{expectedTransactionId}", httpContent);
             response.EnsureSuccessStatusCode();
 
             var returnedTransaction = await _dynamoDbHelper.QueryTable(UserId, expectedTransactionId);

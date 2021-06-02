@@ -155,14 +155,15 @@ namespace TransactionService.Tests.Domain
         public async Task GivenPutTransactionDto_WhenPutTransactionInvoked_ThenCorrectTransactionShouldBeUpdated()
         {
             const string expectedUserId = "id123";
-
+            var expectedTransactionId = Guid.NewGuid().ToString();
+            
             _mockCurrentUserContext.SetupGet(context => context.UserId)
                 .Returns(expectedUserId);
 
             var expectedTransaction = new Transaction
             {
                 UserId = expectedUserId,
-                TransactionId = Guid.NewGuid().ToString(),
+                TransactionId = expectedTransactionId,
                 Amount = (decimal) 1.0,
                 TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                 Category = "category-1",
@@ -171,13 +172,20 @@ namespace TransactionService.Tests.Domain
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Transaction>(It.IsAny<PutTransactionDto>())).Returns(
-                expectedTransaction
+                    new Transaction
+                    {
+                        Amount = (decimal) 1.0,
+                        TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
+                        Category = "category-1",
+                        SubCategory = "subcategory-1",
+                        TransactionType = "type",
+                    }
             );
 
             var service = new TransactionHelperService(_mockCurrentUserContext.Object,
                 _mockTransactionRepository.Object, _mockMapper.Object);
 
-            await service.PutTransaction(new PutTransactionDto());
+            await service.PutTransaction(expectedTransactionId, new PutTransactionDto());
 
             _mockTransactionRepository.Verify(repository =>
                 repository.PutTransaction(expectedTransaction));

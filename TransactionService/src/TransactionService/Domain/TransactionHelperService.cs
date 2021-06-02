@@ -34,9 +34,10 @@ namespace TransactionService.Domain
             return _repository.StoreTransaction(transaction);
         }
 
-        public Task PutTransaction(PutTransactionDto putTransactionDto)
+        public Task PutTransaction(string transactionId, PutTransactionDto putTransactionDto)
         {
             var transaction = _mapper.Map<Transaction>(putTransactionDto);
+            transaction.TransactionId = transactionId;
             transaction.UserId = _userContext.UserId;
             return _repository.PutTransaction(transaction);
         }

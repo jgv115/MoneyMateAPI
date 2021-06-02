@@ -101,7 +101,7 @@ namespace TransactionService.Tests.Controllers
         public async Task GivenValidInputDto_WhenPutIsInvoked_Then200OkIsReturned()
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
-            var response = await controller.Put(new PutTransactionDto());
+            var response = await controller.Put("transaction-id-123", new PutTransactionDto());
 
             var objectResponse = Assert.IsType<OkResult>(response);
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
