@@ -172,5 +172,13 @@ namespace TransactionService.IntegrationTests.Helpers
                 await _dynamoDbContext.SaveAsync(item);
             }
         }
+
+        public async Task WriteIntoTable(IEnumerable<dynamic> items)
+        {
+            foreach (var item in items)
+            {
+                await _dynamoDbContext.SaveAsync(item);
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace TransactionService.Repositories
         private readonly DynamoDBContext _dbContext;
         private readonly string _tableName;
 
-        private const string TransactionSuffix = "#Transaction";
+        private const string HashKeySuffix = "#Transaction";
         
         public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient)
         {
@@ -28,7 +28,7 @@ namespace TransactionService.Repositories
 
         public async Task<List<Transaction>> GetAllTransactionsAsync(string userId, DateTime start, DateTime end)
         {
-            return await _dbContext.QueryAsync<Transaction>($"{userId}{TransactionSuffix}", QueryOperator.Between, new[]
+            return await _dbContext.QueryAsync<Transaction>($"{userId}{HashKeySuffix}", QueryOperator.Between, new[]
             {
                 $"{start:O}", $"{end:O}"
             }, new DynamoDBOperationConfig
@@ -40,7 +40,7 @@ namespace TransactionService.Repositories
 
         public async Task StoreTransaction(Transaction newTransaction)
         {
-            newTransaction.UserId += TransactionSuffix;
+            newTransaction.UserId += HashKeySuffix;
             await _dbContext.SaveAsync(newTransaction, new DynamoDBOperationConfig
             {
                 OverrideTableName = _tableName

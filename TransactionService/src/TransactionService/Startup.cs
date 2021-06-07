@@ -45,6 +45,7 @@ namespace TransactionService
 
             services.AddScoped<CurrentUserContext>();
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
+            services.AddScoped<ICategoriesService, CategoriesService>();
 
             services.AddAutoMapper(typeof(TransactionProfile));
 
@@ -72,7 +73,9 @@ namespace TransactionService
                 services.AddDefaultAWSOptions(awsOptions);
                 services.AddAWSService<IAmazonDynamoDB>();
             }
+
             services.AddSingleton<ITransactionRepository, DynamoDbTransactionRepository>();
+            services.AddSingleton<ICategoriesRepository, DynamoDbCategoriesRepository>();
 
             services.AddControllers();
         }

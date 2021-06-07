@@ -14,6 +14,7 @@ using Xunit;
 
 namespace TransactionService.IntegrationTests.TransactionsEndpoint
 {
+    [Collection("IntegrationTests")]
     public class TransactionsEndpointTests : IClassFixture<WebApplicationFactory<Startup>>, IAsyncLifetime
     {
         private readonly HttpClient _httpClient;
