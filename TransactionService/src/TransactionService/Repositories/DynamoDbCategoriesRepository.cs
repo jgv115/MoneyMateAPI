@@ -38,7 +38,11 @@ namespace TransactionService.Repositories
 
         public async Task<IEnumerable<string>> GetAllSubCategories(string userId, string category)
         {
-            var returnedCategory = await _dbContext.LoadAsync<Category>($"{userId}{HashKeySuffix}", category);
+            var returnedCategory = await _dbContext.LoadAsync<Category>($"{userId}{HashKeySuffix}", category,
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
             return returnedCategory.SubCategories;
         }
     }

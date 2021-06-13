@@ -107,7 +107,8 @@ namespace TransactionService.IntegrationTests.Helpers
                             }
                         }
                     }
-                }
+                },
+                TableName = "MoneyMate_TransactionDB_dev"
             };
 
             ListTablesResponse listTableResponse = await _dynamoDbClient.ListTablesAsync();
