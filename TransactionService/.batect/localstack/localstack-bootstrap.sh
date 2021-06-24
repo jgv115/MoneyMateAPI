@@ -57,4 +57,31 @@ aws --endpoint-url=http://localhost:4566 \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
 
+aws --endpoint-url=http://localhost:4566 \
+	--region ap-southeast-2 \
+  dynamodb put-item \
+  --table-name MoneyMate_TransactionDB_dev \
+  --item \
+  "{
+      \"UserIdQuery\": {\"S\": \"auth0|jgv115#Categories\"},
+      \"Subquery\": {\"S\": \"category1\"},
+      \"SubCategories\": {\"SS\": [\"subcategory1\",\"subcategory2\"]}
+  }" \
+  --return-consumed-capacity TOTAL \
+  --return-item-collection-metrics SIZE
+
+aws --endpoint-url=http://localhost:4566 \
+	--region ap-southeast-2 \
+  dynamodb put-item \
+  --table-name MoneyMate_TransactionDB_dev \
+  --item \
+  "{
+      \"UserIdQuery\": {\"S\": \"auth0|jgv115#Categories\"},
+      \"Subquery\": {\"S\": \"category2\"},
+      \"SubCategories\": {\"SS\": [\"subcategory3\",\"subcategory4\"]}
+  }" \
+  --return-consumed-capacity TOTAL \
+  --return-item-collection-metrics SIZE
+
+
 echo "Created."

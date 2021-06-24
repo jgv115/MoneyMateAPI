@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.Models;
@@ -40,22 +38,39 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
         [Fact]
         public async Task GivenValidRequest_WhenGetCategoriesIsCalled_ThenAllCategoriesAreReturned()
         {
-            var expectedCategories = new List<string> {"category1", "category2"};
-
-            await _dynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
+            var expectedCategories = new List<Category>
             {
-                UserId = UserId,
-                CategoryName = category,
-                SubCategories = new List<string> {"test1", "test2"}
-            }));
+                new()
+                {
+                    UserId = UserId,
+                    CategoryName = "category1",
+                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                },
+                new()
+                {
+                    UserId = UserId,
+                    CategoryName = "category2",
+                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                }
+            };
+            
+            await _dynamoDbHelper.WriteIntoTable(expectedCategories);
 
             var response = await _httpClient.GetAsync("/api/categories");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
-            var returnedCategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
+            var returnedCategoriesList = JsonSerializer.Deserialize<List<Category>>(returnedString, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
-            Assert.Equal(expectedCategories, returnedCategoriesList);
+            for (var i = 0; i < expectedCategories.Count; i++)
+            {
+                Assert.Equal(expectedCategories[i].CategoryName, returnedCategoriesList[i].CategoryName);
+                Assert.Equal(expectedCategories[i].UserId, returnedCategoriesList[i].UserId);
+                Assert.Equal(expectedCategories[i].SubCategories, returnedCategoriesList[i].SubCategories);
+            }
         }
         
         [Fact]

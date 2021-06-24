@@ -26,14 +26,14 @@ namespace TransactionService.Repositories
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
 
-        public async Task<IEnumerable<string>> GetAllCategories(string userId)
+        public async Task<IEnumerable<Category>> GetAllCategories(string userId)
         {
             var userCategoryList = await _dbContext.QueryAsync<Category>($"{userId}{HashKeySuffix}",
                 new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName
                 }).GetRemainingAsync();
-            return userCategoryList.Select(category => category.CategoryName);
+            return userCategoryList;
         }
 
         public async Task<IEnumerable<string>> GetAllSubCategories(string userId, string category)

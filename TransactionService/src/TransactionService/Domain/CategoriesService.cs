@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TransactionService.Models;
 using TransactionService.Repositories;
@@ -17,14 +18,20 @@ namespace TransactionService.Domain
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public Task<IEnumerable<string>> GetAllCategories()
+        public async Task<IEnumerable<string>> GetAllCategoryNames()
         {
-            return _repository.GetAllCategories(_userContext.UserId);
+            var categoriesList = await GetAllCategories();
+            return categoriesList.Select(category => category.CategoryName);
         }
 
         public Task<IEnumerable<string>> GetSubCategories(string category)
         {
             return _repository.GetAllSubCategories(_userContext.UserId, category);
+        }
+
+        public Task<IEnumerable<Category>> GetAllCategories()
+        {
+            return _repository.GetAllCategories(_userContext.UserId);
         }
     }
 }

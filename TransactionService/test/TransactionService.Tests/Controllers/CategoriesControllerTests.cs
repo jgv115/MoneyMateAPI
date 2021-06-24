@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers;
 using TransactionService.Domain;
+using TransactionService.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers
@@ -37,11 +38,20 @@ namespace TransactionService.Tests.Controllers
         public async Task
             GivenCategoriesServiceReturnsObject_WhenGetInvoked_ThenReturns200OKWithCorrectListOfCategories()
         {
-            var expectedCategoryList = new List<string>
+            var expectedCategoryList = new List<Category>
             {
-                "category1",
-                "category2"
+                new()
+                {
+                    CategoryName = "category1",
+                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                },
+                new()
+                {
+                    CategoryName = "category2",
+                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                }
             };
+
             _mockCategoriesService.Setup(service => service.GetAllCategories()).ReturnsAsync(expectedCategoryList);
 
             var controller = new CategoriesController(_mockCategoriesService.Object);

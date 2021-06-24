@@ -22,8 +22,8 @@ namespace TransactionService.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var categories = await _categoriesService.GetAllCategories();
-            return Ok(categories);
+            var categoryTree = await _categoriesService.GetAllCategories();
+            return Ok(categoryTree);
         }
 
         [HttpGet("{categoryName}")]
