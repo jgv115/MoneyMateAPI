@@ -20,9 +20,9 @@ namespace TransactionService.Controllers
 
         // GET api/categories
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(string categoryType)
         {
-            var categoryTree = await _categoriesService.GetAllCategories();
+            var categoryTree = await _categoriesService.GetAllCategories(categoryType);
             return Ok(categoryTree);
         }
 

@@ -7,6 +7,8 @@ namespace TransactionService.Repositories
     public interface ICategoriesRepository
     {
         public Task<IEnumerable<Category>> GetAllCategories(string userId);
+        public Task<IEnumerable<Category>> GetAllExpenseCategories(string userId);
+        public Task<IEnumerable<Category>> GetAllIncomeCategories(string userId);
         public Task<IEnumerable<string>> GetAllSubCategories(string userId, string category);
     }
 }

@@ -8,6 +8,6 @@ namespace TransactionService.Domain
     {
         public Task<IEnumerable<string>> GetAllCategoryNames();
         public Task<IEnumerable<string>> GetSubCategories(string category);
-        public Task<IEnumerable<Category>> GetAllCategories();
+        public Task<IEnumerable<Category>> GetAllCategories(string categoryType);
     }
 }

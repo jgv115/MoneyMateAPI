@@ -35,35 +35,89 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
             await _dynamoDbHelper.DeleteTable();
         }
 
-        [Fact]
-        public async Task GivenValidRequest_WhenGetCategoriesIsCalled_ThenAllCategoriesAreReturned()
+        public static IEnumerable<object[]> CategoriesEndpointTestData =>
+            new List<object[]>
+            {
+                new object[]
+                {
+                    "",
+                    new List<Category>
+                    {
+                        new()
+                        {
+                            UserId = UserId,
+                            CategoryName = "category1",
+                            SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                        },
+                        new()
+                        {
+                            UserId = UserId,
+                            CategoryName = "category2",
+                            SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                        }
+                    }
+                },
+                new object[]
+                {
+                    "?categoryType=expense",
+                    new List<Category>
+                    {
+                        new()
+                        {
+                            UserId = UserId,
+                            CategoryName = "category1",
+                            SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                        }
+                    }
+                },
+                new object[]
+                {
+                    "?categoryType=income",
+                    new List<Category>
+                    {
+                        new()
+                        {
+                            UserId = UserId,
+                            CategoryName = "category2",
+                            SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                        }
+                    }
+                }
+            };
+
+
+        [Theory]
+        [MemberData(nameof(CategoriesEndpointTestData))]
+        public async Task GivenValidRequest_WhenGetCategoriesIsCalledWithCategoryType_ThenAllCategoriesAreReturned(
+            string queryString, List<Category> expectedCategories)
         {
-            var expectedCategories = new List<Category>
+            var initialData = new List<Category>
             {
                 new()
                 {
                     UserId = UserId,
-                    CategoryName = "category1",
+                    CategoryName = "expenseCategory#category1",
                     SubCategories = new List<string> {"subcategory1", "subcategory2"}
                 },
                 new()
                 {
                     UserId = UserId,
-                    CategoryName = "category2",
+                    CategoryName = "incomeCategory#category2",
                     SubCategories = new List<string> {"subcategory3", "subcategory4"}
                 }
             };
-            
-            await _dynamoDbHelper.WriteIntoTable(expectedCategories);
 
-            var response = await _httpClient.GetAsync("/api/categories");
+            await _dynamoDbHelper.WriteIntoTable(initialData);
+
+            var response = await _httpClient.GetAsync($"/api/categories{queryString}");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
-            var returnedCategoriesList = JsonSerializer.Deserialize<List<Category>>(returnedString, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var returnedCategoriesList = JsonSerializer.Deserialize<List<Category>>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
             for (var i = 0; i < expectedCategories.Count; i++)
             {
@@ -72,13 +126,13 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
                 Assert.Equal(expectedCategories[i].SubCategories, returnedCategoriesList[i].SubCategories);
             }
         }
-        
+
         [Fact]
         public async Task GivenValidRequest_WhenGetSubCategoriesIsCalled_ThenAllSubCategoriesAreReturned()
         {
             var expectedCategories = new List<string> {"category1", "category2", "category3"};
             var expectedSubCategories = new List<string> {"test1", "test2", "test4"};
-            
+
             await _dynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
             {
                 UserId = UserId,

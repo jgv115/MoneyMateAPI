@@ -89,7 +89,7 @@ namespace TransactionService.Tests.Domain
 
         [Fact]
         public void
-            GivenValidUserContext_WhenGetAllCategoriesInvoked_ThenRepositoryGetAllCategoriesCalledWithTheCorrectArguments()
+            GivenValidUserContextAndNullCategoryType_WhenGetAllCategoriesInvoked_ThenRepositoryGetAllCategoriesCalledWithTheCorrectArguments()
         {
             const string expectedUserId = "userId-123";
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(expectedUserId);
@@ -100,9 +100,37 @@ namespace TransactionService.Tests.Domain
 
             _mockRepository.Verify(repository => repository.GetAllCategories(expectedUserId));
         }
+        
+        [Fact]
+        public void
+            GivenValidUserContextAndExpenseCategoryType_WhenGetAllCategoriesInvoked_ThenRepositoryGetAllExpenseCategoriesCalledWithTheCorrectArguments()
+        {
+            const string expectedUserId = "userId-123";
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(expectedUserId);
+
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object);
+
+            service.GetAllCategories("expense");
+
+            _mockRepository.Verify(repository => repository.GetAllExpenseCategories(expectedUserId));
+        }
+        
+        [Fact]
+        public void
+            GivenValidUserContextAndIncomeCategoryType_WhenGetAllCategoriesInvoked_ThenRepositoryGetAllIncomeCategoriesCalledWithTheCorrectArguments()
+        {
+            const string expectedUserId = "userId-123";
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(expectedUserId);
+
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object);
+
+            service.GetAllCategories("income");
+
+            _mockRepository.Verify(repository => repository.GetAllIncomeCategories(expectedUserId));
+        }
 
         [Fact]
-        public async Task GivenValidResponseFromRepository_WhenGetAllCategoriesInvoked_ThenShouldReturnTheCorrectList()
+        public async Task GivenValidResponseFromRepository_WhenGetAllCategoriesInvokedWithNullCategoryType_ThenShouldReturnTheCorrectList()
         {
             var expectedReturnedCategoryList = new List<Category>
             {
@@ -123,6 +151,59 @@ namespace TransactionService.Tests.Domain
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object);
             var response = await service.GetAllCategories();
+
+            Assert.Equal(expectedReturnedCategoryList, response);
+        }
+        
+        [Fact]
+        public async Task GivenValidResponseFromRepository_WhenGetAllCategoriesInvokedWithExpenseCategoryType_ThenShouldReturnTheCorrectList()
+        {
+            var expectedReturnedCategoryList = new List<Category>
+            {
+                new()
+                {
+                    CategoryName = "category1",
+                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                },
+                new()
+                {
+                    CategoryName = "category2",
+                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                }
+            };
+
+            _mockRepository.Setup(repository => repository.GetAllExpenseCategories(It.IsAny<string>()))
+                .ReturnsAsync(expectedReturnedCategoryList);
+
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object);
+            var response = await service.GetAllCategories("expense");
+
+            Assert.Equal(expectedReturnedCategoryList, response);
+        }
+        
+                
+        [Fact]
+        public async Task GivenValidResponseFromRepository_WhenGetAllCategoriesInvokedWithIncomeCategoryType_ThenShouldReturnTheCorrectList()
+        {
+            var expectedReturnedCategoryList = new List<Category>
+            {
+                new()
+                {
+                    CategoryName = "category1",
+                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                },
+                new()
+                {
+                    CategoryName = "category2",
+                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                }
+            };
+
+            _mockRepository.Setup(repository => repository.GetAllIncomeCategories(It.IsAny<string>()))
+                .ReturnsAsync(expectedReturnedCategoryList);
+
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object);
+            var response = await service.GetAllCategories("income");
 
             Assert.Equal(expectedReturnedCategoryList, response);
         }

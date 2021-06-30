@@ -29,9 +29,14 @@ namespace TransactionService.Domain
             return _repository.GetAllSubCategories(_userContext.UserId, category);
         }
 
-        public Task<IEnumerable<Category>> GetAllCategories()
+        public Task<IEnumerable<Category>> GetAllCategories(string categoryType = null)
         {
-            return _repository.GetAllCategories(_userContext.UserId);
+            return categoryType switch
+            {
+                "expense" => _repository.GetAllExpenseCategories(_userContext.UserId),
+                "income" => _repository.GetAllIncomeCategories(_userContext.UserId),
+                _ => _repository.GetAllCategories(_userContext.UserId)
+            };
         }
     }
 }

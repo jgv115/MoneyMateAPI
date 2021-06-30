@@ -64,7 +64,7 @@ aws --endpoint-url=http://localhost:4566 \
   --item \
   "{
       \"UserIdQuery\": {\"S\": \"auth0|jgv115#Categories\"},
-      \"Subquery\": {\"S\": \"category1\"},
+      \"Subquery\": {\"S\": \"expenseCategory#category1\"},
       \"SubCategories\": {\"SS\": [\"subcategory1\",\"subcategory2\"]}
   }" \
   --return-consumed-capacity TOTAL \
@@ -77,7 +77,7 @@ aws --endpoint-url=http://localhost:4566 \
   --item \
   "{
       \"UserIdQuery\": {\"S\": \"auth0|jgv115#Categories\"},
-      \"Subquery\": {\"S\": \"category2\"},
+      \"Subquery\": {\"S\": \"incomeCategory#category2\"},
       \"SubCategories\": {\"SS\": [\"subcategory3\",\"subcategory4\"]}
   }" \
   --return-consumed-capacity TOTAL \
