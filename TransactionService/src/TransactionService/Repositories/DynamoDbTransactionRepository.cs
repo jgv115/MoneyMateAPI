@@ -54,7 +54,11 @@ namespace TransactionService.Repositories
 
         public async Task DeleteTransaction(string userId, string transactionId)
         {
-            await _dbContext.DeleteAsync<Transaction>($"{userId}{HashKeySuffix}", transactionId);
+            await _dbContext.DeleteAsync<Transaction>($"{userId}{HashKeySuffix}", transactionId,
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
         }
     }
 }
