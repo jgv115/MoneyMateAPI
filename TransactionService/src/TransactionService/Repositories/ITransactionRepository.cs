@@ -10,5 +10,6 @@ namespace TransactionService.Repositories
         public Task<List<Transaction>> GetAllTransactionsAsync(string userId,  DateTime start, DateTime end);
         public Task StoreTransaction(Transaction newTransaction);
         public Task PutTransaction(Transaction newTransaction);
+        public Task DeleteTransaction(string userId, string transactionId);
     }
 }

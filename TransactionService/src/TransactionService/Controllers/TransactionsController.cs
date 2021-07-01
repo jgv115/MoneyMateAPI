@@ -47,5 +47,12 @@ namespace TransactionService.Controllers
             await _transactionHelperService.PutTransaction(transactionId, putTransactionDto);
             return Ok();
         }
+
+        [HttpDelete("{transactionId}")]
+        public async Task<IActionResult> Delete(string transactionId)
+        {
+            await _transactionHelperService.DeleteTransaction(transactionId);
+            return NoContent();
+        }
     }
 }

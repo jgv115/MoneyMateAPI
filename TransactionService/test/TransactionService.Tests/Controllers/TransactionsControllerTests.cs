@@ -106,5 +106,27 @@ namespace TransactionService.Tests.Controllers
             var objectResponse = Assert.IsType<OkResult>(response);
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
         }
+
+        [Fact]
+        public async Task
+            GivenValidInputTransactionId_WhenDeleteIsInvoked_ThenTransactionHelperServiceCalledWithCorrectParameters()
+        {
+            var expectedTransactionId = "test12354";
+            var controller = new TransactionsController(_mockTransactionHelperService.Object);
+
+            await controller.Delete(expectedTransactionId);
+            
+            _mockTransactionHelperService.Verify(service => service.DeleteTransaction(expectedTransactionId));
+        }
+
+        [Fact]
+        public async Task GivenSuccesfulTransactionHelperServiceCall_WhenDeleteIsInvoked_Then204NoContentIsReturned()
+        {
+            var controller = new TransactionsController(_mockTransactionHelperService.Object);
+            var response = await controller.Delete("test1234");
+
+            var objectResponse = Assert.IsType<NoContentResult>(response);
+            Assert.Equal(StatusCodes.Status204NoContent, objectResponse.StatusCode);
+        }
     }
 }

@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
@@ -279,7 +280,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
         }
 
         [Fact]
-        public async Task GivenValidPutTransactionDto_WhenPutTransactionsIsCalled_ThenCorrecTransactionsArePersisted()
+        public async Task GivenValidPutTransactionDto_WhenPutTransactionsIsCalled_ThenCorrectTransactionsArePersisted()
         {
             var expectedTransactionId = Guid.NewGuid().ToString();
 
@@ -343,6 +344,45 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = expectedTransactionType
             };
             Assert.Equal(expectedTransaction, returnedTransaction);
+        }
+
+        [Fact]
+        public async Task GivenValidTransactionId_WhenDeleteTransactionIsCalled_ThenCorrectTransactionIsDeleted()
+        {
+            var expectedTransactionId = Guid.NewGuid().ToString();
+
+            var transaction1 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = expectedTransactionId,
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "expense",
+                Amount = 123.45M,
+                Category = "Groceries",
+                SubCategory = "Meat"
+            };
+            var transaction2 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "expense",
+                Amount = 123.45M,
+                Category = "Groceries",
+                SubCategory = "Meat"
+            };
+
+            var transactionList = new List<Transaction>
+            {
+                transaction1,
+                transaction2
+            };
+            await _dynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+            var response = await _httpClient.DeleteAsync($"/api/transactions/{expectedTransactionId}");
+            response.EnsureSuccessStatusCode();
+
+            var returnedTransaction = await _dynamoDbHelper.QueryTable(UserId, expectedTransactionId);
+            Assert.Null(returnedTransaction);
         }
     }
 }

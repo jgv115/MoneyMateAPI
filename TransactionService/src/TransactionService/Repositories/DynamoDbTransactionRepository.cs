@@ -14,14 +14,14 @@ namespace TransactionService.Repositories
         private readonly string _tableName;
 
         private const string HashKeySuffix = "#Transaction";
-        
+
         public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient)
         {
             if (dbClient == null)
             {
                 throw new ArgumentNullException(nameof(dbClient));
             }
-            
+
             _dbContext = new DynamoDBContext(dbClient);
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
@@ -50,6 +50,11 @@ namespace TransactionService.Repositories
         public async Task PutTransaction(Transaction newTransaction)
         {
             await StoreTransaction(newTransaction);
+        }
+
+        public async Task DeleteTransaction(string userId, string transactionId)
+        {
+            await _dbContext.DeleteAsync<Transaction>($"{userId}{HashKeySuffix}", transactionId);
         }
     }
 }

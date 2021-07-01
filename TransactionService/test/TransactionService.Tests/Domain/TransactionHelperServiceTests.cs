@@ -156,7 +156,7 @@ namespace TransactionService.Tests.Domain
         {
             const string expectedUserId = "id123";
             var expectedTransactionId = Guid.NewGuid().ToString();
-            
+
             _mockCurrentUserContext.SetupGet(context => context.UserId)
                 .Returns(expectedUserId);
 
@@ -172,14 +172,14 @@ namespace TransactionService.Tests.Domain
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Transaction>(It.IsAny<PutTransactionDto>())).Returns(
-                    new Transaction
-                    {
-                        Amount = (decimal) 1.0,
-                        TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
-                        Category = "category-1",
-                        SubCategory = "subcategory-1",
-                        TransactionType = "type",
-                    }
+                new Transaction
+                {
+                    Amount = (decimal) 1.0,
+                    TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
+                    Category = "category-1",
+                    SubCategory = "subcategory-1",
+                    TransactionType = "type",
+                }
             );
 
             var service = new TransactionHelperService(_mockCurrentUserContext.Object,
@@ -189,6 +189,24 @@ namespace TransactionService.Tests.Domain
 
             _mockTransactionRepository.Verify(repository =>
                 repository.PutTransaction(expectedTransaction));
+        }
+
+        [Fact]
+        public async Task
+            GivenTransactionId_WhenDeleteTransactionInvoked_ThenRepositoryDeleteTransactionCalledWithCorrectArgument()
+        {
+            const string expectedUserId = "id123";
+            var expectedTransactionId = Guid.NewGuid().ToString();
+
+            _mockCurrentUserContext.SetupGet(context => context.UserId)
+                .Returns(expectedUserId);
+
+            var service = new TransactionHelperService(_mockCurrentUserContext.Object,
+                _mockTransactionRepository.Object, _mockMapper.Object);
+            await service.DeleteTransaction(expectedTransactionId);
+
+            _mockTransactionRepository.Verify(repository =>
+                repository.DeleteTransaction(expectedUserId, expectedTransactionId));
         }
     }
 }

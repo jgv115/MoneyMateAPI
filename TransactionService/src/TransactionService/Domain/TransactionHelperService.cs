@@ -41,5 +41,10 @@ namespace TransactionService.Domain
             transaction.UserId = _userContext.UserId;
             return _repository.PutTransaction(transaction);
         }
+
+        public Task DeleteTransaction(string transactionId)
+        {
+            return _repository.DeleteTransaction(_userContext.UserId, transactionId);
+        }
     }
 }
