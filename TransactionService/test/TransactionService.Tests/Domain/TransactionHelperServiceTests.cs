@@ -74,7 +74,8 @@ namespace TransactionService.Tests.Domain
                 SubCategory = "subcategory-1",
                 TransactionId = "transaction-id-1",
                 TransactionType = "expense",
-                UserId = "userid-1"
+                UserId = "userid-1",
+                Note = "this is a note123"
             };
 
             var transaction2 = new Transaction
@@ -85,7 +86,8 @@ namespace TransactionService.Tests.Domain
                 SubCategory = "subcategory-2",
                 TransactionId = "transaction-id-2",
                 TransactionType = "expense",
-                UserId = "userid-2"
+                UserId = "userid-2",
+                Note = "this is a note123"
             };
             var expectedTransactionList = new List<Transaction>
             {
@@ -120,7 +122,8 @@ namespace TransactionService.Tests.Domain
                 TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                 Category = "category-1",
                 SubCategory = "subcategory-1",
-                TransactionType = "transaction-type-1"
+                TransactionType = "transaction-type-1",
+                Note = "this is a note123"
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Transaction>(It.IsAny<StoreTransactionDto>()))
@@ -130,7 +133,8 @@ namespace TransactionService.Tests.Domain
                     TransactionTimestamp = inputDto.TransactionTimestamp,
                     Category = inputDto.Category,
                     SubCategory = inputDto.SubCategory,
-                    TransactionType = inputDto.TransactionType
+                    TransactionType = inputDto.TransactionType,
+                    Note = inputDto.Note
                 });
 
             var service = new TransactionHelperService(_mockCurrentUserContext.Object,
@@ -147,7 +151,8 @@ namespace TransactionService.Tests.Domain
                     transaction.Amount == inputDto.Amount &&
                     transaction.Category == inputDto.Category &&
                     transaction.SubCategory == inputDto.SubCategory &&
-                    transaction.TransactionType == inputDto.TransactionType))
+                    transaction.TransactionType == inputDto.TransactionType &&
+                    transaction.Note == inputDto.Note))
             );
         }
 
@@ -169,6 +174,7 @@ namespace TransactionService.Tests.Domain
                 Category = "category-1",
                 SubCategory = "subcategory-1",
                 TransactionType = "type",
+                Note = "this is a note123"
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Transaction>(It.IsAny<PutTransactionDto>())).Returns(
@@ -179,6 +185,7 @@ namespace TransactionService.Tests.Domain
                     Category = "category-1",
                     SubCategory = "subcategory-1",
                     TransactionType = "type",
+                    Note = "this is a note123"
                 }
             );
 

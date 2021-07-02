@@ -13,5 +13,6 @@ namespace TransactionService.Models
         public decimal Amount { get; init; }
         public string Category { get; init; }
         public string SubCategory { get; init; }
+        public string Note { get; init; }
     }
 }

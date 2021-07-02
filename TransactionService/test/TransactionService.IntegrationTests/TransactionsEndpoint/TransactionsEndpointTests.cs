@@ -66,7 +66,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                SubCategory = "Meat",
+                Note = "this is a note123"
             };
             var transaction2 = new Transaction
             {
@@ -110,7 +111,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                SubCategory = "Meat",
+                Note = "this is a note123"
             };
             var transaction2 = new Transaction
             {
@@ -131,7 +133,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                SubCategory = "Meat",
+                Note = "this is a note123"
             };
 
             var transactionList = new List<Transaction>
@@ -175,7 +178,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                SubCategory = "Meat",
+                Note = "this is a note123"
             };
             var transaction2 = new Transaction
             {
@@ -206,7 +210,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                SubCategory = "Meat",
+                Note = "this is a note123"
             };
 
             var transactionList = new List<Transaction>
@@ -252,13 +257,15 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const string expectedSubCategory = "Dinner";
             var expectedTransactionTimestamp = new DateTime(2021, 4, 2).ToString("O");
             const string expectedTransactionType = "expense";
+            const string expectedNote = "this is a note123";
             var inputDto = new StoreTransactionDto
             {
                 Amount = expectedAmount,
                 Category = expectedCategory,
                 SubCategory = expectedSubCategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
-                TransactionType = expectedTransactionType
+                TransactionType = expectedTransactionType,
+                Note = expectedNote
             };
 
             string inputDtoString = JsonSerializer.Serialize(inputDto);
@@ -277,6 +284,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             Assert.Equal(expectedSubCategory, returnedTransactions[0].SubCategory);
             Assert.Equal(expectedTransactionTimestamp, returnedTransactions[0].TransactionTimestamp);
             Assert.Equal(expectedTransactionType, returnedTransactions[0].TransactionType);
+            Assert.Equal(expectedNote, returnedTransactions[0].Note);
         }
 
         [Fact]
@@ -292,7 +300,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                SubCategory = "Meat",
+                Note = "this is a note123"
             };
             var transaction2 = new Transaction
             {
@@ -317,13 +326,15 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const string expectedSubCategory = "Dinner";
             var expectedTransactionTimestamp = new DateTime(2021, 4, 2).ToString("O");
             const string expectedTransactionType = "expense";
+            const string expectedNote = "This is a new note";
             var inputDto = new PutTransactionDto
             {
                 Amount = expectedAmount,
                 Category = expectedCategory,
                 SubCategory = expectedSubCategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
-                TransactionType = expectedTransactionType
+                TransactionType = expectedTransactionType,
+                Note = expectedNote
             };
 
             string inputDtoString = JsonSerializer.Serialize(inputDto);
@@ -341,7 +352,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = expectedCategory,
                 SubCategory = expectedSubCategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
-                TransactionType = expectedTransactionType
+                TransactionType = expectedTransactionType,
+                Note = expectedNote
             };
             Assert.Equal(expectedTransaction, returnedTransaction);
         }

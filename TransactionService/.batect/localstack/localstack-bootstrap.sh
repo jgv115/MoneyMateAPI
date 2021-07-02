@@ -35,7 +35,8 @@ aws --endpoint-url=http://localhost:4566 \
       \"TransactionType\": {\"S\": \"expense\"},
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Groceries\"},
-      \"SubCategory\": {\"S\": \"Meat\"}
+      \"SubCategory\": {\"S\": \"Meat\"},
+      \"Note\": {\"S\": \"HUGE MEATS!\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
@@ -52,7 +53,8 @@ aws --endpoint-url=http://localhost:4566 \
       \"TransactionType\": {\"S\": \"expense\"},
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Groceries\"},
-      \"SubCategory\": {\"S\": \"Meat\"}
+      \"SubCategory\": {\"S\": \"Meat\"},
+      \"Note\": {\"S\": \"HUGE MEATS!\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
