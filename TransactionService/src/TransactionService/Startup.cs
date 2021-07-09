@@ -47,7 +47,7 @@ namespace TransactionService
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
             services.AddScoped<ICategoriesService, CategoriesService>();
 
-            services.AddAutoMapper(typeof(TransactionProfile));
+            services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile));
 
             var dynamoDbConfig = Configuration.GetSection("DynamoDb");
             var dynamoDbLocalMode = dynamoDbConfig.GetValue<bool>("LocalMode");

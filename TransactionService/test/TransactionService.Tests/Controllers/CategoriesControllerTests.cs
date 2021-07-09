@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers;
 using TransactionService.Domain;
+using TransactionService.Dtos;
 using TransactionService.Models;
 using Xunit;
 
@@ -27,15 +29,17 @@ namespace TransactionService.Tests.Controllers
         }
 
         [Fact]
-        public async Task GivenValidRequest_WhenGetInvokedWithNullCategoryType_ThenCategoriesServiceGetAllCategoriesIsInvokedWithCorrectCategoryType()
+        public async Task
+            GivenValidRequest_WhenGetInvokedWithNullCategoryType_ThenCategoriesServiceGetAllCategoriesIsInvokedWithCorrectCategoryType()
         {
             var controller = new CategoriesController(_mockCategoriesService.Object);
             await controller.Get(null);
             _mockCategoriesService.Verify(service => service.GetAllCategories(null));
         }
-        
+
         [Fact]
-        public async Task GivenValidRequest_WhenGetInvokedWithNonNullCategoryType_ThenCategoriesServiceGetAllCategoriesIsInvokedWithCorrectCategoryType()
+        public async Task
+            GivenValidRequest_WhenGetInvokedWithNonNullCategoryType_ThenCategoriesServiceGetAllCategoriesIsInvokedWithCorrectCategoryType()
         {
             var categoryType = "expense";
             var controller = new CategoriesController(_mockCategoriesService.Object);
@@ -61,7 +65,8 @@ namespace TransactionService.Tests.Controllers
                 }
             };
 
-            _mockCategoriesService.Setup(service => service.GetAllCategories(It.IsAny<string>())).ReturnsAsync(expectedCategoryList);
+            _mockCategoriesService.Setup(service => service.GetAllCategories(It.IsAny<string>()))
+                .ReturnsAsync(expectedCategoryList);
 
             var controller = new CategoriesController(_mockCategoriesService.Object);
             var response = await controller.Get("test");
@@ -101,6 +106,37 @@ namespace TransactionService.Tests.Controllers
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
             Assert.Equal(expectedSubCategoryList, objectResponse.Value);
+        }
+
+        [Fact]
+        public async Task
+            GivenValidCreateCategoryDto_WhenPostInvoked_ThenCategoriesServiceCreateCategoryIsCalledWithCorrectDto()
+        {
+            var expectedDto = new CreateCategoryDto
+            {
+                CategoryName = "categoryName",
+                CategoryType = "categoryType",
+                SubCategories = new List<string> {"test1", "test2"}
+            };
+            var controller = new CategoriesController(_mockCategoriesService.Object);
+            await controller.Post(expectedDto);
+
+            _mockCategoriesService.Verify(service => service.CreateCategory(expectedDto));
+        }
+
+        [Fact]
+        public async Task GivenValidCreateCategoryDto_WhenPostInvoked_Then200OKIsReturned()
+        {
+            var controller = new CategoriesController(_mockCategoriesService.Object);
+            var response = await controller.Post(new CreateCategoryDto
+            {
+                CategoryName = "categoryName",
+                CategoryType = "categoryType",
+                SubCategories = new List<string> {"test1", "test2"}
+            });
+
+            var objectResponse = Assert.IsType<OkResult>(response);
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
         }
     }
 }

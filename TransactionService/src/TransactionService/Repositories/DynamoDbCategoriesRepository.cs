@@ -77,5 +77,28 @@ namespace TransactionService.Repositories
                 });
             return returnedCategory.SubCategories;
         }
+
+        private async Task CreateCategory(Category newCategory)
+        {
+            await _dbContext.SaveAsync(newCategory, new DynamoDBOperationConfig
+            {
+                OverrideTableName = _tableName
+            });
+        }
+        
+        public async Task CreateExpenseCategory(Category newCategory)
+        {
+            newCategory.UserId += HashKeySuffix;
+            await CreateCategory(newCategory);
+        }
+        
+        public async Task CreateIncomeCategory(Category newCategory)
+        {
+            newCategory.UserId += HashKeySuffix;
+            await _dbContext.SaveAsync(newCategory, new DynamoDBOperationConfig
+            {
+                OverrideTableName = _tableName
+            });
+        }
     }
 }

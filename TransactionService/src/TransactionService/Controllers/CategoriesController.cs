@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Domain;
+using TransactionService.Dtos;
 
 namespace TransactionService.Controllers
 {
@@ -24,6 +25,13 @@ namespace TransactionService.Controllers
         {
             var categoryTree = await _categoriesService.GetAllCategories(categoryType);
             return Ok(categoryTree);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post(CreateCategoryDto createCategoryDto)
+        {
+            await _categoriesService.CreateCategory(createCategoryDto);
+            return Ok();
         }
 
         [HttpGet("{categoryName}")]

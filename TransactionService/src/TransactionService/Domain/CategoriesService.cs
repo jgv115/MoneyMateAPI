@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using TransactionService.Dtos;
 using TransactionService.Models;
 using TransactionService.Repositories;
 
@@ -11,11 +13,13 @@ namespace TransactionService.Domain
     {
         private readonly CurrentUserContext _userContext;
         private readonly ICategoriesRepository _repository;
-
-        public CategoriesService(CurrentUserContext userContext, ICategoriesRepository repository)
+        private readonly IMapper _mapper;
+        
+        public CategoriesService(CurrentUserContext userContext, ICategoriesRepository repository, IMapper mapper)
         {
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public async Task<IEnumerable<string>> GetAllCategoryNames()
@@ -36,6 +40,19 @@ namespace TransactionService.Domain
                 "expense" => _repository.GetAllExpenseCategories(_userContext.UserId),
                 "income" => _repository.GetAllIncomeCategories(_userContext.UserId),
                 _ => _repository.GetAllCategories(_userContext.UserId)
+            };
+        }
+
+        public Task CreateCategory(CreateCategoryDto createCategoryDto)
+        {
+            var newCategory = _mapper.Map<Category>(createCategoryDto);
+
+            newCategory.UserId = _userContext.UserId;
+            return createCategoryDto.CategoryType switch
+            {
+                "expense" => _repository.CreateExpenseCategory(newCategory),
+                "income" => _repository.CreateIncomeCategory(newCategory),
+                _ => throw new ArgumentException("Wrong category type")
             };
         }
     }
