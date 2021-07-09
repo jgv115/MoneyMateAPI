@@ -4,7 +4,6 @@ namespace TransactionService.Models
 {
     [DynamoDBTable("MoneyMate_TransactionDB_dev")]
     public record Transaction
-
     {
         [DynamoDBHashKey("UserIdQuery")] public string UserId { get; set; }
         [DynamoDBRangeKey("Subquery")] public string TransactionId { get; set; }
