@@ -78,23 +78,10 @@ namespace TransactionService.Repositories
             return returnedCategory.SubCategories;
         }
 
-        private async Task CreateCategory(Category newCategory)
-        {
-            await _dbContext.SaveAsync(newCategory, new DynamoDBOperationConfig
-            {
-                OverrideTableName = _tableName
-            });
-        }
-        
-        public async Task CreateExpenseCategory(Category newCategory)
+        public async Task CreateCategory(Category newCategory, string categoryType)
         {
             newCategory.UserId += HashKeySuffix;
-            await CreateCategory(newCategory);
-        }
-        
-        public async Task CreateIncomeCategory(Category newCategory)
-        {
-            newCategory.UserId += HashKeySuffix;
+            newCategory.CategoryName = $"{_rangeKeySuffixes[categoryType]}{newCategory.CategoryName}";
             await _dbContext.SaveAsync(newCategory, new DynamoDBOperationConfig
             {
                 OverrideTableName = _tableName

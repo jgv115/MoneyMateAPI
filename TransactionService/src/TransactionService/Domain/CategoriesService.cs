@@ -14,7 +14,7 @@ namespace TransactionService.Domain
         private readonly CurrentUserContext _userContext;
         private readonly ICategoriesRepository _repository;
         private readonly IMapper _mapper;
-        
+
         public CategoriesService(CurrentUserContext userContext, ICategoriesRepository repository, IMapper mapper)
         {
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
@@ -48,12 +48,7 @@ namespace TransactionService.Domain
             var newCategory = _mapper.Map<Category>(createCategoryDto);
 
             newCategory.UserId = _userContext.UserId;
-            return createCategoryDto.CategoryType switch
-            {
-                "expense" => _repository.CreateExpenseCategory(newCategory),
-                "income" => _repository.CreateIncomeCategory(newCategory),
-                _ => throw new ArgumentException("Wrong category type")
-            };
+            return _repository.CreateCategory(newCategory, createCategoryDto.CategoryType);
         }
     }
 }

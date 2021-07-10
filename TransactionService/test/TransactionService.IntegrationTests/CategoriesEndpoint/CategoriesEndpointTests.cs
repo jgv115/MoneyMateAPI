@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.Models;
@@ -147,6 +149,34 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
             var returnedCategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
 
             Assert.Equal(expectedSubCategories, returnedCategoriesList);
+        }
+
+        [Fact]
+        public async Task GivenAValidExpenseCategoryRequest_WhenCreateCategoryIsCalled_ThenCategoryIsPersisted()
+        {
+            const string inputCategoryName = "category123";
+            const string inputCategoryType = "expense";
+            var expectedCategoryName = $"{inputCategoryType}Category#{inputCategoryName}";
+            var expectedSubcategories = new List<string> {"test1", "test2"};
+
+            var inputDto = new CreateCategoryDto
+            {
+                CategoryName = inputCategoryName,
+                CategoryType = inputCategoryType,
+                SubCategories = expectedSubcategories
+            };
+
+            var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/api/categories", httpContent);
+
+            response.EnsureSuccessStatusCode();
+
+            var returnedCategories = await _dynamoDbHelper.ScanTable<Category>();
+
+            Assert.Single(returnedCategories);
+            Assert.Equal(expectedCategoryName, returnedCategories[0].CategoryName);
+            Assert.Equal(expectedSubcategories, returnedCategories[0].SubCategories);
+            Assert.Equal(UserId, returnedCategories[0].UserId);
         }
     }
 }

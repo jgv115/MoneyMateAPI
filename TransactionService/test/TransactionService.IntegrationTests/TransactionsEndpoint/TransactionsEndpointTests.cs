@@ -276,7 +276,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var response = await _httpClient.PostAsync($"/api/transactions", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var returnedTransactions = await _dynamoDbHelper.ScanTable();
+            var returnedTransactions = await _dynamoDbHelper.ScanTable<Transaction>();
 
             Assert.Single(returnedTransactions);
             Assert.Equal(expectedAmount, returnedTransactions[0].Amount);

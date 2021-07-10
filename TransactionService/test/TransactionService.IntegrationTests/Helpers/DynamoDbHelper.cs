@@ -25,7 +25,7 @@ namespace TransactionService.IntegrationTests.Helpers
             var dynamoDbUrl = Environment.GetEnvironmentVariable("DynamoDb__ServiceUrl") ?? "http://localhost:4566";
 
             Console.WriteLine($">>>> dynamodBURL: {dynamoDbUrl}");
-            
+
             var clientConfig = new AmazonDynamoDBConfig
             {
                 ServiceURL = dynamoDbUrl,
@@ -37,9 +37,9 @@ namespace TransactionService.IntegrationTests.Helpers
                 new DynamoDBOperationConfig {OverrideTableName = TableName});
         }
 
-        public async Task<List<Transaction>> ScanTable()
+        public async Task<List<T>> ScanTable<T>()
         {
-            return await _dynamoDbContext.ScanAsync<Transaction>(new List<ScanCondition>()).GetRemainingAsync();
+            return await _dynamoDbContext.ScanAsync<T>(new List<ScanCondition>()).GetRemainingAsync();
         }
 
         public async Task<Transaction> QueryTable(string hashKey, string rangeKey)

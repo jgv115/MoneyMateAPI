@@ -290,7 +290,7 @@ namespace TransactionService.Tests.Domain
 
             await service.CreateCategory(inputDto);
 
-            _mockRepository.Verify(repository => repository.CreateExpenseCategory(expectedCategory));
+            _mockRepository.Verify(repository => repository.CreateCategory(expectedCategory, "expense"));
         }
 
         [Fact]
@@ -329,7 +329,7 @@ namespace TransactionService.Tests.Domain
 
             await service.CreateCategory(inputDto);
 
-            _mockRepository.Verify(repository => repository.CreateIncomeCategory(expectedCategory));
+            _mockRepository.Verify(repository => repository.CreateCategory(expectedCategory, "income"));
         }
     }
 }
