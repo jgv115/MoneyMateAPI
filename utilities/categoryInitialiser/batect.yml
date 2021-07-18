@@ -1,0 +1,85 @@
+---
+project_name: moneymate_categoryinitialiser
+
+.aws_creds_envs: &aws_creds_envs
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  AWS_REGION: ${AWS_REGION:-}
+
+containers:
+  terraform_env:
+    image: hashicorp/terraform:latest
+    environment:
+      <<: *aws_creds_envs
+      TF_WORKSPACE: $ENVIRONMENT
+      TF_VAR_CATEGORY_INITIALISER_LAMBDA_IMAGE_TAG: $IMAGE_TAG
+    volumes:
+      - local: .
+        container: /code
+        options: cached
+    working_directory: /code/infra
+
+  localstack:
+    image: localstack/localstack:latest
+    environment:
+      DEFAULT_REGION: ap-southeast-2
+      TEST_AWS_ACCOUNT_ID: "000000000000"
+      SERVICES: lambda
+      DEBUG: "1"
+      HOSTNAME_EXTERNAL: localstack
+      LOCALSTACK_HOSTNAME: localstack
+      AWS_ACCESS_KEY_ID: foo
+      AWS_SECRET_ACCESS_KEY: bar
+      AWS_DEFAULT_REGION: ap-southeast-2
+      LAMBDA_EXECUTOR: docker
+    volumes:
+      - local: ./.batect/localstack/localstack-bootstrap.sh
+        container: /docker-entrypoint-initaws.d/localstack-bootstrap.sh
+      - local: ././.batect/localstack/healthcheck.sh
+        container: /app/healthcheck.sh
+      - local: .
+        container: /code
+      - local: /var/run/docker.sock
+        container: /var/run/docker.sock
+    ports:
+      - local: 4566
+        container: 4566
+    health_check:
+      command: /app/healthcheck.sh
+      interval: 3s
+      retries: 5
+      start_period: 15s
+      timeout: 10s
+
+  golang:
+    image: golang:1.16.5-alpine
+    working_directory: /app
+    volumes:
+      - local: .
+        container: /app
+        options: cached
+      - type: cache
+        name: go-cache
+        container: /go
+    environment:
+      GOCACHE: /go/cache
+
+tasks:
+  build:
+    run:
+      container: golang
+      command: env GOOS=darwin GOARCH=amd64 go build -o bin/main main.go
+
+  terraform_plan:
+    description: Runs terraform plan
+    group: Terraform
+    run:
+      container: terraform_env
+      entrypoint: ../scripts/plan_terraform.sh
+
+  terraform_apply:
+    description: Runs terraform apply
+    group: Terraform
+    run:
+      container: terraform_env
+      entrypoint: ../scripts/apply_terraform.sh
