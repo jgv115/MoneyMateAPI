@@ -13,6 +13,6 @@ EOF
   enabled = true
 
   dependencies = {
-    aws-sdk = "2.949.0"
+    auth0 = "2.30.0"
   }
 }
