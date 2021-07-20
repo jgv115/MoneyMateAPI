@@ -6,7 +6,6 @@ resource "aws_iam_user" auth0_hooks {
 
 resource "aws_iam_access_key" auth0_hooks {
   user = aws_iam_user.auth0_hooks
-  tags = local.tags
 }
 
 data aws_iam_policy_document auth0_hooks {
@@ -24,10 +23,7 @@ data aws_iam_policy_document auth0_hooks {
 resource aws_iam_user_policy auth0_hooks {
   policy = data.aws_iam_policy_document.auth0_hooks.json
   user = aws_iam_user.auth0_hooks.name
-  tags = local.tags
 }
-
-
 
 resource "aws_ssm_parameter" auth0_hooks_secret {
   name = "auth0_hooks_user_${terraform.workspace}"
