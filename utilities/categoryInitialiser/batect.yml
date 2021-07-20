@@ -13,6 +13,9 @@ containers:
       <<: *aws_creds_envs
       TF_WORKSPACE: $ENVIRONMENT
       TF_VAR_CATEGORY_INITIALISER_LAMBDA_IMAGE_TAG: $IMAGE_TAG
+      TF_VAR_auth0_management_api_client_id: $AUTH0_MANAGEMENT_CLIENT_ID
+      TF_VAR_auth0_management_api_client_secret: $AUTH0_MANAGEMENT_CLIENT_SECRET
+      TF_VAR_auth0_domain: $AUTH0_DOMAIN
     volumes:
       - local: .
         container: /code

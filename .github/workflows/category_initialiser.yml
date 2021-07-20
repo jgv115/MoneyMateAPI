@@ -64,6 +64,9 @@ jobs:
       ENVIRONMENT: test
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_TEST }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_TEST }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_TEST }}
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout
@@ -80,6 +83,9 @@ jobs:
       ENVIRONMENT: test
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_TEST }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_TEST }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_TEST }}
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout
@@ -96,6 +102,9 @@ jobs:
       ENVIRONMENT: prod
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_PROD }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_PROD }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_PROD }}
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout
@@ -112,6 +121,9 @@ jobs:
       ENVIRONMENT: prod
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_PROD }}
+      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_PROD }}
+      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_PROD }}
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout
