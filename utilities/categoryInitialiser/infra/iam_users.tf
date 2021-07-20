@@ -25,9 +25,16 @@ resource aws_iam_user_policy auth0_hooks {
   user = aws_iam_user.auth0_hooks.name
 }
 
-resource "aws_ssm_parameter" auth0_hooks_secret {
-  name = "auth0_hooks_user_${terraform.workspace}"
+resource "aws_ssm_parameter" auth0_hooks_access_id {
+  name = "auth0_hooks_user_access_id_${terraform.workspace}"
   type = "SecureString"
-  value = aws_iam_access_key.auth0_hooks.encrypted_secret
+  value = aws_iam_access_key.auth0_hooks.id
+  tags = local.tags
+}
+
+resource "aws_ssm_parameter" auth0_hooks_access_secret {
+  name = "auth0_hooks_user_access_secret_${terraform.workspace}"
+  type = "SecureString"
+  value = aws_iam_access_key.auth0_hooks.secret
   tags = local.tags
 }
