@@ -5,7 +5,7 @@ resource "aws_iam_user" auth0_hooks {
 }
 
 resource "aws_iam_access_key" auth0_hooks {
-  user = aws_iam_user.auth0_hooks
+  user = aws_iam_user.auth0_hooks.name
 }
 
 data aws_iam_policy_document auth0_hooks {
