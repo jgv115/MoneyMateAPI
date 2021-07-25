@@ -1,4 +1,8 @@
 resource "auth0_hook" post_user_registration {
+  depends_on = [
+    aws_iam_access_key.auth0_hooks,
+    aws_iam_user.auth0_hooks
+  ]
   name = "Post User Registration - Category Initialiser"
   script = <<EOF
 module.exports = async (user, context, callback) => {
@@ -26,6 +30,11 @@ EOF
 
   dependencies = {
     aws-sdk = "2.950.0"
+  }
+
+  secrets {
+    aws_client_id: aws_iam_access_key.auth0_hooks.id
+    aws_client_secret: aws_iam_access_key.auth0_hooks.secret
   }
 }
 
