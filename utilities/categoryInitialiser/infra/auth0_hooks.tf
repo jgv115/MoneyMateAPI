@@ -33,8 +33,8 @@ EOF
   }
 
   secrets {
-    aws_client_id: aws_iam_access_key.auth0_hooks.id
-    aws_client_secret: aws_iam_access_key.auth0_hooks.secret
+    aws_client_id = aws_iam_access_key.auth0_hooks.id
+    aws_client_secret = aws_iam_access_key.auth0_hooks.secret
   }
 }
 
