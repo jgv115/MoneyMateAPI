@@ -16,7 +16,7 @@ module.exports = async (user, context, callback) => {
 
   const result = await (new AWS.Lambda().invoke({
       FunctionName: "category_initialiser_lambda_${terraform.workspace}",
-      // Payload: "test"
+      Payload: JSON.stringify(user)
   }).promise());
 
   console.log(result)
