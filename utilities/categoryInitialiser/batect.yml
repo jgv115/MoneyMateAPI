@@ -27,7 +27,7 @@ containers:
     environment:
       DEFAULT_REGION: ap-southeast-2
       TEST_AWS_ACCOUNT_ID: "000000000000"
-      SERVICES: lambda
+      SERVICES: lambda,dynamodb
       DEBUG: "1"
       HOSTNAME_EXTERNAL: localstack
       LOCALSTACK_HOSTNAME: localstack
@@ -55,7 +55,7 @@ containers:
       timeout: 10s
 
   golang:
-    image: golang:1.16.5-alpine
+    image: golang:1.16.5
     working_directory: /app
     volumes:
       - local: .
@@ -71,7 +71,25 @@ tasks:
   build:
     run:
       container: golang
-      command: env GOOS=darwin GOARCH=amd64 go build -o bin/main main.go
+      command: env GOOS=linux GOARCH=amd64 go build -o bin/main main.go
+
+  unit_tests:
+    run:
+      container: golang
+      command: go test -v -count=1 ./...
+
+  integration_tests:
+    prerequisites:
+      - build
+    dependencies:
+      - localstack
+    run:
+      container: golang
+      command: go test -v -count=1 -tags integrationTest ./...
+      environment:
+        AWS_ACCESS_KEY_ID: foo
+        AWS_SECRET_ACCESS_KEY: bar
+        AWS_DEFAULT_REGION: ap-southeast-2
 
   terraform_plan:
     description: Runs terraform plan
