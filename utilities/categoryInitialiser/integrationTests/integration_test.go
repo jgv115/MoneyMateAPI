@@ -5,11 +5,11 @@ package integrationTests
 import (
 	"categoryInitialiser/models"
 	"encoding/json"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
@@ -68,7 +68,6 @@ func TestCategoryInitialiser(t *testing.T) {
 			TableName: aws.String("MoneyMate_TransactionDB_dev"),
 		})
 
-		fmt.Printf("%+v\n", scanOutput)
-
+		assert.Len(t, scanOutput.Items, 8)
 	})
 }

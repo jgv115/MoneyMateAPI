@@ -70,7 +70,7 @@ func TestHandleRequest(t *testing.T) {
 		var expectedCategories = []models.Category{
 			{
 				UserIdQuery:   "auth0|" + userId + "#Categories",
-				Subquery:      expectedCategoryType + "#" + expectedCategoryName,
+				Subquery:      expectedCategoryType + "Category#" + expectedCategoryName,
 				SubCategories: expectedSubcategories,
 			},
 		}

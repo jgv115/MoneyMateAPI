@@ -3,9 +3,6 @@ package category_provider
 import (
 	"categoryInitialiser/models"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"os"
 )
 
 type CategoryProvider interface {
@@ -14,27 +11,6 @@ type CategoryProvider interface {
 
 type JsonCategoryProvider struct {
 	CategoryJsonBytes map[string][]byte
-}
-
-func (j *JsonCategoryProvider) readCategoryJson(filePath string) (categories map[string][]string, err error) {
-	output, _ := os.Getwd()
-	fmt.Println(output)
-	categoriesJson, err := os.Open(filePath)
-	if err != nil {
-		return
-	}
-
-	byteValue, err := ioutil.ReadAll(categoriesJson)
-	if err != nil {
-		return
-	}
-
-	err = json.Unmarshal(byteValue, &categories)
-	if err != nil {
-		return
-	}
-
-	return
 }
 
 func (j *JsonCategoryProvider) convertCategoryMapToCategory(categoryType string, inputMap map[string][]string) (categories []models.CategoryDto) {

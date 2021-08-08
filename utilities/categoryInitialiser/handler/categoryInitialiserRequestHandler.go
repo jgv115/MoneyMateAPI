@@ -18,7 +18,7 @@ func HandleRequest(userId string, categoryProvider category_provider.CategoryPro
 	for _, categoryDto := range categoryDtos {
 		categories = append(categories, models.Category{
 			UserIdQuery: fmt.Sprintf("auth0|%v#Categories", userId),
-			Subquery:      fmt.Sprintf("%v#%v", categoryDto.CategoryType, categoryDto.CategoryName),
+			Subquery:      fmt.Sprintf("%vCategory#%v", categoryDto.CategoryType, categoryDto.CategoryName),
 			SubCategories: categoryDto.Subcategories,
 		})
 	}

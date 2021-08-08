@@ -59,4 +59,28 @@ func TestDynamoDbCategoriesRepository_SaveCategories(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("given input categories when SaveCategories invoked, then BatchWriteItem is called with RequestItems with SubCategories stringset", func(t *testing.T) {
+		var mockDynamoDbClient = new(MockDynamoDbClient)
+		const expectedTableName = "TestTableName"
+
+		mockDynamoDbClient.On("BatchWriteItem", mock.Anything).Return(&dynamodb.BatchWriteItemOutput{}, nil)
+		var repository = &DynamoDbCategoriesRepository{
+			DynamoDbClient: mockDynamoDbClient,
+			TableName:      expectedTableName,
+		}
+
+		const numberOfItems = 1
+		var expectedCategories = createCategories(numberOfItems)
+		_ = repository.SaveCategories(expectedCategories)
+
+		mockDynamoDbClient.AssertNumberOfCalls(t, "BatchWriteItem", 1)
+		var actualBatchWriteItemInput = mockDynamoDbClient.Calls[0].Arguments.Get(0).(*dynamodb.BatchWriteItemInput)
+		subCategoriesDynamoDbItem := actualBatchWriteItemInput.RequestItems[expectedTableName][0].PutRequest.Item["SubCategories"]
+
+		if subCategoriesDynamoDbItem.SS == nil {
+			t.Errorf("expected subCategories to be a stringset but was not, subCategories item looks like this: %+v", subCategoriesDynamoDbItem)
+		}
+
+	})
 }
