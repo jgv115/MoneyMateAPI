@@ -85,5 +85,31 @@ aws --endpoint-url=http://localhost:4566 \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
 
+aws --endpoint-url=http://localhost:4566 \
+	--region ap-southeast-2 \
+  dynamodb put-item \
+  --table-name MoneyMate_TransactionDB_dev \
+  --item \
+  "{
+      \"UserIdQuery\": {\"S\": \"auth0|jgv115#PayersPayees\"},
+      \"Subquery\": {\"S\": \"payee#payee1\"},
+      \"GooglePlaceId\": {\"S\": \"googlePlaceId123\"}
+  }" \
+  --return-consumed-capacity TOTAL \
+  --return-item-collection-metrics SIZE
+
+aws --endpoint-url=http://localhost:4566 \
+	--region ap-southeast-2 \
+  dynamodb put-item \
+  --table-name MoneyMate_TransactionDB_dev \
+  --item \
+  "{
+      \"UserIdQuery\": {\"S\": \"auth0|jgv115#PayersPayees\"},
+      \"Subquery\": {\"S\": \"payee#payee2\"},
+      \"GooglePlaceId\": {\"S\": \"googlePlaceId1234\"}
+  }" \
+  --return-consumed-capacity TOTAL \
+  --return-item-collection-metrics SIZE
+
 
 echo "Created."

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
@@ -13,7 +14,13 @@ namespace TransactionService.Repositories
         private readonly DynamoDBContext _dbContext;
         private readonly string _tableName;
 
-        private const string HashKeySuffix = "#PayerPayees";
+        private const string HashKeySuffix = "#PayersPayees";
+
+        private readonly Dictionary<string, string> _rangeKeySuffixes = new()
+        {
+            {"payee", "payee#"},
+            {"payer", "payer#"}
+        };
 
         public DynamoDbPayerPayeeRepository(IAmazonDynamoDB dbClient)
         {
@@ -27,11 +34,13 @@ namespace TransactionService.Repositories
         {
             var payers = await _dbContext.QueryAsync<PayerPayee>(
                 $"{userId}{HashKeySuffix}",
-                QueryOperator.BeginsWith, new[] {"payers#"}, new DynamoDBOperationConfig
+                QueryOperator.BeginsWith, new[] {"payer#"}, new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName
                 }
             ).GetRemainingAsync();
+
+            payers.AsParallel().ForAll(payer => payer.UserId = payer.UserId.Split("#")[1]);
             return payers;
         }
 
@@ -39,16 +48,20 @@ namespace TransactionService.Repositories
         {
             var payees = await _dbContext.QueryAsync<PayerPayee>(
                 $"{userId}{HashKeySuffix}",
-                QueryOperator.BeginsWith, new[] {"payees#"}, new DynamoDBOperationConfig
+                QueryOperator.BeginsWith, new[] {"payee#"}, new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName
                 }
             ).GetRemainingAsync();
+            payees.AsParallel().ForAll(payee => payee.UserId = payee.UserId.Split("#")[1]);
+
             return payees;
         }
 
         public async Task StorePayer(PayerPayee newPayerPayee)
         {
+            newPayerPayee.UserId += HashKeySuffix;
+            newPayerPayee.Name = $"{_rangeKeySuffixes["payer"]}{newPayerPayee.Name}";
             await _dbContext.SaveAsync(newPayerPayee, new DynamoDBOperationConfig
             {
                 OverrideTableName = _tableName
@@ -57,6 +70,8 @@ namespace TransactionService.Repositories
 
         public Task StorePayee(PayerPayee newPayerPayee)
         {
+            newPayerPayee.UserId += HashKeySuffix;
+            newPayerPayee.Name = $"{_rangeKeySuffixes["payee"]}{newPayerPayee.Name}";
             throw new NotImplementedException();
         }
 

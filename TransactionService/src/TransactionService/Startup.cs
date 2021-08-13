@@ -46,6 +46,7 @@ namespace TransactionService
             services.AddScoped<CurrentUserContext>();
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
             services.AddScoped<ICategoriesService, CategoriesService>();
+            services.AddScoped<IPayerPayeeService, PayerPayeeService>();
 
             services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile));
 
@@ -76,6 +77,7 @@ namespace TransactionService
 
             services.AddSingleton<ITransactionRepository, DynamoDbTransactionRepository>();
             services.AddSingleton<ICategoriesRepository, DynamoDbCategoriesRepository>();
+            services.AddSingleton<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
 
             services.AddControllers();
         }
