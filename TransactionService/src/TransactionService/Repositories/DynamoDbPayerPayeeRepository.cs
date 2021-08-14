@@ -40,7 +40,7 @@ namespace TransactionService.Repositories
                 }
             ).GetRemainingAsync();
 
-            payers.AsParallel().ForAll(payer => payer.UserId = payer.UserId.Split("#")[1]);
+            payers.AsParallel().ForAll(payer => payer.Name = payer.Name.Split("#")[1]);
             return payers;
         }
 
@@ -53,7 +53,7 @@ namespace TransactionService.Repositories
                     OverrideTableName = _tableName
                 }
             ).GetRemainingAsync();
-            payees.AsParallel().ForAll(payee => payee.UserId = payee.UserId.Split("#")[1]);
+            payees.AsParallel().ForAll(payee => payee.Name = payee.Name.Split("#")[1]);
 
             return payees;
         }
