@@ -48,6 +48,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
         public async Task InitializeAsync()
         {
             await _dynamoDbHelper.CreateTable();
+            Console.WriteLine("created table!");
         }
 
         public async Task DisposeAsync()
