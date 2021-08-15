@@ -22,13 +22,13 @@ namespace TransactionService.IntegrationTests.Helpers
             var awsKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID") ?? "fake";
             var awsSecret = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") ?? "fake";
             var awsRegion = Environment.GetEnvironmentVariable("AWS_REGION") ?? "ap-southeast-2";
-            var dynamoDbUrl = Environment.GetEnvironmentVariable("DynamoDb__ServiceUrl") ?? "http://localhost:4566";
+            var awsUrl = Environment.GetEnvironmentVariable("AWS_SERVICE_URL") ?? "http://localhost:4566";
 
-            Console.WriteLine($">>>> dynamodBURL: {dynamoDbUrl}");
+            Console.WriteLine($">>>> dynamodBURL: {awsUrl}");
 
             var clientConfig = new AmazonDynamoDBConfig
             {
-                ServiceURL = dynamoDbUrl,
+                ServiceURL = awsUrl,
                 AuthenticationRegion = awsRegion
             };
 

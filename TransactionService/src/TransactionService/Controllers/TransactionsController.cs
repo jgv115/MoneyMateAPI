@@ -26,7 +26,6 @@ namespace TransactionService.Controllers
             [FromQuery] DateTime? end = null
         )
         {
-            Console.WriteLine($">>>> {start} {end}");
             var result = await _transactionHelperService
                 .GetAllTransactionsAsync(
                     start.GetValueOrDefault(DateTime.MinValue),

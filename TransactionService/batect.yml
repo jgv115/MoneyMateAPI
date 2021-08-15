@@ -6,11 +6,11 @@ project_name: moneymate_api
   AWS_REGION: ${AWS_REGION:-}
 
 .local_dev_envs: &local_dev_envs
-  AWS_ACCESS_KEY_ID: fake
-  AWS_SECRET_ACCESS_KEY: fake
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
   AWS_REGION: ap-southeast-2
-  AWS_DEFAULT_REGION: ap-southeast-2
-  DynamoDb__ServiceUrl: "http://localstack:4566"
+  AWS_LOCAL_MODE: "true"
+  AWS_SERVICE_URL: "http://localstack:4566"
 
 containers:
   dotnet_build_env:
@@ -67,7 +67,6 @@ containers:
   localstack:
     image: localstack/localstack
     environment:
-      DEFAULT_REGION: ap-southeast-2
       SERVICES: dynamodb
       <<: *local_dev_envs
     volumes:
@@ -90,7 +89,6 @@ containers:
       - localstack
     image: localstack/localstack
     environment:
-      DEFAULT_REGION: ap-southeast-2
       SERVICES: dynamodb
       <<: *local_dev_envs
     volumes:

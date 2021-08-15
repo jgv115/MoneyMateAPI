@@ -1,4 +1,5 @@
 ﻿using System;
+using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
@@ -50,20 +51,20 @@ namespace TransactionService
 
             services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile));
 
-            var dynamoDbConfig = Configuration.GetSection("DynamoDb");
-            var dynamoDbLocalMode = dynamoDbConfig.GetValue<bool>("LocalMode");
-            Console.WriteLine(dynamoDbConfig.GetSection("LocalMode").Value);
-            Console.WriteLine(dynamoDbConfig.GetSection("ServiceUrl").Value);
+            var awsLocalModeEnvVariable = Environment.GetEnvironmentVariable("AWS_LOCAL_MODE");
+            var awsLocalMode = !string.IsNullOrWhiteSpace(awsLocalModeEnvVariable) && bool.Parse(awsLocalModeEnvVariable);
 
-            Console.WriteLine($">>> dynamoDbLocalmode is {dynamoDbLocalMode}");
-            Console.WriteLine($">>> dynamoDb service url is {dynamoDbConfig.GetValue<string>("ServiceUrl")}");
-            if (dynamoDbLocalMode)
+            if (awsLocalMode)
             {
+                var awsServiceUrl = Environment.GetEnvironmentVariable("AWS_SERVICE_URL");
+                var awsRegion = Environment.GetEnvironmentVariable("AWS_REGION");
+
                 services.AddSingleton<IAmazonDynamoDB>(_ =>
                 {
-                    var clientConfig = new AmazonDynamoDBConfig()
+                    var clientConfig = new AmazonDynamoDBConfig
                     {
-                        ServiceURL = dynamoDbConfig.GetValue<string>("ServiceUrl")
+                        ServiceURL = awsServiceUrl,
+                        AuthenticationRegion = awsRegion
                     };
                     return new AmazonDynamoDBClient(clientConfig);
                 });

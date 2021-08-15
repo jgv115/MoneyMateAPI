@@ -24,7 +24,6 @@ namespace TransactionService.Repositories
 
             _dbContext = new DynamoDBContext(dbClient);
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
-            Console.WriteLine($">>> table name is {_tableName}");
         }
 
         public async Task<List<Transaction>> GetAllTransactionsAsync(string userId, DateTime start, DateTime end)
