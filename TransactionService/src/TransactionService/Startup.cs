@@ -56,6 +56,7 @@ namespace TransactionService
             Console.WriteLine(dynamoDbConfig.GetSection("ServiceUrl").Value);
 
             Console.WriteLine($">>> dynamoDbLocalmode is {dynamoDbLocalMode}");
+            Console.WriteLine($">>> dynamoDb service url is {dynamoDbConfig.GetValue<string>("ServiceUrl")}");
             if (dynamoDbLocalMode)
             {
                 services.AddSingleton<IAmazonDynamoDB>(_ =>
