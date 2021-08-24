@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.Models;
@@ -41,25 +43,25 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 UserId = UserId,
                 Name = "payer#payer1",
-                GooglePlaceId = Guid.NewGuid().ToString()
+                ExternalId = Guid.NewGuid().ToString()
             };
             var expectedPayer1 = new PayerPayee
             {
                 UserId = UserId,
                 Name = "payer1",
-                GooglePlaceId = payer1.GooglePlaceId
+                ExternalId = payer1.ExternalId
             };
             var payer2 = new PayerPayee
             {
                 UserId = UserId,
                 Name = "payer#payer2",
-                GooglePlaceId = Guid.NewGuid().ToString()
+                ExternalId = Guid.NewGuid().ToString()
             };
             var expectedPayer2 = new PayerPayee
             {
                 UserId = UserId,
                 Name = "payer2",
-                GooglePlaceId = payer2.GooglePlaceId
+                ExternalId = payer2.ExternalId
             };
 
             var initialData = new List<PayerPayee>
@@ -70,7 +72,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 {
                     UserId = UserId,
                     Name = "payee#payee1",
-                    GooglePlaceId = Guid.NewGuid().ToString()
+                    ExternalId = Guid.NewGuid().ToString()
                 }
             };
 
@@ -98,25 +100,25 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 UserId = UserId,
                 Name = "payee#payee1",
-                GooglePlaceId = Guid.NewGuid().ToString()
+                ExternalId = Guid.NewGuid().ToString()
             };
             var expectedPayee1 = new PayerPayee
             {
                 UserId = UserId,
                 Name = "payee1",
-                GooglePlaceId = payee1.GooglePlaceId
+                ExternalId = payee1.ExternalId
             };
             var payee2 = new PayerPayee
             {
                 UserId = UserId,
                 Name = "payee#payee2",
-                GooglePlaceId = Guid.NewGuid().ToString()
+                ExternalId = Guid.NewGuid().ToString()
             };
             var expectedPayee2 = new PayerPayee
             {
                 UserId = UserId,
                 Name = "payee2",
-                GooglePlaceId = payee2.GooglePlaceId
+                ExternalId = payee2.ExternalId
             };
 
             var initialData = new List<PayerPayee>
@@ -125,13 +127,13 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 {
                     UserId = UserId,
                     Name = "payer#payer1",
-                    GooglePlaceId = Guid.NewGuid().ToString()
+                    ExternalId = Guid.NewGuid().ToString()
                 },
                 new()
                 {
                     UserId = UserId,
                     Name = "payer#payer2",
-                    GooglePlaceId = Guid.NewGuid().ToString()
+                    ExternalId = Guid.NewGuid().ToString()
                 },
                 payee1,
                 payee2
@@ -149,6 +151,90 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             });
 
             Assert.Equal(new List<PayerPayee> {expectedPayee1, expectedPayee2}, returnedPayees);
+        }
+
+        [Fact]
+        public async Task GivenValidRequest_WhenPostPayerEndpointCalled_ThenCorrectPayerPersisted()
+        {
+            const string expectedPayerName = "test payer123";
+            const string expectedExternalId = "test external id 123";
+            var cratePayerDto = new CreatePayerPayeeDto
+            {
+                Name = expectedPayerName,
+                ExternalId = expectedExternalId
+            };
+            var httpContent =
+                new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
+
+            Assert.Equal(new List<PayerPayee>
+            {
+                new()
+                {
+                    Name = $"payer#{expectedPayerName}",
+                    ExternalId = expectedExternalId,
+                    UserId = UserId
+                }
+            }, scanOutput);
+        }
+        
+        [Fact]
+        public async Task GivenRequestWithEmptyExternalId_WhenPostPayerEndpointCalled_ThenCorrectPayerPersisted()
+        {
+            const string expectedPayerName = "test payer123";
+            var cratePayerDto = new CreatePayerPayeeDto
+            {
+                Name = expectedPayerName,
+            };
+            var httpContent =
+                new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
+
+            Assert.Equal(new List<PayerPayee>
+            {
+                new()
+                {
+                    Name = $"payer#{expectedPayerName}",
+                    UserId = UserId
+                }
+            }, scanOutput);
+        }
+        
+        [Fact]
+        public async Task GivenValidRequest_WhenPostPayeeEndpointCalled_ThenCorrectPayeePersisted()
+        {
+            const string expectedPayeeName = "test payee123";
+            const string expectedExternalId = "test external id 123";
+            var cratePayerDto = new CreatePayerPayeeDto
+            {
+                Name = expectedPayeeName,
+                ExternalId = expectedExternalId
+            };
+            var httpContent =
+                new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/payerspayees/payees", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
+
+            Assert.Equal(new List<PayerPayee>
+            {
+                new()
+                {
+                    Name = $"payee#{expectedPayeeName}",
+                    ExternalId = expectedExternalId,
+                    UserId = UserId
+                }
+            }, scanOutput);
         }
     }
 }

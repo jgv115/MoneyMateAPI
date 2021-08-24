@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Domain;
+using TransactionService.Dtos;
 
 namespace TransactionService.Controllers
 {
@@ -32,6 +33,20 @@ namespace TransactionService.Controllers
         {
             var payees = await _payerPayeeService.GetPayees();
             return Ok(payees);
+        }
+
+        [HttpPost("payers")]
+        public async Task<IActionResult> PostPayer(CreatePayerPayeeDto createPayerPayeeDto)
+        {
+            await _payerPayeeService.CreatePayer(createPayerPayeeDto);
+            return Ok();
+        }
+        
+        [HttpPost("payees")]
+        public async Task<IActionResult> PostPayee(CreatePayerPayeeDto createPayerPayeeDto)
+        {
+            await _payerPayeeService.CreatePayee(createPayerPayeeDto);
+            return Ok();
         }
     }
 }

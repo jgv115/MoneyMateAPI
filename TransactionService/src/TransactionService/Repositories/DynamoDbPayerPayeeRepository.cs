@@ -58,21 +58,31 @@ namespace TransactionService.Repositories
             return payees;
         }
 
-        public async Task StorePayer(PayerPayee newPayerPayee)
+        private async Task StorePayerPayee(PayerPayee newPayerPayee, string payerOrPayee)
         {
-            newPayerPayee.UserId += HashKeySuffix;
-            newPayerPayee.Name = $"{_rangeKeySuffixes["payer"]}{newPayerPayee.Name}";
-            await _dbContext.SaveAsync(newPayerPayee, new DynamoDBOperationConfig
+            if (payerOrPayee is "payer" or "payee")
             {
-                OverrideTableName = _tableName
-            });
+                newPayerPayee.UserId += HashKeySuffix;
+                newPayerPayee.Name = $"{_rangeKeySuffixes[payerOrPayee]}{newPayerPayee.Name}";
+                await _dbContext.SaveAsync(newPayerPayee, new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
+            }
+            else
+            {
+                throw new Exception("payerPayee input not valid");
+            }
         }
 
-        public Task StorePayee(PayerPayee newPayerPayee)
+        public async Task CreatePayer(PayerPayee newPayerPayee)
         {
-            newPayerPayee.UserId += HashKeySuffix;
-            newPayerPayee.Name = $"{_rangeKeySuffixes["payee"]}{newPayerPayee.Name}";
-            throw new NotImplementedException();
+            await StorePayerPayee(newPayerPayee, "payer");
+        }
+
+        public async Task CreatePayee(PayerPayee newPayerPayee)
+        {
+            await StorePayerPayee(newPayerPayee, "payee");
         }
 
         public Task PutPayer(string userId)

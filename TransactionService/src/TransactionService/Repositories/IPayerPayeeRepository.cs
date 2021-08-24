@@ -8,8 +8,8 @@ namespace TransactionService.Repositories
     {
         public Task<IEnumerable<PayerPayee>> GetPayers(string userId);
         public Task<IEnumerable<PayerPayee>> GetPayees(string userId);
-        public Task StorePayer(PayerPayee newPayerPayee);
-        public Task StorePayee(PayerPayee newPayerPayee);
+        public Task CreatePayer(PayerPayee newPayerPayee);
+        public Task CreatePayee(PayerPayee newPayerPayee);
         public Task PutPayer(string userId);
         public Task PutPayee(string userId);
         public Task DeletePayer(string userId);

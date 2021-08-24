@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using TransactionService.Domain;
+using TransactionService.Dtos;
 using TransactionService.Models;
 using TransactionService.Repositories;
 using Xunit;
@@ -49,19 +50,19 @@ namespace TransactionService.Tests.Domain
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
-            var payers = new List<PayerPayee>()
+            var payers = new List<PayerPayee>
             {
                 new()
                 {
                     Name = "test123",
                     UserId = "userId123",
-                    GooglePlaceId = "id123"
+                    ExternalId = "id123"
                 },
                 new()
                 {
                     Name = "test1234",
                     UserId = "userId1234",
-                    GooglePlaceId = "id1234"
+                    ExternalId = "id1234"
                 }
             };
             _mockRepository.Setup(repository => repository.GetPayers(It.IsAny<string>()))
@@ -89,19 +90,19 @@ namespace TransactionService.Tests.Domain
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
-            var payees = new List<PayerPayee>()
+            var payees = new List<PayerPayee>
             {
                 new()
                 {
                     Name = "test123",
                     UserId = "userId123",
-                    GooglePlaceId = "id123"
+                    ExternalId = "id123"
                 },
                 new()
                 {
                     Name = "test1234",
                     UserId = "userId1234",
-                    GooglePlaceId = "id1234"
+                    ExternalId = "id1234"
                 }
             };
             _mockRepository.Setup(repository => repository.GetPayees(It.IsAny<string>()))
@@ -110,6 +111,54 @@ namespace TransactionService.Tests.Domain
 
             var response = await service.GetPayees();
             Assert.Equal(payees, response);
+        }
+
+        [Fact]
+        public async Task
+            GivenValidCreatePayerPayeeDto_WhenCreatePayerInvoked_ThenRepositoryCalledWithCorrectPayerPayeeModel()
+        {
+            const string expectedPayerName = "payer name 123";
+            const string expectedExternalId = "externalId123";
+            var userId = Guid.NewGuid().ToString();
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+            
+            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
+            await service.CreatePayer(new CreatePayerPayeeDto
+            {
+                Name = expectedPayerName,
+                ExternalId = expectedExternalId
+            });
+            
+            _mockRepository.Verify(repository => repository.CreatePayer(new PayerPayee
+            {
+                Name = expectedPayerName,
+                ExternalId = expectedExternalId,
+                UserId = userId 
+            }));
+        }
+        
+        [Fact]
+        public async Task
+            GivenValidCreatePayerPayeeDto_WhenCreatePayeeInvoked_ThenRepositoryCalledWithCorrectPayerPayeeModel()
+        {
+            const string expectedPayeeName = "payee name 123";
+            const string expectedExternalId = "externalId123";
+            var userId = Guid.NewGuid().ToString();
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+            
+            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
+            await service.CreatePayee(new CreatePayerPayeeDto
+            {
+                Name = expectedPayeeName,
+                ExternalId = expectedExternalId
+            });
+            
+            _mockRepository.Verify(repository => repository.CreatePayee(new PayerPayee
+            {
+                Name = expectedPayeeName,
+                ExternalId = expectedExternalId,
+                UserId = userId 
+            }));
         }
     }
 }

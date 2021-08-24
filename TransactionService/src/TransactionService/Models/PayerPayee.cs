@@ -8,6 +8,6 @@ namespace TransactionService.Models
     {
         [DynamoDBHashKey("UserIdQuery")] public string UserId { get; set; }
         [DynamoDBRangeKey("Subquery")] public string Name { get; set; }
-        public string GooglePlaceId { get; set; }
+        public string ExternalId { get; set; }
     }
 }
