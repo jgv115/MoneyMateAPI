@@ -28,6 +28,16 @@ namespace TransactionService.Domain
             return _repository.GetPayees(_userContext.UserId);
         }
 
+        public Task<PayerPayee> GetPayer(Guid payerPayeeId)
+        {
+            return _repository.GetPayer(_userContext.UserId, payerPayeeId);
+        }
+
+        public Task<PayerPayee> GetPayee(Guid payerPayeeId)
+        {
+            return _repository.GetPayee(_userContext.UserId, payerPayeeId);
+        }
+
         public Task CreatePayer(CreatePayerPayeeDto newPayerPayee)
         {
             return _repository.CreatePayer(new PayerPayee

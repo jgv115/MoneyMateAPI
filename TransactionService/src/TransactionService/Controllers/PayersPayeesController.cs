@@ -34,6 +34,20 @@ namespace TransactionService.Controllers
             var payees = await _payerPayeeService.GetPayees();
             return Ok(payees);
         }
+        
+        [HttpGet("payers/{payerPayeeId}")]
+        public async Task<IActionResult> GetPayer(Guid payerPayeeId)
+        {
+            var payer = await _payerPayeeService.GetPayer(payerPayeeId);
+            return Ok(payer);
+        }
+        
+        [HttpGet("payees/{payerPayeeId}")]
+        public async Task<IActionResult> GetPayee(Guid payerPayeeId)
+        {
+            var payee = await _payerPayeeService.GetPayee(payerPayeeId);
+            return Ok(payee);
+        }
 
         [HttpPost("payers")]
         public async Task<IActionResult> PostPayer(CreatePayerPayeeDto createPayerPayeeDto)

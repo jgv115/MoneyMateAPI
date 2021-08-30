@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TransactionService.Dtos;
@@ -9,6 +10,8 @@ namespace TransactionService.Domain
     {
         public Task<IEnumerable<PayerPayee>> GetPayers();
         public Task<IEnumerable<PayerPayee>> GetPayees();
+        public Task<PayerPayee> GetPayer(Guid payerPayeeId);
+        public Task<PayerPayee> GetPayee(Guid payerPayeeId);
         public Task CreatePayer(CreatePayerPayeeDto newPayerPayee);
         public Task CreatePayee(CreatePayerPayeeDto newPayerPayee);
     }

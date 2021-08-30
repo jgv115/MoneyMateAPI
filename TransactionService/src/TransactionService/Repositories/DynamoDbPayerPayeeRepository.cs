@@ -16,7 +16,7 @@ namespace TransactionService.Repositories
 
         private const string HashKeySuffix = "#PayersPayees";
 
-        private readonly Dictionary<string, string> _rangeKeySuffixes = new()
+        private readonly Dictionary<string, string> _rangeKeyPrefixes = new()
         {
             {"payee", "payee#"},
             {"payer", "payer#"}
@@ -51,7 +51,6 @@ namespace TransactionService.Repositories
                 QueryOperator.BeginsWith, new[] {"payee#"}, new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName,
-                    
                 }
             ).GetRemainingAsync();
             payees.AsParallel().ForAll(payee => payee.PayerPayeeId = payee.PayerPayeeId.Split("#")[1]);
@@ -59,12 +58,24 @@ namespace TransactionService.Repositories
             return payees;
         }
 
+        public Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId)
+        {
+            return _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+                $"{_rangeKeyPrefixes["payer"]}{payerPayeeId}");
+        }
+
+        public Task<PayerPayee> GetPayee(string userId, Guid payerPayeeId)
+        {
+            return _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+                $"{_rangeKeyPrefixes["payee"]}{payerPayeeId}");
+        }
+
         private async Task StorePayerPayee(PayerPayee newPayerPayee, string payerOrPayee)
         {
             if (payerOrPayee is "payer" or "payee")
             {
                 newPayerPayee.UserId += HashKeySuffix;
-                newPayerPayee.PayerPayeeId = $"{_rangeKeySuffixes[payerOrPayee]}{newPayerPayee.PayerPayeeId}";
+                newPayerPayee.PayerPayeeId = $"{_rangeKeyPrefixes[payerOrPayee]}{newPayerPayee.PayerPayeeId}";
                 await _dbContext.SaveAsync(newPayerPayee, new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName

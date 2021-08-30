@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TransactionService.Models;
@@ -8,6 +9,8 @@ namespace TransactionService.Repositories
     {
         public Task<IEnumerable<PayerPayee>> GetPayers(string userId);
         public Task<IEnumerable<PayerPayee>> GetPayees(string userId);
+        public Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId);
+        public Task<PayerPayee> GetPayee(string userId, Guid payerPayeeId);
         public Task CreatePayer(PayerPayee newPayerPayee);
         public Task CreatePayee(PayerPayee newPayerPayee);
         public Task PutPayer(string userId);
