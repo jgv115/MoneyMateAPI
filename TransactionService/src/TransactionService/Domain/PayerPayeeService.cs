@@ -32,7 +32,8 @@ namespace TransactionService.Domain
         {
             return _repository.CreatePayer(new PayerPayee
             {
-                Name = newPayerPayee.Name,
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = newPayerPayee.Name,
                 ExternalId = newPayerPayee.ExternalId,
                 UserId = _userContext.UserId
             });
@@ -42,7 +43,8 @@ namespace TransactionService.Domain
         {
             return _repository.CreatePayee(new PayerPayee
             {
-                Name = newPayerPayee.Name,
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = newPayerPayee.Name,
                 ExternalId = newPayerPayee.ExternalId,
                 UserId = _userContext.UserId
             });

@@ -7,7 +7,8 @@ namespace TransactionService.Models
     public record PayerPayee
     {
         [DynamoDBHashKey("UserIdQuery")] public string UserId { get; set; }
-        [DynamoDBRangeKey("Subquery")] public string Name { get; set; }
+        [DynamoDBRangeKey("Subquery")] public string PayerPayeeId { get; set; }
+        public string PayerPayeeName { get; set; }
         public string ExternalId { get; set; }
     }
 }

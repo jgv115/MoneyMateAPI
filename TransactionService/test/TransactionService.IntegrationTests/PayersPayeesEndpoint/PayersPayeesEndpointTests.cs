@@ -42,25 +42,29 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             var payer1 = new PayerPayee
             {
                 UserId = UserId,
-                Name = "payer#payer1",
+                PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
+                PayerPayeeName = "payer1",
                 ExternalId = Guid.NewGuid().ToString()
             };
             var expectedPayer1 = new PayerPayee
             {
                 UserId = UserId,
-                Name = "payer1",
+                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
+                PayerPayeeName = "payer1",
                 ExternalId = payer1.ExternalId
             };
             var payer2 = new PayerPayee
             {
                 UserId = UserId,
-                Name = "payer#payer2",
+                PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeName = "payer2",
                 ExternalId = Guid.NewGuid().ToString()
             };
             var expectedPayer2 = new PayerPayee
             {
                 UserId = UserId,
-                Name = "payer2",
+                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeName = "payer2",
                 ExternalId = payer2.ExternalId
             };
 
@@ -71,7 +75,8 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 new()
                 {
                     UserId = UserId,
-                    Name = "payee#payee1",
+                    PayerPayeeId = "payee#a540cf4a-f21b-4cac-9e8b-168d12dcecff",
+                    PayerPayeeName = "payee1",
                     ExternalId = Guid.NewGuid().ToString()
                 }
             };
@@ -99,25 +104,29 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             var payee1 = new PayerPayee
             {
                 UserId = UserId,
-                Name = "payee#payee1",
+                PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
+                PayerPayeeName = "payee1",
                 ExternalId = Guid.NewGuid().ToString()
             };
             var expectedPayee1 = new PayerPayee
             {
                 UserId = UserId,
-                Name = "payee1",
+                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
+                PayerPayeeName = "payee1",
                 ExternalId = payee1.ExternalId
             };
             var payee2 = new PayerPayee
             {
                 UserId = UserId,
-                Name = "payee#payee2",
+                PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeName = "payee2",
                 ExternalId = Guid.NewGuid().ToString()
             };
             var expectedPayee2 = new PayerPayee
             {
                 UserId = UserId,
-                Name = "payee2",
+                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeName = "payee2",
                 ExternalId = payee2.ExternalId
             };
 
@@ -126,13 +135,15 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 new()
                 {
                     UserId = UserId,
-                    Name = "payer#payer1",
+                    PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfd",
+                    PayerPayeeName = "payer1",
                     ExternalId = Guid.NewGuid().ToString()
                 },
                 new()
                 {
                     UserId = UserId,
-                    Name = "payer#payer2",
+                    PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfe",
+                    PayerPayeeName = "payer2",
                     ExternalId = Guid.NewGuid().ToString()
                 },
                 payee1,
@@ -171,17 +182,18 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
 
             var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
 
-            Assert.Equal(new List<PayerPayee>
-            {
-                new()
+            Assert.Collection(scanOutput,
+                payerPayee =>
                 {
-                    Name = $"payer#{expectedPayerName}",
-                    ExternalId = expectedExternalId,
-                    UserId = UserId
-                }
-            }, scanOutput);
+                    Assert.Equal(expectedExternalId, payerPayee.ExternalId);
+                    Assert.Equal(UserId, payerPayee.UserId);
+                    Assert.Equal(expectedPayerName, payerPayee.PayerPayeeName);
+
+                    var payerPayeeId = Guid.Parse(payerPayee.PayerPayeeId.Split("payer#")[1]);
+                    Assert.NotEqual(Guid.Empty, payerPayeeId);
+                });
         }
-        
+
         [Fact]
         public async Task GivenRequestWithEmptyExternalId_WhenPostPayerEndpointCalled_ThenCorrectPayerPersisted()
         {
@@ -198,16 +210,18 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
 
             var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
 
-            Assert.Equal(new List<PayerPayee>
-            {
-                new()
+            Assert.Collection(scanOutput,
+                payerPayee =>
                 {
-                    Name = $"payer#{expectedPayerName}",
-                    UserId = UserId
-                }
-            }, scanOutput);
+                    Assert.Null(payerPayee.ExternalId);
+                    Assert.Equal(UserId, payerPayee.UserId);
+                    Assert.Equal(expectedPayerName, payerPayee.PayerPayeeName);
+
+                    var payerPayeeId = Guid.Parse(payerPayee.PayerPayeeId.Split("payer#")[1]);
+                    Assert.NotEqual(Guid.Empty, payerPayeeId);
+                });
         }
-        
+
         [Fact]
         public async Task GivenValidRequest_WhenPostPayeeEndpointCalled_ThenCorrectPayeePersisted()
         {
@@ -226,15 +240,16 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
 
             var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
 
-            Assert.Equal(new List<PayerPayee>
-            {
-                new()
+            Assert.Collection(scanOutput,
+                payerPayee =>
                 {
-                    Name = $"payee#{expectedPayeeName}",
-                    ExternalId = expectedExternalId,
-                    UserId = UserId
-                }
-            }, scanOutput);
+                    Assert.Equal(expectedExternalId, payerPayee.ExternalId);
+                    Assert.Equal(UserId, payerPayee.UserId);
+                    Assert.Equal(expectedPayeeName, payerPayee.PayerPayeeName);
+
+                    var payerPayeeId = Guid.Parse(payerPayee.PayerPayeeId.Split("payee#")[1]);
+                    Assert.NotEqual(Guid.Empty, payerPayeeId);
+                });
         }
     }
 }

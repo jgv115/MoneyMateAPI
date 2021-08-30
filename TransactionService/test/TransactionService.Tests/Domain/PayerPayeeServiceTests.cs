@@ -54,14 +54,16 @@ namespace TransactionService.Tests.Domain
             {
                 new()
                 {
-                    Name = "test123",
                     UserId = "userId123",
+                    PayerPayeeId = "test123",
+                    PayerPayeeName = "name123",
                     ExternalId = "id123"
                 },
                 new()
                 {
-                    Name = "test1234",
                     UserId = "userId1234",
+                    PayerPayeeId = "test1234",
+                    PayerPayeeName = "name123",
                     ExternalId = "id1234"
                 }
             };
@@ -72,7 +74,7 @@ namespace TransactionService.Tests.Domain
             var response = await service.GetPayers();
             Assert.Equal(payers, response);
         }
-        
+
         [Fact]
         public void GivenValidUserContext_WhenGetPayeesInvoked_ThenRepositoryCalledWithCorrectArguments()
         {
@@ -94,14 +96,16 @@ namespace TransactionService.Tests.Domain
             {
                 new()
                 {
-                    Name = "test123",
+                    PayerPayeeId = "test123",
                     UserId = "userId123",
+                    PayerPayeeName = "name123",
                     ExternalId = "id123"
                 },
                 new()
                 {
-                    Name = "test1234",
+                    PayerPayeeId = "test1234",
                     UserId = "userId1234",
+                    PayerPayeeName = "name123",
                     ExternalId = "id1234"
                 }
             };
@@ -121,22 +125,22 @@ namespace TransactionService.Tests.Domain
             const string expectedExternalId = "externalId123";
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
-            
+
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
             await service.CreatePayer(new CreatePayerPayeeDto
             {
                 Name = expectedPayerName,
                 ExternalId = expectedExternalId
             });
-            
-            _mockRepository.Verify(repository => repository.CreatePayer(new PayerPayee
-            {
-                Name = expectedPayerName,
-                ExternalId = expectedExternalId,
-                UserId = userId 
-            }));
+
+            _mockRepository.Verify(repository => repository.CreatePayer(It.Is<PayerPayee>(payerPayee =>
+                payerPayee.UserId == userId &&
+                payerPayee.ExternalId == expectedExternalId &&
+                payerPayee.PayerPayeeName == expectedPayerName &&
+                !Guid.Parse(payerPayee.PayerPayeeId).Equals(Guid.Empty)
+            )));
         }
-        
+
         [Fact]
         public async Task
             GivenValidCreatePayerPayeeDto_WhenCreatePayeeInvoked_ThenRepositoryCalledWithCorrectPayerPayeeModel()
@@ -145,20 +149,20 @@ namespace TransactionService.Tests.Domain
             const string expectedExternalId = "externalId123";
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
-            
+
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
             await service.CreatePayee(new CreatePayerPayeeDto
             {
                 Name = expectedPayeeName,
                 ExternalId = expectedExternalId
             });
-            
-            _mockRepository.Verify(repository => repository.CreatePayee(new PayerPayee
-            {
-                Name = expectedPayeeName,
-                ExternalId = expectedExternalId,
-                UserId = userId 
-            }));
+
+            _mockRepository.Verify(repository => repository.CreatePayee(It.Is<PayerPayee>(payerPayee =>
+                payerPayee.UserId == userId &&
+                payerPayee.ExternalId == expectedExternalId &&
+                payerPayee.PayerPayeeName == expectedPayeeName &&
+                !Guid.Parse(payerPayee.PayerPayeeId).Equals(Guid.Empty)
+            )));
         }
     }
 }

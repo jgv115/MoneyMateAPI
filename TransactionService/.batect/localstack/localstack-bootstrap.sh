@@ -92,8 +92,9 @@ aws --endpoint-url=http://localhost:4566 \
   --item \
   "{
       \"UserIdQuery\": {\"S\": \"auth0|jgv115#PayersPayees\"},
-      \"Subquery\": {\"S\": \"payee#payee1\"},
-      \"GooglePlaceId\": {\"S\": \"googlePlaceId123\"}
+      \"Subquery\": {\"S\": \"payee#a540cf4a-f21b-4cac-9e8b-168d12dcecfb\"},
+      \"PayerPayeeName\": {\"S\": \"payee1\"},
+      \"ExternalId\": {\"S\": \"googlePlaceId123\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
@@ -105,8 +106,9 @@ aws --endpoint-url=http://localhost:4566 \
   --item \
   "{
       \"UserIdQuery\": {\"S\": \"auth0|jgv115#PayersPayees\"},
-      \"Subquery\": {\"S\": \"payee#payee2\"},
-      \"GooglePlaceId\": {\"S\": \"googlePlaceId1234\"}
+      \"Subquery\": {\"S\": \"payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfb\"},
+      \"PayerPayeeName\": {\"S\": \"payer1\"},
+      \"ExternalId\": {\"S\": \"googlePlaceId1234\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE

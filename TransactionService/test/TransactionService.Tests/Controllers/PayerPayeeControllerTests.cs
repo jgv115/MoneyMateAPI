@@ -34,13 +34,13 @@ namespace TransactionService.Tests.Controllers
             {
                 new()
                 {
-                    Name = "test123",
+                    PayerPayeeId = "test123",
                     UserId = "userId123",
                     ExternalId = "id123"
                 },
                 new()
                 {
-                    Name = "test1234",
+                    PayerPayeeId = "test1234",
                     UserId = "userId1234",
                     ExternalId = "id1234"
                 }
@@ -62,13 +62,13 @@ namespace TransactionService.Tests.Controllers
             {
                 new()
                 {
-                    Name = "test123",
+                    PayerPayeeId = "test123",
                     UserId = "userId123",
                     ExternalId = "id123"
                 },
                 new()
                 {
-                    Name = "test1234",
+                    PayerPayeeId = "test1234",
                     UserId = "userId1234",
                     ExternalId = "id1234"
                 }

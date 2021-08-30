@@ -40,7 +40,7 @@ namespace TransactionService.Repositories
                 }
             ).GetRemainingAsync();
 
-            payers.AsParallel().ForAll(payer => payer.Name = payer.Name.Split("#")[1]);
+            payers.AsParallel().ForAll(payer => payer.PayerPayeeId = payer.PayerPayeeId.Split("#")[1]);
             return payers;
         }
 
@@ -50,10 +50,11 @@ namespace TransactionService.Repositories
                 $"{userId}{HashKeySuffix}",
                 QueryOperator.BeginsWith, new[] {"payee#"}, new DynamoDBOperationConfig
                 {
-                    OverrideTableName = _tableName
+                    OverrideTableName = _tableName,
+                    
                 }
             ).GetRemainingAsync();
-            payees.AsParallel().ForAll(payee => payee.Name = payee.Name.Split("#")[1]);
+            payees.AsParallel().ForAll(payee => payee.PayerPayeeId = payee.PayerPayeeId.Split("#")[1]);
 
             return payees;
         }
@@ -63,7 +64,7 @@ namespace TransactionService.Repositories
             if (payerOrPayee is "payer" or "payee")
             {
                 newPayerPayee.UserId += HashKeySuffix;
-                newPayerPayee.Name = $"{_rangeKeySuffixes[payerOrPayee]}{newPayerPayee.Name}";
+                newPayerPayee.PayerPayeeId = $"{_rangeKeySuffixes[payerOrPayee]}{newPayerPayee.PayerPayeeId}";
                 await _dbContext.SaveAsync(newPayerPayee, new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName
