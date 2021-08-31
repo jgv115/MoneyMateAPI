@@ -24,11 +24,22 @@ resource "aws_dynamodb_table" transaction_db {
     name = "TransactionTimestamp"
     type = "S"
   }
+  attribute {
+    name = "PayerPayeeName"
+    type = "S"
+  }
 
   local_secondary_index {
     name = "TransactionTimestampIndex"
     projection_type = "ALL"
     range_key = "TransactionTimestamp"
+  }
+  
+  global_secondary_index {
+    hash_key = "UserIdQuery"
+    range_key = "PayerPayeeName"
+    name = "PayerPayeeNameIndex"
+    projection_type = "KEYS_ONLY"
   }
 
   tags = local.tags
