@@ -58,16 +58,20 @@ namespace TransactionService.Repositories
             return payees;
         }
 
-        public Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId)
+        public async Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId)
         {
-            return _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+            var payer = await _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
                 $"{_rangeKeyPrefixes["payer"]}{payerPayeeId}");
+            payer.PayerPayeeId = payer.PayerPayeeId.Split("#")[1];
+            return payer;
         }
 
-        public Task<PayerPayee> GetPayee(string userId, Guid payerPayeeId)
+        public async Task<PayerPayee> GetPayee(string userId, Guid payerPayeeId)
         {
-            return _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+            var payee = await _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
                 $"{_rangeKeyPrefixes["payee"]}{payerPayeeId}");
+            payee.PayerPayeeId = payee.PayerPayeeId.Split("#")[1];
+            return payee;
         }
 
         private async Task StorePayerPayee(PayerPayee newPayerPayee, string payerOrPayee)

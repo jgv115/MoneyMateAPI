@@ -54,7 +54,7 @@ namespace TransactionService.Tests.Controllers
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
             Assert.Equal(payers, objectResponse.Value);
         }
-        
+
         [Fact]
         public async Task GivenPayerPayeeServiceReturnsObject_WhenGetPayeesInvoked_ThenReturns200OKWithCorrectList()
         {
@@ -84,7 +84,48 @@ namespace TransactionService.Tests.Controllers
         }
 
         [Fact]
-        public async Task GivenValidCreatePayerPayeeDto_WhenPostPayerInvoked_ThenPayerPayeeServiceCreatePayerCalledWithCorrectDto()
+        public async Task GivenValidPayerPayeeIdAndPayerPayeeServiceReturnsObject_WhenGetPayerInvoked_ThenReturns200OKWithCorrectPayer()
+        {
+            var expectedPayer = new PayerPayee
+            {
+                ExternalId = "externalId",
+                UserId = "UserId",
+                PayerPayeeId = "payerId",
+                PayerPayeeName = "name"
+            };
+            _mockService.Setup(service => service.GetPayer(It.IsAny<Guid>())).ReturnsAsync(() => expectedPayer);
+            var controller = new PayersPayeesController(_mockService.Object);
+
+            var response = await controller.GetPayer(Guid.NewGuid());
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+            
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(expectedPayer, objectResponse.Value);
+        }
+
+        [Fact]
+        public async Task GivenValidPayerPayeeIdAndPayerPayeeServiceReturnsObject_WhenGetPayeeInvoked_ThenReturns200OKWithCorrectPayee()
+        {
+            var expectedPayee = new PayerPayee
+            {
+                ExternalId = "externalId",
+                UserId = "UserId",
+                PayerPayeeId = "payerId",
+                PayerPayeeName = "name"
+            };
+            _mockService.Setup(service => service.GetPayee(It.IsAny<Guid>())).ReturnsAsync(() => expectedPayee);
+            var controller = new PayersPayeesController(_mockService.Object);
+
+            var response = await controller.GetPayee(Guid.NewGuid());
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+            
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(expectedPayee, objectResponse.Value);
+        }
+        
+        [Fact]
+        public async Task
+            GivenValidCreatePayerPayeeDto_WhenPostPayerInvoked_ThenPayerPayeeServiceCreatePayerCalledWithCorrectDto()
         {
             var dto = new CreatePayerPayeeDto
             {
@@ -93,7 +134,7 @@ namespace TransactionService.Tests.Controllers
             };
             var controller = new PayersPayeesController(_mockService.Object);
             await controller.PostPayer(dto);
-            
+
             _mockService.Verify(service => service.CreatePayer(dto));
         }
 
@@ -108,12 +149,13 @@ namespace TransactionService.Tests.Controllers
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.PostPayer(dto);
             var objectResponse = Assert.IsType<OkResult>(response);
-            
+
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
         }
-        
+
         [Fact]
-        public async Task GivenValidCreatePayerPayeeDto_WhenPostPayeeInvoked_ThenPayerPayeeServiceCreatePayeeCalledWithCorrectDto()
+        public async Task
+            GivenValidCreatePayerPayeeDto_WhenPostPayeeInvoked_ThenPayerPayeeServiceCreatePayeeCalledWithCorrectDto()
         {
             var dto = new CreatePayerPayeeDto
             {
@@ -122,10 +164,10 @@ namespace TransactionService.Tests.Controllers
             };
             var controller = new PayersPayeesController(_mockService.Object);
             await controller.PostPayee(dto);
-            
+
             _mockService.Verify(service => service.CreatePayee(dto));
         }
-        
+
         [Fact]
         public async Task GivenNoErrors_WhenPostPayeeInvoked_Then200OKReturned()
         {
@@ -137,7 +179,7 @@ namespace TransactionService.Tests.Controllers
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.PostPayee(dto);
             var objectResponse = Assert.IsType<OkResult>(response);
-            
+
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
         }
     }

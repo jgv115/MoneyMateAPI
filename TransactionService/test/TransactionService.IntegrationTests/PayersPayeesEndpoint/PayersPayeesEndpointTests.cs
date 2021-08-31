@@ -165,6 +165,70 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         }
 
         [Fact]
+        public async Task GivenValidRequest_WhenGetPayerEndpointCalled_ThenCorrectPayerReturned()
+        {
+            var payerPayeeId = Guid.NewGuid();
+            var payer = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = $"payer#{payerPayeeId.ToString()}",
+                PayerPayeeName = "payer1",
+                ExternalId = Guid.NewGuid().ToString()
+            };
+            var expectedPayer = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = payerPayeeId.ToString(),
+                PayerPayeeName = payer.PayerPayeeName,
+                ExternalId = payer.ExternalId
+            };
+            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payer});
+
+            var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
+            response.EnsureSuccessStatusCode();
+
+            var returnedString = await response.Content.ReadAsStringAsync();
+            var actualPayer = JsonSerializer.Deserialize<PayerPayee>(returnedString, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            
+            Assert.Equal(expectedPayer, actualPayer);
+        }
+        
+        [Fact]
+        public async Task GivenValidRequest_WhenGetPayeeEndpointCalled_ThenCorrectPayeeReturned()
+        {
+            var payerPayeeId = Guid.NewGuid();
+            var payee = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = $"payee#{payerPayeeId.ToString()}",
+                PayerPayeeName = "payee1",
+                ExternalId = Guid.NewGuid().ToString()
+            };
+            var expectedPayee = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = payerPayeeId.ToString(),
+                PayerPayeeName = payee.PayerPayeeName,
+                ExternalId = payee.ExternalId
+            };
+            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payee});
+
+            var response = await _httpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
+            response.EnsureSuccessStatusCode();
+
+            var returnedString = await response.Content.ReadAsStringAsync();
+            var actualPayer = JsonSerializer.Deserialize<PayerPayee>(returnedString, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            
+            Assert.Equal(expectedPayee, actualPayer);
+        }
+
+        [Fact]
         public async Task GivenValidRequest_WhenPostPayerEndpointCalled_ThenCorrectPayerPersisted()
         {
             const string expectedPayerName = "test payer123";
