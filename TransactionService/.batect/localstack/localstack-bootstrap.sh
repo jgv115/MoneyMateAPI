@@ -31,7 +31,8 @@ aws --endpoint-url=http://localhost:4566 \
                 {\"AttributeName\":\"PayerPayeeName\",\"KeyType\":\"RANGE\"}
             ],
             \"Projection\": {
-                \"ProjectionType\":\"KEYS_ONLY\"
+                \"ProjectionType\":\"INCLUDE\",
+                \"NonKeyAttributes\": [\"ExternalId\"]
             }
         }
     ]"
@@ -122,6 +123,20 @@ aws --endpoint-url=http://localhost:4566 \
       \"Subquery\": {\"S\": \"payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfb\"},
       \"PayerPayeeName\": {\"S\": \"payer1\"},
       \"ExternalId\": {\"S\": \"googlePlaceId1234\"}
+  }" \
+  --return-consumed-capacity TOTAL \
+  --return-item-collection-metrics SIZE
+
+aws --endpoint-url=http://localhost:4566 \
+	--region ap-southeast-2 \
+  dynamodb put-item \
+  --table-name MoneyMate_TransactionDB_dev \
+  --item \
+  "{
+      \"UserIdQuery\": {\"S\": \"auth0|jgv115#PayersPayees\"},
+      \"Subquery\": {\"S\": \"payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfc\"},
+      \"PayerPayeeName\": {\"S\": \"PayerTest\"},
+      \"ExternalId\": {\"S\": \"googlePlaceId1235\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE

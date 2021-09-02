@@ -12,6 +12,8 @@ namespace TransactionService.Domain
         public Task<IEnumerable<PayerPayee>> GetPayees();
         public Task<PayerPayee> GetPayer(Guid payerPayeeId);
         public Task<PayerPayee> GetPayee(Guid payerPayeeId);
+        public Task<IEnumerable<PayerPayee>> AutocompletePayer(string payerName);
+        public Task<IEnumerable<PayerPayee>> AutocompletePayee(string payerName);
         public Task CreatePayer(CreatePayerPayeeDto newPayerPayee);
         public Task CreatePayee(CreatePayerPayeeDto newPayerPayee);
     }

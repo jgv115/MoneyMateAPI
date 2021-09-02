@@ -39,7 +39,8 @@ resource "aws_dynamodb_table" transaction_db {
     hash_key = "UserIdQuery"
     range_key = "PayerPayeeName"
     name = "PayerPayeeNameIndex"
-    projection_type = "KEYS_ONLY"
+    projection_type = "INCLUDE"
+    non_key_attributes = ["ExternalId"]
   }
 
   tags = local.tags

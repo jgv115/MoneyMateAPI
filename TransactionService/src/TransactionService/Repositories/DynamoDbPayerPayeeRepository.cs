@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using AutoMapper.Internal;
+using TransactionService.Helpers;
 using TransactionService.Models;
 
 namespace TransactionService.Repositories
@@ -15,6 +18,7 @@ namespace TransactionService.Repositories
         private readonly string _tableName;
 
         private const string HashKeySuffix = "#PayersPayees";
+        private const string PayerPayeeNameIndex = "PayerPayeeNameIndex";
 
         private readonly Dictionary<string, string> _rangeKeyPrefixes = new()
         {
@@ -30,6 +34,8 @@ namespace TransactionService.Repositories
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
 
+        private string extractRangeKeyData(string rangeKey) => rangeKey.Split("#")[1];
+
         public async Task<IEnumerable<PayerPayee>> GetPayers(string userId)
         {
             var payers = await _dbContext.QueryAsync<PayerPayee>(
@@ -40,7 +46,7 @@ namespace TransactionService.Repositories
                 }
             ).GetRemainingAsync();
 
-            payers.AsParallel().ForAll(payer => payer.PayerPayeeId = payer.PayerPayeeId.Split("#")[1]);
+            payers.AsParallel().ForAll(payer => payer.PayerPayeeId = extractRangeKeyData(payer.PayerPayeeId));
             return payers;
         }
 
@@ -53,7 +59,7 @@ namespace TransactionService.Repositories
                     OverrideTableName = _tableName,
                 }
             ).GetRemainingAsync();
-            payees.AsParallel().ForAll(payee => payee.PayerPayeeId = payee.PayerPayeeId.Split("#")[1]);
+            payees.AsParallel().ForAll(payee => payee.PayerPayeeId = extractRangeKeyData(payee.PayerPayeeId));
 
             return payees;
         }
@@ -61,17 +67,92 @@ namespace TransactionService.Repositories
         public async Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId)
         {
             var payer = await _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
-                $"{_rangeKeyPrefixes["payer"]}{payerPayeeId}");
-            payer.PayerPayeeId = payer.PayerPayeeId.Split("#")[1];
+                $"{_rangeKeyPrefixes["payer"]}{payerPayeeId}", new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName,
+                });
+            payer.PayerPayeeId = extractRangeKeyData(payer.PayerPayeeId);
             return payer;
         }
 
         public async Task<PayerPayee> GetPayee(string userId, Guid payerPayeeId)
         {
             var payee = await _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
-                $"{_rangeKeyPrefixes["payee"]}{payerPayeeId}");
-            payee.PayerPayeeId = payee.PayerPayeeId.Split("#")[1];
+                $"{_rangeKeyPrefixes["payee"]}{payerPayeeId}", new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName,
+                });
+            payee.PayerPayeeId = extractRangeKeyData(payee.PayerPayeeId);
             return payee;
+        }
+
+        private async Task<IEnumerable<PayerPayee>> QueryPayerPayeeByName(string userId, string payerOrPayee,
+            IEnumerable<string> searchQueries)
+        {
+            var payerPayeeResults = new ConcurrentBag<PayerPayee>();
+            var tasks = searchQueries.Select(async searchQuery =>
+            {
+                var results = await _dbContext.QueryAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+                    QueryOperator.BeginsWith, new[] {searchQuery}, new DynamoDBOperationConfig
+                    {
+                        OverrideTableName = _tableName,
+                        IndexName = PayerPayeeNameIndex,
+                        QueryFilter = new List<ScanCondition>
+                        {
+                            new("PayerPayeeId", ScanOperator.BeginsWith, $"{payerOrPayee}#")
+                        }
+                    }
+                ).GetRemainingAsync();
+                
+                results.ForAll(payerPayee =>
+                {
+                    payerPayee.PayerPayeeId = extractRangeKeyData(payerPayee.PayerPayeeId);
+                    payerPayeeResults.Add(payerPayee);
+                });
+            });
+
+            await Task.WhenAll(tasks);
+
+            return payerPayeeResults;
+        }
+
+        private async Task<IEnumerable<PayerPayee>> FindPayerPayee(string userId, string payerOrPayee,
+            string searchQuery)
+        {
+            var searchNames = StringHelpers.GenerateNGrams(searchQuery, multiCase: true);
+            return await QueryPayerPayeeByName(userId, payerOrPayee, searchNames);
+        }
+
+        private async Task<IEnumerable<PayerPayee>> AutocompletePayerPayee(string userId, string payerOrPayee,
+            string searchQuery)
+        {
+            var searchNames = new List<string>
+            {
+                searchQuery.CapitaliseFirstLetter(),
+                searchQuery.LowercaseFirstLetter()
+            };
+
+            return await QueryPayerPayeeByName(userId, payerOrPayee, searchNames);
+        }
+
+        public Task<IEnumerable<PayerPayee>> FindPayer(string userId, string payerName)
+        {
+            return FindPayerPayee(userId, "payer", payerName);
+        }
+
+        public Task<IEnumerable<PayerPayee>> FindPayee(string userId, string payeeName)
+        {
+            return FindPayerPayee(userId, "payee", payeeName);
+        }
+
+        public Task<IEnumerable<PayerPayee>> AutocompletePayer(string userId, string autocompleteQuery)
+        {
+            return AutocompletePayerPayee(userId, "payer", autocompleteQuery);
+        }
+
+        public Task<IEnumerable<PayerPayee>> AutocompletePayee(string userId, string autocompleteQuery)
+        {
+            return AutocompletePayerPayee(userId, "payer", autocompleteQuery);
         }
 
         private async Task StorePayerPayee(PayerPayee newPayerPayee, string payerOrPayee)

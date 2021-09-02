@@ -18,16 +18,28 @@ namespace TransactionService.Controllers
         {
             _payerPayeeService = payerPayeeService ?? throw new ArgumentNullException(nameof(payerPayeeService));
         }
-        
-        // GET api/payerspayees/payers
+
         [HttpGet("payers")]
         public async Task<IActionResult> GetPayers()
         {
             var payers = await _payerPayeeService.GetPayers();
             return Ok(payers);
         }
-        
-        // GET api/payerspayees/payers
+
+        [HttpGet("payers/autocomplete")]
+        public async Task<IActionResult> GetAutocompletePayer(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(name))
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var payers = await _payerPayeeService.AutocompletePayer(name);
+                return Ok(payers);
+            }
+        }
+
         [HttpGet("payees")]
         public async Task<IActionResult> GetPayees()
         {
@@ -35,13 +47,27 @@ namespace TransactionService.Controllers
             return Ok(payees);
         }
         
+        [HttpGet("payees/autocomplete")]
+        public async Task<IActionResult> GetAutocompletePayee(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(name))
+            {
+                return BadRequest();
+            }
+            else
+            {
+                var payers = await _payerPayeeService.AutocompletePayee(name);
+                return Ok(payers);
+            }
+        }
+
         [HttpGet("payers/{payerPayeeId:guid}")]
         public async Task<IActionResult> GetPayer(Guid payerPayeeId)
         {
             var payer = await _payerPayeeService.GetPayer(payerPayeeId);
             return Ok(payer);
         }
-        
+
         [HttpGet("payees/{payerPayeeId:guid}")]
         public async Task<IActionResult> GetPayee(Guid payerPayeeId)
         {
@@ -55,7 +81,7 @@ namespace TransactionService.Controllers
             await _payerPayeeService.CreatePayer(createPayerPayeeDto);
             return Ok();
         }
-        
+
         [HttpPost("payees")]
         public async Task<IActionResult> PostPayee(CreatePayerPayeeDto createPayerPayeeDto)
         {

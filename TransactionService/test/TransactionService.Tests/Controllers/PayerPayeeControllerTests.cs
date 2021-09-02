@@ -84,7 +84,88 @@ namespace TransactionService.Tests.Controllers
         }
 
         [Fact]
-        public async Task GivenValidPayerPayeeIdAndPayerPayeeServiceReturnsObject_WhenGetPayerInvoked_ThenReturns200OKWithCorrectPayer()
+        public async Task GivenWhitespaceInputName_WhenGetAutocompletePayerInvoked_ThenReturns400BadRequest()
+        {
+            var controller = new PayersPayeesController(_mockService.Object);
+            var response = await controller.GetAutocompletePayer("");
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public async Task
+            GivenPayerPayeeServiceReturnsPayers_WhenGetAutocompletePayerInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var inputName = "test";
+            var payers = new List<PayerPayee>
+            {
+                new()
+                {
+                    PayerPayeeId = "test123",
+                    UserId = "userId123",
+                    ExternalId = "id123",
+                    PayerPayeeName = "test123"
+                },
+                new()
+                {
+                    PayerPayeeId = "test1234",
+                    UserId = "userId1234",
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test1234"
+                }
+            };
+
+            _mockService.Setup(service => service.AutocompletePayer(inputName)).ReturnsAsync(() => payers);
+            var controller = new PayersPayeesController(_mockService.Object);
+            var response = await controller.GetAutocompletePayer(inputName);
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payers, objectResponse.Value);
+        }
+
+        [Fact]
+        public async Task
+            GivenPayerPayeeServiceReturnsPayees_WhenGetAutocompletePayeeInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var inputName = "test";
+            var payees = new List<PayerPayee>
+            {
+                new()
+                {
+                    PayerPayeeId = "test123",
+                    UserId = "userId123",
+                    ExternalId = "id123",
+                    PayerPayeeName = "test123"
+                },
+                new()
+                {
+                    PayerPayeeId = "test1234",
+                    UserId = "userId1234",
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test1234"
+                }
+            };
+
+            _mockService.Setup(service => service.AutocompletePayee(inputName)).ReturnsAsync(() => payees);
+            var controller = new PayersPayeesController(_mockService.Object);
+            var response = await controller.GetAutocompletePayee(inputName);
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payees, objectResponse.Value);
+        }
+        
+        [Fact]
+        public async Task GivenWhitespaceInputName_WhenGetAutocompletePayeeInvoked_ThenReturns400BadRequest()
+        {
+            var controller = new PayersPayeesController(_mockService.Object);
+            var response = await controller.GetAutocompletePayee("");
+            Assert.IsType<BadRequestResult>(response);
+        }
+
+        [Fact]
+        public async Task
+            GivenValidPayerPayeeIdAndPayerPayeeServiceReturnsObject_WhenGetPayerInvoked_ThenReturns200OKWithCorrectPayer()
         {
             var expectedPayer = new PayerPayee
             {
@@ -98,13 +179,14 @@ namespace TransactionService.Tests.Controllers
 
             var response = await controller.GetPayer(Guid.NewGuid());
             var objectResponse = Assert.IsType<OkObjectResult>(response);
-            
+
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
             Assert.Equal(expectedPayer, objectResponse.Value);
         }
 
         [Fact]
-        public async Task GivenValidPayerPayeeIdAndPayerPayeeServiceReturnsObject_WhenGetPayeeInvoked_ThenReturns200OKWithCorrectPayee()
+        public async Task
+            GivenValidPayerPayeeIdAndPayerPayeeServiceReturnsObject_WhenGetPayeeInvoked_ThenReturns200OKWithCorrectPayee()
         {
             var expectedPayee = new PayerPayee
             {
@@ -118,11 +200,11 @@ namespace TransactionService.Tests.Controllers
 
             var response = await controller.GetPayee(Guid.NewGuid());
             var objectResponse = Assert.IsType<OkObjectResult>(response);
-            
+
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
             Assert.Equal(expectedPayee, objectResponse.Value);
         }
-        
+
         [Fact]
         public async Task
             GivenValidCreatePayerPayeeDto_WhenPostPayerInvoked_ThenPayerPayeeServiceCreatePayerCalledWithCorrectDto()

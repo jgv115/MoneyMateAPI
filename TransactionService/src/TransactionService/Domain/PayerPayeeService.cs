@@ -38,6 +38,16 @@ namespace TransactionService.Domain
             return _repository.GetPayee(_userContext.UserId, payerPayeeId);
         }
 
+        public Task<IEnumerable<PayerPayee>> AutocompletePayer(string payerName)
+        {
+            return _repository.AutocompletePayer(_userContext.UserId, payerName);
+        }
+        
+        public Task<IEnumerable<PayerPayee>> AutocompletePayee(string payeeName)
+        {
+            return _repository.AutocompletePayee(_userContext.UserId, payeeName);
+        }
+
         public Task CreatePayer(CreatePayerPayeeDto newPayerPayee)
         {
             return _repository.CreatePayer(new PayerPayee

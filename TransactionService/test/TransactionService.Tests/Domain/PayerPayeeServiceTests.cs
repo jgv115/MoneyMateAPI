@@ -191,6 +191,100 @@ namespace TransactionService.Tests.Domain
 
         [Fact]
         public async Task
+            GivenValidPayerNameAndUserContext_WhenAutocompletePayerInvoked_ThenRepositoryCalledWithCorectArguments()
+        {
+            var payerName = "test name";
+            var userId = Guid.NewGuid().ToString();
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+
+            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
+            await service.AutocompletePayer(payerName);
+            
+            _mockRepository.Verify(repository => repository.AutocompletePayer(userId, payerName));
+        }
+
+        [Fact]
+        public async Task GivenRepositoryResponse_WhenAutocompletePayerInvoked_ThenCorrectPayerPayeeEnumerableReturned()
+        {
+            var payerName = "test name";
+            var userId = Guid.NewGuid().ToString();
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+
+            var expectedPayers = new List<PayerPayee>
+            {
+                new()
+                {
+                    ExternalId = "externalId1",
+                    UserId = "userId",
+                    PayerPayeeId = "payerpayeeId1",
+                    PayerPayeeName = "name1"
+                },
+                new()
+                {
+                    ExternalId = "externalId2",
+                    UserId = "userId",
+                    PayerPayeeId = "payerpayeeId2",
+                    PayerPayeeName = "name2"
+                }
+            };
+            _mockRepository.Setup(repository => repository.AutocompletePayer(userId, payerName))
+                .ReturnsAsync(() => expectedPayers);
+            
+            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
+            var actualPayers = await service.AutocompletePayer(payerName);
+            
+            Assert.Equal(expectedPayers, actualPayers);
+        }
+        
+        [Fact]
+        public async Task
+            GivenValidPayerNameAndUserContext_WhenAutocompletePayeeInvoked_ThenRepositoryCalledWithCorectArguments()
+        {
+            var payeeName = "test name";
+            var userId = Guid.NewGuid().ToString();
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+
+            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
+            await service.AutocompletePayee(payeeName);
+            
+            _mockRepository.Verify(repository => repository.AutocompletePayee(userId, payeeName));
+        }
+
+        [Fact]
+        public async Task GivenRepositoryResponse_WhenAutocompletePayeeInvoked_ThenCorrectPayerPayeeEnumerableReturned()
+        {
+            var payeeName = "test name";
+            var userId = Guid.NewGuid().ToString();
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+
+            var expectedPayees = new List<PayerPayee>
+            {
+                new()
+                {
+                    ExternalId = "externalId1",
+                    UserId = "userId",
+                    PayerPayeeId = "payerpayeeId1",
+                    PayerPayeeName = "name1"
+                },
+                new()
+                {
+                    ExternalId = "externalId2",
+                    UserId = "userId",
+                    PayerPayeeId = "payerpayeeId2",
+                    PayerPayeeName = "name2"
+                }
+            };
+            _mockRepository.Setup(repository => repository.AutocompletePayee(userId, payeeName))
+                .ReturnsAsync(() => expectedPayees);
+            
+            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
+            var actualPayees = await service.AutocompletePayee(payeeName);
+            
+            Assert.Equal(expectedPayees, actualPayees);
+        }
+
+        [Fact]
+        public async Task
             GivenValidCreatePayerPayeeDto_WhenCreatePayerInvoked_ThenRepositoryCalledWithCorrectPayerPayeeModel()
         {
             const string expectedPayerName = "payer name 123";
