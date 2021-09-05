@@ -152,7 +152,7 @@ namespace TransactionService.Repositories
 
         public Task<IEnumerable<PayerPayee>> AutocompletePayee(string userId, string autocompleteQuery)
         {
-            return AutocompletePayerPayee(userId, "payer", autocompleteQuery);
+            return AutocompletePayerPayee(userId, "payee", autocompleteQuery);
         }
 
         private async Task StorePayerPayee(PayerPayee newPayerPayee, string payerOrPayee)
