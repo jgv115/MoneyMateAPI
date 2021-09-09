@@ -34,7 +34,7 @@ namespace TransactionService.IntegrationTests.Helpers
 
             _dynamoDbClient = new AmazonDynamoDBClient(awsKey, awsSecret, clientConfig);
             _dynamoDbContext = new DynamoDBContext(_dynamoDbClient,
-                new DynamoDBOperationConfig {OverrideTableName = TableName});
+                new DynamoDBOperationConfig { OverrideTableName = TableName });
         }
 
         public async Task<List<T>> ScanTable<T>()
@@ -67,6 +67,11 @@ namespace TransactionService.IntegrationTests.Helpers
                     {
                         AttributeName = "TransactionTimestamp",
                         AttributeType = "S"
+                    },
+                    new()
+                    {
+                        AttributeName = "PayerPayeeName",
+                        AttributeType = "S"
                     }
                 },
                 KeySchema = new List<KeySchemaElement>
@@ -82,16 +87,12 @@ namespace TransactionService.IntegrationTests.Helpers
                         KeyType = "RANGE"
                     }
                 },
-                ProvisionedThroughput = new ProvisionedThroughput
-                {
-                    ReadCapacityUnits = 5,
-                    WriteCapacityUnits = 5
-                },
+                BillingMode = BillingMode.PAY_PER_REQUEST,
                 LocalSecondaryIndexes = new List<LocalSecondaryIndex>
                 {
                     new()
                     {
-                        Projection = new Projection {ProjectionType = ProjectionType.ALL},
+                        Projection = new Projection { ProjectionType = ProjectionType.ALL },
                         IndexName = "TransactionTimestampIndex",
                         KeySchema = new List<KeySchemaElement>
                         {
@@ -103,6 +104,31 @@ namespace TransactionService.IntegrationTests.Helpers
                             new()
                             {
                                 AttributeName = "TransactionTimestamp",
+                                KeyType = KeyType.RANGE
+                            }
+                        }
+                    }
+                },
+                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
+                {
+                    new()
+                    {
+                        Projection = new Projection()
+                        {
+                            ProjectionType = ProjectionType.INCLUDE,
+                            NonKeyAttributes = new List<string> { "ExternalId" }
+                        },
+                        IndexName = "PayerPayeeNameIndex",
+                        KeySchema = new List<KeySchemaElement>
+                        {
+                            new()
+                            {
+                                AttributeName = "UserIdQuery",
+                                KeyType = KeyType.HASH
+                            },
+                            new()
+                            {
+                                AttributeName = "PayerPayeeName",
                                 KeyType = KeyType.RANGE
                             }
                         }

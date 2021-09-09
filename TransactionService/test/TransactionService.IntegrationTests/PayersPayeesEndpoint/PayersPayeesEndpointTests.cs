@@ -161,7 +161,66 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PropertyNameCaseInsensitive = true
             });
 
-            Assert.Equal(new List<PayerPayee> {expectedPayee1, expectedPayee2}, returnedPayees);
+            Assert.Equal(new List<PayerPayee> { expectedPayee1, expectedPayee2 }, returnedPayees);
+        }
+
+        [Fact]
+        public async Task GivenValidRequest_WhenGetAutocompletePayeesEndpointCalled_ThenCorrectPayeesReturned()
+        {
+            var payee1 = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
+                PayerPayeeName = "payee1",
+                ExternalId = Guid.NewGuid().ToString()
+            };
+            var payee2 = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeName = "test2",
+                ExternalId = Guid.NewGuid().ToString()
+            };
+            var expectedPayee2 = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeName = "test2",
+                ExternalId = payee2.ExternalId
+            };
+
+            var initialData = new List<PayerPayee>
+            {
+                new()
+                {
+                    UserId = UserId,
+                    PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfd",
+                    PayerPayeeName = "payer1",
+                    ExternalId = Guid.NewGuid().ToString()
+                },
+                new()
+                {
+                    UserId = UserId,
+                    PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfe",
+                    PayerPayeeName = "payer2",
+                    ExternalId = Guid.NewGuid().ToString()
+                },
+                payee1,
+                payee2
+            };
+
+            await _dynamoDbHelper.WriteIntoTable(initialData);
+
+            var response = await _httpClient.GetAsync($"/api/payerspayees/payees/autocomplete?name=test");
+            response.EnsureSuccessStatusCode();
+
+            var returnedString = await response.Content.ReadAsStringAsync();
+            var returnedPayees = JsonSerializer.Deserialize<List<PayerPayee>>(returnedString, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            Assert.Equal(new List<PayerPayee> { expectedPayee2 }, returnedPayees);
         }
 
         [Fact]
@@ -182,7 +241,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = payer.PayerPayeeName,
                 ExternalId = payer.ExternalId
             };
-            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payer});
+            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> { payer });
 
             var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
             response.EnsureSuccessStatusCode();
@@ -192,10 +251,10 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 PropertyNameCaseInsensitive = true
             });
-            
+
             Assert.Equal(expectedPayer, actualPayer);
         }
-        
+
         [Fact]
         public async Task GivenValidRequest_WhenGetPayeeEndpointCalled_ThenCorrectPayeeReturned()
         {
@@ -214,7 +273,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = payee.PayerPayeeName,
                 ExternalId = payee.ExternalId
             };
-            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payee});
+            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> { payee });
 
             var response = await _httpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
             response.EnsureSuccessStatusCode();
@@ -224,7 +283,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 PropertyNameCaseInsensitive = true
             });
-            
+
             Assert.Equal(expectedPayee, actualPayer);
         }
 
