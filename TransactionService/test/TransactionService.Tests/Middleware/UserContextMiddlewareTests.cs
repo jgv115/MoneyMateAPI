@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TransactionService.Middleware;
-using TransactionService.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Middleware

@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.DataModel;
 
-namespace TransactionService.Models
+namespace TransactionService.Domain.Models
 {
     [DynamoDBTable("MoneyMate_TransactionDB_dev")]
     public record Transaction

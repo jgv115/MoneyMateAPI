@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using TransactionService.Domain.Models;
 using TransactionService.Dtos;
-using TransactionService.Models;
+using TransactionService.Middleware;
 using TransactionService.Repositories;
 
-namespace TransactionService.Domain
+namespace TransactionService.Domain.Services
 {
     public class TransactionHelperService: ITransactionHelperService
     {

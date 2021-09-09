@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TransactionService.Domain;
+using TransactionService.Domain.Services;
 using TransactionService.Dtos;
 
 namespace TransactionService.Controllers
@@ -46,7 +46,7 @@ namespace TransactionService.Controllers
             var payees = await _payerPayeeService.GetPayees();
             return Ok(payees);
         }
-        
+
         [HttpGet("payees/autocomplete")]
         public async Task<IActionResult> GetAutocompletePayee(string name)
         {
@@ -78,15 +78,15 @@ namespace TransactionService.Controllers
         [HttpPost("payers")]
         public async Task<IActionResult> PostPayer(CreatePayerPayeeDto createPayerPayeeDto)
         {
-            await _payerPayeeService.CreatePayer(createPayerPayeeDto);
-            return Ok();
+            var createdPayer = await _payerPayeeService.CreatePayer(createPayerPayeeDto);
+            return Ok(createdPayer);
         }
 
         [HttpPost("payees")]
         public async Task<IActionResult> PostPayee(CreatePayerPayeeDto createPayerPayeeDto)
         {
-            await _payerPayeeService.CreatePayee(createPayerPayeeDto);
-            return Ok();
+            var createdPayee = await _payerPayeeService.CreatePayee(createPayerPayeeDto);
+            return Ok(createdPayee);
         }
     }
 }

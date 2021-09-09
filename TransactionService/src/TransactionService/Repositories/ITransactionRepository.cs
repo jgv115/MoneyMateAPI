@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TransactionService.Models;
+using TransactionService.Domain.Models;
 
 namespace TransactionService.Repositories
 {

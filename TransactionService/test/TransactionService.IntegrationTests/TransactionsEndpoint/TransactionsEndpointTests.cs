@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
-using TransactionService.Models;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.TransactionsEndpoint

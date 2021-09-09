@@ -5,10 +5,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
-using TransactionService.Models;
+using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
@@ -46,10 +47,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = "payer1",
                 ExternalId = Guid.NewGuid().ToString()
             };
-            var expectedPayer1 = new PayerPayee
+            var expectedPayer1 = new PayerPayeeViewModel
             {
-                UserId = UserId,
-                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
+                PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfb"),
                 PayerPayeeName = "payer1",
                 ExternalId = payer1.ExternalId
             };
@@ -60,10 +60,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = "payer2",
                 ExternalId = Guid.NewGuid().ToString()
             };
-            var expectedPayer2 = new PayerPayee
+            var expectedPayer2 = new PayerPayeeViewModel
             {
-                UserId = UserId,
-                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
                 PayerPayeeName = "payer2",
                 ExternalId = payer2.ExternalId
             };
@@ -87,12 +86,13 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
-            var returnedPayers = JsonSerializer.Deserialize<List<PayerPayee>>(returnedString, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var returnedPayers = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
-            Assert.Equal(new List<PayerPayee>
+            Assert.Equal(new List<PayerPayeeViewModel>
             {
                 expectedPayer1, expectedPayer2
             }, returnedPayers);
@@ -108,10 +108,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = "payee1",
                 ExternalId = Guid.NewGuid().ToString()
             };
-            var expectedPayee1 = new PayerPayee
+            var expectedPayee1 = new PayerPayeeViewModel
             {
-                UserId = UserId,
-                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
+                PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfb"),
                 PayerPayeeName = "payee1",
                 ExternalId = payee1.ExternalId
             };
@@ -122,10 +121,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = "payee2",
                 ExternalId = Guid.NewGuid().ToString()
             };
-            var expectedPayee2 = new PayerPayee
+            var expectedPayee2 = new PayerPayeeViewModel
             {
-                UserId = UserId,
-                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
                 PayerPayeeName = "payee2",
                 ExternalId = payee2.ExternalId
             };
@@ -156,12 +154,13 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
-            var returnedPayees = JsonSerializer.Deserialize<List<PayerPayee>>(returnedString, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var returnedPayees = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
-            Assert.Equal(new List<PayerPayee> { expectedPayee1, expectedPayee2 }, returnedPayees);
+            Assert.Equal(new List<PayerPayeeViewModel> { expectedPayee1, expectedPayee2 }, returnedPayees);
         }
 
         [Fact]
@@ -234,10 +233,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = "payer1",
                 ExternalId = Guid.NewGuid().ToString()
             };
-            var expectedPayer = new PayerPayee
+            var expectedPayer = new PayerPayeeViewModel
             {
-                UserId = UserId,
-                PayerPayeeId = payerPayeeId.ToString(),
+                PayerPayeeId = payerPayeeId,
                 PayerPayeeName = payer.PayerPayeeName,
                 ExternalId = payer.ExternalId
             };
@@ -247,7 +245,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
-            var actualPayer = JsonSerializer.Deserialize<PayerPayee>(returnedString, new JsonSerializerOptions
+            var actualPayer = JsonSerializer.Deserialize<PayerPayeeViewModel>(returnedString, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
@@ -266,10 +264,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = "payee1",
                 ExternalId = Guid.NewGuid().ToString()
             };
-            var expectedPayee = new PayerPayee
+            var expectedPayee = new PayerPayeeViewModel
             {
-                UserId = UserId,
-                PayerPayeeId = payerPayeeId.ToString(),
+                PayerPayeeId = payerPayeeId,
                 PayerPayeeName = payee.PayerPayeeName,
                 ExternalId = payee.ExternalId
             };
@@ -279,7 +276,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
-            var actualPayer = JsonSerializer.Deserialize<PayerPayee>(returnedString, new JsonSerializerOptions
+            var actualPayer = JsonSerializer.Deserialize<PayerPayeeViewModel>(returnedString, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });

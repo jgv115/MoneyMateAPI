@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers;
-using TransactionService.Domain;
+using TransactionService.Domain.Models;
+using TransactionService.Domain.Services;
 using TransactionService.Dtos;
-using TransactionService.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers

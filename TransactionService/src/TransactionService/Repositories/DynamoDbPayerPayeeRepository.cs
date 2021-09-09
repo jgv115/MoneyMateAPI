@@ -7,8 +7,8 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using AutoMapper.Internal;
+using TransactionService.Domain.Models;
 using TransactionService.Helpers;
-using TransactionService.Models;
 
 namespace TransactionService.Repositories
 {

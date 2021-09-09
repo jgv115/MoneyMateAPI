@@ -5,10 +5,10 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
-using TransactionService.Models;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.CategoriesEndpoint

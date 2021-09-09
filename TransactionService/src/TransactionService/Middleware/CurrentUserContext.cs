@@ -1,4 +1,4 @@
-namespace TransactionService.Models
+namespace TransactionService.Middleware
 {
     public class CurrentUserContext
     {

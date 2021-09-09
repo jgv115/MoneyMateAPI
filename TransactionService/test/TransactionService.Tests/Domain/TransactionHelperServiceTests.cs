@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Moq;
-using TransactionService.Domain;
+using TransactionService.Domain.Models;
+using TransactionService.Domain.Services;
 using TransactionService.Dtos;
-using TransactionService.Models;
+using TransactionService.Middleware;
 using TransactionService.Repositories;
 using Xunit;
 

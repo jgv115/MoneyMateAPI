@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers;
-using TransactionService.Domain;
+using TransactionService.Domain.Models;
+using TransactionService.Domain.Services;
 using TransactionService.Dtos;
-using TransactionService.Models;
+using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers
@@ -30,19 +31,19 @@ namespace TransactionService.Tests.Controllers
         [Fact]
         public async Task GivenPayerPayeeServiceReturnsObject_WhenGetPayersInvoked_ThenReturns200OKWithCorrectList()
         {
-            var payers = new List<PayerPayee>
+            var payers = new List<PayerPayeeViewModel>
             {
                 new()
                 {
-                    PayerPayeeId = "test123",
-                    UserId = "userId123",
-                    ExternalId = "id123"
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
                 },
                 new()
                 {
-                    PayerPayeeId = "test1234",
-                    UserId = "userId1234",
-                    ExternalId = "id1234"
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
                 }
             };
 
@@ -58,19 +59,19 @@ namespace TransactionService.Tests.Controllers
         [Fact]
         public async Task GivenPayerPayeeServiceReturnsObject_WhenGetPayeesInvoked_ThenReturns200OKWithCorrectList()
         {
-            var payees = new List<PayerPayee>
+            var payees = new List<PayerPayeeViewModel>
             {
                 new()
                 {
-                    PayerPayeeId = "test123",
-                    UserId = "userId123",
-                    ExternalId = "id123"
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
                 },
                 new()
                 {
-                    PayerPayeeId = "test1234",
-                    UserId = "userId1234",
-                    ExternalId = "id1234"
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
                 }
             };
 
@@ -154,7 +155,7 @@ namespace TransactionService.Tests.Controllers
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
             Assert.Equal(payees, objectResponse.Value);
         }
-        
+
         [Fact]
         public async Task GivenWhitespaceInputName_WhenGetAutocompletePayeeInvoked_ThenReturns400BadRequest()
         {
@@ -167,11 +168,10 @@ namespace TransactionService.Tests.Controllers
         public async Task
             GivenValidPayerPayeeIdAndPayerPayeeServiceReturnsObject_WhenGetPayerInvoked_ThenReturns200OKWithCorrectPayer()
         {
-            var expectedPayer = new PayerPayee
+            var expectedPayer = new PayerPayeeViewModel
             {
                 ExternalId = "externalId",
-                UserId = "UserId",
-                PayerPayeeId = "payerId",
+                PayerPayeeId = Guid.NewGuid(),
                 PayerPayeeName = "name"
             };
             _mockService.Setup(service => service.GetPayer(It.IsAny<Guid>())).ReturnsAsync(() => expectedPayer);
@@ -188,11 +188,10 @@ namespace TransactionService.Tests.Controllers
         public async Task
             GivenValidPayerPayeeIdAndPayerPayeeServiceReturnsObject_WhenGetPayeeInvoked_ThenReturns200OKWithCorrectPayee()
         {
-            var expectedPayee = new PayerPayee
+            var expectedPayee = new PayerPayeeViewModel
             {
                 ExternalId = "externalId",
-                UserId = "UserId",
-                PayerPayeeId = "payerId",
+                PayerPayeeId = Guid.NewGuid(),
                 PayerPayeeName = "name"
             };
             _mockService.Setup(service => service.GetPayee(It.IsAny<Guid>())).ReturnsAsync(() => expectedPayee);
@@ -221,18 +220,32 @@ namespace TransactionService.Tests.Controllers
         }
 
         [Fact]
-        public async Task GivenNoErrors_WhenPostPayerInvoked_Then200OKReturned()
+        public async Task GivenNoErrors_WhenPostPayerInvoked_Then200OKReturnedWithCorrectObject()
         {
+            var name = "test name";
+            var externalId = "test external id";
+
+
             var dto = new CreatePayerPayeeDto
             {
-                Name = "test name",
-                ExternalId = "test external id"
+                Name = name,
+                ExternalId = externalId
             };
+
+            var expectedViewModel = new PayerPayeeViewModel
+            {
+                ExternalId = externalId,
+                PayerPayeeName = name,
+                PayerPayeeId = Guid.NewGuid()
+            };
+            _mockService.Setup(service => service.CreatePayer(dto)).ReturnsAsync(() => expectedViewModel);
+
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.PostPayer(dto);
-            var objectResponse = Assert.IsType<OkResult>(response);
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
 
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(expectedViewModel, objectResponse.Value);
         }
 
         [Fact]
@@ -251,18 +264,31 @@ namespace TransactionService.Tests.Controllers
         }
 
         [Fact]
-        public async Task GivenNoErrors_WhenPostPayeeInvoked_Then200OKReturned()
+        public async Task GivenNoErrors_WhenPostPayeeInvoked_Then200OKReturnedWithCorrectObject()
         {
+            var name = "test name";
+            var externalId = "test external id";
+
             var dto = new CreatePayerPayeeDto
             {
-                Name = "test name",
-                ExternalId = "test external id"
+                Name = name,
+                ExternalId = externalId
             };
+
+            var expectedViewModel = new PayerPayeeViewModel
+            {
+                ExternalId = externalId,
+                PayerPayeeName = name,
+                PayerPayeeId = Guid.NewGuid()
+            };
+            _mockService.Setup(service => service.CreatePayee(dto)).ReturnsAsync(() => expectedViewModel);
+
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.PostPayee(dto);
-            var objectResponse = Assert.IsType<OkResult>(response);
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
 
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(expectedViewModel, objectResponse.Value);
         }
     }
 }

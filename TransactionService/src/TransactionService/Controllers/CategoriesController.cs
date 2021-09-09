@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TransactionService.Domain;
+using TransactionService.Domain.Services;
 using TransactionService.Dtos;
 
 namespace TransactionService.Controllers
