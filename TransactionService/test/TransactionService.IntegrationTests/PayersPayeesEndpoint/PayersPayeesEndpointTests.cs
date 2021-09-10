@@ -180,10 +180,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = "test2",
                 ExternalId = Guid.NewGuid().ToString()
             };
-            var expectedPayee2 = new PayerPayee
+            var expectedPayee2 = new PayerPayeeViewModel
             {
-                UserId = UserId,
-                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+                PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
                 PayerPayeeName = "test2",
                 ExternalId = payee2.ExternalId
             };
@@ -214,12 +213,12 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
-            var returnedPayees = JsonSerializer.Deserialize<List<PayerPayee>>(returnedString, new JsonSerializerOptions
+            var returnedPayees = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            Assert.Equal(new List<PayerPayee> { expectedPayee2 }, returnedPayees);
+            Assert.Equal(new List<PayerPayeeViewModel> { expectedPayee2 }, returnedPayees);
         }
 
         [Fact]

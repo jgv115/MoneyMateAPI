@@ -238,7 +238,7 @@ namespace TransactionService.Tests.Domain
 
         [Fact]
         public async Task
-            GivenValidPayerNameAndUserContext_WhenAutocompletePayerInvoked_ThenRepositoryCalledWithCorectArguments()
+            GivenValidPayerNameAndUserContext_WhenAutocompletePayerInvoked_ThenRepositoryCalledWithCorrectArguments()
         {
             var payerName = "test name";
             var userId = Guid.NewGuid().ToString();
@@ -257,35 +257,40 @@ namespace TransactionService.Tests.Domain
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
-            var expectedPayers = new List<PayerPayee>
+            var repositoryPayers = new List<PayerPayee>
             {
                 new()
                 {
                     ExternalId = "externalId1",
                     UserId = "userId",
-                    PayerPayeeId = "payerpayeeId1",
+                    PayerPayeeId = Guid.NewGuid().ToString(),
                     PayerPayeeName = "name1"
                 },
                 new()
                 {
                     ExternalId = "externalId2",
                     UserId = "userId",
-                    PayerPayeeId = "payerpayeeId2",
+                    PayerPayeeId = Guid.NewGuid().ToString(),
                     PayerPayeeName = "name2"
                 }
             };
             _mockRepository.Setup(repository => repository.AutocompletePayer(userId, payerName))
-                .ReturnsAsync(() => expectedPayers);
+                .ReturnsAsync(() => repositoryPayers);
 
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
             var actualPayers = await service.AutocompletePayer(payerName);
-
+            var expectedPayers = repositoryPayers.Select(payer => new PayerPayeeViewModel
+            {
+                ExternalId = payer.ExternalId,
+                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
+                PayerPayeeName = payer.PayerPayeeName
+            });
             Assert.Equal(expectedPayers, actualPayers);
         }
 
         [Fact]
         public async Task
-            GivenValidPayerNameAndUserContext_WhenAutocompletePayeeInvoked_ThenRepositoryCalledWithCorectArguments()
+            GivenValidPayerNameAndUserContext_WhenAutocompletePayeeInvoked_ThenRepositoryCalledWithCorrectArguments()
         {
             var payeeName = "test name";
             var userId = Guid.NewGuid().ToString();
@@ -304,29 +309,34 @@ namespace TransactionService.Tests.Domain
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
-            var expectedPayees = new List<PayerPayee>
+            var repositoryPayees = new List<PayerPayee>
             {
                 new()
                 {
                     ExternalId = "externalId1",
                     UserId = "userId",
-                    PayerPayeeId = "payerpayeeId1",
+                    PayerPayeeId = Guid.NewGuid().ToString(),
                     PayerPayeeName = "name1"
                 },
                 new()
                 {
                     ExternalId = "externalId2",
                     UserId = "userId",
-                    PayerPayeeId = "payerpayeeId2",
+                    PayerPayeeId = Guid.NewGuid().ToString(),
                     PayerPayeeName = "name2"
                 }
             };
             _mockRepository.Setup(repository => repository.AutocompletePayee(userId, payeeName))
-                .ReturnsAsync(() => expectedPayees);
+                .ReturnsAsync(() => repositoryPayees);
 
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
             var actualPayees = await service.AutocompletePayee(payeeName);
-
+            var expectedPayees = repositoryPayees.Select(payee => new PayerPayeeViewModel
+            {
+                ExternalId = payee.ExternalId,
+                PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
+                PayerPayeeName = payee.PayerPayeeName
+            });
             Assert.Equal(expectedPayees, actualPayees);
         }
     }

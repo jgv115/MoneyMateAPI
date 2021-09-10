@@ -65,14 +65,26 @@ namespace TransactionService.Domain.Services
             };
         }
 
-        public Task<IEnumerable<PayerPayee>> AutocompletePayer(string payerName)
+        public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName)
         {
-            return _repository.AutocompletePayer(_userContext.UserId, payerName);
+            var payers = await _repository.AutocompletePayer(_userContext.UserId, payerName);
+            return payers.Select(payer => new PayerPayeeViewModel
+            {
+                ExternalId = payer.ExternalId,
+                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
+                PayerPayeeName = payer.PayerPayeeName
+            });
         }
 
-        public Task<IEnumerable<PayerPayee>> AutocompletePayee(string payeeName)
+        public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayee(string payeeName)
         {
-            return _repository.AutocompletePayee(_userContext.UserId, payeeName);
+            var payees = await _repository.AutocompletePayee(_userContext.UserId, payeeName);
+            return payees.Select(payee => new PayerPayeeViewModel
+            {
+                ExternalId = payee.ExternalId,
+                PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
+                PayerPayeeName = payee.PayerPayeeName
+            });
         }
 
         public async Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee)

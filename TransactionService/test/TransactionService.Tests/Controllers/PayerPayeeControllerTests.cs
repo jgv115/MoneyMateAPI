@@ -97,19 +97,17 @@ namespace TransactionService.Tests.Controllers
             GivenPayerPayeeServiceReturnsPayers_WhenGetAutocompletePayerInvoked_ThenReturns200OKWithCorrectList()
         {
             var inputName = "test";
-            var payers = new List<PayerPayee>
+            var payers = new List<PayerPayeeViewModel>
             {
                 new()
                 {
-                    PayerPayeeId = "test123",
-                    UserId = "userId123",
+                    PayerPayeeId = Guid.NewGuid(),
                     ExternalId = "id123",
                     PayerPayeeName = "test123"
                 },
                 new()
                 {
-                    PayerPayeeId = "test1234",
-                    UserId = "userId1234",
+                    PayerPayeeId = Guid.NewGuid(),
                     ExternalId = "id1234",
                     PayerPayeeName = "test1234"
                 }
@@ -129,19 +127,17 @@ namespace TransactionService.Tests.Controllers
             GivenPayerPayeeServiceReturnsPayees_WhenGetAutocompletePayeeInvoked_ThenReturns200OKWithCorrectList()
         {
             var inputName = "test";
-            var payees = new List<PayerPayee>
+            var payees = new List<PayerPayeeViewModel>
             {
                 new()
                 {
-                    PayerPayeeId = "test123",
-                    UserId = "userId123",
+                    PayerPayeeId = Guid.NewGuid(),
                     ExternalId = "id123",
                     PayerPayeeName = "test123"
                 },
                 new()
                 {
-                    PayerPayeeId = "test1234",
-                    UserId = "userId1234",
+                    PayerPayeeId = Guid.NewGuid(),
                     ExternalId = "id1234",
                     PayerPayeeName = "test1234"
                 }

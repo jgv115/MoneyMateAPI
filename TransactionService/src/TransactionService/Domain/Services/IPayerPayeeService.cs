@@ -13,8 +13,8 @@ namespace TransactionService.Domain.Services
         public Task<IEnumerable<PayerPayeeViewModel>> GetPayees();
         public Task<PayerPayeeViewModel> GetPayer(Guid payerPayeeId);
         public Task<PayerPayeeViewModel> GetPayee(Guid payerPayeeId);
-        public Task<IEnumerable<PayerPayee>> AutocompletePayer(string payerName);
-        public Task<IEnumerable<PayerPayee>> AutocompletePayee(string payerName);
+        public Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName);
+        public Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayee(string payerName);
         public Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee);
         public Task<PayerPayeeViewModel> CreatePayee(CreatePayerPayeeDto newPayerPayee);
     }
