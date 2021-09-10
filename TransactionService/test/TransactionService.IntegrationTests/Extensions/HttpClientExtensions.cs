@@ -30,6 +30,7 @@ namespace TransactionService.IntegrationTests.Extensions
             };
             var responseString = accessTokenClient.SendAsync(request).Result.Content.ReadAsStringAsync().Result;
 
+            Console.WriteLine($">>> responseString {responseString}");
             var deserializedObject = JsonSerializer.Deserialize<Dictionary<string, object>>(responseString);
             var accessToken = deserializedObject["access_token"].ToString();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);

@@ -6,24 +6,23 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
-using TransactionService.IntegrationTests.Extensions;
-using TransactionService.IntegrationTests.Helpers;
+using TransactionService.IntegrationTests.TestFixtures;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.TransactionsEndpoint
 {
     [Collection("IntegrationTests")]
-    public class TransactionsEndpointTests : IClassFixture<WebApplicationFactory<Startup>>, IAsyncLifetime
+    public class TransactionsEndpointTests : MoneyMateApiTestFixture, IAsyncLifetime
     {
-        private readonly HttpClient _httpClient;
-        private readonly DynamoDbHelper _dynamoDbHelper;
+        // private readonly HttpClient HttpClient;
+        // private readonly DynamoDbHelper DynamoDbHelper;
         private const string UserId = "auth0|moneymatetest#Transaction";
 
-        public TransactionsEndpointTests(WebApplicationFactory<Startup> factory)
+        public TransactionsEndpointTests(WebApplicationFactory<Startup> factory) : base(factory)
         {
+            
             // // Uncomment to run integration test class locally
             // factory = factory.WithWebHostBuilder(builder =>
             // {
@@ -40,19 +39,19 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             //     });
             // });
 
-            _httpClient = factory.CreateClient();
-            _httpClient.GetAccessToken();
-            _dynamoDbHelper = new DynamoDbHelper();
+            // HttpClient = factory.CreateClient();
+            // HttpClient.GetAccessToken();
+            // DynamoDbHelper = new DynamoDbHelper();
         }
 
         public async Task InitializeAsync()
         {
-            await _dynamoDbHelper.CreateTable();
+            await DynamoDbHelper.CreateTable();
         }
 
         public async Task DisposeAsync()
         {
-            await _dynamoDbHelper.DeleteTable();
+            await DynamoDbHelper.DeleteTable();
         }
 
         [Fact]
@@ -67,6 +66,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Amount = 123.45M,
                 Category = "Groceries",
                 SubCategory = "Meat",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
             var transaction2 = new Transaction
@@ -77,6 +78,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2",
                 SubCategory = "Meat"
             };
 
@@ -85,9 +88,9 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 transaction1,
                 transaction2
             };
-            await _dynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
-            var response = await _httpClient.GetAsync("/api/transactions");
+            var response = await HttpClient.GetAsync("/api/transactions");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -144,13 +147,13 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 transaction3
             };
 
-            await _dynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
             var query = HttpUtility.ParseQueryString(string.Empty);
             query["start"] = new DateTime(2021, 4, 1).ToString("O");
             var queryString = query.ToString();
 
-            var response = await _httpClient.GetAsync($"/api/transactions?{queryString}");
+            var response = await HttpClient.GetAsync($"/api/transactions?{queryString}");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -222,13 +225,13 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 transaction4
             };
 
-            await _dynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
             var query = HttpUtility.ParseQueryString(string.Empty);
             query["end"] = new DateTime(2021, 3, 3).ToString("O");
             var queryString = query.ToString();
 
-            var response = await _httpClient.GetAsync($"/api/transactions?{queryString}");
+            var response = await HttpClient.GetAsync($"/api/transactions?{queryString}");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -257,6 +260,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const string expectedSubCategory = "Dinner";
             var expectedTransactionTimestamp = new DateTime(2021, 4, 2).ToString("O");
             const string expectedTransactionType = "expense";
+            var expectedPayerPayeeId = Guid.NewGuid().ToString();
+            const string expectedPayerPayeeName = "name1";
             const string expectedNote = "this is a note123";
             var inputDto = new StoreTransactionDto
             {
@@ -265,6 +270,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 SubCategory = expectedSubCategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
                 TransactionType = expectedTransactionType,
+                PayerPayeeId = expectedPayerPayeeId,
+                PayerPayeeName = expectedPayerPayeeName,
                 Note = expectedNote
             };
 
@@ -273,10 +280,10 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             StringContent httpContent =
                 new StringContent(inputDtoString, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"/api/transactions", httpContent);
+            var response = await HttpClient.PostAsync($"/api/transactions", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var returnedTransactions = await _dynamoDbHelper.ScanTable<Transaction>();
+            var returnedTransactions = await DynamoDbHelper.ScanTable<Transaction>();
 
             Assert.Single(returnedTransactions);
             Assert.Equal(expectedAmount, returnedTransactions[0].Amount);
@@ -284,6 +291,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             Assert.Equal(expectedSubCategory, returnedTransactions[0].SubCategory);
             Assert.Equal(expectedTransactionTimestamp, returnedTransactions[0].TransactionTimestamp);
             Assert.Equal(expectedTransactionType, returnedTransactions[0].TransactionType);
+            Assert.Equal(expectedPayerPayeeId, returnedTransactions[0].PayerPayeeId);
+            Assert.Equal(expectedPayerPayeeName, returnedTransactions[0].PayerPayeeName);
             Assert.Equal(expectedNote, returnedTransactions[0].Note);
         }
 
@@ -319,7 +328,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 transaction1,
                 transaction2
             };
-            await _dynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
@@ -340,10 +349,10 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             string inputDtoString = JsonSerializer.Serialize(inputDto);
             StringContent httpContent = new StringContent(inputDtoString, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync($"/api/transactions/{expectedTransactionId}", httpContent);
+            var response = await HttpClient.PutAsync($"/api/transactions/{expectedTransactionId}", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var returnedTransaction = await _dynamoDbHelper.QueryTable(UserId, expectedTransactionId);
+            var returnedTransaction = await DynamoDbHelper.QueryTable(UserId, expectedTransactionId);
             var expectedTransaction = new Transaction
             {
                 UserId = UserId,
@@ -389,11 +398,11 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 transaction1,
                 transaction2
             };
-            await _dynamoDbHelper.WriteTransactionsIntoTable(transactionList);
-            var response = await _httpClient.DeleteAsync($"/api/transactions/{expectedTransactionId}");
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+            var response = await HttpClient.DeleteAsync($"/api/transactions/{expectedTransactionId}");
             response.EnsureSuccessStatusCode();
 
-            var returnedTransaction = await _dynamoDbHelper.QueryTable(UserId, expectedTransactionId);
+            var returnedTransaction = await DynamoDbHelper.QueryTable(UserId, expectedTransactionId);
             Assert.Null(returnedTransaction);
         }
     }

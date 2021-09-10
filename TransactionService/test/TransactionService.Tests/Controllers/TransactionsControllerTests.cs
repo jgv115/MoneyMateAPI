@@ -43,6 +43,8 @@ namespace TransactionService.Tests.Controllers
                 SubCategory = "subcategory-1",
                 TransactionId = "transaction-id-1",
                 TransactionType = "expense",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
                 UserId = "userid-1"
             };
 
@@ -54,6 +56,8 @@ namespace TransactionService.Tests.Controllers
                 SubCategory = "subcategory-2",
                 TransactionId = "transaction-id-2",
                 TransactionType = "expense",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2",
                 UserId = "userid-2"
             };
 

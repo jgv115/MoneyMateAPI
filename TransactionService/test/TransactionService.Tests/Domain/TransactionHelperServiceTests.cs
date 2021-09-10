@@ -76,6 +76,8 @@ namespace TransactionService.Tests.Domain
                 TransactionId = "transaction-id-1",
                 TransactionType = "expense",
                 UserId = "userid-1",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
 
@@ -88,6 +90,8 @@ namespace TransactionService.Tests.Domain
                 TransactionId = "transaction-id-2",
                 TransactionType = "expense",
                 UserId = "userid-2",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
             var expectedTransactionList = new List<Transaction>
@@ -124,6 +128,8 @@ namespace TransactionService.Tests.Domain
                 Category = "category-1",
                 SubCategory = "subcategory-1",
                 TransactionType = "transaction-type-1",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
 
@@ -135,6 +141,8 @@ namespace TransactionService.Tests.Domain
                     Category = inputDto.Category,
                     SubCategory = inputDto.SubCategory,
                     TransactionType = inputDto.TransactionType,
+                    PayerPayeeId = inputDto.PayerPayeeId,
+                    PayerPayeeName = inputDto.PayerPayeeName,
                     Note = inputDto.Note
                 });
 
@@ -153,6 +161,8 @@ namespace TransactionService.Tests.Domain
                     transaction.Category == inputDto.Category &&
                     transaction.SubCategory == inputDto.SubCategory &&
                     transaction.TransactionType == inputDto.TransactionType &&
+                    transaction.PayerPayeeId == inputDto.PayerPayeeId &&
+                    transaction.PayerPayeeName == inputDto.PayerPayeeName &&
                     transaction.Note == inputDto.Note))
             );
         }
