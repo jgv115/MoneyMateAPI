@@ -124,7 +124,7 @@ namespace TransactionService.Tests.Controllers
         }
 
         [Fact]
-        public async Task GivenSuccesfulTransactionHelperServiceCall_WhenDeleteIsInvoked_Then204NoContentIsReturned()
+        public async Task GivenSuccessfulTransactionHelperServiceCall_WhenDeleteIsInvoked_Then204NoContentIsReturned()
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
             var response = await controller.Delete("test1234");

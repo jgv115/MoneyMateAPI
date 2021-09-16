@@ -335,6 +335,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const string expectedSubCategory = "Dinner";
             var expectedTransactionTimestamp = new DateTime(2021, 4, 2).ToString("O");
             const string expectedTransactionType = "expense";
+            const string expectedPayerPayeeId = "id123";
+            const string expectedPayerPayeeName = "name123";
             const string expectedNote = "This is a new note";
             var inputDto = new PutTransactionDto
             {
@@ -343,6 +345,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 SubCategory = expectedSubCategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
                 TransactionType = expectedTransactionType,
+                PayerPayeeId = expectedPayerPayeeId,
+                PayerPayeeName = expectedPayerPayeeName,
                 Note = expectedNote
             };
 
@@ -362,6 +366,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 SubCategory = expectedSubCategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
                 TransactionType = expectedTransactionType,
+                PayerPayeeId = expectedPayerPayeeId,
+                PayerPayeeName = expectedPayerPayeeName,
                 Note = expectedNote
             };
             Assert.Equal(expectedTransaction, returnedTransaction);

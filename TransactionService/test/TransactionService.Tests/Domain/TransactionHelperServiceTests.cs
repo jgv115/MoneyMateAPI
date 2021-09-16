@@ -185,6 +185,8 @@ namespace TransactionService.Tests.Domain
                 Category = "category-1",
                 SubCategory = "subcategory-1",
                 TransactionType = "type",
+                PayerPayeeId = "id123",
+                PayerPayeeName = "name123",
                 Note = "this is a note123"
             };
 
@@ -196,6 +198,8 @@ namespace TransactionService.Tests.Domain
                     Category = "category-1",
                     SubCategory = "subcategory-1",
                     TransactionType = "type",
+                    PayerPayeeId = "id123",
+                    PayerPayeeName = "name123",
                     Note = "this is a note123"
                 }
             );
