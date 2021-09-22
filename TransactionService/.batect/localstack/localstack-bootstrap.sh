@@ -72,6 +72,24 @@ aws --endpoint-url=http://localhost:4566 \
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
+  
+aws --endpoint-url=http://localhost:4566 \
+	--region ap-southeast-2 \
+  dynamodb put-item \
+  --table-name MoneyMate_TransactionDB_dev \
+  --item \
+  "{
+      \"UserIdQuery\": {\"S\": \"auth0|jgv115#Transaction\"},
+      \"Subquery\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915c\"},
+      \"TransactionTimestamp\": {\"S\": \"2021-03-15T10:39:41.3123420Z\"},
+      \"TransactionType\": {\"S\": \"income\"},
+      \"Amount\": {\"N\": \"123.45\"},
+      \"Category\": {\"S\": \"Salary\"},
+      \"SubCategory\": {\"S\": \"Bank Interest\"},
+      \"Note\": {\"S\": \"Westpac interest!\"}
+  }" \
+  --return-consumed-capacity TOTAL \
+  --return-item-collection-metrics SIZE
 
 aws --endpoint-url=http://localhost:4566 \
 	--region ap-southeast-2 \

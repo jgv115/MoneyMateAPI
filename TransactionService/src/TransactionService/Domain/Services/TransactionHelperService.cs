@@ -9,22 +9,26 @@ using TransactionService.Repositories;
 
 namespace TransactionService.Domain.Services
 {
-    public class TransactionHelperService: ITransactionHelperService
+    public class TransactionHelperService : ITransactionHelperService
     {
         private readonly CurrentUserContext _userContext;
         private readonly ITransactionRepository _repository;
         private readonly IMapper _mapper;
-        
-        public TransactionHelperService(CurrentUserContext userContext, ITransactionRepository repository, IMapper mapper)
+
+        public TransactionHelperService(CurrentUserContext userContext, ITransactionRepository repository,
+            IMapper mapper)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
-        
-        public Task<List<Transaction>> GetAllTransactionsAsync(DateTime start, DateTime end)
+
+        public Task<List<Transaction>> GetAllTransactionsAsync(DateTime start, DateTime end, string type = null)
         {
-            return _repository.GetAllTransactionsAsync(_userContext.UserId, start, end);
+            if (type == null)
+                return _repository.GetAllTransactionsAsync(_userContext.UserId, start, end);
+            else
+                return _repository.GetAllTransactionsAsync(_userContext.UserId, start, end, type);
         }
 
         public Task StoreTransaction(StoreTransactionDto transactionDto)

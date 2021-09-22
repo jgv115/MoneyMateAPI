@@ -23,13 +23,15 @@ namespace TransactionService.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(
             [FromQuery] DateTime? start = null,
-            [FromQuery] DateTime? end = null
+            [FromQuery] DateTime? end = null,
+            [FromQuery] string type = null
         )
         {
             var result = await _transactionHelperService
                 .GetAllTransactionsAsync(
                     start.GetValueOrDefault(DateTime.MinValue),
-                    end.GetValueOrDefault(DateTime.MaxValue));
+                    end.GetValueOrDefault(DateTime.MaxValue),
+                    type);
             return Ok(result);
         }
 

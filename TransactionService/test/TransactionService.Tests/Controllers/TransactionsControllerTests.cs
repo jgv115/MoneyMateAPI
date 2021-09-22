@@ -37,7 +37,7 @@ namespace TransactionService.Tests.Controllers
         {
             var transaction1 = new Transaction
             {
-                Amount = (decimal) 1.0,
+                Amount = (decimal)1.0,
                 Category = "category-1",
                 TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-1",
@@ -50,7 +50,7 @@ namespace TransactionService.Tests.Controllers
 
             var transaction2 = new Transaction
             {
-                Amount = (decimal) 2.0,
+                Amount = (decimal)2.0,
                 Category = "category-2",
                 TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-2",
@@ -66,12 +66,16 @@ namespace TransactionService.Tests.Controllers
                 transaction1, transaction2
             };
 
+            var startDate = DateTime.MinValue;
+            var endDate = DateTime.MaxValue;
+            var type = "expense";
+
             _mockTransactionHelperService.Setup(service =>
-                    service.GetAllTransactionsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                    service.GetAllTransactionsAsync(startDate, endDate, type))
                 .ReturnsAsync(expectedTransactionList);
 
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
-            var response = await controller.Get(DateTime.MinValue, DateTime.MaxValue);
+            var response = await controller.Get(startDate, endDate, type);
 
             var objectResult = Assert.IsType<OkObjectResult>(response);
 
@@ -82,13 +86,13 @@ namespace TransactionService.Tests.Controllers
 
         [Fact]
         public async Task
-            GivenNullStartAndEndParameters_WhenGetIsInvoked_ThenGetAllTransactionsAsyncCalledWithCorrectDates()
+            GivenNullQueryParameters_WhenGetIsInvoked_ThenGetAllTransactionsAsyncCalledWithCorrectArguments()
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
             await controller.Get();
 
             _mockTransactionHelperService.Verify(service =>
-                service.GetAllTransactionsAsync(DateTime.MinValue, DateTime.MaxValue));
+                service.GetAllTransactionsAsync(DateTime.MinValue, DateTime.MaxValue, null));
         }
 
         [Fact]
@@ -119,7 +123,7 @@ namespace TransactionService.Tests.Controllers
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
 
             await controller.Delete(expectedTransactionId);
-            
+
             _mockTransactionHelperService.Verify(service => service.DeleteTransaction(expectedTransactionId));
         }
 

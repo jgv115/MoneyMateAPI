@@ -69,7 +69,7 @@ namespace TransactionService.Tests.Domain
         {
             var transaction1 = new Transaction
             {
-                Amount = (decimal) 1.0,
+                Amount = (decimal)1.0,
                 Category = "category-1",
                 TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-1",
@@ -83,7 +83,7 @@ namespace TransactionService.Tests.Domain
 
             var transaction2 = new Transaction
             {
-                Amount = (decimal) 2.0,
+                Amount = (decimal)2.0,
                 Category = "category-2",
                 TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-2",
@@ -113,6 +113,57 @@ namespace TransactionService.Tests.Domain
         }
 
         [Fact]
+        public async Task GivenNonNullTransactionType_WhenGetAllTransactionsAsyncInvoked_ThenReturnsListOfTransactions()
+        {
+            const string expectedTransactionType = "expense";
+            var transaction1 = new Transaction
+            {
+                Amount = (decimal)1.0,
+                Category = "category-1",
+                TransactionTimestamp = DateTime.Now.ToString("O"),
+                SubCategory = "subcategory-1",
+                TransactionId = "transaction-id-1",
+                TransactionType = "expense",
+                UserId = "userid-1",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
+                Note = "this is a note123"
+            };
+
+            var transaction2 = new Transaction
+            {
+                Amount = (decimal)2.0,
+                Category = "category-2",
+                TransactionTimestamp = DateTime.Now.ToString("O"),
+                SubCategory = "subcategory-2",
+                TransactionId = "transaction-id-2",
+                TransactionType = "expense",
+                UserId = "userid-2",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
+                Note = "this is a note123"
+            };
+            var expectedTransactionList = new List<Transaction>
+            {
+                transaction1, transaction2
+            };
+
+            _mockTransactionRepository.Setup(repository =>
+                    repository.GetAllTransactionsAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(),
+                        expectedTransactionType))
+                .ReturnsAsync(expectedTransactionList);
+
+            var service = new TransactionHelperService(_mockCurrentUserContext.Object,
+                _mockTransactionRepository.Object, _mockMapper.Object);
+            var response =
+                await service.GetAllTransactionsAsync(DateTime.MinValue, DateTime.MaxValue, expectedTransactionType);
+
+            Assert.Equal(2, response.Count);
+            Assert.Equal(transaction1, response[0]);
+            Assert.Equal(transaction2, response[1]);
+        }
+
+        [Fact]
         public async Task
             GivenValidStoreTransactionDto_WhenStoreTransactionInvoked_ThenCorrectTransactionShouldBeStored()
         {
@@ -123,7 +174,7 @@ namespace TransactionService.Tests.Domain
 
             var inputDto = new StoreTransactionDto
             {
-                Amount = (decimal) 1.0,
+                Amount = (decimal)1.0,
                 TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                 Category = "category-1",
                 SubCategory = "subcategory-1",
@@ -180,7 +231,7 @@ namespace TransactionService.Tests.Domain
             {
                 UserId = expectedUserId,
                 TransactionId = expectedTransactionId,
-                Amount = (decimal) 1.0,
+                Amount = (decimal)1.0,
                 TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                 Category = "category-1",
                 SubCategory = "subcategory-1",
@@ -193,7 +244,7 @@ namespace TransactionService.Tests.Domain
             _mockMapper.Setup(mapper => mapper.Map<Transaction>(It.IsAny<PutTransactionDto>())).Returns(
                 new Transaction
                 {
-                    Amount = (decimal) 1.0,
+                    Amount = (decimal)1.0,
                     TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                     Category = "category-1",
                     SubCategory = "subcategory-1",

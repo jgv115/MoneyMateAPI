@@ -38,6 +38,25 @@ namespace TransactionService.Repositories
             }).GetRemainingAsync();
         }
 
+        public async Task<List<Transaction>> GetAllTransactionsAsync(string userId, DateTime start,
+            DateTime end, string transactionType)
+        {
+            return await _dbContext.QueryAsync<Transaction>($"{userId}{HashKeySuffix}", QueryOperator.Between, new[]
+            {
+                $"{start:O}", $"{end:O}"
+            }, new DynamoDBOperationConfig
+            {
+                OverrideTableName = _tableName,
+                IndexName = "TransactionTimestampIndex",
+                QueryFilter = new List<ScanCondition>
+                {
+                    {
+                        new("TransactionType", ScanOperator.BeginsWith, transactionType)
+                    }
+                }
+            }).GetRemainingAsync();
+        }
+
         public async Task StoreTransaction(Transaction newTransaction)
         {
             newTransaction.UserId += HashKeySuffix;

@@ -75,12 +75,12 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
                 TransactionTimestamp = DateTime.Now.ToString("o"),
-                TransactionType = "expense",
+                TransactionType = "income",
                 Amount = 123.45M,
-                Category = "Groceries",
+                Category = "Income",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
-                SubCategory = "Meat"
+                SubCategory = "Salary"
             };
 
             var transactionList = new List<Transaction>
@@ -249,6 +249,60 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 transaction1, transaction2, transaction3
             };
             Assert.Equal(expectedTransactionList, returnedTransactionList);
+        }
+        
+        [Fact]
+        public async Task GivenTypeInputParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfTypeAreReturned()
+        {
+            var transactionType = "expense";
+            var transaction1 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = transactionType,
+                Amount = 123.45M,
+                Category = "Groceries",
+                SubCategory = "Meat",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
+                Note = "this is a note123"
+            };
+            var transaction2 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "income",
+                Amount = 123.45M,
+                Category = "Income",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2",
+                SubCategory = "Salary"
+            };
+
+            var transactionList = new List<Transaction>
+            {
+                transaction1,
+                transaction2
+            };
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+            
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["type"] = transactionType;
+            var queryString = query.ToString();
+
+            var response = await HttpClient.GetAsync($"/api/transactions?{queryString}");
+            response.EnsureSuccessStatusCode();
+
+            var returnedString = await response.Content.ReadAsStringAsync();
+            var returnedTransactionList = JsonSerializer.Deserialize<List<Transaction>>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            Assert.Equal(new List<Transaction>{transaction1}, returnedTransactionList);
         }
 
         [Fact]
