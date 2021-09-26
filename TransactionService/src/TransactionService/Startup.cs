@@ -14,6 +14,7 @@ using TransactionService.Domain.Services;
 using TransactionService.Middleware;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
+using TransactionService.Services;
 
 namespace TransactionService
 {
@@ -47,6 +48,7 @@ namespace TransactionService
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
             services.AddScoped<ICategoriesService, CategoriesService>();
             services.AddScoped<IPayerPayeeService, PayerPayeeService>();
+            services.AddScoped<IAnalyticsService, AnalyticsService>();
 
             services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile));
 

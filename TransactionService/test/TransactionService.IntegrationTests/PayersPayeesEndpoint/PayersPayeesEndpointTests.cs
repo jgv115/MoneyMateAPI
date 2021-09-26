@@ -9,32 +9,29 @@ using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
+using TransactionService.IntegrationTests.TestFixtures;
 using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
 {
     [Collection("IntegrationTests")]
-    public class PayersPayeesEndpointTests : IClassFixture<WebApplicationFactory<Startup>>, IAsyncLifetime
+    public class PayersPayeesEndpointTests : MoneyMateApiTestFixture, IAsyncLifetime
     {
-        private readonly HttpClient _httpClient;
-        private readonly DynamoDbHelper _dynamoDbHelper = new();
         private const string UserId = "auth0|moneymatetest#PayersPayees";
 
-        public PayersPayeesEndpointTests(WebApplicationFactory<Startup> factory)
+        public PayersPayeesEndpointTests(WebApplicationFactory<Startup> factory) : base(factory)
         {
-            _httpClient = factory.CreateClient();
-            _httpClient.GetAccessToken();
         }
 
         public async Task InitializeAsync()
         {
-            await _dynamoDbHelper.CreateTable();
+            await DynamoDbHelper.CreateTable();
         }
 
         public async Task DisposeAsync()
         {
-            await _dynamoDbHelper.DeleteTable();
+            await DynamoDbHelper.DeleteTable();
         }
 
         [Fact]
@@ -80,9 +77,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 }
             };
 
-            await _dynamoDbHelper.WriteIntoTable(initialData);
+            await DynamoDbHelper.WriteIntoTable(initialData);
 
-            var response = await _httpClient.GetAsync($"api/payerspayees/payers");
+            var response = await HttpClient.GetAsync($"api/payerspayees/payers");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -148,9 +145,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 payee2
             };
 
-            await _dynamoDbHelper.WriteIntoTable(initialData);
+            await DynamoDbHelper.WriteIntoTable(initialData);
 
-            var response = await _httpClient.GetAsync($"api/payerspayees/payees");
+            var response = await HttpClient.GetAsync($"api/payerspayees/payees");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -207,9 +204,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 payee2
             };
 
-            await _dynamoDbHelper.WriteIntoTable(initialData);
+            await DynamoDbHelper.WriteIntoTable(initialData);
 
-            var response = await _httpClient.GetAsync($"/api/payerspayees/payees/autocomplete?name=test");
+            var response = await HttpClient.GetAsync($"/api/payerspayees/payees/autocomplete?name=test");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -238,9 +235,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = payer.PayerPayeeName,
                 ExternalId = payer.ExternalId
             };
-            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> { payer });
+            await DynamoDbHelper.WriteIntoTable(new List<PayerPayee> { payer });
 
-            var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
+            var response = await HttpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -269,9 +266,9 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = payee.PayerPayeeName,
                 ExternalId = payee.ExternalId
             };
-            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> { payee });
+            await DynamoDbHelper.WriteIntoTable(new List<PayerPayee> { payee });
 
-            var response = await _httpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
+            var response = await HttpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -296,10 +293,10 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             var httpContent =
                 new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
+            var response = await HttpClient.PostAsync("api/payerspayees/payers", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
+            var scanOutput = await DynamoDbHelper.ScanTable<PayerPayee>();
 
             Assert.Collection(scanOutput,
                 payerPayee =>
@@ -324,10 +321,10 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             var httpContent =
                 new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
+            var response = await HttpClient.PostAsync("api/payerspayees/payers", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
+            var scanOutput = await DynamoDbHelper.ScanTable<PayerPayee>();
 
             Assert.Collection(scanOutput,
                 payerPayee =>
@@ -354,10 +351,10 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             var httpContent =
                 new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/payerspayees/payees", httpContent);
+            var response = await HttpClient.PostAsync("api/payerspayees/payees", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
+            var scanOutput = await DynamoDbHelper.ScanTable<PayerPayee>();
 
             Assert.Collection(scanOutput,
                 payerPayee =>

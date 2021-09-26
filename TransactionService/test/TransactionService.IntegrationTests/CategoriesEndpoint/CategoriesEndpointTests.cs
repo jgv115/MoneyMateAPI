@@ -7,34 +7,28 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
-using TransactionService.IntegrationTests.Extensions;
-using TransactionService.IntegrationTests.Helpers;
+using TransactionService.IntegrationTests.TestFixtures;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.CategoriesEndpoint
 {
     [Collection("IntegrationTests")]
-    public class CategoriesEndpointTests : IClassFixture<WebApplicationFactory<Startup>>, IAsyncLifetime
+    public class CategoriesEndpointTests : MoneyMateApiTestFixture, IAsyncLifetime
     {
-        private readonly HttpClient _httpClient;
-        private readonly DynamoDbHelper _dynamoDbHelper;
         private const string UserId = "auth0|moneymatetest#Categories";
 
-        public CategoriesEndpointTests(WebApplicationFactory<Startup> factory)
+        public CategoriesEndpointTests(WebApplicationFactory<Startup> factory) : base(factory)
         {
-            _httpClient = factory.CreateClient();
-            _httpClient.GetAccessToken();
-            _dynamoDbHelper = new DynamoDbHelper();
         }
 
         public async Task InitializeAsync()
         {
-            await _dynamoDbHelper.CreateTable();
+            await DynamoDbHelper.CreateTable();
         }
 
         public async Task DisposeAsync()
         {
-            await _dynamoDbHelper.DeleteTable();
+            await DynamoDbHelper.DeleteTable();
         }
 
         public static IEnumerable<object[]> CategoriesEndpointTestData =>
@@ -109,9 +103,9 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
                 }
             };
 
-            await _dynamoDbHelper.WriteIntoTable(initialData);
+            await DynamoDbHelper.WriteIntoTable(initialData);
 
-            var response = await _httpClient.GetAsync($"/api/categories{queryString}");
+            var response = await HttpClient.GetAsync($"/api/categories{queryString}");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -135,14 +129,14 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
             var expectedCategories = new List<string> {"category1", "category2", "category3"};
             var expectedSubCategories = new List<string> {"test1", "test2", "test4"};
 
-            await _dynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
+            await DynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
             {
                 UserId = UserId,
                 CategoryName = category,
                 SubCategories = expectedSubCategories
             }));
 
-            var response = await _httpClient.GetAsync("/api/categories/category1");
+            var response = await HttpClient.GetAsync("/api/categories/category1");
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
@@ -167,11 +161,11 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
             };
 
             var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/api/categories", httpContent);
+            var response = await HttpClient.PostAsync("/api/categories", httpContent);
 
             response.EnsureSuccessStatusCode();
 
-            var returnedCategories = await _dynamoDbHelper.ScanTable<Category>();
+            var returnedCategories = await DynamoDbHelper.ScanTable<Category>();
 
             Assert.Single(returnedCategories);
             Assert.Equal(expectedCategoryName, returnedCategories[0].CategoryName);
