@@ -5,30 +5,35 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
-using TransactionService.IntegrationTests.TestFixtures;
+using TransactionService.IntegrationTests.Helpers;
+using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.TransactionsEndpoint
 {
     [Collection("IntegrationTests")]
-    public class TransactionsEndpointTests : MoneyMateApiTestFixture, IAsyncLifetime
+    public class TransactionsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
     {
-        // private readonly HttpClient HttpClient;
-        // private readonly DynamoDbHelper DynamoDbHelper;
+        private readonly HttpClient HttpClient;
+        private readonly DynamoDbHelper DynamoDbHelper;
         private const string UserId = "auth0|moneymatetest#Transaction";
 
-        public TransactionsEndpointTests(WebApplicationFactory<Startup> factory) : base(factory)
+        public TransactionsEndpointTests(MoneyMateApiWebApplicationFactory factory)
         {
-            
             // // Uncomment to run integration test class locally
-            // factory = factory.WithWebHostBuilder(builder =>
+            // var test = factory.WithWebHostBuilder(builder =>
             // {
             //     builder.ConfigureAppConfiguration((context, configurationBuilder) =>
             //     {
             //         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "dev");
+            //         Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", "fake");
+            //         Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "fake");
+            //         Environment.SetEnvironmentVariable("AWS_REGION", "ap-southeast-2");
+            //         Environment.SetEnvironmentVariable("AWS_SERVICE_URL", "http://localhost:4566");
+
             //         configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
             //         {
             //             {"Auth0:Authority", "https://moneymate-dev.au.auth0.com/"},
@@ -39,9 +44,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             //     });
             // });
 
-            // HttpClient = factory.CreateClient();
-            // HttpClient.GetAccessToken();
-            // DynamoDbHelper = new DynamoDbHelper();
+            HttpClient = factory.CreateDefaultClient();
+            DynamoDbHelper = new DynamoDbHelper();
         }
 
         public async Task InitializeAsync()
@@ -250,7 +254,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             };
             Assert.Equal(expectedTransactionList, returnedTransactionList);
         }
-        
+
         [Fact]
         public async Task GivenTypeInputParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfTypeAreReturned()
         {
@@ -287,7 +291,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 transaction2
             };
             await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
-            
+
             var query = HttpUtility.ParseQueryString(string.Empty);
             query["type"] = transactionType;
             var queryString = query.ToString();
@@ -302,7 +306,32 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(new List<Transaction>{transaction1}, returnedTransactionList);
+            Assert.Equal(new List<Transaction> { transaction1 }, returnedTransactionList);
+        }
+
+        [Fact]
+        public async Task GivenInvalidRequest_WhenPostTransactionsIsCalled_ThenValidationErrorShouldBeReturned()
+        {
+            var inputDto = new StoreTransactionDto
+            {
+                Category = "Food",
+                SubCategory = "Dinner",
+                TransactionTimestamp = "2017-06-21T14:57:17",
+                TransactionType = "expense",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
+                Note = "note123"
+            };
+
+            string inputDtoString = JsonSerializer.Serialize(inputDto);
+
+            StringContent httpContent =
+                new StringContent(inputDtoString, Encoding.UTF8, "application/json");
+
+            var response = await HttpClient.PostAsync($"/api/transactions", httpContent);
+
+            var stringResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(stringResponse);
         }
 
         [Fact]
@@ -312,7 +341,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
             const string expectedSubCategory = "Dinner";
-            var expectedTransactionTimestamp = new DateTime(2021, 4, 2).ToString("O");
+            var expectedTransactionTimestamp = new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ssK");
             const string expectedTransactionType = "expense";
             var expectedPayerPayeeId = Guid.NewGuid().ToString();
             const string expectedPayerPayeeName = "name1";

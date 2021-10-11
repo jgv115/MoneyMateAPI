@@ -1,8 +1,8 @@
 ﻿using System;
-using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -83,7 +83,7 @@ namespace TransactionService
             services.AddSingleton<ICategoriesRepository, DynamoDbCategoriesRepository>();
             services.AddSingleton<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
 
-            services.AddControllers();
+            services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline

@@ -48,7 +48,7 @@ namespace TransactionService.Tests.Domain
         }
 
         [Fact]
-        public void
+        public async Task
             GivenValidUserContext_WhenGetAllCategoryNamesInvoked_ThenRepositoryGetAllCategoriesCalledWithCorrectArguments()
         {
             const string expectedUserId = "userId-123";
@@ -57,7 +57,7 @@ namespace TransactionService.Tests.Domain
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockMapper.Object);
 
-            service.GetAllCategoryNames();
+            await service.GetAllCategoryNames();
 
             _mockRepository.Verify(repository => repository.GetAllCategories(expectedUserId));
         }

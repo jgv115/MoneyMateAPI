@@ -19,8 +19,8 @@ namespace TransactionService.IntegrationTests.Helpers
 
         public DynamoDbHelper()
         {
-            var awsKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID") ?? "fake";
-            var awsSecret = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") ?? "fake";
+            var awsKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID") ?? "test";
+            var awsSecret = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") ?? "test";
             var awsRegion = Environment.GetEnvironmentVariable("AWS_REGION") ?? "ap-southeast-2";
             var awsUrl = Environment.GetEnvironmentVariable("AWS_SERVICE_URL") ?? "http://localhost:4566";
 
