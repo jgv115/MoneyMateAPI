@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.Extensions.Configuration;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Helpers;
@@ -416,7 +415,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
             const string expectedSubCategory = "Dinner";
-            var expectedTransactionTimestamp = new DateTime(2021, 4, 2).ToString("O");
+            var expectedTransactionTimestamp = new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ssK");
             const string expectedTransactionType = "expense";
             const string expectedPayerPayeeId = "id123";
             const string expectedPayerPayeeName = "name123";

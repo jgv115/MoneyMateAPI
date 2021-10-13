@@ -4,24 +4,26 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Testing;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
-using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
-using TransactionService.IntegrationTests.TestFixtures;
+using TransactionService.IntegrationTests.WebApplicationFactories;
 using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
 {
     [Collection("IntegrationTests")]
-    public class PayersPayeesEndpointTests : MoneyMateApiTestFixture, IAsyncLifetime
+    public class PayersPayeesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
     {
+        private readonly HttpClient HttpClient;
+        private readonly DynamoDbHelper DynamoDbHelper;
         private const string UserId = "auth0|moneymatetest#PayersPayees";
 
-        public PayersPayeesEndpointTests(WebApplicationFactory<Startup> factory) : base(factory)
+        public PayersPayeesEndpointTests(MoneyMateApiWebApplicationFactory factory)
         {
+            HttpClient = factory.CreateDefaultClient();
+            DynamoDbHelper = new DynamoDbHelper();
         }
 
         public async Task InitializeAsync()

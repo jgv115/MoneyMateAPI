@@ -4,21 +4,25 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Testing;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
-using TransactionService.IntegrationTests.TestFixtures;
+using TransactionService.IntegrationTests.Helpers;
+using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.CategoriesEndpoint
 {
     [Collection("IntegrationTests")]
-    public class CategoriesEndpointTests : MoneyMateApiTestFixture, IAsyncLifetime
+    public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
     {
+        private readonly HttpClient HttpClient;
+        private readonly DynamoDbHelper DynamoDbHelper;
         private const string UserId = "auth0|moneymatetest#Categories";
 
-        public CategoriesEndpointTests(WebApplicationFactory<Startup> factory) : base(factory)
+        public CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory)
         {
+            HttpClient = factory.CreateDefaultClient();
+            DynamoDbHelper = new DynamoDbHelper();
         }
 
         public async Task InitializeAsync()
@@ -126,8 +130,8 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
         [Fact]
         public async Task GivenValidRequest_WhenGetSubCategoriesIsCalled_ThenAllSubCategoriesAreReturned()
         {
-            var expectedCategories = new List<string> {"category1", "category2", "category3"};
-            var expectedSubCategories = new List<string> {"test1", "test2", "test4"};
+            var expectedCategories = new List<string> { "category1", "category2", "category3" };
+            var expectedSubCategories = new List<string> { "test1", "test2", "test4" };
 
             await DynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
             {
@@ -151,7 +155,7 @@ namespace TransactionService.IntegrationTests.CategoriesEndpoint
             const string inputCategoryName = "category123";
             const string inputCategoryType = "expense";
             var expectedCategoryName = $"{inputCategoryType}Category#{inputCategoryName}";
-            var expectedSubcategories = new List<string> {"test1", "test2"};
+            var expectedSubcategories = new List<string> { "test1", "test2" };
 
             var inputDto = new CreateCategoryDto
             {

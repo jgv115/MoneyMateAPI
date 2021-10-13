@@ -1,26 +1,30 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.AspNetCore.Mvc.Testing;
 using TransactionService.Domain.Models;
-using TransactionService.IntegrationTests.TestFixtures;
+using TransactionService.IntegrationTests.Helpers;
+using TransactionService.IntegrationTests.WebApplicationFactories;
 using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.AnalyticsEndpoint
 {
     [Collection("IntegrationTests")]
-    public class AnalyticsEndpointTests: MoneyMateApiTestFixture, IAsyncLifetime
+    public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
     {
+        private readonly HttpClient HttpClient;
+        private readonly DynamoDbHelper DynamoDbHelper;
         private const string UserId = "auth0|moneymatetest#Transaction";
 
-        public AnalyticsEndpointTests(WebApplicationFactory<Startup> factory): base(factory)
+        public AnalyticsEndpointTests(MoneyMateApiWebApplicationFactory factory)
         {
-            
+            HttpClient = factory.CreateDefaultClient();
+            DynamoDbHelper = new DynamoDbHelper();
         }
-        
+
         public async Task InitializeAsync()
         {
             await DynamoDbHelper.CreateTable();
@@ -54,15 +58,15 @@ namespace TransactionService.IntegrationTests.AnalyticsEndpoint
                 .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
                     category3TransactionsAmount)
                 .Build();
-            
+
             await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
-            
+
             var query = HttpUtility.ParseQueryString(string.Empty);
             query["type"] = "expense";
             query["start"] = new DateTime(2021, 4, 1).ToString("yyyy-MM-dd");
             query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
             var queryString = query.ToString();
-            
+
             var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");
             response.EnsureSuccessStatusCode();
 
@@ -93,7 +97,7 @@ namespace TransactionService.IntegrationTests.AnalyticsEndpoint
             };
             Assert.Equal(expectedAnalyticsCategories, actualAnalyticsCategories);
         }
-        
+
         public class TransactionListBuilder
         {
             private readonly List<Transaction> _transactionList;
