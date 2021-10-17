@@ -340,7 +340,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
             const string expectedSubCategory = "Dinner";
-            var expectedTransactionTimestamp = new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ssK");
+            var expectedTransactionTimestamp = new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ss.FFFK");
             const string expectedTransactionType = "expense";
             var expectedPayerPayeeId = Guid.NewGuid().ToString();
             const string expectedPayerPayeeName = "name1";
@@ -415,7 +415,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
             const string expectedSubCategory = "Dinner";
-            var expectedTransactionTimestamp = new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ssK");
+            var expectedTransactionTimestamp = new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ss.FFFK");
             const string expectedTransactionType = "expense";
             const string expectedPayerPayeeId = "id123";
             const string expectedPayerPayeeName = "name123";

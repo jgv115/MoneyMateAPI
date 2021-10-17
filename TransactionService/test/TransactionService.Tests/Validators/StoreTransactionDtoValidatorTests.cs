@@ -29,7 +29,9 @@ namespace TransactionService.Tests.Validators
 
         [Theory]
         [InlineData("2021-10-09T09:23:39Z")]
+        [InlineData("2021-10-09T09:23:39.000Z")]
         [InlineData("2021-10-09T09:23:39+01")]
+        [InlineData("2021-10-09T09:23:39.123+01")]
         [InlineData("2021-10-09T09:23:39+1")]
         [InlineData("2021-10-09T09:23:39+10")]
         [InlineData("2021-10-09T09:23:39+10:00")]
