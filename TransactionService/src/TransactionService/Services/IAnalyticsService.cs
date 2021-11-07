@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.ViewModels;
 
 namespace TransactionService.Services
@@ -9,6 +10,8 @@ namespace TransactionService.Services
     {
         public Task<IEnumerable<AnalyticsCategory>> GetCategoryBreakdown(string type, int? count, DateTime start,
             DateTime end);
+
+        public Task<IEnumerable<AnalyticsCategory>> GetCategoryBreakdown(string type, int? count, TimePeriod timePeriod);
 
         public Task<IEnumerable<AnalyticsSubcategory>> GetSubcategoriesBreakdown(string categoryName, int? count,
             DateTime start, DateTime end);

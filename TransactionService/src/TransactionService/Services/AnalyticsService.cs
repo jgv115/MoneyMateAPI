@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TransactionService.Domain.Services;
+using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.ViewModels;
 
 namespace TransactionService.Services
@@ -10,10 +11,12 @@ namespace TransactionService.Services
     public class AnalyticsService : IAnalyticsService
     {
         private readonly ITransactionHelperService _transactionService;
+        private readonly ITimePeriodHelper _timePeriodHelper;
 
-        public AnalyticsService(ITransactionHelperService transactionService)
+        public AnalyticsService(ITransactionHelperService transactionService, ITimePeriodHelper timePeriodHelper)
         {
             _transactionService = transactionService ?? throw new ArgumentNullException(nameof(transactionService));
+            _timePeriodHelper = timePeriodHelper ?? throw new ArgumentNullException(nameof(timePeriodHelper));
         }
 
         public async Task<IEnumerable<AnalyticsCategory>> GetCategoryBreakdown(string type, int? count, DateTime start,
@@ -23,12 +26,19 @@ namespace TransactionService.Services
             var orderedCategories = transactions.GroupBy(transaction => transaction.Category)
                 .Select(grouping => new AnalyticsCategory
                 {
-                    CategoryName = grouping.Key, TotalAmount = grouping.Sum(transaction => transaction.Amount)
+                    CategoryName = grouping.Key,
+                    TotalAmount = grouping.Sum(transaction => transaction.Amount)
                 })
                 .OrderByDescending(categoryAmounts => categoryAmounts.TotalAmount);
 
             if (count.HasValue) return orderedCategories.Take(count.Value);
             else return orderedCategories;
+        }
+
+        public async Task<IEnumerable<AnalyticsCategory>> GetCategoryBreakdown(string type, int? count, TimePeriod timePeriod)
+        {
+            var dateRange = _timePeriodHelper.ResolveDateRange(timePeriod);
+            return await GetCategoryBreakdown(type, count, dateRange.Start, dateRange.End);
         }
 
         public async Task<IEnumerable<AnalyticsSubcategory>> GetSubcategoriesBreakdown(string categoryName, int? count,

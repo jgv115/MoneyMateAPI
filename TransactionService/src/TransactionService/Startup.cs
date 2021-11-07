@@ -10,7 +10,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Internal;
 using TransactionService.Domain.Services;
+using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
@@ -44,6 +46,9 @@ namespace TransactionService
                 options.SaveToken = true;
             });
 
+            services.AddSingleton<ISystemClock, SystemClock>();
+            services.AddSingleton<ITimePeriodHelper, TimePeriodHelper>();
+            
             services.AddScoped<CurrentUserContext>();
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
             services.AddScoped<ICategoriesService, CategoriesService>();

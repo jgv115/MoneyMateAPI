@@ -75,5 +75,14 @@ namespace TransactionService.Tests.Controllers
 
             Assert.Equal(expectedAnalyticsCategories, actualAnalyticsCategories);
         }
+
+        [Fact]
+        public async Task GivenValidQueryParameters_WhenGetPeriodicAggregatesInvoked_Then200OkReturned()
+        {
+            var controller = new AnalyticsController(_mockAnalyticsService.Object);
+            var response = await controller.GetPeriodicAggregates("type", "period", 1);
+
+            var objectResult = Assert.IsType<OkResult>(response);
+        }
     }
 }
