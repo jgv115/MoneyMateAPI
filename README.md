@@ -1,4 +1,4 @@
-# MoneyMate API
+# MoneyMate API 
 
 ### Notes
 
