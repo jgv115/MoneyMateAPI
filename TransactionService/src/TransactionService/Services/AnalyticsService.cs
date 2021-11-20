@@ -31,8 +31,7 @@ namespace TransactionService.Services
                 })
                 .OrderByDescending(categoryAmounts => categoryAmounts.TotalAmount);
 
-            if (count.HasValue) return orderedCategories.Take(count.Value);
-            else return orderedCategories;
+            return count.HasValue ? orderedCategories.Take(count.Value) : orderedCategories;
         }
 
         public async Task<IEnumerable<AnalyticsCategory>> GetCategoryBreakdown(string type, int? count, TimePeriod timePeriod)

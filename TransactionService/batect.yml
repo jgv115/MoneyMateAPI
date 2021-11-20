@@ -14,7 +14,7 @@ project_name: moneymate_api
 
 containers:
   dotnet_build_env:
-    image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+    image: mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
     environment:
       ASPNETCORE_URLS: http://*:5000
       ASPNETCORE_ENVIRONMENT: dev
@@ -35,7 +35,7 @@ containers:
       home_directory: /home/container-user
   
   dotnet_run_env:
-    image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+    image: mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
     environment:
       ASPNETCORE_URLS: http://*:5000
       ASPNETCORE_ENVIRONMENT: dev
@@ -65,7 +65,7 @@ containers:
     working_directory: /code/infra
 
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:0.13.0
     environment:
       SERVICES: dynamodb
       <<: *local_dev_envs

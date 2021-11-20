@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers;
+using TransactionService.Dtos;
 using TransactionService.Services;
 using TransactionService.ViewModels;
 using Xunit;
@@ -35,7 +36,13 @@ namespace TransactionService.Tests.Controllers
             var endDate = DateTime.MaxValue;
 
             var controller = new AnalyticsController(_mockAnalyticsService.Object);
-            await controller.GetCategoryBreakdown(expectedType, expectedCount, startDate, endDate);
+            await controller.GetCategoryBreakdown(new GetCategoryBreakdownQuery
+            {
+                Type = expectedType,
+                Count = expectedCount,
+                Start = startDate,
+                End = endDate,
+            });
 
             _mockAnalyticsService.Verify(service =>
                 service.GetCategoryBreakdown(expectedType, expectedCount, startDate, endDate));
@@ -67,7 +74,10 @@ namespace TransactionService.Tests.Controllers
                 .Setup(service => service.GetCategoryBreakdown(It.IsAny<string>(), It.IsAny<int?>(),
                     It.IsAny<DateTime>(), It.IsAny<DateTime>())).ReturnsAsync(() => expectedAnalyticsCategories);
             var controller = new AnalyticsController(_mockAnalyticsService.Object);
-            var response = await controller.GetCategoryBreakdown("expense");
+            var response = await controller.GetCategoryBreakdown(new GetCategoryBreakdownQuery
+            {
+                Type = "expense"
+            });
 
             var objectResult = Assert.IsType<OkObjectResult>(response);
 
