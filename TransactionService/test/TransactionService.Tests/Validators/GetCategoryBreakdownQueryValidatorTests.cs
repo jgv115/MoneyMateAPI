@@ -20,26 +20,108 @@ namespace TransactionService.Tests.Validators
             result.ShouldHaveValidationErrorFor(query => query.Type);
         }
 
-        [Theory]
-        [MemberData(nameof(GivenStartDateHasValueTestData))]
-        public void GivenStartDateHasValue_ThenOnlyEndDateShouldBePopulated(GetCategoryBreakdownQuery input)
+        [Fact]
+        public void GivenStartDateAndEndDateHasValue_ThenFrequencyMustBeEmpty()
         {
+            var input = new GetCategoryBreakdownQuery
+            {
+                Type = "expense",
+                Start = DateTime.MinValue,
+                End = DateTime.MaxValue,
+                Frequency = "MONTHS",
+            };
+            var result = _validator.TestValidate(input);
+            result.ShouldHaveValidationErrorFor(query => query.Frequency);
+        }
+
+        [Fact]
+        public void GivenStartDateAndEndDateHasValue_ThenPeriodsMustBeEmpty()
+        {
+            var input = new GetCategoryBreakdownQuery
+            {
+                Type = "expense",
+                Start = DateTime.MinValue,
+                End = DateTime.MaxValue,
+                Periods = 1
+            };
+            var result = _validator.TestValidate(input);
+            result.ShouldHaveValidationErrorFor(query => query.Periods);
+        }
+
+        [Fact]
+        public void GivenStartDateHasValue_ThenEndDateShouldNotBeEmpty()
+        {
+            var input = new GetCategoryBreakdownQuery
+            {
+                Type = "expense",
+                Start = DateTime.MinValue
+            };
             var result = _validator.TestValidate(input);
             result.ShouldHaveValidationErrorFor(query => query.End);
         }
 
-        public static IEnumerable<object[]> GivenStartDateHasValueTestData =>
-            new List<object[]>
+        [Fact]
+        public void GivenEndDateHasValue_ThenStartDateShouldNotBeEmpty()
+        {
+            var input = new GetCategoryBreakdownQuery
             {
-                new object[]
-                {
-                    new GetCategoryBreakdownQuery
-                    {
-                        Type = "expense",
-                        Start = DateTime.MinValue
-                    },
-                    (GetCategoryBreakdownQuery query) => query.End
-                }
+                Type = "expense",
+                End = DateTime.MaxValue
             };
+            var result = _validator.TestValidate(input);
+            result.ShouldHaveValidationErrorFor(query => query.Start);
+        }
+
+        [Fact]
+        public void GivenFrequencyAndPeriodsHasValue_ThenStartMustBeEmpty()
+        {
+            var input = new GetCategoryBreakdownQuery
+            {
+                Type = "expense",
+                Start = DateTime.MinValue,
+                Periods = 1,
+                Frequency = "MONTHS",
+            };
+            var result = _validator.TestValidate(input);
+            result.ShouldHaveValidationErrorFor(query => query.Start);
+        }
+
+        [Fact]
+        public void GivenFrequencyAndPeriodsHasValue_ThenEndMustBeEmpty()
+        {
+            var input = new GetCategoryBreakdownQuery
+            {
+                Type = "expense",
+                End = DateTime.MaxValue,
+                Periods = 1,
+                Frequency = "MONTHS",
+            };
+            var result = _validator.TestValidate(input);
+            result.ShouldHaveValidationErrorFor(query => query.End);
+        }
+
+        [Fact]
+        public void GivenFrequencyHasValue_ThenPeriodsShouldNotBeEmpty()
+        {
+            var input = new GetCategoryBreakdownQuery
+            {
+                Type = "expense",
+                Frequency = "MONTHS",
+            };
+            var result = _validator.TestValidate(input);
+            result.ShouldHaveValidationErrorFor(query => query.Periods);
+        }
+
+        [Fact]
+        public void GivenPeriodsHasValue_ThenFrequencyShouldNotBeEmpty()
+        {
+            var input = new GetCategoryBreakdownQuery
+            {
+                Type = "expense",
+                Periods = 1,
+            };
+            var result = _validator.TestValidate(input);
+            result.ShouldHaveValidationErrorFor(query => query.Frequency);
+        }
     }
 }
