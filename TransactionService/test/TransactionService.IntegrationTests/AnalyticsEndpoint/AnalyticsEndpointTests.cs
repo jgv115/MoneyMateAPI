@@ -36,7 +36,7 @@ namespace TransactionService.IntegrationTests.AnalyticsEndpoint
         }
 
         [Fact]
-        public async Task GivenInputParameters_WhenGetCategoryBreakdownEndpointInvoked_ThenCorrectCategoriesReturned()
+        public async Task GivenStartAndEndInputParameters_WhenGetCategoryBreakdownEndpointInvoked_ThenCorrectCategoriesReturned()
         {
             const string expectedCategory1 = "category1";
             const int numberOfCategory1Transactions = 10;
@@ -65,6 +65,69 @@ namespace TransactionService.IntegrationTests.AnalyticsEndpoint
             query["type"] = "expense";
             query["start"] = new DateTime(2021, 4, 1).ToString("yyyy-MM-dd");
             query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
+            var queryString = query.ToString();
+
+            var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");
+            response.EnsureSuccessStatusCode();
+
+            var returnedString = await response.Content.ReadAsStringAsync();
+            var actualAnalyticsCategories = JsonSerializer.Deserialize<List<AnalyticsCategory>>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            var expectedAnalyticsCategories = new List<AnalyticsCategory>
+            {
+                new()
+                {
+                    CategoryName = expectedCategory1,
+                    TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
+                },
+                new()
+                {
+                    CategoryName = expectedCategory2,
+                    TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
+                },
+                new()
+                {
+                    CategoryName = expectedCategory3,
+                    TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
+                }
+            };
+            Assert.Equal(expectedAnalyticsCategories, actualAnalyticsCategories);
+        }
+        
+        [Fact]
+        public async Task GivenFrequencyAndPeriodInputParameters_WhenGetCategoryBreakdownEndpointInvoked_ThenCorrectCategoriesReturned()
+        {
+            const string expectedCategory1 = "category1";
+            const int numberOfCategory1Transactions = 10;
+            const decimal category1TransactionsAmount = (decimal)34.5;
+
+            const string expectedCategory2 = "category2";
+            const int numberOfCategory2Transactions = 5;
+            const decimal category2TransactionsAmount = (decimal)34.5;
+
+            const string expectedCategory3 = "category3";
+            const int numberOfCategory3Transactions = 2;
+            const decimal category3TransactionsAmount = (decimal)34.5;
+
+            var transactionList = new TransactionListBuilder()
+                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
+                    category1TransactionsAmount)
+                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
+                    category2TransactionsAmount)
+                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
+                    category3TransactionsAmount)
+                .Build();
+
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["type"] = "expense";
+            query["frequency"] = "MONTH";
+            query["periods"] = "0";
             var queryString = query.ToString();
 
             var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");

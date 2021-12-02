@@ -22,7 +22,6 @@ namespace TransactionService.Controllers
             _analyticsService = analyticsService ?? throw new ArgumentNullException(nameof(analyticsService));
         }
 
-        // TODO: put query params inta class and use fluent validation to validate them
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategoryBreakdown([FromQuery] GetCategoryBreakdownQuery queryParams)
         {
