@@ -22,27 +22,6 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
 
         public TransactionsEndpointTests(MoneyMateApiWebApplicationFactory factory)
         {
-            // // Uncomment to run integration test class locally
-            // var test = factory.WithWebHostBuilder(builder =>
-            // {
-            //     builder.ConfigureAppConfiguration((context, configurationBuilder) =>
-            //     {
-            //         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "dev");
-            //         Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", "fake");
-            //         Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "fake");
-            //         Environment.SetEnvironmentVariable("AWS_REGION", "ap-southeast-2");
-            //         Environment.SetEnvironmentVariable("AWS_SERVICE_URL", "http://localhost:4566");
-
-            //         configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
-            //         {
-            //             {"Auth0:Authority", "https://moneymate-dev.au.auth0.com/"},
-            //             {"Auth0:Audience", "https://api.dev.moneymate.benong.id.au"},
-            //             {"DynamoDb:LocalMode", "true"},
-            //             {"DynamoDb:ServiceUrl", "http://localhost:4566"}
-            //         });
-            //     });
-            // });
-
             HttpClient = factory.CreateDefaultClient();
             DynamoDbHelper = new DynamoDbHelper();
         }

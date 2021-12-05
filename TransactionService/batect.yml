@@ -6,11 +6,11 @@ project_name: moneymate_api
   AWS_REGION: ${AWS_REGION:-}
 
 .local_dev_envs: &local_dev_envs
-  AWS_ACCESS_KEY_ID: test
-  AWS_SECRET_ACCESS_KEY: test
-  AWS_REGION: ap-southeast-2
-  AWS_LOCAL_MODE: "true"
-  AWS_SERVICE_URL: "http://localstack:4566"
+  AWS__AccessKey: test,
+  AWS__SecretKey: test,
+  AWS__Region: ap-southeast-2
+  AWS__LocalMode: "true"
+  AWS__ServiceUrl: "http://localstack:4566"
 
 containers:
   dotnet_build_env:
@@ -68,7 +68,8 @@ containers:
     image: localstack/localstack:0.13.0
     environment:
       SERVICES: dynamodb
-      <<: *local_dev_envs
+      AWS_ACCESS_KEY_ID: fake
+      AWS_SECRET_ACCESS_KEY: fake
     volumes:
       - local: ./.batect/localstack/localstack-bootstrap.sh
         container: /docker-entrypoint-initaws.d/localstack-bootstrap.sh
@@ -87,10 +88,11 @@ containers:
   localstack_clean:
     additional_hostnames:
       - localstack
-    image: localstack/localstack
+    image: localstack/localstack:0.13.0
     environment:
       SERVICES: dynamodb
-      <<: *local_dev_envs
+      AWS_ACCESS_KEY_ID: fake
+      AWS_SECRET_ACCESS_KEY: fake
     volumes:
       - local: ./.batect/localstack_clean/healthcheck.sh
         container: /app/healthcheck.sh
@@ -125,6 +127,11 @@ tasks:
       command: dotnet test test/TransactionService.IntegrationTests
 
   start_localstack:
+    description: Starts localstack only
+    run:
+      container: localstack_clean
+      
+  start_localstack_with_data:
     description: Starts localstack only
     run:
       container: localstack

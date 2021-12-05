@@ -29,7 +29,6 @@ namespace TransactionService
 
         public static IConfiguration Configuration { get; private set; }
 
-        // This method gets called by the runtime. Use this method to add services to the container
         public void ConfigureServices(IServiceCollection services)
         {
             var auth0Settings = Configuration.GetSection("Auth0");
@@ -57,14 +56,16 @@ namespace TransactionService
 
             services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile));
 
-            var awsLocalModeEnvVariable = Environment.GetEnvironmentVariable("AWS_LOCAL_MODE");
-            var awsLocalMode = !string.IsNullOrWhiteSpace(awsLocalModeEnvVariable) && bool.Parse(awsLocalModeEnvVariable);
-
+            var awsSettings = Configuration.GetSection("AWS");
+            var awsLocalMode = awsSettings.GetValue<bool>("LocalMode");
+            
             if (awsLocalMode)
             {
-                var awsServiceUrl = Environment.GetEnvironmentVariable("AWS_SERVICE_URL");
-                var awsRegion = Environment.GetEnvironmentVariable("AWS_REGION");
-
+                var awsServiceUrl = awsSettings.GetValue<string>("ServiceUrl");
+                var awsRegion = awsSettings.GetValue<string>("Region");
+                var awsKey = awsSettings.GetValue<string>("AccessKey");
+                var awsSecret = awsSettings.GetValue<string>("SecretKey");
+                
                 services.AddSingleton<IAmazonDynamoDB>(_ =>
                 {
                     var clientConfig = new AmazonDynamoDBConfig
@@ -72,7 +73,7 @@ namespace TransactionService
                         ServiceURL = awsServiceUrl,
                         AuthenticationRegion = awsRegion
                     };
-                    return new AmazonDynamoDBClient(clientConfig);
+                    return new AmazonDynamoDBClient(awsKey, awsSecret, clientConfig);
                 });
             }
             else
@@ -91,7 +92,6 @@ namespace TransactionService
             services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

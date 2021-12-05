@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using TransactionService.IntegrationTests.Helpers;
 
 namespace TransactionService.IntegrationTests.WebApplicationFactories
 {
     public class MoneyMateApiWebApplicationFactory : WebApplicationFactory<Startup>
     {
         private string _accessToken;
+
+        public MoneyMateApiWebApplicationFactory()
+        {
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "dev");
+        }
 
         private string RequestAccessToken()
         {

@@ -5,10 +5,7 @@
       "commandName": "Project",
       "launchBrowser": false,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "dev",
-        "AWS_REGION": "ap-southeast-2",
-        "AWS_SERVICE_URL": "http://localhost:4566",
-        "AWS_LOCAL_MODE": "true"
+        "ASPNETCORE_ENVIRONMENT": "dev"
       }
     }
   }

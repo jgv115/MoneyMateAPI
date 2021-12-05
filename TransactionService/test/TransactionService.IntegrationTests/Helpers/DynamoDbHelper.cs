@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
+using Microsoft.Extensions.Configuration;
 using TransactionService.Domain.Models;
 
 namespace TransactionService.IntegrationTests.Helpers
@@ -15,24 +16,34 @@ namespace TransactionService.IntegrationTests.Helpers
         private readonly DynamoDBContext _dynamoDbContext;
 
         private string TableName { get; } =
-            $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
+            $"MoneyMate_TransactionDB_dev";
 
         public DynamoDbHelper()
         {
-            var awsKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID") ?? "test";
-            var awsSecret = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") ?? "test";
-            var awsRegion = Environment.GetEnvironmentVariable("AWS_REGION") ?? "ap-southeast-2";
-            var awsUrl = Environment.GetEnvironmentVariable("AWS_SERVICE_URL") ?? "http://localhost:4566";
+            var config = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.dev.json", false, true)
+                .AddEnvironmentVariables()
+                .Build();
 
-            Console.WriteLine($">>>> dynamodBURL: {awsUrl}");
-
+            var awsSettings = config.GetSection("AWS");
+            
+            var awsKey = awsSettings.GetValue<string>("AccessKey") ??
+                         throw new ArgumentException("Could not find AWS access key for DynamoDb helper");
+            var awsSecret = awsSettings.GetValue<string>("SecretKey") ??
+                            throw new ArgumentException("Could not find AWS secret key for DynamoDb helper");
+            var awsRegion = awsSettings.GetValue<string>("Region") ??
+                            throw new ArgumentException("Could not find AWS region for DynamoDb helper");
+            var awsUrl = awsSettings.GetValue<string>("ServiceUrl") ??
+                         throw new ArgumentException("Could not find AWS URL for DynamoDb helper");
+            
             var clientConfig = new AmazonDynamoDBConfig
             {
                 ServiceURL = awsUrl,
                 AuthenticationRegion = awsRegion
             };
 
-            _dynamoDbClient = new AmazonDynamoDBClient(awsKey, awsSecret, clientConfig);
+            _dynamoDbClient = new AmazonDynamoDBClient("test", "test", clientConfig);
             _dynamoDbContext = new DynamoDBContext(_dynamoDbClient,
                 new DynamoDBOperationConfig { OverrideTableName = TableName });
         }
