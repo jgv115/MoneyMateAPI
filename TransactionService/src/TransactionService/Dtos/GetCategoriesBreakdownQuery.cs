@@ -2,7 +2,7 @@ using System;
 
 namespace TransactionService.Dtos
 {
-    public record GetCategoryBreakdownQuery
+    public record GetCategoriesBreakdownQuery
     {
         public string Type { get; init; }
         public int? Count { get; init; }

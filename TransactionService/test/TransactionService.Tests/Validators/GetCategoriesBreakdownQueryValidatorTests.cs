@@ -7,14 +7,14 @@ using Xunit;
 
 namespace TransactionService.Tests.Validators
 {
-    public class GetCategoryBreakdownQueryValidatorTests
+    public class GetCategoriesBreakdownQueryValidatorTests
     {
-        private readonly GetCategoryBreakdownQueryValidator _validator = new();
+        private readonly GetCategoriesBreakdownQueryValidator _validator = new();
 
         [Fact]
         public void GivenEmptyType_ThenShouldThrowValidationException()
         {
-            var request = new GetCategoryBreakdownQuery();
+            var request = new GetCategoriesBreakdownQuery();
             var result = _validator.TestValidate(request);
 
             result.ShouldHaveValidationErrorFor(query => query.Type);
@@ -23,7 +23,7 @@ namespace TransactionService.Tests.Validators
         [Fact]
         public void GivenStartDateAndEndDateHasValue_ThenFrequencyMustBeEmpty()
         {
-            var input = new GetCategoryBreakdownQuery
+            var input = new GetCategoriesBreakdownQuery
             {
                 Type = "expense",
                 Start = DateTime.MinValue,
@@ -37,7 +37,7 @@ namespace TransactionService.Tests.Validators
         [Fact]
         public void GivenStartDateAndEndDateHasValue_ThenPeriodsMustBeEmpty()
         {
-            var input = new GetCategoryBreakdownQuery
+            var input = new GetCategoriesBreakdownQuery
             {
                 Type = "expense",
                 Start = DateTime.MinValue,
@@ -51,7 +51,7 @@ namespace TransactionService.Tests.Validators
         [Fact]
         public void GivenStartDateHasValue_ThenEndDateShouldNotBeEmpty()
         {
-            var input = new GetCategoryBreakdownQuery
+            var input = new GetCategoriesBreakdownQuery
             {
                 Type = "expense",
                 Start = DateTime.MinValue
@@ -63,7 +63,7 @@ namespace TransactionService.Tests.Validators
         [Fact]
         public void GivenEndDateHasValue_ThenStartDateShouldNotBeEmpty()
         {
-            var input = new GetCategoryBreakdownQuery
+            var input = new GetCategoriesBreakdownQuery
             {
                 Type = "expense",
                 End = DateTime.MaxValue
@@ -75,7 +75,7 @@ namespace TransactionService.Tests.Validators
         [Fact]
         public void GivenFrequencyAndPeriodsHasValue_ThenStartMustBeEmpty()
         {
-            var input = new GetCategoryBreakdownQuery
+            var input = new GetCategoriesBreakdownQuery
             {
                 Type = "expense",
                 Start = DateTime.MinValue,
@@ -89,7 +89,7 @@ namespace TransactionService.Tests.Validators
         [Fact]
         public void GivenFrequencyAndPeriodsHasValue_ThenEndMustBeEmpty()
         {
-            var input = new GetCategoryBreakdownQuery
+            var input = new GetCategoriesBreakdownQuery
             {
                 Type = "expense",
                 End = DateTime.MaxValue,
@@ -103,7 +103,7 @@ namespace TransactionService.Tests.Validators
         [Fact]
         public void GivenFrequencyHasValue_ThenPeriodsShouldNotBeEmpty()
         {
-            var input = new GetCategoryBreakdownQuery
+            var input = new GetCategoriesBreakdownQuery
             {
                 Type = "expense",
                 Frequency = "MONTHS",
@@ -115,7 +115,7 @@ namespace TransactionService.Tests.Validators
         [Fact]
         public void GivenPeriodsHasValue_ThenFrequencyShouldNotBeEmpty()
         {
-            var input = new GetCategoryBreakdownQuery
+            var input = new GetCategoriesBreakdownQuery
             {
                 Type = "expense",
                 Periods = 1,

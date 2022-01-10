@@ -28,7 +28,7 @@ namespace TransactionService.Tests.Controllers
 
         [Fact]
         public async Task
-            GivenValidQueryParams_WhenGetCategoryBreakdownInvoked_ThenAnalyticsServiceCalledWithCorrectArguments()
+            GivenValidQueryParams_WhenGetCategoriesBreakdownInvoked_ThenAnalyticsServiceCalledWithCorrectArguments()
         {
             const string expectedType = "expense";
             const int expectedCount = 20;
@@ -36,7 +36,7 @@ namespace TransactionService.Tests.Controllers
             var endDate = DateTime.MaxValue;
 
             var controller = new AnalyticsController(_mockAnalyticsService.Object);
-            await controller.GetCategoryBreakdown(new GetCategoryBreakdownQuery
+            await controller.GetCategoriesBreakdown(new GetCategoriesBreakdownQuery
             {
                 Type = expectedType,
                 Count = expectedCount,
@@ -45,11 +45,11 @@ namespace TransactionService.Tests.Controllers
             });
 
             _mockAnalyticsService.Verify(service =>
-                service.GetCategoryBreakdown(expectedType, expectedCount, startDate, endDate));
+                service.GetCategoriesBreakdown(expectedType, expectedCount, startDate, endDate));
         }
 
         [Fact]
-        public async Task GivenValidQueryParams_WhenGetCategoryBreakdownInvoked_ThenReturnsListOfAnalyticsCategories()
+        public async Task GivenValidQueryParams_WhenGetCategoriesBreakdownInvoked_ThenReturnsListOfAnalyticsCategories()
         {
             var expectedAnalyticsCategories = new List<AnalyticsCategory>
             {
@@ -71,10 +71,10 @@ namespace TransactionService.Tests.Controllers
             };
 
             _mockAnalyticsService
-                .Setup(service => service.GetCategoryBreakdown(It.IsAny<string>(), It.IsAny<int?>(),
+                .Setup(service => service.GetCategoriesBreakdown(It.IsAny<string>(), It.IsAny<int?>(),
                     It.IsAny<DateTime>(), It.IsAny<DateTime>())).ReturnsAsync(() => expectedAnalyticsCategories);
             var controller = new AnalyticsController(_mockAnalyticsService.Object);
-            var response = await controller.GetCategoryBreakdown(new GetCategoryBreakdownQuery
+            var response = await controller.GetCategoriesBreakdown(new GetCategoriesBreakdownQuery
             {
                 Type = "expense"
             });
@@ -84,6 +84,93 @@ namespace TransactionService.Tests.Controllers
             var actualAnalyticsCategories = objectResult.Value as List<AnalyticsCategory>;
 
             Assert.Equal(expectedAnalyticsCategories, actualAnalyticsCategories);
+        }
+
+        [Fact]
+        public async Task
+            GivenValidQueryParamsWithStartAndEnd_WhenGetSubcategoriesBreakdownInvoked_ThenReturnsListOfAnalyticsSubcategories()
+        {
+            const string expectedCategoryName = "category123";
+            const int expectedCount = 20;
+            var startDate = DateTime.MinValue;
+            var endDate = DateTime.MaxValue;
+
+            var expectedAnalyticsSubcategories = new List<AnalyticsSubcategory>
+            {
+                new()
+                {
+                    SubcategoryName = "hello",
+                    TotalAmount = 11234,
+                    BelongsToCategory = "hello123"
+                },
+                new()
+                {
+                    SubcategoryName = "hello2",
+                    TotalAmount = 112234,
+                    BelongsToCategory = "hello1234"
+                }
+            };
+
+            _mockAnalyticsService.Setup(service =>
+                    service.GetSubcategoriesBreakdown(expectedCategoryName, expectedCount, startDate, endDate))
+                .ReturnsAsync(() => expectedAnalyticsSubcategories);
+
+            var controller = new AnalyticsController(_mockAnalyticsService.Object);
+            var response = await controller.GetSubcategoriesBreakdown(new GetSubcategoriesBreakdownQuery
+            {
+                Category = expectedCategoryName,
+                Count = expectedCount,
+                End = endDate,
+                Start = startDate
+            });
+
+            var objectResult = Assert.IsType<OkObjectResult>(response);
+
+            var actualAnalyticsSubcategories = objectResult.Value as List<AnalyticsSubcategory>;
+
+            Assert.Equal(expectedAnalyticsSubcategories, actualAnalyticsSubcategories);
+        }
+
+        [Fact]
+        public async Task
+            GivenValidQueryParamsWithoutStartAndEnd_WhenGetSubcategoriesBreakdownInvoked_ThenReturnsListOfAnalyticsSubcategories()
+        {
+            const string expectedCategoryName = "category123";
+            const int expectedCount = 20;
+
+            var expectedAnalyticsSubcategories = new List<AnalyticsSubcategory>
+            {
+                new()
+                {
+                    SubcategoryName = "hello",
+                    TotalAmount = 11234,
+                    BelongsToCategory = "hello123"
+                },
+                new()
+                {
+                    SubcategoryName = "hello2",
+                    TotalAmount = 112234,
+                    BelongsToCategory = "hello1234"
+                }
+            };
+
+            _mockAnalyticsService.Setup(service =>
+                    service.GetSubcategoriesBreakdown(expectedCategoryName, expectedCount, DateTime.MinValue,
+                        DateTime.MaxValue))
+                .ReturnsAsync(() => expectedAnalyticsSubcategories);
+
+            var controller = new AnalyticsController(_mockAnalyticsService.Object);
+            var response = await controller.GetSubcategoriesBreakdown(new GetSubcategoriesBreakdownQuery
+            {
+                Category = expectedCategoryName,
+                Count = expectedCount
+            });
+
+            var objectResult = Assert.IsType<OkObjectResult>(response);
+
+            var actualAnalyticsSubcategories = objectResult.Value as List<AnalyticsSubcategory>;
+
+            Assert.Equal(expectedAnalyticsSubcategories, actualAnalyticsSubcategories);
         }
 
         [Fact]

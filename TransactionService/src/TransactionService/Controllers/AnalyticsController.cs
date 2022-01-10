@@ -23,7 +23,7 @@ namespace TransactionService.Controllers
         }
 
         [HttpGet("categories")]
-        public async Task<IActionResult> GetCategoryBreakdown([FromQuery] GetCategoryBreakdownQuery queryParams)
+        public async Task<IActionResult> GetCategoriesBreakdown([FromQuery] GetCategoriesBreakdownQuery queryParams)
         {
             var type = queryParams.Type;
             var count = queryParams.Count;
@@ -35,17 +35,40 @@ namespace TransactionService.Controllers
             IEnumerable<AnalyticsCategory> analyticsCategories;
             if (start.HasValue && end.HasValue)
             {
-                analyticsCategories = await _analyticsService.GetCategoryBreakdown(type, count, start.Value, end.Value);
+                analyticsCategories = await _analyticsService.GetCategoriesBreakdown(type, count, start.Value, end.Value);
             }
             else if (!string.IsNullOrEmpty(frequency) && periods.HasValue)
             {
                 analyticsCategories =
-                    await _analyticsService.GetCategoryBreakdown(type, count, new TimePeriod(frequency, periods.Value));
+                    await _analyticsService.GetCategoriesBreakdown(type, count, new TimePeriod(frequency, periods.Value));
             }
             else
             {
                 analyticsCategories =
-                    await _analyticsService.GetCategoryBreakdown(type, count, DateTime.MinValue, DateTime.MaxValue);
+                    await _analyticsService.GetCategoriesBreakdown(type, count, DateTime.MinValue, DateTime.MaxValue);
+            }
+
+            return Ok(analyticsCategories);
+        }
+        
+        [HttpGet("subcategories")]
+        public async Task<IActionResult> GetSubcategoriesBreakdown([FromQuery] GetSubcategoriesBreakdownQuery queryParams)
+        {
+            var category = queryParams.Category;
+            var count = queryParams.Count;
+            var start = queryParams.Start;
+            var end = queryParams.End;
+
+
+            IEnumerable<AnalyticsSubcategory> analyticsCategories;
+            if (start.HasValue && end.HasValue)
+            {
+                analyticsCategories = await _analyticsService.GetSubcategoriesBreakdown(category, count, start.Value, end.Value);
+            }
+            else
+            {
+                analyticsCategories =
+                    await _analyticsService.GetSubcategoriesBreakdown(category, count, DateTime.MinValue, DateTime.MaxValue);
             }
 
             return Ok(analyticsCategories);

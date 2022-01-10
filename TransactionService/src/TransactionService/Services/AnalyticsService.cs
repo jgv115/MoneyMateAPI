@@ -19,7 +19,7 @@ namespace TransactionService.Services
             _timePeriodHelper = timePeriodHelper ?? throw new ArgumentNullException(nameof(timePeriodHelper));
         }
 
-        public async Task<IEnumerable<AnalyticsCategory>> GetCategoryBreakdown(string type, int? count, DateTime start,
+        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(string type, int? count, DateTime start,
             DateTime end)
         {
             var transactions = await _transactionService.GetAllTransactionsAsync(start, end, type);
@@ -34,10 +34,10 @@ namespace TransactionService.Services
             return count.HasValue ? orderedCategories.Take(count.Value) : orderedCategories;
         }
 
-        public async Task<IEnumerable<AnalyticsCategory>> GetCategoryBreakdown(string type, int? count, TimePeriod timePeriod)
+        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(string type, int? count, TimePeriod timePeriod)
         {
             var dateRange = _timePeriodHelper.ResolveDateRange(timePeriod);
-            return await GetCategoryBreakdown(type, count, dateRange.Start, dateRange.End);
+            return await GetCategoriesBreakdown(type, count, dateRange.Start, dateRange.End);
         }
 
         public async Task<IEnumerable<AnalyticsSubcategory>> GetSubcategoriesBreakdown(string categoryName, int? count,

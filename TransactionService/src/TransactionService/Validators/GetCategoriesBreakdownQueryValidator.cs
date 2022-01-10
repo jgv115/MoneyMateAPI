@@ -4,9 +4,9 @@ using TransactionService.Dtos;
 
 namespace TransactionService.Validators
 {
-    public class GetCategoryBreakdownQueryValidator : AbstractValidator<GetCategoryBreakdownQuery>
+    public class GetCategoriesBreakdownQueryValidator : AbstractValidator<GetCategoriesBreakdownQuery>
     {
-        public GetCategoryBreakdownQueryValidator()
+        public GetCategoriesBreakdownQueryValidator()
         {
             CascadeMode = CascadeMode.Stop;
 

@@ -38,12 +38,12 @@ namespace TransactionService.Tests.Services
             }
         }
 
-        public class GetCategoryBreakdown_ByDateTime
+        public class GetCategoriesBreakdown_ByDateTime
         {
             private readonly Mock<ITransactionHelperService> _mockTransactionService;
             private readonly Mock<ITimePeriodHelper> _mockTimePeriodHelper;
 
-            public GetCategoryBreakdown_ByDateTime()
+            public GetCategoriesBreakdown_ByDateTime()
             {
                 _mockTransactionService = new Mock<ITransactionHelperService>();
                 _mockTimePeriodHelper = new Mock<ITimePeriodHelper>();
@@ -84,7 +84,7 @@ namespace TransactionService.Tests.Services
                             expectedType)).ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
-                var analyticsCategories = await service.GetCategoryBreakdown(expectedType, null, start, end);
+                var analyticsCategories = await service.GetCategoriesBreakdown(expectedType, null, start, end);
 
                 var expectedAnalyticsCategories = new List<AnalyticsCategory>
             {
@@ -144,7 +144,7 @@ namespace TransactionService.Tests.Services
                             expectedType)).ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
-                var analyticsCategories = await service.GetCategoryBreakdown(expectedType, expectedCount, start, end);
+                var analyticsCategories = await service.GetCategoriesBreakdown(expectedType, expectedCount, start, end);
 
                 var expectedAnalyticsCategories = new List<AnalyticsCategory>
             {
@@ -169,12 +169,12 @@ namespace TransactionService.Tests.Services
             }
         }
 
-        public class GetCategoryBreakdown_ByTimePeriod
+        public class GetCategoriesBreakdown_ByTimePeriod
         {
             private readonly Mock<ITransactionHelperService> _mockTransactionService;
             private readonly Mock<ITimePeriodHelper> _mockTimePeriodHelper;
 
-            public GetCategoryBreakdown_ByTimePeriod()
+            public GetCategoriesBreakdown_ByTimePeriod()
             {
                 _mockTransactionService = new Mock<ITransactionHelperService>();
                 _mockTimePeriodHelper = new Mock<ITimePeriodHelper>();
@@ -219,7 +219,7 @@ namespace TransactionService.Tests.Services
                             expectedType)).ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
-                var analyticsCategories = await service.GetCategoryBreakdown(expectedType, null, timePeriod);
+                var analyticsCategories = await service.GetCategoriesBreakdown(expectedType, null, timePeriod);
 
                 var expectedAnalyticsCategories = new List<AnalyticsCategory>
             {
@@ -283,7 +283,7 @@ namespace TransactionService.Tests.Services
                             expectedType)).ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
-                var analyticsCategories = await service.GetCategoryBreakdown(expectedType, expectedCount, timePeriod);
+                var analyticsCategories = await service.GetCategoriesBreakdown(expectedType, expectedCount, timePeriod);
 
                 var expectedAnalyticsCategories = new List<AnalyticsCategory>
             {
