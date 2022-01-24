@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using TransactionService.Domain.Models;
+using TransactionService.Domain.Specifications;
+using TransactionService.Dtos;
+using TransactionService.Helpers.TimePeriodHelpers;
 
 namespace TransactionService.Repositories
 {
@@ -73,9 +77,28 @@ namespace TransactionService.Repositories
                         new("Category", ScanOperator.Equal, categoryName)
                     }
                 }
-            }).GetRemainingAsync(); 
+            }).GetRemainingAsync();
         }
-        
+
+        public async Task<List<Transaction>> GetTransactions(string userId, DateRange dateRange,
+            ITransactionSpecification spec)
+        {
+            var start = dateRange.Start;
+            var end = dateRange.End;
+
+            var transactions = await _dbContext.QueryAsync<Transaction>($"{userId}{HashKeySuffix}",
+                QueryOperator.Between, new[]
+                {
+                    $"{start:O}", $"{end:O}"
+                }, new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName,
+                    IndexName = "TransactionTimestampIndex"
+                }).GetRemainingAsync();
+
+            return transactions.Where(transaction => spec.IsSatisfied(transaction)).ToList();
+        }
+
         public async Task StoreTransaction(Transaction newTransaction)
         {
             newTransaction.UserId += HashKeySuffix;

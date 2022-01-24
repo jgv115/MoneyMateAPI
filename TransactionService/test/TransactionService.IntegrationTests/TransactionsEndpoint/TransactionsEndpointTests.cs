@@ -42,6 +42,18 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var transaction1 = new Transaction
             {
                 UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
+                TransactionTimestamp = new DateTime(2020, 02, 01).ToString("o"),
+                TransactionType = "income",
+                Amount = 1223.45M,
+                Category = "Test Category",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2",
+                SubCategory = "Salary"
+            };
+            var transaction2 = new Transaction
+            {
+                UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
                 TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "expense",
@@ -52,23 +64,25 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
-            var transaction2 = new Transaction
+            var transaction3 = new Transaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
                 TransactionTimestamp = DateTime.Now.ToString("o"),
                 TransactionType = "income",
                 Amount = 123.45M,
-                Category = "Income",
+                Category = "Salary",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
                 SubCategory = "Salary"
             };
 
+
             var transactionList = new List<Transaction>
             {
                 transaction1,
-                transaction2
+                transaction2,
+                transaction3
             };
             await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
@@ -92,7 +106,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
-                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionTimestamp = new DateTime(2021, 3, 28).ToString("O"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
@@ -103,7 +117,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
-                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionTimestamp = new DateTime(2021, 3, 28).ToString("O"),
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
@@ -132,7 +146,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
             var query = HttpUtility.ParseQueryString(string.Empty);
-            query["start"] = new DateTime(2021, 4, 1).ToString("O");
+            query["start"] = new DateTime(2021, 3, 27).ToString("O");
             var queryString = query.ToString();
 
             var response = await HttpClient.GetAsync($"/api/transactions?{queryString}");
@@ -284,7 +298,86 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(new List<Transaction> { transaction1 }, returnedTransactionList);
+            Assert.Equal(new List<Transaction> {transaction1}, returnedTransactionList);
+        }
+
+        [Fact]
+        public async Task
+            GivenCategoriesParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfCategoryAreReturned()
+        {
+            var transactionType = "expense";
+            var transaction1 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = transactionType,
+                Amount = 123.45M,
+                Category = "Groceries",
+                SubCategory = "Meat",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
+                Note = "this is a note123"
+            };
+            var transaction2 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "expense",
+                Amount = 123.45M,
+                Category = "Groceries",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2",
+                SubCategory = "Salary"
+            };
+            var transaction3 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "income",
+                Amount = 123.45M,
+                Category = "Income",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2",
+                SubCategory = "Salary"
+            };
+            var transaction4 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915d",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "expense",
+                Amount = 123.45M,
+                Category = "Eating Out",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2",
+                SubCategory = "Dinner"
+            };
+
+            var transactionList = new List<Transaction>
+            {
+                transaction1,
+                transaction2,
+                transaction3,
+                transaction4
+            };
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+
+            var queryString = "categories=Groceries&categories=Eating Out";
+
+            var response = await HttpClient.GetAsync($"/api/transactions?{queryString}");
+            response.EnsureSuccessStatusCode();
+
+            var returnedString = await response.Content.ReadAsStringAsync();
+            var returnedTransactionList = JsonSerializer.Deserialize<List<Transaction>>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            Assert.Equal(new List<Transaction> {transaction1, transaction2, transaction4}, returnedTransactionList);
         }
 
         [Fact]
@@ -319,7 +412,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
             const string expectedSubCategory = "Dinner";
-            var expectedTransactionTimestamp = new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ss.FFFK");
+            var expectedTransactionTimestamp =
+                new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ss.FFFK");
             const string expectedTransactionType = "expense";
             var expectedPayerPayeeId = Guid.NewGuid().ToString();
             const string expectedPayerPayeeName = "name1";
@@ -394,7 +488,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
             const string expectedSubCategory = "Dinner";
-            var expectedTransactionTimestamp = new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ss.FFFK");
+            var expectedTransactionTimestamp =
+                new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ss.FFFK");
             const string expectedTransactionType = "expense";
             const string expectedPayerPayeeId = "id123";
             const string expectedPayerPayeeName = "name123";

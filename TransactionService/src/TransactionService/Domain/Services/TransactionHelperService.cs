@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using TransactionService.Domain.Models;
+using TransactionService.Domain.Specifications;
 using TransactionService.Dtos;
+using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 
@@ -14,6 +16,7 @@ namespace TransactionService.Domain.Services
         private readonly CurrentUserContext _userContext;
         private readonly ITransactionRepository _repository;
         private readonly IMapper _mapper;
+        private readonly TransactionSpecificationFactory _specificationFactory;
 
         public TransactionHelperService(CurrentUserContext userContext, ITransactionRepository repository,
             IMapper mapper)
@@ -21,6 +24,7 @@ namespace TransactionService.Domain.Services
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _specificationFactory = new TransactionSpecificationFactory();
         }
 
         public Task<List<Transaction>> GetAllTransactionsAsync(DateTime start, DateTime end, string type = null)
@@ -31,10 +35,21 @@ namespace TransactionService.Domain.Services
                 return _repository.GetAllTransactionsAsync(_userContext.UserId, start, end, type);
         }
 
+
         public Task<List<Transaction>> GetAllTransactionsByCategoryAsync(string categoryName, DateTime start,
             DateTime end)
         {
             return _repository.GetAllTransactionsByCategoryAsync(_userContext.UserId, categoryName, start, end);
+        }
+
+        public async Task<List<Transaction>> GetTransactionsAsync(GetTransactionsQuery queryParams)
+        {
+            var dateRange = new DateRange(queryParams.Start.GetValueOrDefault(DateTime.MinValue),
+                queryParams.End.GetValueOrDefault(DateTime.MaxValue));
+            var spec = _specificationFactory.Create(queryParams);
+
+            var filteredTransactions = await _repository.GetTransactions(_userContext.UserId, dateRange, spec);
+            return filteredTransactions;
         }
 
         public Task StoreTransaction(StoreTransactionDto transactionDto)

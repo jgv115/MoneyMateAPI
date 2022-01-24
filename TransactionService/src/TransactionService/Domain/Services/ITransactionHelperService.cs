@@ -13,6 +13,8 @@ namespace TransactionService.Domain.Services
         public Task<List<Transaction>> GetAllTransactionsByCategoryAsync(string categoryName, DateTime start,
             DateTime end);
 
+        public Task<List<Transaction>> GetTransactionsAsync(GetTransactionsQuery queryParams);
+
         public Task StoreTransaction(StoreTransactionDto transactionDto);
         public Task PutTransaction(string transactionId, PutTransactionDto putTransactionDto);
         public Task DeleteTransaction(string transactionId);

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using TransactionService.Constants;
 using TransactionService.Controllers;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
@@ -26,7 +27,7 @@ namespace TransactionService.Tests.Controllers
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
 
-            var response = await controller.Get(DateTime.MinValue, DateTime.MaxValue);
+            var response = await controller.Get(new GetTransactionsQuery());
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
@@ -37,7 +38,7 @@ namespace TransactionService.Tests.Controllers
         {
             var transaction1 = new Transaction
             {
-                Amount = (decimal)1.0,
+                Amount = (decimal) 1.0,
                 Category = "category-1",
                 TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-1",
@@ -50,7 +51,7 @@ namespace TransactionService.Tests.Controllers
 
             var transaction2 = new Transaction
             {
-                Amount = (decimal)2.0,
+                Amount = (decimal) 2.0,
                 Category = "category-2",
                 TransactionTimestamp = DateTime.Now.ToString("O"),
                 SubCategory = "subcategory-2",
@@ -68,31 +69,26 @@ namespace TransactionService.Tests.Controllers
 
             var startDate = DateTime.MinValue;
             var endDate = DateTime.MaxValue;
-            var type = "expense";
+            var type = TransactionType.Expense;
+            var inputQuery = new GetTransactionsQuery
+            {
+                Start = startDate,
+                End = endDate,
+                Type = type
+            };
 
             _mockTransactionHelperService.Setup(service =>
-                    service.GetAllTransactionsAsync(startDate, endDate, type))
+                    service.GetTransactionsAsync(inputQuery))
                 .ReturnsAsync(expectedTransactionList);
 
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
-            var response = await controller.Get(startDate, endDate, type);
+            var response = await controller.Get(inputQuery);
 
             var objectResult = Assert.IsType<OkObjectResult>(response);
 
             var transactionList = objectResult.Value as List<Transaction>;
             Assert.NotNull(transactionList);
             Assert.Equal(expectedTransactionList, transactionList);
-        }
-
-        [Fact]
-        public async Task
-            GivenNullQueryParameters_WhenGetIsInvoked_ThenGetAllTransactionsAsyncCalledWithCorrectArguments()
-        {
-            var controller = new TransactionsController(_mockTransactionHelperService.Object);
-            await controller.Get();
-
-            _mockTransactionHelperService.Verify(service =>
-                service.GetAllTransactionsAsync(DateTime.MinValue, DateTime.MaxValue, null));
         }
 
         [Fact]
