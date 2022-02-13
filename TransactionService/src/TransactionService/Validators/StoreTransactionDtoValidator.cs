@@ -14,16 +14,16 @@ namespace TransactionService.Validators
             {
                 var validFormats = new[]
                 {
-                    "yyyy-MM-ddThh:mm:ssZ",
-                    "yyyy-MM-ddThh:mm:ss.FZ",
-                    "yyyy-MM-ddThh:mm:ss.FFZ",
-                    "yyyy-MM-ddThh:mm:ss.FFFZ",
-                    "yyyy-MM-ddThh:mm:ssz",
-                    "yyyy-MM-ddThh:mm:ss.FFFz",
-                    "yyyy-MM-ddThh:mm:sszz",
-                    "yyyy-MM-ddThh:mm:ss.FFFzz",
-                    "yyyy-MM-ddThh:mm:sszzz",
-                    "yyyy-MM-ddThh:mm:ssFFFzzz"
+                    "yyyy-MM-ddTHH:mm:ssZ",
+                    "yyyy-MM-ddTHH:mm:ss.FZ",
+                    "yyyy-MM-ddTHH:mm:ss.FFZ",
+                    "yyyy-MM-ddTHH:mm:ss.FFFZ",
+                    "yyyy-MM-ddTHH:mm:ssz",
+                    "yyyy-MM-ddTHH:mm:ss.FFFz",
+                    "yyyy-MM-ddTHH:mm:sszz",
+                    "yyyy-MM-ddTHH:mm:ss.FFFzz",
+                    "yyyy-MM-ddTHH:mm:sszzz",
+                    "yyyy-MM-ddTHH:mm:ssFFFzzz"
                 };
 
                 DateTime dt;
