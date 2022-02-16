@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -400,9 +401,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 new StringContent(inputDtoString, Encoding.UTF8, "application/json");
 
             var response = await HttpClient.PostAsync($"/api/transactions", httpContent);
-
-            var stringResponse = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(stringResponse);
+            
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]

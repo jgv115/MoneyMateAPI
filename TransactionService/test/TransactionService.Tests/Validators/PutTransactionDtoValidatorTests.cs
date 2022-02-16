@@ -29,12 +29,13 @@ namespace TransactionService.Tests.Validators
 
         [Theory]
         [InlineData("2021-10-09T09:23:39Z")]
-        [InlineData("2021-10-09T09:23:39.000Z")]
+        [InlineData("2021-10-09T01:23:39.000Z")]
+        [InlineData("2022-02-13T13:41:00.000Z")]
         [InlineData("2021-10-09T09:23:39+01")]
-        [InlineData("2021-10-09T09:23:39.123+01")]
-        [InlineData("2021-10-09T09:23:39+1")]
-        [InlineData("2021-10-09T09:23:39+10")]
-        [InlineData("2021-10-09T09:23:39+10:00")]
+        [InlineData("2021-10-09T15:23:39.123+01")]
+        [InlineData("2021-10-09T16:23:39+1")]
+        [InlineData("2021-10-09T20:23:39+10")]
+        [InlineData("2021-10-09T00:23:39+10:00")]
         public void GivenValidTransactionTimestampThenShouldNotThrowValidationError(string transactionTimestamp)
         {
             var request = new PutTransactionDto
