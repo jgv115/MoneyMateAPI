@@ -50,4 +50,19 @@ namespace TransactionService.Domain.Specifications
             return _categories.Contains(item.Category);
         }
     }
+    
+    public class SubcategoriesSpec : ITransactionSpecification
+    {
+        private readonly IEnumerable<string> _categories;
+
+        public SubcategoriesSpec(IEnumerable<string> categories)
+        {
+            _categories = categories;
+        }
+
+        public bool IsSatisfied(Transaction item)
+        {
+            return _categories.Contains(item.SubCategory);
+        }
+    }
 }

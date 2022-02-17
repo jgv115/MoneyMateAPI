@@ -19,6 +19,11 @@ namespace TransactionService.Domain.Specifications
                 specifications.Add(new CategoriesSpec(query.Categories));
             }
 
+            if (query.SubcategoriesQuery.Any())
+            {
+                specifications.Add(new SubcategoriesSpec(query.SubcategoriesQuery));
+            }
+
             return new AndSpec(specifications);
         }
     }
