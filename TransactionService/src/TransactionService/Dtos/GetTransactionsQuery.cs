@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using TransactionService.Constants;
 
 namespace TransactionService.Dtos
@@ -11,6 +12,7 @@ namespace TransactionService.Dtos
         public DateTime? End { get; set; }
 
         public List<string> Categories { get; set; } = new();
-        public List<string> SubcategoriesQuery { get; set; } = new();
+        [FromQuery(Name = "subcategory")]
+        public List<string> Subcategories { get; set; } = new();
     }
 }

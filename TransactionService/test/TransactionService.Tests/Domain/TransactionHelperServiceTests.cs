@@ -1,12 +1,14 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Moq;
+using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Specifications;
 using TransactionService.Dtos;
+using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 using Xunit;
@@ -184,6 +186,84 @@ namespace TransactionService.Tests.Domain
                 Assert.Equal(2, response.Count);
                 Assert.Equal(transaction1, response[0]);
                 Assert.Equal(transaction2, response[1]);
+            }
+        }
+
+        public class GetTransactionsAsync
+        {
+            private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
+            private readonly Mock<ITransactionRepository> _mockTransactionRepository;
+            private readonly Mock<IMapper> _mockMapper;
+
+            public GetTransactionsAsync()
+            {
+                _mockCurrentUserContext = new Mock<CurrentUserContext>();
+                _mockTransactionRepository = new Mock<ITransactionRepository>();
+                _mockMapper = new Mock<IMapper>();
+            }
+
+            [Fact]
+            public async Task GivenValidInputs_ThenCorrectTransactionsReturned()
+            {
+                const string expectedUserId = "id123";
+
+                _mockCurrentUserContext.SetupGet(context => context.UserId)
+                    .Returns(expectedUserId);
+
+                var service = new TransactionHelperService(_mockCurrentUserContext.Object,
+                    _mockTransactionRepository.Object, _mockMapper.Object);
+
+                var expectedTransactionList = new List<Transaction>()
+                {
+                    new()
+                    {
+                        Amount = decimal.One,
+                        Category = "test category123",
+                    }
+                };
+                _mockTransactionRepository
+                    .Setup(repository => repository.GetTransactions(expectedUserId,
+                        new DateRange(DateTime.MinValue, DateTime.MaxValue), It.IsAny<ITransactionSpecification>()))
+                    .ReturnsAsync(() => expectedTransactionList);
+
+                var response = await service.GetTransactionsAsync(new GetTransactionsQuery());
+                Assert.Equal(expectedTransactionList, response);
+            }
+
+            [Fact]
+            public async Task GivenQueryInputs_ThenRepositoryCalledWithCorrectSpecification()
+            {
+                const string expectedUserId = "id123";
+                var expectedTransactionType = TransactionType.Expense;
+                _mockCurrentUserContext.SetupGet(context => context.UserId)
+                    .Returns(expectedUserId);
+
+                var service = new TransactionHelperService(_mockCurrentUserContext.Object,
+                    _mockTransactionRepository.Object, _mockMapper.Object);
+
+                ITransactionSpecification calledWithSpecification = null;
+                _mockTransactionRepository
+                    .Setup(repository => repository.GetTransactions(expectedUserId,
+                        new DateRange(DateTime.MinValue, DateTime.MaxValue), It.IsAny<ITransactionSpecification>()))
+                    .Callback((string _, DateRange _, ITransactionSpecification transactionSpecification) =>
+                    {
+                        calledWithSpecification = transactionSpecification;
+                    });
+
+                await service.GetTransactionsAsync(new GetTransactionsQuery
+                {
+                    Type = expectedTransactionType
+                });
+
+                Assert.IsType<AndSpec>(calledWithSpecification);
+                Assert.True(calledWithSpecification.IsSatisfied(new Transaction
+                {
+                    TransactionType = "expense"
+                }));
+                Assert.False(calledWithSpecification.IsSatisfied(new Transaction
+                {
+                    TransactionType = "invalid type"
+                }));
             }
         }
 

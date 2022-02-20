@@ -74,7 +74,7 @@ public class TransactionSpecificationFactoryTests
 
             var returnedSpec = factory.Create(new GetTransactionsQuery
             {
-                SubcategoriesQuery = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> {"subcategory1", "subcategory2"}
             });
 
 
@@ -134,7 +134,7 @@ public class TransactionSpecificationFactoryTests
             var returnedSpec = factory.Create(new GetTransactionsQuery
             {
                 Type = TransactionType.Expense,
-                SubcategoriesQuery = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> {"subcategory1", "subcategory2"}
             });
 
 

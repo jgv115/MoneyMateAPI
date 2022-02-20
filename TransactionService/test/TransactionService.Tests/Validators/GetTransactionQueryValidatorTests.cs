@@ -13,7 +13,7 @@ public class GetTransactionQueryValidatorTests
     private readonly GetTransactionQueryValidator _validator = new();
 
     [Fact]
-    public void GivenCategoriesAndSubcategoryQueryAreNotEmpty_ThenValidationShouldFail()
+    public void GivenCategoriesAndSubcategoriesAreNotEmpty_ThenValidationShouldFail()
     {
         var input = new GetTransactionsQuery
         {
@@ -21,11 +21,11 @@ public class GetTransactionQueryValidatorTests
             Start = DateTime.MinValue,
             End = DateTime.Today,
             Categories = new List<string> {"hello", "hello"},
-            SubcategoriesQuery = new List<string> {"hello", "hello"}
+            Subcategories = new List<string> {"hello", "hello"}
         };
 
         var result = _validator.TestValidate(input);
-        result.ShouldHaveValidationErrorFor(query => query.SubcategoriesQuery);
+        result.ShouldHaveValidationErrorFor(query => query.Subcategories);
     }
 
     [Fact]
