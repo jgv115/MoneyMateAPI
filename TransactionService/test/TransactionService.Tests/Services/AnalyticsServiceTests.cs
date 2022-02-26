@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Moq;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
+using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Services;
 using TransactionService.ViewModels;
@@ -320,8 +321,43 @@ namespace TransactionService.Tests.Services
             }
 
             [Fact]
+            public async Task GivenInputCategoryNameAndDates_TransactionServiceCalledWithCorrectArguments()
+            {
+                const string expectedCategoryName = "category name";
+                var start = DateTime.MinValue;
+                var end = DateTime.MaxValue;
+
+                _mockTransactionService
+                    .Setup(helperService =>
+                        helperService.GetTransactionsAsync(
+                            It.IsAny<GetTransactionsQuery>()
+                        ))
+                    .ReturnsAsync(() => new List<Transaction>{
+                        new Transaction
+                    {
+                        Amount = 123M,
+                        Category = "category",
+                        TransactionTimestamp = DateTime.Now.ToString("O"),
+                        SubCategory = "subcategory",
+                        TransactionId = "transaction-id-1",
+                        TransactionType = "expense",
+                    }
+                    });
+
+                var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
+                await service.GetSubcategoriesBreakdown(expectedCategoryName, null, start, end);
+
+                _mockTransactionService.Verify(
+                    transactionService => transactionService.GetTransactionsAsync(
+                        It.Is<GetTransactionsQuery>(query =>
+                            query.Categories.SequenceEqual(new List<string> { expectedCategoryName })
+                            && query.Start == start && query.End == end
+                         )));
+            }
+
+            [Fact]
             public async Task
-                GivenNullCountAndListReturnedFromTransactionService_WhenGetSubcategoriesBreakdownInvoked_ThenCorrectAnalyticsSubcategoryListReturned()
+                GivenNullCountAndListReturnedFromTransactionService_ThenCorrectAnalyticsSubcategoryListReturned()
             {
                 const string expectedCategoryName = "category name";
                 var start = DateTime.MinValue;
@@ -354,7 +390,9 @@ namespace TransactionService.Tests.Services
 
                 _mockTransactionService
                     .Setup(helperService =>
-                        helperService.GetAllTransactionsByCategoryAsync(expectedCategoryName, start, end))
+                        helperService.GetTransactionsAsync(
+                            It.IsAny<GetTransactionsQuery>()
+                        ))
                     .ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
@@ -387,7 +425,7 @@ namespace TransactionService.Tests.Services
 
             [Fact]
             public async Task
-                GivenInputCountAndListReturnedFromTransactionService_WhenGetSubcategoriesBreakdownInvoked_ThenCorrectAnalyticsSubcategoryListReturned()
+                GivenInputCountAndListReturnedFromTransactionService_ThenCorrectAnalyticsSubcategoryListReturned()
             {
                 const int expectedCount = 2;
                 const string expectedCategoryName = "category name";
@@ -420,7 +458,9 @@ namespace TransactionService.Tests.Services
 
                 _mockTransactionService
                     .Setup(helperService =>
-                        helperService.GetAllTransactionsByCategoryAsync(expectedCategoryName, start, end))
+                        helperService.GetTransactionsAsync(
+                            It.IsAny<GetTransactionsQuery>()
+                        ))
                     .ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);

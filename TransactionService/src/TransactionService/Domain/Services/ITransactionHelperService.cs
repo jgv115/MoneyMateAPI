@@ -10,9 +10,6 @@ namespace TransactionService.Domain.Services
     {
         public Task<List<Transaction>> GetAllTransactionsAsync(DateTime start, DateTime end, string type = null);
 
-        public Task<List<Transaction>> GetAllTransactionsByCategoryAsync(string categoryName, DateTime start,
-            DateTime end);
-
         public Task<List<Transaction>> GetTransactionsAsync(GetTransactionsQuery queryParams);
 
         public Task StoreTransaction(StoreTransactionDto transactionDto);

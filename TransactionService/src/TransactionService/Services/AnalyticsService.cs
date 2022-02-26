@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TransactionService.Domain.Services;
+using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.ViewModels;
 
@@ -43,7 +44,13 @@ namespace TransactionService.Services
         public async Task<IEnumerable<AnalyticsSubcategory>> GetSubcategoriesBreakdown(string categoryName, int? count,
             DateTime start, DateTime end)
         {
-            var transactions = await _transactionService.GetAllTransactionsByCategoryAsync(categoryName, start, end);
+            var transactions = await _transactionService.GetTransactionsAsync(new GetTransactionsQuery
+            {
+                Categories = new List<string> { categoryName },
+                Start = start,
+                End = end,
+            });
+
             var orderedSubcategories = transactions.GroupBy(transaction => transaction.SubCategory)
                 .Select(grouping => new AnalyticsSubcategory
                 {

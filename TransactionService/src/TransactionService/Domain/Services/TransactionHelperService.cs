@@ -35,13 +35,6 @@ namespace TransactionService.Domain.Services
                 return _repository.GetAllTransactionsAsync(_userContext.UserId, start, end, type);
         }
 
-
-        public Task<List<Transaction>> GetAllTransactionsByCategoryAsync(string categoryName, DateTime start,
-            DateTime end)
-        {
-            return _repository.GetAllTransactionsByCategoryAsync(_userContext.UserId, categoryName, start, end);
-        }
-
         public async Task<List<Transaction>> GetTransactionsAsync(GetTransactionsQuery queryParams)
         {
             var dateRange = new DateRange(queryParams.Start.GetValueOrDefault(DateTime.MinValue),
