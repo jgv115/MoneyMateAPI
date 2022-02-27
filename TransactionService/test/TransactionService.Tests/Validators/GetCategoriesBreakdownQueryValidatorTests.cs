@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FluentValidation.TestHelper;
+using TransactionService.Constants;
 using TransactionService.Dtos;
 using TransactionService.Validators;
 using Xunit;
@@ -25,7 +26,7 @@ namespace TransactionService.Tests.Validators
         {
             var input = new GetCategoriesBreakdownQuery
             {
-                Type = "expense",
+                Type = TransactionType.Expense,
                 Start = DateTime.MinValue,
                 End = DateTime.MaxValue,
                 Frequency = "MONTHS",
@@ -39,7 +40,7 @@ namespace TransactionService.Tests.Validators
         {
             var input = new GetCategoriesBreakdownQuery
             {
-                Type = "expense",
+                Type = TransactionType.Expense,
                 Start = DateTime.MinValue,
                 End = DateTime.MaxValue,
                 Periods = 1
@@ -53,7 +54,7 @@ namespace TransactionService.Tests.Validators
         {
             var input = new GetCategoriesBreakdownQuery
             {
-                Type = "expense",
+                Type = TransactionType.Expense,
                 Start = DateTime.MinValue
             };
             var result = _validator.TestValidate(input);
@@ -65,7 +66,7 @@ namespace TransactionService.Tests.Validators
         {
             var input = new GetCategoriesBreakdownQuery
             {
-                Type = "expense",
+                Type = TransactionType.Expense,
                 End = DateTime.MaxValue
             };
             var result = _validator.TestValidate(input);
@@ -77,7 +78,7 @@ namespace TransactionService.Tests.Validators
         {
             var input = new GetCategoriesBreakdownQuery
             {
-                Type = "expense",
+                Type = TransactionType.Expense,
                 Start = DateTime.MinValue,
                 Periods = 1,
                 Frequency = "MONTHS",
@@ -91,7 +92,7 @@ namespace TransactionService.Tests.Validators
         {
             var input = new GetCategoriesBreakdownQuery
             {
-                Type = "expense",
+                Type = TransactionType.Expense,
                 End = DateTime.MaxValue,
                 Periods = 1,
                 Frequency = "MONTHS",
@@ -105,7 +106,7 @@ namespace TransactionService.Tests.Validators
         {
             var input = new GetCategoriesBreakdownQuery
             {
-                Type = "expense",
+                Type = TransactionType.Expense,
                 Frequency = "MONTHS",
             };
             var result = _validator.TestValidate(input);
@@ -117,7 +118,7 @@ namespace TransactionService.Tests.Validators
         {
             var input = new GetCategoriesBreakdownQuery
             {
-                Type = "expense",
+                Type = TransactionType.Expense,
                 Periods = 1,
             };
             var result = _validator.TestValidate(input);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TransactionService.Constants;
 using TransactionService.Domain.Services;
 using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
@@ -20,10 +21,15 @@ namespace TransactionService.Services
             _timePeriodHelper = timePeriodHelper ?? throw new ArgumentNullException(nameof(timePeriodHelper));
         }
 
-        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(string type, int? count, DateTime start,
+        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(TransactionType type, int? count, DateTime start,
             DateTime end)
         {
-            var transactions = await _transactionService.GetAllTransactionsAsync(start, end, type);
+            var transactions = await _transactionService.GetTransactionsAsync(new GetTransactionsQuery
+            {
+                Start = start,
+                End = end,
+                Type = type,
+            });
             var orderedCategories = transactions.GroupBy(transaction => transaction.Category)
                 .Select(grouping => new AnalyticsCategory
                 {
@@ -35,7 +41,7 @@ namespace TransactionService.Services
             return count.HasValue ? orderedCategories.Take(count.Value) : orderedCategories;
         }
 
-        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(string type, int? count, TimePeriod timePeriod)
+        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(TransactionType type, int? count, TimePeriod timePeriod)
         {
             var dateRange = _timePeriodHelper.ResolveDateRange(timePeriod);
             return await GetCategoriesBreakdown(type, count, dateRange.Start, dateRange.End);

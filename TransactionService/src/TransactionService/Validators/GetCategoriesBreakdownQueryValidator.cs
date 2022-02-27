@@ -10,7 +10,7 @@ namespace TransactionService.Validators
         {
             CascadeMode = CascadeMode.Stop;
 
-            RuleFor(query => query.Type).NotEmpty().NotNull();
+            RuleFor(query => query.Type).NotNull();
 
             When(query => query.End.HasValue && query.Start.HasValue, () =>
             {

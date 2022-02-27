@@ -8,10 +8,7 @@ namespace TransactionService.Domain.Services
 {
     public interface ITransactionHelperService
     {
-        public Task<List<Transaction>> GetAllTransactionsAsync(DateTime start, DateTime end, string type = null);
-
         public Task<List<Transaction>> GetTransactionsAsync(GetTransactionsQuery queryParams);
-
         public Task StoreTransaction(StoreTransactionDto transactionDto);
         public Task PutTransaction(string transactionId, PutTransactionDto putTransactionDto);
         public Task DeleteTransaction(string transactionId);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using TransactionService.Constants;
 using TransactionService.Controllers;
 using TransactionService.Dtos;
 using TransactionService.Services;
@@ -30,7 +31,7 @@ namespace TransactionService.Tests.Controllers
         public async Task
             GivenValidQueryParams_WhenGetCategoriesBreakdownInvoked_ThenAnalyticsServiceCalledWithCorrectArguments()
         {
-            const string expectedType = "expense";
+            var expectedType = TransactionType.Expense;
             const int expectedCount = 20;
             var startDate = DateTime.MinValue;
             var endDate = DateTime.MaxValue;
@@ -71,12 +72,12 @@ namespace TransactionService.Tests.Controllers
             };
 
             _mockAnalyticsService
-                .Setup(service => service.GetCategoriesBreakdown(It.IsAny<string>(), It.IsAny<int?>(),
+                .Setup(service => service.GetCategoriesBreakdown(It.IsAny<TransactionType>(), It.IsAny<int?>(),
                     It.IsAny<DateTime>(), It.IsAny<DateTime>())).ReturnsAsync(() => expectedAnalyticsCategories);
             var controller = new AnalyticsController(_mockAnalyticsService.Object);
             var response = await controller.GetCategoriesBreakdown(new GetCategoriesBreakdownQuery
             {
-                Type = "expense"
+                Type = TransactionType.Expense
             });
 
             var objectResult = Assert.IsType<OkObjectResult>(response);

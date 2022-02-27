@@ -27,14 +27,6 @@ namespace TransactionService.Domain.Services
             _specificationFactory = new TransactionSpecificationFactory();
         }
 
-        public Task<List<Transaction>> GetAllTransactionsAsync(DateTime start, DateTime end, string type = null)
-        {
-            if (type == null)
-                return _repository.GetAllTransactionsAsync(_userContext.UserId, start, end);
-            else
-                return _repository.GetAllTransactionsAsync(_userContext.UserId, start, end, type);
-        }
-
         public async Task<List<Transaction>> GetTransactionsAsync(GetTransactionsQuery queryParams)
         {
             var dateRange = new DateRange(queryParams.Start.GetValueOrDefault(DateTime.MinValue),

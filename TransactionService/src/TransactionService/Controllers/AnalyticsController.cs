@@ -25,7 +25,7 @@ namespace TransactionService.Controllers
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategoriesBreakdown([FromQuery] GetCategoriesBreakdownQuery queryParams)
         {
-            var type = queryParams.Type;
+            var type = queryParams.Type.Value;
             var count = queryParams.Count;
             var start = queryParams.Start;
             var end = queryParams.End;
@@ -50,7 +50,7 @@ namespace TransactionService.Controllers
 
             return Ok(analyticsCategories);
         }
-        
+
         [HttpGet("subcategories")]
         public async Task<IActionResult> GetSubcategoriesBreakdown([FromQuery] GetSubcategoriesBreakdownQuery queryParams)
         {

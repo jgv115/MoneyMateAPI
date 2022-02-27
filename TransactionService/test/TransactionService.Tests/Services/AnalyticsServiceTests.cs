@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 using Moq;
+using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
 using TransactionService.Dtos;
@@ -50,11 +52,46 @@ namespace TransactionService.Tests.Services
                 _mockTimePeriodHelper = new Mock<ITimePeriodHelper>();
             }
 
+
+            [Fact]
+            public async Task
+                GivenInputParameters_ThenTransactionServiceCalledWithCorrectArguments()
+            {
+                var expectedType = TransactionType.Expense;
+                var start = DateTime.MinValue;
+                var end = DateTime.MaxValue;
+
+                _mockTransactionService
+                    .Setup(helperService =>
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>())).ReturnsAsync(() =>
+                        new List<Transaction>
+                        {
+                            new Transaction
+                            {
+                                Amount = 123M,
+                                Category = "category",
+                                TransactionTimestamp = DateTime.Now.ToString("O"),
+                                SubCategory = "subcategory-1",
+                                TransactionId = "transaction-id-1",
+                                TransactionType = "expense",
+                            }
+                        });
+
+                var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
+                await service.GetCategoriesBreakdown(expectedType, null, start, end);
+
+                _mockTransactionService.Verify(transactionService => transactionService.GetTransactionsAsync(
+                    It.Is<GetTransactionsQuery>(query =>
+                        query.Start == start && query.End == end && query.Type == expectedType &&
+                        !query.Subcategories.Any() && !query.Categories.Any())
+                ));
+            }
+
             [Fact]
             public async Task
                 GivenNullCountAndListReturnedFromTransactionService_ThenCorrectAnalyticsCategoryListReturned()
             {
-                const string expectedType = "expense";
+                var expectedType = TransactionType.Expense;
                 var start = DateTime.MinValue;
                 var end = DateTime.MaxValue;
 
@@ -81,30 +118,30 @@ namespace TransactionService.Tests.Services
 
                 _mockTransactionService
                     .Setup(helperService =>
-                        helperService.GetAllTransactionsAsync(start, end,
-                            expectedType)).ReturnsAsync(() => transactionList);
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>()))
+                    .ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
                 var analyticsCategories = await service.GetCategoriesBreakdown(expectedType, null, start, end);
 
                 var expectedAnalyticsCategories = new List<AnalyticsCategory>
-            {
-                new()
                 {
-                    CategoryName = expectedCategory1,
-                    TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory2,
-                    TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory3,
-                    TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
-                }
-            };
+                    new()
+                    {
+                        CategoryName = expectedCategory1,
+                        TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
+                    },
+                    new()
+                    {
+                        CategoryName = expectedCategory2,
+                        TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
+                    },
+                    new()
+                    {
+                        CategoryName = expectedCategory3,
+                        TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
+                    }
+                };
 
                 Assert.Equal(expectedAnalyticsCategories, analyticsCategories);
             }
@@ -114,7 +151,7 @@ namespace TransactionService.Tests.Services
                 GivenInputCountAndListReturnedFromTransactionService_ThenCorrectAnalyticsCategoryListReturned()
             {
                 const int expectedCount = 2;
-                const string expectedType = "expense";
+                var expectedType = TransactionType.Expense;
                 var start = DateTime.MinValue;
                 var end = DateTime.MaxValue;
 
@@ -141,30 +178,30 @@ namespace TransactionService.Tests.Services
 
                 _mockTransactionService
                     .Setup(helperService =>
-                        helperService.GetAllTransactionsAsync(start, end,
-                            expectedType)).ReturnsAsync(() => transactionList);
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>()))
+                    .ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
                 var analyticsCategories = await service.GetCategoriesBreakdown(expectedType, expectedCount, start, end);
 
                 var expectedAnalyticsCategories = new List<AnalyticsCategory>
-            {
-                new()
                 {
-                    CategoryName = expectedCategory1,
-                    TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory2,
-                    TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory3,
-                    TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
-                }
-            }.Take(expectedCount);
+                    new()
+                    {
+                        CategoryName = expectedCategory1,
+                        TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
+                    },
+                    new()
+                    {
+                        CategoryName = expectedCategory2,
+                        TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
+                    },
+                    new()
+                    {
+                        CategoryName = expectedCategory3,
+                        TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
+                    }
+                }.Take(expectedCount);
 
                 Assert.Equal(expectedAnalyticsCategories, analyticsCategories);
             }
@@ -182,10 +219,46 @@ namespace TransactionService.Tests.Services
             }
 
             [Fact]
+            public async Task GivenInputParameters_TransactionServiceCalledWithCorrectArguments()
+            {
+                var expectedType = TransactionType.Expense;
+                var start = DateTime.MinValue;
+                var end = DateTime.MaxValue;
+                var timePeriod = new TimePeriod("MONTH", 5);
+                var dateRange = new DateRange(start, end);
+
+                _mockTimePeriodHelper.Setup(helper => helper.ResolveDateRange(timePeriod)).Returns(dateRange);
+
+                _mockTransactionService
+                    .Setup(helperService =>
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>())).ReturnsAsync(() =>
+                        new List<Transaction>
+                        {
+                            new Transaction
+                            {
+                                Amount = 123M,
+                                Category = "category",
+                                TransactionTimestamp = DateTime.Now.ToString("O"),
+                                SubCategory = "subcategory-1",
+                                TransactionId = "transaction-id-1",
+                                TransactionType = "expense",
+                            }
+                        });
+
+                var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
+                await service.GetCategoriesBreakdown(expectedType, null, timePeriod);
+
+                _mockTransactionService.Verify(transactionService => transactionService.GetTransactionsAsync(
+                    It.Is<GetTransactionsQuery>(query =>
+                        query.Start == start && query.End == end && query.Type == expectedType &&
+                        !query.Subcategories.Any() && !query.Categories.Any())));
+            }
+
+            [Fact]
             public async Task
                 GivenNullCountAndListReturnedFromTransactionService_ThenCorrectAnalyticsCategoryListReturned()
             {
-                const string expectedType = "expense";
+                var expectedType = TransactionType.Expense;
                 var start = DateTime.MinValue;
                 var end = DateTime.MaxValue;
                 var timePeriod = new TimePeriod("MONTH", 5);
@@ -216,30 +289,30 @@ namespace TransactionService.Tests.Services
 
                 _mockTransactionService
                     .Setup(helperService =>
-                        helperService.GetAllTransactionsAsync(start, end,
-                            expectedType)).ReturnsAsync(() => transactionList);
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>()))
+                    .ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
                 var analyticsCategories = await service.GetCategoriesBreakdown(expectedType, null, timePeriod);
 
                 var expectedAnalyticsCategories = new List<AnalyticsCategory>
-            {
-                new()
                 {
-                    CategoryName = expectedCategory1,
-                    TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory2,
-                    TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory3,
-                    TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
-                }
-            };
+                    new()
+                    {
+                        CategoryName = expectedCategory1,
+                        TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
+                    },
+                    new()
+                    {
+                        CategoryName = expectedCategory2,
+                        TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
+                    },
+                    new()
+                    {
+                        CategoryName = expectedCategory3,
+                        TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
+                    }
+                };
 
                 Assert.Equal(expectedAnalyticsCategories, analyticsCategories);
             }
@@ -249,7 +322,7 @@ namespace TransactionService.Tests.Services
                 GivenInputCountAndListReturnedFromTransactionService_ThenCorrectAnalyticsCategoryListReturned()
             {
                 const int expectedCount = 2;
-                const string expectedType = "expense";
+                var expectedType = TransactionType.Expense;
                 var start = DateTime.MinValue;
                 var end = DateTime.MaxValue;
                 var timePeriod = new TimePeriod("MONTH", 5);
@@ -280,30 +353,30 @@ namespace TransactionService.Tests.Services
 
                 _mockTransactionService
                     .Setup(helperService =>
-                        helperService.GetAllTransactionsAsync(start, end,
-                            expectedType)).ReturnsAsync(() => transactionList);
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>()))
+                    .ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
                 var analyticsCategories = await service.GetCategoriesBreakdown(expectedType, expectedCount, timePeriod);
 
                 var expectedAnalyticsCategories = new List<AnalyticsCategory>
-            {
-                new()
                 {
-                    CategoryName = expectedCategory1,
-                    TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory2,
-                    TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory3,
-                    TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
-                }
-            }.Take(expectedCount);
+                    new()
+                    {
+                        CategoryName = expectedCategory1,
+                        TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
+                    },
+                    new()
+                    {
+                        CategoryName = expectedCategory2,
+                        TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
+                    },
+                    new()
+                    {
+                        CategoryName = expectedCategory3,
+                        TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
+                    }
+                }.Take(expectedCount);
 
                 Assert.Equal(expectedAnalyticsCategories, analyticsCategories);
             }
@@ -332,16 +405,17 @@ namespace TransactionService.Tests.Services
                         helperService.GetTransactionsAsync(
                             It.IsAny<GetTransactionsQuery>()
                         ))
-                    .ReturnsAsync(() => new List<Transaction>{
-                        new Transaction
+                    .ReturnsAsync(() => new List<Transaction>
                     {
-                        Amount = 123M,
-                        Category = "category",
-                        TransactionTimestamp = DateTime.Now.ToString("O"),
-                        SubCategory = "subcategory",
-                        TransactionId = "transaction-id-1",
-                        TransactionType = "expense",
-                    }
+                        new Transaction
+                        {
+                            Amount = 123M,
+                            Category = "category",
+                            TransactionTimestamp = DateTime.Now.ToString("O"),
+                            SubCategory = "subcategory",
+                            TransactionId = "transaction-id-1",
+                            TransactionType = "expense",
+                        }
                     });
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
@@ -352,7 +426,7 @@ namespace TransactionService.Tests.Services
                         It.Is<GetTransactionsQuery>(query =>
                             query.Categories.SequenceEqual(new List<string> { expectedCategoryName })
                             && query.Start == start && query.End == end
-                         )));
+                        )));
             }
 
             [Fact]
@@ -396,29 +470,30 @@ namespace TransactionService.Tests.Services
                     .ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
-                var analyticsCategories = await service.GetSubcategoriesBreakdown(expectedCategoryName, null, start, end);
+                var analyticsCategories =
+                    await service.GetSubcategoriesBreakdown(expectedCategoryName, null, start, end);
 
                 var expectedAnalyticsCategories = new List<AnalyticsSubcategory>
-            {
-                new()
                 {
-                    SubcategoryName = expectedSubcategory1,
-                    TotalAmount = numberOfSubcategory1Transactions * subcategory1TransactionsAmount,
-                    BelongsToCategory = expectedCategoryName
-                },
-                new()
-                {
-                    SubcategoryName = expectedSubcategory2,
-                    TotalAmount = numberOfSubcategory2Transactions * subcategory2TransactionsAmount,
-                    BelongsToCategory = expectedCategoryName
-                },
-                new()
-                {
-                    SubcategoryName = expectedSubcategory3,
-                    TotalAmount = numberOfSubcategory3Transactions * subcategory3TransactionsAmount,
-                    BelongsToCategory = expectedCategoryName
-                }
-            };
+                    new()
+                    {
+                        SubcategoryName = expectedSubcategory1,
+                        TotalAmount = numberOfSubcategory1Transactions * subcategory1TransactionsAmount,
+                        BelongsToCategory = expectedCategoryName
+                    },
+                    new()
+                    {
+                        SubcategoryName = expectedSubcategory2,
+                        TotalAmount = numberOfSubcategory2Transactions * subcategory2TransactionsAmount,
+                        BelongsToCategory = expectedCategoryName
+                    },
+                    new()
+                    {
+                        SubcategoryName = expectedSubcategory3,
+                        TotalAmount = numberOfSubcategory3Transactions * subcategory3TransactionsAmount,
+                        BelongsToCategory = expectedCategoryName
+                    }
+                };
 
                 Assert.Equal(expectedAnalyticsCategories, analyticsCategories);
             }
@@ -464,29 +539,30 @@ namespace TransactionService.Tests.Services
                     .ReturnsAsync(() => transactionList);
 
                 var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
-                var analyticsCategories = await service.GetSubcategoriesBreakdown(expectedCategoryName, expectedCount, start, end);
+                var analyticsCategories =
+                    await service.GetSubcategoriesBreakdown(expectedCategoryName, expectedCount, start, end);
 
                 var expectedAnalyticsCategories = new List<AnalyticsSubcategory>
-            {
-                new()
                 {
-                    SubcategoryName = expectedSubcategory1,
-                    TotalAmount = numberOfSubcategory1Transactions * subcategory1TransactionsAmount,
-                    BelongsToCategory = expectedCategoryName
-                },
-                new()
-                {
-                    SubcategoryName = expectedSubcategory2,
-                    TotalAmount = numberOfSubcategory2Transactions * subcategory2TransactionsAmount,
-                    BelongsToCategory = expectedCategoryName
-                },
-                new()
-                {
-                    SubcategoryName = expectedSubcategory3,
-                    TotalAmount = numberOfSubcategory3Transactions * subcategory3TransactionsAmount,
-                    BelongsToCategory = expectedCategoryName
-                }
-            }.Take(expectedCount);
+                    new()
+                    {
+                        SubcategoryName = expectedSubcategory1,
+                        TotalAmount = numberOfSubcategory1Transactions * subcategory1TransactionsAmount,
+                        BelongsToCategory = expectedCategoryName
+                    },
+                    new()
+                    {
+                        SubcategoryName = expectedSubcategory2,
+                        TotalAmount = numberOfSubcategory2Transactions * subcategory2TransactionsAmount,
+                        BelongsToCategory = expectedCategoryName
+                    },
+                    new()
+                    {
+                        SubcategoryName = expectedSubcategory3,
+                        TotalAmount = numberOfSubcategory3Transactions * subcategory3TransactionsAmount,
+                        BelongsToCategory = expectedCategoryName
+                    }
+                }.Take(expectedCount);
 
                 Assert.Equal(expectedAnalyticsCategories, analyticsCategories);
             }
