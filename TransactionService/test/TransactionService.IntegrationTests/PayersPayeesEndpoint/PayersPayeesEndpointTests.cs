@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -159,7 +160,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(new List<PayerPayeeViewModel> { expectedPayee1, expectedPayee2 }, returnedPayees);
+            Assert.Equal(new List<PayerPayeeViewModel> {expectedPayee1, expectedPayee2}, returnedPayees);
         }
 
         [Fact]
@@ -212,12 +213,13 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             response.EnsureSuccessStatusCode();
 
             var returnedString = await response.Content.ReadAsStringAsync();
-            var returnedPayees = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var returnedPayees = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
-            Assert.Equal(new List<PayerPayeeViewModel> { expectedPayee2 }, returnedPayees);
+            Assert.Equal(new List<PayerPayeeViewModel> {expectedPayee2}, returnedPayees);
         }
 
         [Fact]
@@ -237,7 +239,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = payer.PayerPayeeName,
                 ExternalId = payer.ExternalId
             };
-            await DynamoDbHelper.WriteIntoTable(new List<PayerPayee> { payer });
+            await DynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payer});
 
             var response = await HttpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
             response.EnsureSuccessStatusCode();
@@ -268,7 +270,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 PayerPayeeName = payee.PayerPayeeName,
                 ExternalId = payee.ExternalId
             };
-            await DynamoDbHelper.WriteIntoTable(new List<PayerPayee> { payee });
+            await DynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payee});
 
             var response = await HttpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
             response.EnsureSuccessStatusCode();
@@ -368,6 +370,84 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                     var payerPayeeId = Guid.Parse(payerPayee.PayerPayeeId.Split("payee#")[1]);
                     Assert.NotEqual(Guid.Empty, payerPayeeId);
                 });
+        }
+
+        [Theory]
+        [InlineData("test payer123", "test external id 123")]
+        [InlineData("test payer123", null)]
+        public async Task
+            GivenExistingPayersInDatabase_WhenPostPayerEndpointCalled_ThenDuplicatePayerShouldNotBePersisted(
+                string expectedPayerName, string expectedExternalId)
+        {
+            var payer = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = $"payer#1234567",
+                PayerPayeeName = expectedPayerName,
+                ExternalId = expectedExternalId
+            };
+            var createPayerDto = new CreatePayerPayeeDto
+            {
+                Name = expectedPayerName,
+                ExternalId = expectedExternalId
+            };
+
+            await DynamoDbHelper.WriteIntoTable(new List<PayerPayee>
+            {
+                payer,
+                new()
+                {
+                    ExternalId = "gkrdfhgjkdf",
+                    PayerPayeeName = "name",
+                    UserId = UserId,
+                    PayerPayeeId = $"payer#12345676532",
+                }
+            });
+            
+            var httpContent =
+                new StringContent(JsonSerializer.Serialize(createPayerDto), Encoding.UTF8, "application/json");
+
+            var response = await HttpClient.PostAsync("api/payerspayees/payers", httpContent);
+            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        }
+        
+        [Theory]
+        [InlineData("test payee123", "test external id 123")]
+        [InlineData("test payee123", null)]
+        public async Task
+            GivenExistingPayeesInDatabase_WhenPostPayerEndpointCalled_ThenDuplicatePayeeShouldNotBePersisted(
+                string expectedPayeeName, string expectedExternalId)
+        {
+            var payee = new PayerPayee
+            {
+                UserId = UserId,
+                PayerPayeeId = $"payee#1234567",
+                PayerPayeeName = expectedPayeeName,
+                ExternalId = expectedExternalId
+            };
+            var createPayerDto = new CreatePayerPayeeDto
+            {
+                Name = expectedPayeeName,
+                ExternalId = expectedExternalId
+            };
+
+            await DynamoDbHelper.WriteIntoTable(new List<PayerPayee>
+            {
+                payee,
+                new()
+                {
+                    ExternalId = "gkrdfhgjkdf",
+                    PayerPayeeName = "name",
+                    UserId = UserId,
+                    PayerPayeeId = $"payee#12345676532",
+                }
+            });
+            
+            var httpContent =
+                new StringContent(JsonSerializer.Serialize(createPayerDto), Encoding.UTF8, "application/json");
+
+            var response = await HttpClient.PostAsync("api/payerspayees/payees", httpContent);
+            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
     }
 }

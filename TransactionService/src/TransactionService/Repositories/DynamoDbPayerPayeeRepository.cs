@@ -9,6 +9,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 using AutoMapper.Internal;
 using TransactionService.Domain.Models;
 using TransactionService.Helpers;
+using TransactionService.Repositories.Exceptions;
 
 namespace TransactionService.Repositories
 {
@@ -86,11 +87,29 @@ namespace TransactionService.Repositories
             return payee;
         }
 
-        private async Task<IEnumerable<PayerPayee>> QueryPayerPayeeByName(string userId, string payerOrPayee,
-            IEnumerable<string> searchQueries)
+        private async Task<PayerPayee> QueryPayerPayee(string userId, string payerOrPayee, string name,
+            string externalId)
+        {
+            var results = await _dbContext.QueryAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+                QueryOperator.Equal, new[] {name}, new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName,
+                    IndexName = PayerPayeeNameIndex,
+                    QueryFilter = new List<ScanCondition>
+                    {
+                        new("PayerPayeeId", ScanOperator.BeginsWith, $"{payerOrPayee}#")
+                    }
+                }
+            ).GetRemainingAsync();
+
+            return results.Find(payerPayee => payerPayee.ExternalId == externalId);
+        }
+
+        private async Task<IEnumerable<PayerPayee>> QueryPayerPayee(string userId, string payerOrPayee,
+            IEnumerable<string> nameSearchQueries)
         {
             var payerPayeeResults = new ConcurrentBag<PayerPayee>();
-            var tasks = searchQueries.Select(async searchQuery =>
+            var tasks = nameSearchQueries.Select(async searchQuery =>
             {
                 var results = await _dbContext.QueryAsync<PayerPayee>($"{userId}{HashKeySuffix}",
                     QueryOperator.BeginsWith, new[] {searchQuery}, new DynamoDBOperationConfig
@@ -103,7 +122,7 @@ namespace TransactionService.Repositories
                         }
                     }
                 ).GetRemainingAsync();
-                
+
                 results.ForAll(payerPayee =>
                 {
                     payerPayee.PayerPayeeId = extractRangeKeyData(payerPayee.PayerPayeeId);
@@ -120,7 +139,7 @@ namespace TransactionService.Repositories
             string searchQuery)
         {
             var searchNames = StringHelpers.GenerateNGrams(searchQuery, multiCase: true);
-            return await QueryPayerPayeeByName(userId, payerOrPayee, searchNames);
+            return await QueryPayerPayee(userId, payerOrPayee, searchNames);
         }
 
         private async Task<IEnumerable<PayerPayee>> AutocompletePayerPayee(string userId, string payerOrPayee,
@@ -132,7 +151,7 @@ namespace TransactionService.Repositories
                 searchQuery.LowercaseFirstLetter()
             };
 
-            return await QueryPayerPayeeByName(userId, payerOrPayee, searchNames);
+            return await QueryPayerPayee(userId, payerOrPayee, searchNames);
         }
 
         public Task<IEnumerable<PayerPayee>> FindPayer(string userId, string payerName)
@@ -159,6 +178,16 @@ namespace TransactionService.Repositories
         {
             if (payerOrPayee is "payer" or "payee")
             {
+                var foundPayerPayee = await QueryPayerPayee(newPayerPayee.UserId, payerOrPayee,
+                    newPayerPayee.PayerPayeeName,
+                    newPayerPayee.ExternalId);
+
+                if (foundPayerPayee != null)
+                {
+                    throw new RepositoryItemExistsException(
+                        $"{payerOrPayee} with name {newPayerPayee.PayerPayeeName} and externalId {newPayerPayee.ExternalId} already exists");
+                }
+
                 newPayerPayee.UserId += HashKeySuffix;
                 newPayerPayee.PayerPayeeId = $"{_rangeKeyPrefixes[payerOrPayee]}{newPayerPayee.PayerPayeeId}";
                 await _dbContext.SaveAsync(newPayerPayee, new DynamoDBOperationConfig
