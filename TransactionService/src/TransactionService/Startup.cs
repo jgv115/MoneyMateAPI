@@ -47,7 +47,7 @@ namespace TransactionService
 
             services.AddSingleton<ISystemClock, SystemClock>();
             services.AddSingleton<ITimePeriodHelper, TimePeriodHelper>();
-            
+
             services.AddScoped<CurrentUserContext>();
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
             services.AddScoped<ICategoriesService, CategoriesService>();
@@ -58,14 +58,14 @@ namespace TransactionService
 
             var awsSettings = Configuration.GetSection("AWS");
             var awsLocalMode = awsSettings.GetValue<bool>("LocalMode");
-            
+
             if (awsLocalMode)
             {
                 var awsServiceUrl = awsSettings.GetValue<string>("ServiceUrl");
                 var awsRegion = awsSettings.GetValue<string>("Region");
                 var awsKey = awsSettings.GetValue<string>("AccessKey");
                 var awsSecret = awsSettings.GetValue<string>("SecretKey");
-                
+
                 services.AddSingleton<IAmazonDynamoDB>(_ =>
                 {
                     var clientConfig = new AmazonDynamoDBConfig
@@ -98,6 +98,8 @@ namespace TransactionService
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 
