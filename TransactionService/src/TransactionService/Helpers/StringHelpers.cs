@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace TransactionService.Helpers
@@ -13,6 +14,17 @@ namespace TransactionService.Helpers
         public static string LowercaseFirstLetter(this string str)
         {
             return str.First().ToString().ToLower() + str.Substring(1);
+        }
+
+        public static IEnumerable<string> GenerateCapitilisationCombinations(string input)
+        {
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            return new List<string>
+            {
+                textInfo.ToTitleCase(input),
+                textInfo.ToLower(input),
+                textInfo.ToUpper(input)
+            };
         }
 
         public static IEnumerable<string> GenerateNGrams(string input, int minSize = 3, bool multiCase = false)
@@ -48,6 +60,7 @@ namespace TransactionService.Helpers
                         ngrams.Add(token);
                     }
                 }
+
                 return ngrams;
             });
         }

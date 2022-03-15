@@ -145,11 +145,7 @@ namespace TransactionService.Repositories
         private async Task<IEnumerable<PayerPayee>> AutocompletePayerPayee(string userId, string payerOrPayee,
             string searchQuery)
         {
-            var searchNames = new List<string>
-            {
-                searchQuery.CapitaliseFirstLetter(),
-                searchQuery.LowercaseFirstLetter()
-            };
+            var searchNames = StringHelpers.GenerateCapitilisationCombinations(searchQuery);
 
             return await QueryPayerPayee(userId, payerOrPayee, searchNames);
         }
