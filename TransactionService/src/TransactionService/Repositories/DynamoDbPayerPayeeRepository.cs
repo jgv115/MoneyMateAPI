@@ -178,7 +178,7 @@ namespace TransactionService.Repositories
                     newPayerPayee.PayerPayeeName,
                     newPayerPayee.ExternalId);
 
-                if (foundPayerPayee != null)
+                if (foundPayerPayee is not null)
                 {
                     throw new RepositoryItemExistsException(
                         $"{payerOrPayee} with name {newPayerPayee.PayerPayeeName} and externalId {newPayerPayee.ExternalId} already exists");

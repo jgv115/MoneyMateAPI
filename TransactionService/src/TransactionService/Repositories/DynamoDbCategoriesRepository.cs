@@ -6,6 +6,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using TransactionService.Domain.Models;
+using TransactionService.Repositories.Exceptions;
 
 namespace TransactionService.Repositories
 {
@@ -31,6 +32,16 @@ namespace TransactionService.Repositories
 
             _dbContext = new DynamoDBContext(dbClient);
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
+        }
+
+        private async Task<Category> GetCategory(string userId, string categoryName, string categoryType)
+        {
+            return await _dbContext.LoadAsync<Category>($"{userId}{HashKeySuffix}",
+                $"{_rangeKeySuffixes[categoryType]}{categoryName}",
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
         }
 
         public async Task<IEnumerable<Category>> GetAllCategories(string userId)
@@ -80,6 +91,12 @@ namespace TransactionService.Repositories
 
         public async Task CreateCategory(Category newCategory, string categoryType)
         {
+            var foundCategory = await GetCategory(newCategory.UserId, newCategory.CategoryName, categoryType);
+            if (foundCategory is not null)
+            {
+                throw new RepositoryItemExistsException($"Category of type ${categoryType} already exists");
+            }
+
             newCategory.UserId += HashKeySuffix;
             newCategory.CategoryName = $"{_rangeKeySuffixes[categoryType]}{newCategory.CategoryName}";
             await _dbContext.SaveAsync(newCategory, new DynamoDBOperationConfig

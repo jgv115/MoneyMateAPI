@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -10,171 +11,208 @@ using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
 
-namespace TransactionService.IntegrationTests.CategoriesEndpoint
+namespace TransactionService.IntegrationTests.CategoriesEndpoint;
+
+[Collection("IntegrationTests")]
+public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
 {
-    [Collection("IntegrationTests")]
-    public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
+    private readonly HttpClient _httpClient;
+    private readonly DynamoDbHelper _dynamoDbHelper;
+    private const string UserId = "auth0|moneymatetest#Categories";
+
+    public CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
-        private readonly HttpClient HttpClient;
-        private readonly DynamoDbHelper DynamoDbHelper;
-        private const string UserId = "auth0|moneymatetest#Categories";
+        _httpClient = factory.CreateDefaultClient();
+        _dynamoDbHelper = new DynamoDbHelper();
+    }
 
-        public CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory)
+    public async Task InitializeAsync()
+    {
+        await _dynamoDbHelper.CreateTable();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _dynamoDbHelper.DeleteTable();
+    }
+
+    public static IEnumerable<object[]> CategoriesEndpointTestData =>
+        new List<object[]>
         {
-            HttpClient = factory.CreateDefaultClient();
-            DynamoDbHelper = new DynamoDbHelper();
-        }
-
-        public async Task InitializeAsync()
-        {
-            await DynamoDbHelper.CreateTable();
-        }
-
-        public async Task DisposeAsync()
-        {
-            await DynamoDbHelper.DeleteTable();
-        }
-
-        public static IEnumerable<object[]> CategoriesEndpointTestData =>
-            new List<object[]>
+            new object[]
             {
-                new object[]
+                "",
+                new List<Category>
                 {
-                    "",
-                    new List<Category>
+                    new()
                     {
-                        new()
-                        {
-                            UserId = UserId,
-                            CategoryName = "category1",
-                            SubCategories = new List<string> {"subcategory1", "subcategory2"}
-                        },
-                        new()
-                        {
-                            UserId = UserId,
-                            CategoryName = "category2",
-                            SubCategories = new List<string> {"subcategory3", "subcategory4"}
-                        }
-                    }
-                },
-                new object[]
-                {
-                    "?categoryType=expense",
-                    new List<Category>
+                        UserId = UserId,
+                        CategoryName = "category1",
+                        SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                    },
+                    new()
                     {
-                        new()
-                        {
-                            UserId = UserId,
-                            CategoryName = "category1",
-                            SubCategories = new List<string> {"subcategory1", "subcategory2"}
-                        }
-                    }
-                },
-                new object[]
-                {
-                    "?categoryType=income",
-                    new List<Category>
-                    {
-                        new()
-                        {
-                            UserId = UserId,
-                            CategoryName = "category2",
-                            SubCategories = new List<string> {"subcategory3", "subcategory4"}
-                        }
+                        UserId = UserId,
+                        CategoryName = "category2",
+                        SubCategories = new List<string> {"subcategory3", "subcategory4"}
                     }
                 }
-            };
-
-
-        [Theory]
-        [MemberData(nameof(CategoriesEndpointTestData))]
-        public async Task GivenValidRequest_WhenGetCategoriesIsCalledWithCategoryType_ThenAllCategoriesAreReturned(
-            string queryString, List<Category> expectedCategories)
-        {
-            var initialData = new List<Category>
+            },
+            new object[]
             {
-                new()
+                "?categoryType=expense",
+                new List<Category>
                 {
-                    UserId = UserId,
-                    CategoryName = "expenseCategory#category1",
-                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
-                },
-                new()
-                {
-                    UserId = UserId,
-                    CategoryName = "incomeCategory#category2",
-                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                    new()
+                    {
+                        UserId = UserId,
+                        CategoryName = "category1",
+                        SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                    }
                 }
-            };
-
-            await DynamoDbHelper.WriteIntoTable(initialData);
-
-            var response = await HttpClient.GetAsync($"/api/categories{queryString}");
-            response.EnsureSuccessStatusCode();
-
-            var returnedString = await response.Content.ReadAsStringAsync();
-            var returnedCategoriesList = JsonSerializer.Deserialize<List<Category>>(returnedString,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-            for (var i = 0; i < expectedCategories.Count; i++)
+            },
+            new object[]
             {
-                Assert.Equal(expectedCategories[i].CategoryName, returnedCategoriesList[i].CategoryName);
-                Assert.Equal(expectedCategories[i].UserId, returnedCategoriesList[i].UserId);
-                Assert.Equal(expectedCategories[i].SubCategories, returnedCategoriesList[i].SubCategories);
+                "?categoryType=income",
+                new List<Category>
+                {
+                    new()
+                    {
+                        UserId = UserId,
+                        CategoryName = "category2",
+                        SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                    }
+                }
             }
-        }
+        };
 
-        [Fact]
-        public async Task GivenValidRequest_WhenGetSubCategoriesIsCalled_ThenAllSubCategoriesAreReturned()
+
+    [Theory]
+    [MemberData(nameof(CategoriesEndpointTestData))]
+    public async Task GivenValidRequest_WhenGetCategoriesIsCalledWithCategoryType_ThenAllCategoriesAreReturned(
+        string queryString, List<Category> expectedCategories)
+    {
+        var initialData = new List<Category>
         {
-            var expectedCategories = new List<string> { "category1", "category2", "category3" };
-            var expectedSubCategories = new List<string> { "test1", "test2", "test4" };
-
-            await DynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
+            new()
             {
                 UserId = UserId,
-                CategoryName = category,
-                SubCategories = expectedSubCategories
-            }));
-
-            var response = await HttpClient.GetAsync("/api/categories/category1");
-            response.EnsureSuccessStatusCode();
-
-            var returnedString = await response.Content.ReadAsStringAsync();
-            var returnedCategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
-
-            Assert.Equal(expectedSubCategories, returnedCategoriesList);
-        }
-
-        [Fact]
-        public async Task GivenAValidExpenseCategoryRequest_WhenCreateCategoryIsCalled_ThenCategoryIsPersisted()
-        {
-            const string inputCategoryName = "category123";
-            const string inputCategoryType = "expense";
-            var expectedCategoryName = $"{inputCategoryType}Category#{inputCategoryName}";
-            var expectedSubcategories = new List<string> { "test1", "test2" };
-
-            var inputDto = new CreateCategoryDto
+                CategoryName = "expenseCategory#category1",
+                SubCategories = new List<string> {"subcategory1", "subcategory2"}
+            },
+            new()
             {
-                CategoryName = inputCategoryName,
-                CategoryType = inputCategoryType,
-                SubCategories = expectedSubcategories
-            };
+                UserId = UserId,
+                CategoryName = "incomeCategory#category2",
+                SubCategories = new List<string> {"subcategory3", "subcategory4"}
+            }
+        };
 
-            var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
-            var response = await HttpClient.PostAsync("/api/categories", httpContent);
+        await _dynamoDbHelper.WriteIntoTable(initialData);
 
-            response.EnsureSuccessStatusCode();
+        var response = await _httpClient.GetAsync($"/api/categories{queryString}");
+        response.EnsureSuccessStatusCode();
 
-            var returnedCategories = await DynamoDbHelper.ScanTable<Category>();
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var returnedCategoriesList = JsonSerializer.Deserialize<List<Category>>(returnedString,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
-            Assert.Single(returnedCategories);
-            Assert.Equal(expectedCategoryName, returnedCategories[0].CategoryName);
-            Assert.Equal(expectedSubcategories, returnedCategories[0].SubCategories);
-            Assert.Equal(UserId, returnedCategories[0].UserId);
+        for (var i = 0; i < expectedCategories.Count; i++)
+        {
+            Assert.Equal(expectedCategories[i].CategoryName, returnedCategoriesList[i].CategoryName);
+            Assert.Equal(expectedCategories[i].UserId, returnedCategoriesList[i].UserId);
+            Assert.Equal(expectedCategories[i].SubCategories, returnedCategoriesList[i].SubCategories);
         }
+    }
+
+    [Fact]
+    public async Task GivenValidRequest_WhenGetSubCategoriesIsCalled_ThenAllSubCategoriesAreReturned()
+    {
+        var expectedCategories = new List<string> {"category1", "category2", "category3"};
+        var expectedSubCategories = new List<string> {"test1", "test2", "test4"};
+
+        await _dynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
+        {
+            UserId = UserId,
+            CategoryName = category,
+            SubCategories = expectedSubCategories
+        }));
+
+        var response = await _httpClient.GetAsync("/api/categories/category1");
+        response.EnsureSuccessStatusCode();
+
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var returnedCategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
+
+        Assert.Equal(expectedSubCategories, returnedCategoriesList);
+    }
+
+    [Fact]
+    public async Task GivenAValidExpenseCategoryRequest_WhenCreateCategoryIsCalled_ThenCategoryIsPersisted()
+    {
+        const string inputCategoryName = "category123";
+        const string inputCategoryType = "expense";
+        var expectedCategoryName = $"{inputCategoryType}Category#{inputCategoryName}";
+        var expectedSubcategories = new List<string> {"test1", "test2"};
+
+        var inputDto = new CreateCategoryDto
+        {
+            CategoryName = inputCategoryName,
+            CategoryType = inputCategoryType,
+            SubCategories = expectedSubcategories
+        };
+
+        var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync("/api/categories", httpContent);
+
+        response.EnsureSuccessStatusCode();
+
+        var returnedCategories = await _dynamoDbHelper.ScanTable<Category>();
+
+        Assert.Single(returnedCategories);
+        Assert.Equal(expectedCategoryName, returnedCategories[0].CategoryName);
+        Assert.Equal(expectedSubcategories, returnedCategories[0].SubCategories);
+        Assert.Equal(UserId, returnedCategories[0].UserId);
+    }
+
+    [Fact]
+    public async Task
+        GivenAnExpenseCategoryRequestForACategoryThatExists_WhenCreateCategoryIsCalled_ThenCategoryIsNotPersisted()
+    {
+        const string duplicateCategoryName = "category123";
+        const string duplicateCategoryType = "expense";
+
+        var initialData = new List<Category>
+        {
+            new()
+            {
+                UserId = UserId,
+                CategoryName = $"expenseCategory#{duplicateCategoryName}",
+                SubCategories = new List<string> {"subcategory1", "subcategory2"}
+            },
+            new()
+            {
+                UserId = UserId,
+                CategoryName = "incomeCategory#category2",
+                SubCategories = new List<string> {"subcategory3", "subcategory4"}
+            }
+        };
+
+        await _dynamoDbHelper.WriteIntoTable(initialData);
+
+        var inputDto = new CreateCategoryDto
+        {
+            CategoryName = duplicateCategoryName,
+            CategoryType = duplicateCategoryType,
+            SubCategories = new List<string> {"subcategory1", "subcategory2"}
+        };
+
+        var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync("/api/categories", httpContent);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 }
