@@ -264,26 +264,26 @@ namespace TransactionService.Tests.Domain
 
             const string expectedCategoryName = "categoryName";
             const string expectedCategoryType = "expense";
-            var expectedSubCategories = new List<string> {"sub1", "sub2"};
+            var expectedSubcategories = new List<string> {"sub1", "sub2"};
 
             var inputDto = new CreateCategoryDto
             {
                 CategoryName = expectedCategoryName,
                 CategoryType = expectedCategoryType,
-                Subcategories = expectedSubCategories
+                Subcategories = expectedSubcategories
             };
 
             var expectedCategory = new Category
             {
                 CategoryName = expectedCategoryName,
-                Subcategories = expectedSubCategories,
+                Subcategories = expectedSubcategories,
                 UserId = expectedUserId
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CreateCategoryDto>())).Returns(new Category
             {
                 CategoryName = expectedCategoryName,
-                Subcategories = expectedSubCategories
+                Subcategories = expectedSubcategories
             });
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -303,26 +303,26 @@ namespace TransactionService.Tests.Domain
 
             const string expectedCategoryName = "categoryName";
             const string expectedCategoryType = "income";
-            var expectedSubCategories = new List<string> {"sub1", "sub2"};
+            var expectedSubcategories = new List<string> {"sub1", "sub2"};
 
             var inputDto = new CreateCategoryDto
             {
                 CategoryName = expectedCategoryName,
                 CategoryType = expectedCategoryType,
-                Subcategories = expectedSubCategories
+                Subcategories = expectedSubcategories
             };
 
             var expectedCategory = new Category
             {
                 CategoryName = expectedCategoryName,
-                Subcategories = expectedSubCategories,
+                Subcategories = expectedSubcategories,
                 UserId = expectedUserId
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CreateCategoryDto>())).Returns(new Category
             {
                 CategoryName = expectedCategoryName,
-                Subcategories = expectedSubCategories
+                Subcategories = expectedSubcategories
             });
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,

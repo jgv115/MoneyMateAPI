@@ -90,22 +90,22 @@ namespace TransactionService.Tests.Controllers
 
         [Fact]
         public async Task
-            GivenCategoryNameQueryInput_WhenGetSubcategoriesInvoked_ThenReturns200OKWithCorrectListOfSubCategories()
+            GivenCategoryNameQueryInput_WhenGetSubcategoriesInvoked_ThenReturns200OKWithCorrectListOfSubcategories()
         {
-            var expectedSubCategoryList = new List<string>
+            var expectedSubcategoryList = new List<string>
             {
                 "subCategory1",
                 "subCategory2"
             };
 
             _mockCategoriesService.Setup(service => service.GetSubcategories(It.IsAny<string>()))
-                .ReturnsAsync(expectedSubCategoryList);
+                .ReturnsAsync(expectedSubcategoryList);
 
             var controller = new CategoriesController(_mockCategoriesService.Object);
             var response = await controller.GetSubcategories("testCategory");
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
-            Assert.Equal(expectedSubCategoryList, objectResponse.Value);
+            Assert.Equal(expectedSubcategoryList, objectResponse.Value);
         }
 
         [Fact]

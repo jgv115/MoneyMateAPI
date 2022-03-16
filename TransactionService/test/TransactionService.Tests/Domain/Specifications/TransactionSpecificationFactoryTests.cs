@@ -80,15 +80,15 @@ public class TransactionSpecificationFactoryTests
 
             Assert.True(returnedSpec.IsSatisfied(new Transaction
             {
-                SubCategory = "subcategory1"
+                Subcategory = "subcategory1"
             }));
             Assert.True(returnedSpec.IsSatisfied(new Transaction
             {
-                SubCategory = "subcategory2"
+                Subcategory = "subcategory2"
             }));
             Assert.False(returnedSpec.IsSatisfied(new Transaction
             {
-                SubCategory = "invalid subcategory"
+                Subcategory = "invalid subcategory"
             }));
         }
         
@@ -141,22 +141,22 @@ public class TransactionSpecificationFactoryTests
             Assert.True(returnedSpec.IsSatisfied(new Transaction
             {
                 TransactionType = "expense",
-                SubCategory = "subcategory1"
+                Subcategory = "subcategory1"
             }));
             Assert.True(returnedSpec.IsSatisfied(new Transaction
             {
                 TransactionType = "expense",
-                SubCategory = "subcategory2"
+                Subcategory = "subcategory2"
             }));
             Assert.False(returnedSpec.IsSatisfied(new Transaction
             {
                 TransactionType = "expense",
-                SubCategory = "invalid subcategory"
+                Subcategory = "invalid subcategory"
             }));
             Assert.False(returnedSpec.IsSatisfied(new Transaction
             {
                 TransactionType = "income",
-                SubCategory = "subcategory1"
+                Subcategory = "subcategory1"
             }));
         }
     }

@@ -261,7 +261,7 @@ namespace TransactionService.IntegrationTests.AnalyticsEndpoint
                         TransactionType = "expense",
                         Amount = amount,
                         Category = category,
-                        SubCategory = "subcategory-1",
+                        Subcategory = "subcategory-1",
                     });
                 }
 
@@ -281,7 +281,7 @@ namespace TransactionService.IntegrationTests.AnalyticsEndpoint
                         TransactionType = "expense",
                         Amount = amount,
                         Category = category,
-                        SubCategory = subcategory,
+                        Subcategory = subcategory,
                     });
                 }
 

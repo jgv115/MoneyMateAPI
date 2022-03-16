@@ -7,7 +7,6 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Specifications;
-using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 
 namespace TransactionService.Repositories

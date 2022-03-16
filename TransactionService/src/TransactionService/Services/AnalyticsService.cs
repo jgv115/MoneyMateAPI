@@ -57,7 +57,7 @@ namespace TransactionService.Services
                 End = end,
             });
 
-            var orderedSubcategories = transactions.GroupBy(transaction => transaction.SubCategory)
+            var orderedSubcategories = transactions.GroupBy(transaction => transaction.Subcategory)
                 .Select(grouping => new AnalyticsSubcategory
                 {
                     SubcategoryName = grouping.Key,

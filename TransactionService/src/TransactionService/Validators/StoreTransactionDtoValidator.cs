@@ -46,7 +46,7 @@ namespace TransactionService.Validators
             });
             RuleFor(dto => dto.Amount).NotEmpty();
             RuleFor(dto => dto.Category).NotEmpty();
-            RuleFor(dto => dto.SubCategory).NotEmpty();
+            RuleFor(dto => dto.Subcategory).NotEmpty();
         }
     }
 }

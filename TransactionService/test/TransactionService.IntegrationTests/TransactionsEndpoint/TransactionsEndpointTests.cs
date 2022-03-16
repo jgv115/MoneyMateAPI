@@ -50,7 +50,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = "Test Category",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
-                SubCategory = "Salary"
+                Subcategory = "Salary"
             };
             var transaction2 = new Transaction
             {
@@ -60,7 +60,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat",
+                Subcategory = "Meat",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name1",
                 Note = "this is a note123"
@@ -75,7 +75,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = "Salary",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
-                SubCategory = "Salary"
+                Subcategory = "Salary"
             };
 
 
@@ -111,7 +111,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat",
+                Subcategory = "Meat",
                 Note = "this is a note123"
             };
             var transaction2 = new Transaction
@@ -122,7 +122,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                Subcategory = "Meat"
             };
 
             var transaction3 = new Transaction
@@ -133,7 +133,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat",
+                Subcategory = "Meat",
                 Note = "this is a note123"
             };
 
@@ -178,7 +178,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat",
+                Subcategory = "Meat",
                 Note = "this is a note123"
             };
             var transaction2 = new Transaction
@@ -189,7 +189,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                Subcategory = "Meat"
             };
             var transaction3 = new Transaction
             {
@@ -199,7 +199,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                Subcategory = "Meat"
             };
 
             var transaction4 = new Transaction
@@ -210,7 +210,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat",
+                Subcategory = "Meat",
                 Note = "this is a note123"
             };
 
@@ -260,7 +260,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = transactionType,
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat",
+                Subcategory = "Meat",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name1",
                 Note = "this is a note123"
@@ -275,7 +275,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = "Income",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
-                SubCategory = "Salary"
+                Subcategory = "Salary"
             };
 
             var transactionList = new List<Transaction>
@@ -315,7 +315,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = transactionType,
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat",
+                Subcategory = "Meat",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name1",
                 Note = "this is a note123"
@@ -330,7 +330,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = "Groceries",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
-                SubCategory = "Salary"
+                Subcategory = "Salary"
             };
             var transaction3 = new Transaction
             {
@@ -342,7 +342,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = "Income",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
-                SubCategory = "Salary"
+                Subcategory = "Salary"
             };
             var transaction4 = new Transaction
             {
@@ -354,7 +354,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = "Eating Out",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
-                SubCategory = "Dinner"
+                Subcategory = "Dinner"
             };
 
             var transactionList = new List<Transaction>
@@ -387,7 +387,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var inputDto = new StoreTransactionDto
             {
                 Category = "Food",
-                SubCategory = "Dinner",
+                Subcategory = "Dinner",
                 TransactionTimestamp = "2017-06-21T14:57:17",
                 TransactionType = "expense",
                 PayerPayeeId = Guid.NewGuid().ToString(),
@@ -411,7 +411,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
         {
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
-            const string expectedSubCategory = "Dinner";
+            const string expectedSubcategory = "Dinner";
             var expectedTransactionTimestamp =
                 new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ss.FFFK");
             const string expectedTransactionType = "expense";
@@ -422,7 +422,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             {
                 Amount = expectedAmount,
                 Category = expectedCategory,
-                SubCategory = expectedSubCategory,
+                Subcategory = expectedSubcategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
                 TransactionType = expectedTransactionType,
                 PayerPayeeId = expectedPayerPayeeId,
@@ -443,7 +443,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             Assert.Single(returnedTransactions);
             Assert.Equal(expectedAmount, returnedTransactions[0].Amount);
             Assert.Equal(expectedCategory, returnedTransactions[0].Category);
-            Assert.Equal(expectedSubCategory, returnedTransactions[0].SubCategory);
+            Assert.Equal(expectedSubcategory, returnedTransactions[0].Subcategory);
             Assert.Equal(expectedTransactionTimestamp, returnedTransactions[0].TransactionTimestamp);
             Assert.Equal(expectedTransactionType, returnedTransactions[0].TransactionType);
             Assert.Equal(expectedPayerPayeeId, returnedTransactions[0].PayerPayeeId);
@@ -464,7 +464,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat",
+                Subcategory = "Meat",
                 Note = "this is a note123"
             };
             var transaction2 = new Transaction
@@ -475,7 +475,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                Subcategory = "Meat"
             };
 
             var transactionList = new List<Transaction>
@@ -487,7 +487,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
 
             const decimal expectedAmount = 123M;
             const string expectedCategory = "Food";
-            const string expectedSubCategory = "Dinner";
+            const string expectedSubcategory = "Dinner";
             var expectedTransactionTimestamp =
                 new DateTimeOffset(new DateTime(2021, 4, 2)).ToString("yyyy-MM-ddThh:mm:ss.FFFK");
             const string expectedTransactionType = "expense";
@@ -498,7 +498,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             {
                 Amount = expectedAmount,
                 Category = expectedCategory,
-                SubCategory = expectedSubCategory,
+                Subcategory = expectedSubcategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
                 TransactionType = expectedTransactionType,
                 PayerPayeeId = expectedPayerPayeeId,
@@ -519,7 +519,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionId = expectedTransactionId,
                 Amount = expectedAmount,
                 Category = expectedCategory,
-                SubCategory = expectedSubCategory,
+                Subcategory = expectedSubcategory,
                 TransactionTimestamp = expectedTransactionTimestamp,
                 TransactionType = expectedTransactionType,
                 PayerPayeeId = expectedPayerPayeeId,
@@ -542,7 +542,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                Subcategory = "Meat"
             };
             var transaction2 = new Transaction
             {
@@ -552,7 +552,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 TransactionType = "expense",
                 Amount = 123.45M,
                 Category = "Groceries",
-                SubCategory = "Meat"
+                Subcategory = "Meat"
             };
 
             var transactionList = new List<Transaction>

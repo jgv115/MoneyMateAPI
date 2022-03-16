@@ -132,13 +132,13 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     public async Task GivenValidRequest_WhenGetSubcategoriesIsCalled_ThenAllSubcategoriesAreReturned()
     {
         var expectedCategories = new List<string> {"category1", "category2", "category3"};
-        var expectedSubCategories = new List<string> {"test1", "test2", "test4"};
+        var expectedSubcategories = new List<string> {"test1", "test2", "test4"};
 
         await _dynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
         {
             UserId = UserId,
             CategoryName = category,
-            Subcategories = expectedSubCategories
+            Subcategories = expectedSubcategories
         }));
 
         var response = await _httpClient.GetAsync("/api/categories/category1");
@@ -147,7 +147,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         var returnedString = await response.Content.ReadAsStringAsync();
         var returnedCategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
 
-        Assert.Equal(expectedSubCategories, returnedCategoriesList);
+        Assert.Equal(expectedSubcategories, returnedCategoriesList);
     }
 
     [Fact]

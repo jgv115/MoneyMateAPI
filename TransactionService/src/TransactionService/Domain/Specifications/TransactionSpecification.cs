@@ -62,7 +62,7 @@ namespace TransactionService.Domain.Specifications
 
         public bool IsSatisfied(Transaction item)
         {
-            return _categories.Contains(item.SubCategory);
+            return _categories.Contains(item.Subcategory);
         }
     }
 }

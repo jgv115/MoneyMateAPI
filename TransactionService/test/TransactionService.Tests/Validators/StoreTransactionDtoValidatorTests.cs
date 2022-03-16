@@ -110,7 +110,7 @@ namespace TransactionService.Tests.Validators
         {
             var request = new StoreTransactionDto
             {
-                SubCategory = subcategory
+                Subcategory = subcategory
             };
 
             var result = validator.TestValidate(request);

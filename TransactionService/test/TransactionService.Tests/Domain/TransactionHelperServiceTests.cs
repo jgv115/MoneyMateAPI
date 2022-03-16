@@ -158,7 +158,7 @@ namespace TransactionService.Tests.Domain
                     Amount = (decimal) 1.0,
                     TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                     Category = "category-1",
-                    SubCategory = "subcategory-1",
+                    Subcategory = "subcategory-1",
                     TransactionType = "transaction-type-1",
                     PayerPayeeId = Guid.NewGuid().ToString(),
                     PayerPayeeName = "name1",
@@ -171,7 +171,7 @@ namespace TransactionService.Tests.Domain
                         Amount = inputDto.Amount,
                         TransactionTimestamp = inputDto.TransactionTimestamp,
                         Category = inputDto.Category,
-                        SubCategory = inputDto.SubCategory,
+                        Subcategory = inputDto.Subcategory,
                         TransactionType = inputDto.TransactionType,
                         PayerPayeeId = inputDto.PayerPayeeId,
                         PayerPayeeName = inputDto.PayerPayeeName,
@@ -191,7 +191,7 @@ namespace TransactionService.Tests.Domain
                         Guid.TryParse(transaction.TransactionId, out guid) &&
                         transaction.Amount == inputDto.Amount &&
                         transaction.Category == inputDto.Category &&
-                        transaction.SubCategory == inputDto.SubCategory &&
+                        transaction.Subcategory == inputDto.Subcategory &&
                         transaction.TransactionType == inputDto.TransactionType &&
                         transaction.PayerPayeeId == inputDto.PayerPayeeId &&
                         transaction.PayerPayeeName == inputDto.PayerPayeeName &&
@@ -229,7 +229,7 @@ namespace TransactionService.Tests.Domain
                     Amount = (decimal) 1.0,
                     TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                     Category = "category-1",
-                    SubCategory = "subcategory-1",
+                    Subcategory = "subcategory-1",
                     TransactionType = "type",
                     PayerPayeeId = "id123",
                     PayerPayeeName = "name123",
@@ -242,7 +242,7 @@ namespace TransactionService.Tests.Domain
                         Amount = (decimal) 1.0,
                         TransactionTimestamp = "2021-04-13T13:15:23.7002027Z",
                         Category = "category-1",
-                        SubCategory = "subcategory-1",
+                        Subcategory = "subcategory-1",
                         TransactionType = "type",
                         PayerPayeeId = "id123",
                         PayerPayeeName = "name123",

@@ -71,7 +71,7 @@ namespace TransactionService.Tests.Services
                                 Amount = 123M,
                                 Category = "category",
                                 TransactionTimestamp = DateTime.Now.ToString("O"),
-                                SubCategory = "subcategory-1",
+                                Subcategory = "subcategory-1",
                                 TransactionId = "transaction-id-1",
                                 TransactionType = "expense",
                             }
@@ -239,7 +239,7 @@ namespace TransactionService.Tests.Services
                                 Amount = 123M,
                                 Category = "category",
                                 TransactionTimestamp = DateTime.Now.ToString("O"),
-                                SubCategory = "subcategory-1",
+                                Subcategory = "subcategory-1",
                                 TransactionId = "transaction-id-1",
                                 TransactionType = "expense",
                             }
@@ -382,12 +382,12 @@ namespace TransactionService.Tests.Services
             }
         }
 
-        public class GetSubCategoriesBreakdown
+        public class GetSubcategoriesBreakdown
         {
             private readonly Mock<ITransactionHelperService> _mockTransactionService;
             private readonly Mock<ITimePeriodHelper> _mockTimePeriodHelper;
 
-            public GetSubCategoriesBreakdown()
+            public GetSubcategoriesBreakdown()
             {
                 _mockTransactionService = new Mock<ITransactionHelperService>();
                 _mockTimePeriodHelper = new Mock<ITimePeriodHelper>();
@@ -412,7 +412,7 @@ namespace TransactionService.Tests.Services
                             Amount = 123M,
                             Category = "category",
                             TransactionTimestamp = DateTime.Now.ToString("O"),
-                            SubCategory = "subcategory",
+                            Subcategory = "subcategory",
                             TransactionId = "transaction-id-1",
                             TransactionType = "expense",
                         }
@@ -592,7 +592,7 @@ namespace TransactionService.Tests.Services
                         Amount = amount,
                         Category = category,
                         TransactionTimestamp = DateTime.Now.ToString("O"),
-                        SubCategory = "subcategory-1",
+                        Subcategory = "subcategory-1",
                         TransactionId = "transaction-id-1",
                         TransactionType = "expense",
                     });
@@ -612,7 +612,7 @@ namespace TransactionService.Tests.Services
                         Amount = amount,
                         Category = category,
                         TransactionTimestamp = DateTime.Now.ToString("O"),
-                        SubCategory = subcategory,
+                        Subcategory = subcategory,
                         TransactionId = "transaction-id-1",
                         TransactionType = "expense",
                     });
