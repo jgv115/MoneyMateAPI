@@ -8,6 +8,6 @@ namespace TransactionService.Domain.Models
     {
         [DynamoDBHashKey("UserIdQuery")] public string UserId { get; set; }
         [DynamoDBRangeKey("Subquery")] public string CategoryName { get; set; }
-        public List<string> SubCategories { get; set; }
+        [DynamoDBProperty("Subcategories")] public List<string> Subcategories { get; set; }
     }
 }

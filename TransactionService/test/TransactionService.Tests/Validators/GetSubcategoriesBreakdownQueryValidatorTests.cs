@@ -9,7 +9,7 @@ namespace TransactionService.Tests.Validators
 {
     public class GetSubcategoriesBreakdownQueryValidatorTests
     {
-        private readonly GetSubCategoriesBreakdownQueryValidator _validator = new();
+        private readonly GetSubcategoriesBreakdownQueryValidator _validator = new();
 
         [Fact]
         public void GivenEmptyCategoryName_ThenShouldThrowValidationException()

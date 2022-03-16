@@ -35,9 +35,9 @@ namespace TransactionService.Controllers
         }
 
         [HttpGet("{categoryName}")]
-        public async Task<IActionResult> GetSubCategories(string categoryName)
+        public async Task<IActionResult> GetSubcategories(string categoryName)
         {
-            var subCategories = await _categoriesService.GetSubCategories(categoryName);
+            var subCategories = await _categoriesService.GetSubcategories(categoryName);
             return Ok(subCategories);
         }
     }

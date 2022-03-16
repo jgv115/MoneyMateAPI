@@ -70,12 +70,12 @@ namespace TransactionService.Tests.Domain
                 new()
                 {
                     CategoryName = "category1",
-                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                    Subcategories = new List<string> {"subcategory1", "subcategory2"}
                 },
                 new()
                 {
                     CategoryName = "category2",
-                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                    Subcategories = new List<string> {"subcategory3", "subcategory4"}
                 }
             };
 
@@ -91,7 +91,7 @@ namespace TransactionService.Tests.Domain
 
         [Fact]
         public void
-            GivenValidCategoryAndUserContext_WhenGetSubCategoriesInvoked_ThenRepositoryGetSubCategoriesCalledWithCorrectArguments()
+            GivenValidCategoryAndUserContext_WhenGetSubcategoriesInvoked_ThenRepositoryGetSubcategoriesCalledWithCorrectArguments()
         {
             const string expectedUserId = "testUser123";
             const string expectedCategory = "Category1";
@@ -99,9 +99,9 @@ namespace TransactionService.Tests.Domain
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockMapper.Object);
-            service.GetSubCategories(expectedCategory);
+            service.GetSubcategories(expectedCategory);
 
-            _mockRepository.Verify(repository => repository.GetAllSubCategories(expectedUserId, expectedCategory));
+            _mockRepository.Verify(repository => repository.GetAllSubcategories(expectedUserId, expectedCategory));
         }
 
         [Fact]
@@ -158,12 +158,12 @@ namespace TransactionService.Tests.Domain
                 new()
                 {
                     CategoryName = "category1",
-                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                    Subcategories = new List<string> {"subcategory1", "subcategory2"}
                 },
                 new()
                 {
                     CategoryName = "category2",
-                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                    Subcategories = new List<string> {"subcategory3", "subcategory4"}
                 }
             };
 
@@ -186,12 +186,12 @@ namespace TransactionService.Tests.Domain
                 new()
                 {
                     CategoryName = "category1",
-                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                    Subcategories = new List<string> {"subcategory1", "subcategory2"}
                 },
                 new()
                 {
                     CategoryName = "category2",
-                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                    Subcategories = new List<string> {"subcategory3", "subcategory4"}
                 }
             };
 
@@ -215,12 +215,12 @@ namespace TransactionService.Tests.Domain
                 new()
                 {
                     CategoryName = "category1",
-                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                    Subcategories = new List<string> {"subcategory1", "subcategory2"}
                 },
                 new()
                 {
                     CategoryName = "category2",
-                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                    Subcategories = new List<string> {"subcategory3", "subcategory4"}
                 }
             };
 
@@ -242,7 +242,7 @@ namespace TransactionService.Tests.Domain
             {
                 CategoryName = "testname",
                 CategoryType = "expense",
-                SubCategories = new List<string> {"test1", "test2"}
+                Subcategories = new List<string> {"test1", "test2"}
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CreateCategoryDto>())).Returns(new Category());
@@ -270,20 +270,20 @@ namespace TransactionService.Tests.Domain
             {
                 CategoryName = expectedCategoryName,
                 CategoryType = expectedCategoryType,
-                SubCategories = expectedSubCategories
+                Subcategories = expectedSubCategories
             };
 
             var expectedCategory = new Category
             {
                 CategoryName = expectedCategoryName,
-                SubCategories = expectedSubCategories,
+                Subcategories = expectedSubCategories,
                 UserId = expectedUserId
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CreateCategoryDto>())).Returns(new Category
             {
                 CategoryName = expectedCategoryName,
-                SubCategories = expectedSubCategories
+                Subcategories = expectedSubCategories
             });
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -309,20 +309,20 @@ namespace TransactionService.Tests.Domain
             {
                 CategoryName = expectedCategoryName,
                 CategoryType = expectedCategoryType,
-                SubCategories = expectedSubCategories
+                Subcategories = expectedSubCategories
             };
 
             var expectedCategory = new Category
             {
                 CategoryName = expectedCategoryName,
-                SubCategories = expectedSubCategories,
+                Subcategories = expectedSubCategories,
                 UserId = expectedUserId
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CreateCategoryDto>())).Returns(new Category
             {
                 CategoryName = expectedCategoryName,
-                SubCategories = expectedSubCategories
+                Subcategories = expectedSubCategories
             });
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,

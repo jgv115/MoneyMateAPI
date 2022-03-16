@@ -6,6 +6,6 @@ namespace TransactionService.Dtos
     {
         public string CategoryName { get; set; }
         public string CategoryType { get; set; }
-        public List<string> SubCategories { get; set; }
+        public List<string> Subcategories { get; set; }
     }
 }

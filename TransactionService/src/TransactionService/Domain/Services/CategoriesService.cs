@@ -29,9 +29,9 @@ namespace TransactionService.Domain.Services
             return categoriesList.Select(category => category.CategoryName);
         }
 
-        public Task<IEnumerable<string>> GetSubCategories(string category)
+        public Task<IEnumerable<string>> GetSubcategories(string category)
         {
-            return _repository.GetAllSubCategories(_userContext.UserId, category);
+            return _repository.GetAllSubcategories(_userContext.UserId, category);
         }
 
         public Task<IEnumerable<Category>> GetAllCategories(string categoryType = null)

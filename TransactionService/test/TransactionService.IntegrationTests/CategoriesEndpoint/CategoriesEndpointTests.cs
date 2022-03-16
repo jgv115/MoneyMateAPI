@@ -48,13 +48,13 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                     {
                         UserId = UserId,
                         CategoryName = "category1",
-                        SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                        Subcategories = new List<string> {"subcategory1", "subcategory2"}
                     },
                     new()
                     {
                         UserId = UserId,
                         CategoryName = "category2",
-                        SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                        Subcategories = new List<string> {"subcategory3", "subcategory4"}
                     }
                 }
             },
@@ -67,7 +67,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                     {
                         UserId = UserId,
                         CategoryName = "category1",
-                        SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                        Subcategories = new List<string> {"subcategory1", "subcategory2"}
                     }
                 }
             },
@@ -80,7 +80,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                     {
                         UserId = UserId,
                         CategoryName = "category2",
-                        SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                        Subcategories = new List<string> {"subcategory3", "subcategory4"}
                     }
                 }
             }
@@ -98,13 +98,13 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             {
                 UserId = UserId,
                 CategoryName = "expenseCategory#category1",
-                SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> {"subcategory1", "subcategory2"}
             },
             new()
             {
                 UserId = UserId,
                 CategoryName = "incomeCategory#category2",
-                SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> {"subcategory3", "subcategory4"}
             }
         };
 
@@ -124,12 +124,12 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             Assert.Equal(expectedCategories[i].CategoryName, returnedCategoriesList[i].CategoryName);
             Assert.Equal(expectedCategories[i].UserId, returnedCategoriesList[i].UserId);
-            Assert.Equal(expectedCategories[i].SubCategories, returnedCategoriesList[i].SubCategories);
+            Assert.Equal(expectedCategories[i].Subcategories, returnedCategoriesList[i].Subcategories);
         }
     }
 
     [Fact]
-    public async Task GivenValidRequest_WhenGetSubCategoriesIsCalled_ThenAllSubCategoriesAreReturned()
+    public async Task GivenValidRequest_WhenGetSubcategoriesIsCalled_ThenAllSubcategoriesAreReturned()
     {
         var expectedCategories = new List<string> {"category1", "category2", "category3"};
         var expectedSubCategories = new List<string> {"test1", "test2", "test4"};
@@ -138,7 +138,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             UserId = UserId,
             CategoryName = category,
-            SubCategories = expectedSubCategories
+            Subcategories = expectedSubCategories
         }));
 
         var response = await _httpClient.GetAsync("/api/categories/category1");
@@ -162,7 +162,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             CategoryName = inputCategoryName,
             CategoryType = inputCategoryType,
-            SubCategories = expectedSubcategories
+            Subcategories = expectedSubcategories
         };
 
         var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
@@ -174,7 +174,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         Assert.Single(returnedCategories);
         Assert.Equal(expectedCategoryName, returnedCategories[0].CategoryName);
-        Assert.Equal(expectedSubcategories, returnedCategories[0].SubCategories);
+        Assert.Equal(expectedSubcategories, returnedCategories[0].Subcategories);
         Assert.Equal(UserId, returnedCategories[0].UserId);
     }
 
@@ -191,13 +191,13 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             {
                 UserId = UserId,
                 CategoryName = $"expenseCategory#{duplicateCategoryName}",
-                SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> {"subcategory1", "subcategory2"}
             },
             new()
             {
                 UserId = UserId,
                 CategoryName = "incomeCategory#category2",
-                SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> {"subcategory3", "subcategory4"}
             }
         };
 
@@ -207,7 +207,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             CategoryName = duplicateCategoryName,
             CategoryType = duplicateCategoryType,
-            SubCategories = new List<string> {"subcategory1", "subcategory2"}
+            Subcategories = new List<string> {"subcategory1", "subcategory2"}
         };
 
         var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");

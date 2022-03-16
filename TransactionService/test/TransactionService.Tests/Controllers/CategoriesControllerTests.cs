@@ -56,12 +56,12 @@ namespace TransactionService.Tests.Controllers
                 new()
                 {
                     CategoryName = "category1",
-                    SubCategories = new List<string> {"subcategory1", "subcategory2"}
+                    Subcategories = new List<string> {"subcategory1", "subcategory2"}
                 },
                 new()
                 {
                     CategoryName = "category2",
-                    SubCategories = new List<string> {"subcategory3", "subcategory4"}
+                    Subcategories = new List<string> {"subcategory3", "subcategory4"}
                 }
             };
 
@@ -78,19 +78,19 @@ namespace TransactionService.Tests.Controllers
 
         [Fact]
         public async Task
-            GivenValidCategoryNameInput_WhenGetSubCategoriesInvoked_ThenCategoriesServiceGetSubCategoriesCalledWithCorrectCategory()
+            GivenValidCategoryNameInput_WhenGetSubcategoriesInvoked_ThenCategoriesServiceGetSubcategoriesCalledWithCorrectCategory()
         {
             var expectedCategory = "category1";
             var controller = new CategoriesController(_mockCategoriesService.Object);
 
-            await controller.GetSubCategories(expectedCategory);
+            await controller.GetSubcategories(expectedCategory);
 
-            _mockCategoriesService.Verify(service => service.GetSubCategories(expectedCategory));
+            _mockCategoriesService.Verify(service => service.GetSubcategories(expectedCategory));
         }
 
         [Fact]
         public async Task
-            GivenCategoryNameQueryInput_WhenGetSubCategoriesInvoked_ThenReturns200OKWithCorrectListOfSubCategories()
+            GivenCategoryNameQueryInput_WhenGetSubcategoriesInvoked_ThenReturns200OKWithCorrectListOfSubCategories()
         {
             var expectedSubCategoryList = new List<string>
             {
@@ -98,11 +98,11 @@ namespace TransactionService.Tests.Controllers
                 "subCategory2"
             };
 
-            _mockCategoriesService.Setup(service => service.GetSubCategories(It.IsAny<string>()))
+            _mockCategoriesService.Setup(service => service.GetSubcategories(It.IsAny<string>()))
                 .ReturnsAsync(expectedSubCategoryList);
 
             var controller = new CategoriesController(_mockCategoriesService.Object);
-            var response = await controller.GetSubCategories("testCategory");
+            var response = await controller.GetSubcategories("testCategory");
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
             Assert.Equal(expectedSubCategoryList, objectResponse.Value);
@@ -116,7 +116,7 @@ namespace TransactionService.Tests.Controllers
             {
                 CategoryName = "categoryName",
                 CategoryType = "categoryType",
-                SubCategories = new List<string> {"test1", "test2"}
+                Subcategories = new List<string> {"test1", "test2"}
             };
             var controller = new CategoriesController(_mockCategoriesService.Object);
             await controller.Post(expectedDto);
@@ -132,7 +132,7 @@ namespace TransactionService.Tests.Controllers
             {
                 CategoryName = "categoryName",
                 CategoryType = "categoryType",
-                SubCategories = new List<string> {"test1", "test2"}
+                Subcategories = new List<string> {"test1", "test2"}
             });
 
             var objectResponse = Assert.IsType<OkResult>(response);
