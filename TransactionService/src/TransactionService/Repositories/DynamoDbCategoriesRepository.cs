@@ -87,7 +87,7 @@ namespace TransactionService.Repositories
             var foundCategory = await GetCategory(newCategory.UserId, newCategory.CategoryName);
             if (foundCategory is not null)
             {
-                throw new RepositoryItemExistsException($"Category of with name ${newCategory.CategoryName} already exists");
+                throw new RepositoryItemExistsException($"Category with name {newCategory.CategoryName} already exists");
             }
 
             await SaveCategory(newCategory);

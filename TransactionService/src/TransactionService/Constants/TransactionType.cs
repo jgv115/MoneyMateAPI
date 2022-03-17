@@ -1,7 +1,14 @@
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
+
 namespace TransactionService.Constants
 {
+    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
     public enum TransactionType
     {
-        Expense = 0, Income = 1
+        [EnumMember(Value="expense")]
+        Expense = 0,
+        [EnumMember(Value="income")]
+        Income = 1
     }
 }
