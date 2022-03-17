@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.Middleware;
@@ -34,14 +35,11 @@ namespace TransactionService.Domain.Services
             return _repository.GetAllSubcategories(_userContext.UserId, category);
         }
 
-        public Task<IEnumerable<Category>> GetAllCategories(string categoryType = null)
+        public Task<IEnumerable<Category>> GetAllCategories(TransactionType? transactionType = null)
         {
-            return categoryType switch
-            {
-                "expense" => _repository.GetAllExpenseCategories(_userContext.UserId),
-                "income" => _repository.GetAllIncomeCategories(_userContext.UserId),
-                _ => _repository.GetAllCategories(_userContext.UserId)
-            };
+            if (transactionType.HasValue)
+                return _repository.GetAllCategoriesForTransactionType(_userContext.UserId, transactionType.Value);
+            return _repository.GetAllCategories(_userContext.UserId);
         }
 
         public Task CreateCategory(CreateCategoryDto createCategoryDto)
@@ -49,7 +47,7 @@ namespace TransactionService.Domain.Services
             var newCategory = _mapper.Map<Category>(createCategoryDto);
 
             newCategory.UserId = _userContext.UserId;
-            return _repository.CreateCategory(newCategory, createCategoryDto.CategoryType);
+            return _repository.CreateCategory(newCategory);
         }
     }
 }

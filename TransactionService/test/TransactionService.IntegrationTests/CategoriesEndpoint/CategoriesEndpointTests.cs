@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Helpers;
@@ -60,7 +61,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             },
             new object[]
             {
-                "?categoryType=expense",
+                "?transactionType=expense",
                 new List<Category>
                 {
                     new()
@@ -73,7 +74,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             },
             new object[]
             {
-                "?categoryType=income",
+                "?transactionType=income",
                 new List<Category>
                 {
                     new()
@@ -97,13 +98,15 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             new()
             {
                 UserId = UserId,
-                CategoryName = "expenseCategory#category1",
+                CategoryName = "category1",
+                TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"subcategory1", "subcategory2"}
             },
             new()
             {
                 UserId = UserId,
-                CategoryName = "incomeCategory#category2",
+                CategoryName = "category2",
+                TransactionType = TransactionType.Income,
                 Subcategories = new List<string> {"subcategory3", "subcategory4"}
             }
         };
@@ -111,9 +114,10 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         await _dynamoDbHelper.WriteIntoTable(initialData);
 
         var response = await _httpClient.GetAsync($"/api/categories{queryString}");
+        var returnedString = await response.Content.ReadAsStringAsync();
+
         response.EnsureSuccessStatusCode();
 
-        var returnedString = await response.Content.ReadAsStringAsync();
         var returnedCategoriesList = JsonSerializer.Deserialize<List<Category>>(returnedString,
             new JsonSerializerOptions
             {
@@ -122,7 +126,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         for (var i = 0; i < expectedCategories.Count; i++)
         {
-            Assert.Equal(expectedCategories[i].CategoryName, returnedCategoriesList[i].CategoryName);
+            Assert.Equal(expectedCategories[i].CategoryName, returnedCategoriesList![i].CategoryName);
             Assert.Equal(expectedCategories[i].UserId, returnedCategoriesList[i].UserId);
             Assert.Equal(expectedCategories[i].Subcategories, returnedCategoriesList[i].Subcategories);
         }
@@ -131,13 +135,14 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     [Fact]
     public async Task GivenValidRequest_WhenGetSubcategoriesIsCalled_ThenAllSubcategoriesAreReturned()
     {
-        var expectedCategories = new List<string> {"category1", "category2", "category3"};
+        var inputCategories = new List<string> {"category1", "category2", "category3"};
         var expectedSubcategories = new List<string> {"test1", "test2", "test4"};
 
-        await _dynamoDbHelper.WriteIntoTable(expectedCategories.Select(category => new Category
+        await _dynamoDbHelper.WriteIntoTable(inputCategories.Select(category => new Category
         {
             UserId = UserId,
             CategoryName = category,
+            TransactionType = TransactionType.Expense,
             Subcategories = expectedSubcategories
         }));
 
@@ -145,23 +150,22 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         response.EnsureSuccessStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
-        var returnedCategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
+        var returnedSubcategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
 
-        Assert.Equal(expectedSubcategories, returnedCategoriesList);
+        Assert.Equal(expectedSubcategories, returnedSubcategoriesList);
     }
 
     [Fact]
     public async Task GivenAValidExpenseCategoryRequest_WhenCreateCategoryIsCalled_ThenCategoryIsPersisted()
     {
         const string inputCategoryName = "category123";
-        const string inputCategoryType = "expense";
-        var expectedCategoryName = $"{inputCategoryType}Category#{inputCategoryName}";
+        var inputCategoryType = TransactionType.Expense;
         var expectedSubcategories = new List<string> {"test1", "test2"};
 
         var inputDto = new CreateCategoryDto
         {
             CategoryName = inputCategoryName,
-            CategoryType = inputCategoryType,
+            TransactionType = inputCategoryType,
             Subcategories = expectedSubcategories
         };
 
@@ -172,31 +176,33 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         var returnedCategories = await _dynamoDbHelper.ScanTable<Category>();
 
-        Assert.Single(returnedCategories);
-        Assert.Equal(expectedCategoryName, returnedCategories[0].CategoryName);
-        Assert.Equal(expectedSubcategories, returnedCategories[0].Subcategories);
-        Assert.Equal(UserId, returnedCategories[0].UserId);
+        Assert.Collection(returnedCategories, category =>
+        {
+            Assert.Equal(inputCategoryName, category.CategoryName);
+            Assert.Equal(expectedSubcategories, category.Subcategories);
+            Assert.Equal(UserId, category.UserId);
+        });
     }
 
     [Fact]
     public async Task
-        GivenAnExpenseCategoryRequestForACategoryThatExists_WhenCreateCategoryIsCalled_ThenCategoryIsNotPersisted()
+        GivenAnCreateCategoryRequestForACategoryThatExists_WhenCreateCategoryIsCalled_ThenCategoryIsNotPersisted()
     {
         const string duplicateCategoryName = "category123";
-        const string duplicateCategoryType = "expense";
+        var duplicateTransactionType = TransactionType.Expense;
 
         var initialData = new List<Category>
         {
             new()
             {
                 UserId = UserId,
-                CategoryName = $"expenseCategory#{duplicateCategoryName}",
+                CategoryName = duplicateCategoryName,
                 Subcategories = new List<string> {"subcategory1", "subcategory2"}
             },
             new()
             {
                 UserId = UserId,
-                CategoryName = "incomeCategory#category2",
+                CategoryName = "#category2",
                 Subcategories = new List<string> {"subcategory3", "subcategory4"}
             }
         };
@@ -206,7 +212,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         var inputDto = new CreateCategoryDto
         {
             CategoryName = duplicateCategoryName,
-            CategoryType = duplicateCategoryType,
+            TransactionType = duplicateTransactionType,
             Subcategories = new List<string> {"subcategory1", "subcategory2"}
         };
 

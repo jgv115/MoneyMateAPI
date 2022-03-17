@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.DataModel;
+using TransactionService.Constants;
 
 namespace TransactionService.Domain.Models
 {
@@ -8,6 +9,7 @@ namespace TransactionService.Domain.Models
     {
         [DynamoDBHashKey("UserIdQuery")] public string UserId { get; set; }
         [DynamoDBRangeKey("Subquery")] public string CategoryName { get; set; }
-        [DynamoDBProperty("SubCategories")] public List<string> Subcategories { get; set; }
+        public TransactionType TransactionType { get; set; }
+        public List<string> Subcategories { get; set; }
     }
 }

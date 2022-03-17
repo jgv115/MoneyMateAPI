@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TransactionService.Constants;
 using TransactionService.Domain.Services;
 using TransactionService.Dtos;
 
@@ -21,19 +22,21 @@ namespace TransactionService.Controllers
 
         // GET api/categories
         [HttpGet]
-        public async Task<IActionResult> Get(string categoryType)
+        public async Task<IActionResult> Get(TransactionType? transactionType = null)
         {
-            var categoryTree = await _categoriesService.GetAllCategories(categoryType);
+            var categoryTree = await _categoriesService.GetAllCategories(transactionType);
             return Ok(categoryTree);
         }
 
+        // POST api/categories
         [HttpPost]
         public async Task<IActionResult> Post(CreateCategoryDto createCategoryDto)
         {
             await _categoriesService.CreateCategory(createCategoryDto);
             return Ok();
         }
-
+        
+        // GET api/categories/{categoryName}
         [HttpGet("{categoryName}")]
         public async Task<IActionResult> GetSubcategories(string categoryName)
         {

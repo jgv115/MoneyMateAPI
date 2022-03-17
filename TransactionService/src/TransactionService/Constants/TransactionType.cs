@@ -2,6 +2,6 @@ namespace TransactionService.Constants
 {
     public enum TransactionType
     {
-        Expense, Income
+        Expense = 0, Income = 1
     }
 }
