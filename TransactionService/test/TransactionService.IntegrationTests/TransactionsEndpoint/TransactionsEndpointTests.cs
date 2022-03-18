@@ -512,7 +512,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var response = await HttpClient.PutAsync($"/api/transactions/{expectedTransactionId}", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var returnedTransaction = await DynamoDbHelper.QueryTable(UserId, expectedTransactionId);
+            var returnedTransaction = await DynamoDbHelper.QueryTable<Transaction>(UserId, expectedTransactionId);
             var expectedTransaction = new Transaction
             {
                 UserId = UserId,
@@ -564,7 +564,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var response = await HttpClient.DeleteAsync($"/api/transactions/{expectedTransactionId}");
             response.EnsureSuccessStatusCode();
 
-            var returnedTransaction = await DynamoDbHelper.QueryTable(UserId, expectedTransactionId);
+            var returnedTransaction = await DynamoDbHelper.QueryTable<Transaction>(UserId, expectedTransactionId);
             Assert.Null(returnedTransaction);
         }
     }

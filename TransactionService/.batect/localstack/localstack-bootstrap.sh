@@ -116,8 +116,9 @@ aws --endpoint-url=http://localhost:4566 \
   --item \
   "{
       \"UserIdQuery\": {\"S\": \"auth0|jgv115#Categories\"},
-      \"Subquery\": {\"S\": \"expenseCategory#category1\"},
-      \"SubCategories\": {\"SS\": [\"subcategory1\",\"subcategory2\"]}
+      \"Subquery\": {\"S\": \"category1\"},
+      \"TransactionType\": {\"N\": \"0\"},
+      \"Subcategories\": {\"SS\": [\"subcategory1\",\"subcategory2\"]}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
@@ -129,8 +130,9 @@ aws --endpoint-url=http://localhost:4566 \
   --item \
   "{
       \"UserIdQuery\": {\"S\": \"auth0|jgv115#Categories\"},
-      \"Subquery\": {\"S\": \"incomeCategory#category2\"},
-      \"SubCategories\": {\"SS\": [\"subcategory3\",\"subcategory4\"]}
+      \"Subquery\": {\"S\": \"category2\"},
+      \"TransactionType\": {\"S\": \"1\"},
+      \"Subcategories\": {\"SS\": [\"subcategory3\",\"subcategory4\"]}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE

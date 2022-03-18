@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Constants;
 using TransactionService.Domain.Services;
@@ -28,20 +29,29 @@ namespace TransactionService.Controllers
             return Ok(categoryTree);
         }
 
-        // POST api/categories
-        [HttpPost]
-        public async Task<IActionResult> Post(CreateCategoryDto createCategoryDto)
-        {
-            await _categoriesService.CreateCategory(createCategoryDto);
-            return Ok();
-        }
-        
         // GET api/categories/{categoryName}
         [HttpGet("{categoryName}")]
         public async Task<IActionResult> GetSubcategories(string categoryName)
         {
             var subCategories = await _categoriesService.GetSubcategories(categoryName);
             return Ok(subCategories);
+        }
+
+        // POST api/categories
+        [HttpPost]
+        public async Task<IActionResult> Post(CategoryDto categoryDto)
+        {
+            await _categoriesService.CreateCategory(categoryDto);
+            return Ok();
+        }
+
+        // PATCH api/categories/{categoryName}
+        [HttpPatch("{categoryName}")]
+        public async Task<IActionResult> Patch(string categoryName,
+            [FromBody] JsonPatchDocument<CategoryDto> jsonPatchDocument)
+        {
+            await _categoriesService.UpdateCategory(categoryName, jsonPatchDocument);
+            return Ok();
         }
     }
 }

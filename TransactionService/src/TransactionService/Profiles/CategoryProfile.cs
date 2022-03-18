@@ -8,7 +8,8 @@ namespace TransactionService.Profiles
     {
         public CategoryProfile()
         {
-            CreateMap<CreateCategoryDto, Category>();
+            CreateMap<CategoryDto, Category>();
+            CreateMap<Category, CategoryDto>();
         }
     }
 }

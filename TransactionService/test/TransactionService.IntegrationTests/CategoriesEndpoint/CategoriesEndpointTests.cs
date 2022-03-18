@@ -19,7 +19,8 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 {
     private readonly HttpClient _httpClient;
     private readonly DynamoDbHelper _dynamoDbHelper;
-    private const string UserId = "auth0|moneymatetest#Categories";
+    private const string PersistedUserId = "auth0|moneymatetest#Categories";
+    private const string ConsumerUserId = "auth0|moneymatetest";
 
     public CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
@@ -47,13 +48,13 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                 {
                     new()
                     {
-                        UserId = UserId,
+                        UserId = ConsumerUserId,
                         CategoryName = "category1",
                         Subcategories = new List<string> {"subcategory1", "subcategory2"}
                     },
                     new()
                     {
-                        UserId = UserId,
+                        UserId = ConsumerUserId,
                         CategoryName = "category2",
                         Subcategories = new List<string> {"subcategory3", "subcategory4"}
                     }
@@ -66,7 +67,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                 {
                     new()
                     {
-                        UserId = UserId,
+                        UserId = ConsumerUserId,
                         CategoryName = "category1",
                         Subcategories = new List<string> {"subcategory1", "subcategory2"}
                     }
@@ -79,7 +80,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                 {
                     new()
                     {
-                        UserId = UserId,
+                        UserId = ConsumerUserId,
                         CategoryName = "category2",
                         Subcategories = new List<string> {"subcategory3", "subcategory4"}
                     }
@@ -97,14 +98,14 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             new()
             {
-                UserId = UserId,
+                UserId = PersistedUserId,
                 CategoryName = "category1",
                 TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"subcategory1", "subcategory2"}
             },
             new()
             {
-                UserId = UserId,
+                UserId = PersistedUserId,
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
                 Subcategories = new List<string> {"subcategory3", "subcategory4"}
@@ -140,7 +141,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         await _dynamoDbHelper.WriteIntoTable(inputCategories.Select(category => new Category
         {
-            UserId = UserId,
+            UserId = PersistedUserId,
             CategoryName = category,
             TransactionType = TransactionType.Expense,
             Subcategories = expectedSubcategories
@@ -156,13 +157,13 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     }
 
     [Fact]
-    public async Task GivenAValidExpenseCategoryRequest_WhenCreateCategoryIsCalled_ThenCategoryIsPersisted()
+    public async Task GivenAValidCreateCategoryRequest_WhenCreateCategoryIsCalled_ThenCategoryIsPersisted()
     {
         const string inputCategoryName = "category123";
         var inputCategoryType = TransactionType.Expense;
         var expectedSubcategories = new List<string> {"test1", "test2"};
 
-        var inputDto = new CreateCategoryDto
+        var inputDto = new CategoryDto
         {
             CategoryName = inputCategoryName,
             TransactionType = inputCategoryType,
@@ -180,7 +181,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             Assert.Equal(inputCategoryName, category.CategoryName);
             Assert.Equal(expectedSubcategories, category.Subcategories);
-            Assert.Equal(UserId, category.UserId);
+            Assert.Equal(PersistedUserId, category.UserId);
         });
     }
 
@@ -195,21 +196,23 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             new()
             {
-                UserId = UserId,
+                UserId = PersistedUserId,
                 CategoryName = duplicateCategoryName,
+                TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"subcategory1", "subcategory2"}
             },
             new()
             {
-                UserId = UserId,
-                CategoryName = "#category2",
+                UserId = PersistedUserId,
+                CategoryName = "category2",
+                TransactionType = TransactionType.Income,
                 Subcategories = new List<string> {"subcategory3", "subcategory4"}
             }
         };
 
         await _dynamoDbHelper.WriteIntoTable(initialData);
 
-        var inputDto = new CreateCategoryDto
+        var inputDto = new CategoryDto
         {
             CategoryName = duplicateCategoryName,
             TransactionType = duplicateTransactionType,
@@ -220,5 +223,52 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         var response = await _httpClient.PostAsync("/api/categories", httpContent);
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+
+    [Fact]
+    public async Task
+        GivenAPatchCategoryRequestForACategoryThatExists_WhenPatchCategoryIsCalled_ThenCategoryIsUpdated()
+    {
+        const string categoryName = "category123";
+
+        var initialData = new List<Category>
+        {
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = categoryName,
+                TransactionType = TransactionType.Expense,
+                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+            },
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = "category2",
+                TransactionType = TransactionType.Income,
+                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+            }
+        };
+
+        await _dynamoDbHelper.WriteIntoTable(initialData);
+
+
+        var inputPatchDoc = "[{ \"op\": \"add\", \"path\": \"/subcategories/-\", \"value\": \"test subcategory\" }]";
+
+        var httpContent = new StringContent(inputPatchDoc,
+            Encoding.UTF8, "application/json-patch+json");
+        var response = await _httpClient.PatchAsync($"/api/categories/{categoryName}", httpContent);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var returnedCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedUserId, categoryName);
+
+        Assert.Equal(new Category
+        {
+            UserId = PersistedUserId,
+            CategoryName = categoryName,
+            TransactionType = TransactionType.Expense,
+            Subcategories = new List<string> {"subcategory1", "subcategory2", "test subcategory"}
+        }, returnedCategory);
     }
 }

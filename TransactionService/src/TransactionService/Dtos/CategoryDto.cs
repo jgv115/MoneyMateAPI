@@ -3,7 +3,7 @@ using TransactionService.Constants;
 
 namespace TransactionService.Dtos
 {
-    public record CreateCategoryDto
+    public record CategoryDto
     {
         public string CategoryName { get; set; }
         public TransactionType TransactionType { get; set; }

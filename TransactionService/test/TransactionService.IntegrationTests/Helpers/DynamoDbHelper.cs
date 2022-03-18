@@ -53,9 +53,9 @@ namespace TransactionService.IntegrationTests.Helpers
             return await _dynamoDbContext.ScanAsync<T>(new List<ScanCondition>()).GetRemainingAsync();
         }
 
-        public async Task<Transaction> QueryTable(string hashKey, string rangeKey)
+        public async Task<T> QueryTable<T>(string hashKey, string rangeKey)
         {
-            return await _dynamoDbContext.LoadAsync<Transaction>(hashKey, rangeKey);
+            return await _dynamoDbContext.LoadAsync<T>(hashKey, rangeKey);
         }
 
         public async Task CreateTable()
@@ -202,11 +202,8 @@ namespace TransactionService.IntegrationTests.Helpers
 
         public async Task WriteTransactionsIntoTable(IEnumerable<Transaction> items)
         {
-            // var table = Table.LoadTable(_dynamoDbClient, TableName);
             foreach (var item in items)
             {
-                // var itemDoc = Document.FromJson(JsonSerializer.Serialize(item));
-                // await table.PutItemAsync(itemDoc);
                 await _dynamoDbContext.SaveAsync(item);
             }
         }

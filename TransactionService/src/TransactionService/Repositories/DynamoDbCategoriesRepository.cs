@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
@@ -28,13 +29,20 @@ namespace TransactionService.Repositories
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
 
-        private async Task<Category> GetCategory(string userId, string categoryName)
+        private string ExtractPublicFacingUserId(string input) => input.Split("#")[0];
+
+        public async Task<Category> GetCategory(string userId, string categoryName)
         {
-            return await _dbContext.LoadAsync<Category>($"{userId}{HashKeySuffix}", categoryName,
+            var loadedCategory = await _dbContext.LoadAsync<Category>($"{userId}{HashKeySuffix}", categoryName,
                 new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName
                 });
+
+            if (loadedCategory is not null)
+                loadedCategory.UserId = ExtractPublicFacingUserId(loadedCategory.UserId);
+            
+            return loadedCategory;
         }
 
         public async Task<IEnumerable<Category>> GetAllCategories(string userId)
@@ -44,6 +52,10 @@ namespace TransactionService.Repositories
                 {
                     OverrideTableName = _tableName
                 }).GetRemainingAsync();
+
+            userCategoryList.AsParallel().ForAll(category =>
+                category.UserId = ExtractPublicFacingUserId(category.UserId));
+
             return userCategoryList;
         }
 
@@ -60,6 +72,10 @@ namespace TransactionService.Repositories
                     },
                     OverrideTableName = _tableName
                 }).GetRemainingAsync();
+
+            userCategoryList.AsParallel().ForAll(category =>
+                category.UserId = ExtractPublicFacingUserId(category.UserId));
+
             return userCategoryList;
         }
 
@@ -87,10 +103,16 @@ namespace TransactionService.Repositories
             var foundCategory = await GetCategory(newCategory.UserId, newCategory.CategoryName);
             if (foundCategory is not null)
             {
-                throw new RepositoryItemExistsException($"Category with name {newCategory.CategoryName} already exists");
+                throw new RepositoryItemExistsException(
+                    $"Category with name {newCategory.CategoryName} already exists");
             }
 
             await SaveCategory(newCategory);
+        }
+
+        public Task UpdateCategory(Category updatedCategory)
+        {
+            return SaveCategory(updatedCategory);
         }
     }
 }

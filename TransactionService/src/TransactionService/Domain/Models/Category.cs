@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Amazon.DynamoDBv2.DataModel;
 using TransactionService.Constants;
 
@@ -11,5 +13,16 @@ namespace TransactionService.Domain.Models
         [DynamoDBRangeKey("Subquery")] public string CategoryName { get; set; }
         public TransactionType TransactionType { get; set; }
         public List<string> Subcategories { get; set; }
+
+        public virtual bool Equals(Category? other)
+        {
+            return other != null && other.UserId == UserId && other.CategoryName == CategoryName &&
+                   other.TransactionType == TransactionType && other.Subcategories.SequenceEqual(Subcategories);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(UserId, CategoryName, (int) TransactionType, Subcategories);
+        }
     }
 }

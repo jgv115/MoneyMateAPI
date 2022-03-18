@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
@@ -7,10 +8,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Options;
 using TransactionService.Domain.Services;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
@@ -29,8 +33,29 @@ namespace TransactionService
 
         public static IConfiguration Configuration { get; private set; }
 
+        private static NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
+        {
+            var builder = new ServiceCollection()
+                .AddLogging()
+                .AddMvc()
+                .AddNewtonsoftJson()
+                .Services.BuildServiceProvider();
+
+            return builder
+                .GetRequiredService<IOptions<MvcOptions>>()
+                .Value
+                .InputFormatters
+                .OfType<NewtonsoftJsonPatchInputFormatter>()
+                .First();
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
+                .AddControllersWithViews(options => options.InputFormatters.Insert(0, GetJsonPatchInputFormatter()));
+            services.AddControllersWithViews().AddNewtonsoftJson();
+
             var auth0Settings = Configuration.GetSection("Auth0");
             Console.WriteLine(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
             Console.WriteLine(auth0Settings.GetSection("Authority").Value);
@@ -88,8 +113,6 @@ namespace TransactionService
             services.AddSingleton<ITransactionRepository, DynamoDbTransactionRepository>();
             services.AddSingleton<ICategoriesRepository, DynamoDbCategoriesRepository>();
             services.AddSingleton<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
-
-            services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Constants;
@@ -110,9 +111,9 @@ public class CategoriesControllerTests
 
     [Fact]
     public async Task
-        GivenValidCreateCategoryDto_WhenPostInvoked_ThenCategoriesServiceCreateCategoryIsCalledWithCorrectDto()
+        GivenValidCategoryDto_WhenPostInvoked_ThenCategoriesServiceCreateCategoryIsCalledWithCorrectDto()
     {
-        var expectedDto = new CreateCategoryDto
+        var expectedDto = new CategoryDto
         {
             CategoryName = "categoryName",
             TransactionType = TransactionType.Expense,
@@ -125,15 +126,38 @@ public class CategoriesControllerTests
     }
 
     [Fact]
-    public async Task GivenValidCreateCategoryDto_WhenPostInvoked_Then200OKIsReturned()
+    public async Task GivenValidCategoryDto_WhenPostInvoked_Then200OKIsReturned()
     {
         var controller = new CategoriesController(_mockCategoriesService.Object);
-        var response = await controller.Post(new CreateCategoryDto
+        var response = await controller.Post(new CategoryDto
         {
             CategoryName = "categoryName",
             TransactionType = TransactionType.Expense,
             Subcategories = new List<string> {"test1", "test2"}
         });
+
+        var objectResponse = Assert.IsType<OkResult>(response);
+        Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task
+        GivenValidCategoryDto_WhenPatchInvoked_ThenCategoriesServiceCalledWithCorrectDto()
+    {
+        const string categoryName = "test category";
+        var patchDoc = new JsonPatchDocument<CategoryDto>();
+
+        var controller = new CategoriesController(_mockCategoriesService.Object);
+        await controller.Patch(categoryName, patchDoc);
+
+        _mockCategoriesService.Verify(service => service.UpdateCategory(categoryName, patchDoc));
+    }
+
+    [Fact]
+    public async Task GivenValidCategoryDto_WhenPatchInvoked_Then200OKIsReturned()
+    {
+        var controller = new CategoriesController(_mockCategoriesService.Object);
+        var response = await controller.Patch("category Name", new JsonPatchDocument<CategoryDto>());
 
         var objectResponse = Assert.IsType<OkResult>(response);
         Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
