@@ -185,8 +185,7 @@ public class CategoriesServiceTests
         }
 
         [Fact]
-        public async Task
-            GivenTransactionType_ThenShouldReturnTheCorrectList()
+        public async Task GivenTransactionType_ThenShouldReturnTheCorrectList()
         {
             var expectedReturnedCategoryList = new List<Category>
             {
@@ -214,6 +213,51 @@ public class CategoriesServiceTests
 
             Assert.Equal(expectedReturnedCategoryList, response);
         }
+
+        [Fact]
+        public async Task GivenResponseFromRepository_ThenShouldReturnCategoriesInAlphabeticalOrder()
+        {
+            var returnedCategoryList = new List<Category>
+            {
+                new()
+                {
+                    CategoryName = "category2",
+                    TransactionType = TransactionType.Income,
+                    Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                },
+                new()
+                {
+                    CategoryName = "category1",
+                    TransactionType = TransactionType.Expense,
+                    Subcategories = new List<string> {"subcategory1", "subcategory2"}
+                }
+            };
+
+            _mockRepository.Setup(repository =>
+                    repository.GetAllCategoriesForTransactionType(It.IsAny<string>(), It.IsAny<TransactionType>()))
+                .ReturnsAsync(returnedCategoryList);
+
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+                _mockMapper.Object);
+            var response = await service.GetAllCategories(TransactionType.Expense);
+
+            var expectedReturnedCategoryList = new List<Category>
+            {
+                new()
+                {
+                    CategoryName = "category1",
+                    TransactionType = TransactionType.Expense,
+                    Subcategories = new List<string> {"subcategory1", "subcategory2"}
+                },
+                new()
+                {
+                    CategoryName = "category2",
+                    TransactionType = TransactionType.Income,
+                    Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                }
+            };
+            Assert.Equal(expectedReturnedCategoryList, response);
+        }
     }
 
     public class CreateCategory
@@ -239,7 +283,7 @@ public class CategoriesServiceTests
             {
                 CategoryName = "testname",
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"test1", "test2"}
+                Subcategories = new List<string> { "test1", "test2" }
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CategoryDto>())).Returns(new Category());
@@ -261,7 +305,7 @@ public class CategoriesServiceTests
 
             const string expectedCategoryName = "categoryName";
             var expectedTransactionType = TransactionType.Expense;
-            var expectedSubcategories = new List<string> {"sub1", "sub2"};
+            var expectedSubcategories = new List<string> { "sub1", "sub2" };
 
             var inputDto = new CategoryDto
             {
@@ -347,7 +391,7 @@ public class CategoriesServiceTests
                     UserId = UserId,
                     CategoryName = CategoryName,
                     TransactionType = TransactionType.Expense,
-                    Subcategories = new List<string> {"test1", "test2"}
+                    Subcategories = new List<string> { "test1", "test2" }
                 };
             }
 

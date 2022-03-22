@@ -36,11 +36,15 @@ namespace TransactionService.Domain.Services
             return _repository.GetAllSubcategories(_userContext.UserId, category);
         }
 
-        public Task<IEnumerable<Category>> GetAllCategories(TransactionType? transactionType = null)
+        public async Task<IEnumerable<Category>> GetAllCategories(TransactionType? transactionType = null)
         {
+            IEnumerable<Category> returnedCategories;
             if (transactionType.HasValue)
-                return _repository.GetAllCategoriesForTransactionType(_userContext.UserId, transactionType.Value);
-            return _repository.GetAllCategories(_userContext.UserId);
+                returnedCategories = await _repository.GetAllCategoriesForTransactionType(_userContext.UserId, transactionType.Value);
+            else
+                returnedCategories = await _repository.GetAllCategories(_userContext.UserId);
+
+            return returnedCategories.OrderBy(category => category.CategoryName).ToList();
         }
 
         public Task CreateCategory(CategoryDto categoryDto)
