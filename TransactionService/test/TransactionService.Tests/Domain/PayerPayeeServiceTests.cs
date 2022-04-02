@@ -37,12 +37,12 @@ namespace TransactionService.Tests.Domain
         }
 
         [Fact]
-        public void GivenValidUserContext_WhenGetPayersInvoked_ThenRepositoryCalledWithCorrectArguments()
+        public async Task GivenValidUserContext_WhenGetPayersInvoked_ThenRepositoryCalledWithCorrectArguments()
         {
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
-            service.GetPayers();
+            await service.GetPayers();
 
             _mockRepository.Verify(repository => repository.GetPayers(userId));
         }
@@ -87,12 +87,12 @@ namespace TransactionService.Tests.Domain
         }
 
         [Fact]
-        public void GivenValidUserContext_WhenGetPayeesInvoked_ThenRepositoryCalledWithCorrectArguments()
+        public async Task GivenValidUserContext_WhenGetPayeesInvoked_ThenRepositoryCalledWithCorrectArguments()
         {
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object);
-            service.GetPayees();
+            await service.GetPayees();
 
             _mockRepository.Verify(repository => repository.GetPayees(userId));
         }

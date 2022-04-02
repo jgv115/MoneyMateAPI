@@ -120,7 +120,7 @@ public class CategoriesServiceTests
 
 
         [Fact]
-        public void
+        public async Task
             GivenValidUserContextAndNullTransactionType_ThenRepositoryGetAllCategoriesCalledWithTheCorrectArguments()
         {
             const string expectedUserId = "userId-123";
@@ -129,7 +129,7 @@ public class CategoriesServiceTests
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockMapper.Object);
 
-            service.GetAllCategories();
+            await service.GetAllCategories();
 
             _mockRepository.Verify(repository => repository.GetAllCategories(expectedUserId));
         }
@@ -137,7 +137,7 @@ public class CategoriesServiceTests
         [Theory]
         [InlineData(TransactionType.Expense)]
         [InlineData(TransactionType.Income)]
-        public void
+        public async Task
             GivenValidUserContextAndTransactionType_ThenRepositoryGetAllCategoriesForTransactionTypeCalledWithTheCorrectArguments(
                 TransactionType
                     transactionType)
@@ -148,7 +148,7 @@ public class CategoriesServiceTests
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockMapper.Object);
 
-            service.GetAllCategories(transactionType);
+            await service.GetAllCategories(transactionType);
 
             _mockRepository.Verify(repository =>
                 repository.GetAllCategoriesForTransactionType(expectedUserId, transactionType));
