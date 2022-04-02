@@ -12,7 +12,7 @@ namespace TransactionService.Domain.Models
         [DynamoDBHashKey("UserIdQuery")] public string UserId { get; set; }
         [DynamoDBRangeKey("Subquery")] public string CategoryName { get; set; }
         public TransactionType TransactionType { get; set; }
-        public List<string> Subcategories { get; set; }
+        public List<string> Subcategories { get; set; } = new List<string>();
 
         public virtual bool Equals(Category? other)
         {
@@ -22,7 +22,7 @@ namespace TransactionService.Domain.Models
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(UserId, CategoryName, (int) TransactionType, Subcategories);
+            return HashCode.Combine(UserId, CategoryName, (int)TransactionType, Subcategories);
         }
     }
 }

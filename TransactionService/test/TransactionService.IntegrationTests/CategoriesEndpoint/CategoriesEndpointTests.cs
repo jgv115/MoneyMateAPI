@@ -57,6 +57,12 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                         UserId = ConsumerUserId,
                         CategoryName = "category2",
                         Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                    },
+                    new()
+                    {
+                        UserId = ConsumerUserId,
+                        CategoryName = "category3",
+                        Subcategories = new List<string>()
                     }
                 }
             },
@@ -83,6 +89,12 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                         UserId = ConsumerUserId,
                         CategoryName = "category2",
                         Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                    },
+                    new()
+                    {
+                        UserId = ConsumerUserId,
+                        CategoryName = "category3",
+                        Subcategories = new List<string>()
                     }
                 }
             }
@@ -109,6 +121,12 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
                 Subcategories = new List<string> {"subcategory3", "subcategory4"}
+            },
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = "category3",
+                TransactionType = TransactionType.Income,
             }
         };
 
@@ -136,8 +154,8 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     [Fact]
     public async Task GivenValidRequest_WhenGetSubcategoriesIsCalled_ThenAllSubcategoriesAreReturned()
     {
-        var inputCategories = new List<string> {"category1", "category2", "category3"};
-        var expectedSubcategories = new List<string> {"test1", "test2", "test4"};
+        var inputCategories = new List<string> { "category1", "category2", "category3" };
+        var expectedSubcategories = new List<string> { "test1", "test2", "test4" };
 
         await _dynamoDbHelper.WriteIntoTable(inputCategories.Select(category => new Category
         {
@@ -161,7 +179,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     {
         const string inputCategoryName = "category123";
         var inputCategoryType = TransactionType.Expense;
-        var expectedSubcategories = new List<string> {"test1", "test2"};
+        var expectedSubcategories = new List<string> { "test1", "test2" };
 
         var inputDto = new CategoryDto
         {
@@ -216,7 +234,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             CategoryName = duplicateCategoryName,
             TransactionType = duplicateTransactionType,
-            Subcategories = new List<string> {"subcategory1", "subcategory2"}
+            Subcategories = new List<string> { "subcategory1", "subcategory2" }
         };
 
         var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
@@ -268,7 +286,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             UserId = PersistedUserId,
             CategoryName = categoryName,
             TransactionType = TransactionType.Expense,
-            Subcategories = new List<string> {"subcategory1", "subcategory2", "test subcategory"}
+            Subcategories = new List<string> { "subcategory1", "subcategory2", "test subcategory" }
         }, returnedCategory);
     }
 }
