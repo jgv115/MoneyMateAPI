@@ -69,6 +69,9 @@ namespace TransactionService.Domain.Services.Categories
                     if (string.IsNullOrWhiteSpace(operation.value as string))
                         throw new BadUpdateCategoryRequestException("Subcategory name should not be empty");
                 }
+
+                if (operation.op == "replace" && operation.path == "/transactionType")
+                    throw new BadUpdateCategoryRequestException("Updating transaction type is not allowed");
             });
 
             var existingCategory = await _repository.GetCategory(_userContext.UserId, categoryName);

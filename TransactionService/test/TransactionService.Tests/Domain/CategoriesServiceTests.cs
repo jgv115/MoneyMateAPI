@@ -395,6 +395,31 @@ public class CategoriesServiceTests
                 service.UpdateCategory(categoryName, inputPatchDocument));
         }
 
+        [Fact]
+        public async Task GivenAttemptToChangeTransactionType_ThenBadUpdateCategoryRequestExceptionThrown()
+        {
+            const string categoryName = "test-category";
+
+            var inputPatchDocument = new JsonPatchDocument<CategoryDto>(new List<Operation<CategoryDto>>
+            {
+                new()
+                {
+                    op = "replace",
+                    path = "/transactionType",
+                    value = TransactionType.Expense
+                }
+            }, new DefaultContractResolver());
+
+            _mockRepository.Setup(repository => repository.GetCategory(UserId, categoryName))
+                .ReturnsAsync(() => new Category());
+
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+                _mapper);
+
+            await Assert.ThrowsAsync<BadUpdateCategoryRequestException>(() =>
+                service.UpdateCategory(categoryName, inputPatchDocument));
+        }
+
         [Theory]
         [ClassData(typeof(PatchDocumentTestData))]
         public async Task
