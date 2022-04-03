@@ -10,6 +10,8 @@ using Newtonsoft.Json.Serialization;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.Categories;
+using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Dtos;
 using TransactionService.Middleware;
 using TransactionService.Profiles;
@@ -356,6 +358,19 @@ public class CategoriesServiceTests
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(UserId);
         }
 
+        [Fact]
+        public async Task GivenCategoryNameThatDoesNotExist_ThenCategoryDoesNotExistExceptionShouldBeThrown()
+        {
+
+            _mockRepository.Setup(repository => repository.GetCategory(UserId, "name"))
+                .ReturnsAsync(() => null);
+
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+                _mapper);
+
+            await Assert.ThrowsAsync<CategoryDoesNotExistException>(() => service.UpdateCategory("name", new JsonPatchDocument<CategoryDto>()));
+
+        }
 
         [Theory]
         [ClassData(typeof(PatchDocumentTestData))]

@@ -3,6 +3,8 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Repositories.Exceptions;
 
 namespace TransactionService.Middleware
@@ -29,7 +31,7 @@ namespace TransactionService.Middleware
                 switch (ex)
                 {
                     case RepositoryItemExistsException:
-                        returnedStatusCode = (int) HttpStatusCode.Conflict;
+                        returnedStatusCode = (int)HttpStatusCode.Conflict;
                         problemDetails = new ProblemDetails
                         {
                             Status = returnedStatusCode,
@@ -37,9 +39,19 @@ namespace TransactionService.Middleware
                             Detail = ex.Message
                         };
                         break;
-                    
+
+                    case CategoryDoesNotExistException:
+                        returnedStatusCode = (int)HttpStatusCode.BadRequest;
+                        problemDetails = new ProblemDetails
+                        {
+                            Status = returnedStatusCode,
+                            Title = "Bad update category request",
+                            Detail = ex.Message
+                        };
+                        break;
+
                     default:
-                        returnedStatusCode = (int) HttpStatusCode.InternalServerError;
+                        returnedStatusCode = (int)HttpStatusCode.InternalServerError;
                         problemDetails = new ProblemDetails
                         {
                             Status = returnedStatusCode,

@@ -5,7 +5,7 @@ using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 
-namespace TransactionService.Domain.Services
+namespace TransactionService.Domain.Services.Categories
 {
     public interface ICategoriesService
     {

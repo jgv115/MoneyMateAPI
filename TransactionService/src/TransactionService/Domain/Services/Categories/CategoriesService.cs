@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,11 +5,12 @@ using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
+using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Dtos;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 
-namespace TransactionService.Domain.Services
+namespace TransactionService.Domain.Services.Categories
 {
     public class CategoriesService : ICategoriesService
     {
@@ -55,7 +55,6 @@ namespace TransactionService.Domain.Services
             return _repository.CreateCategory(newCategory);
         }
 
-        // TODO: error out if no existing category found
         // TODO: enforce one operation at a time.
         // TODO: Can't delete if there are still transactions
         // TODO: if want to change name then have to change it for all transactions
@@ -63,6 +62,9 @@ namespace TransactionService.Domain.Services
         public async Task UpdateCategory(string categoryName, JsonPatchDocument<CategoryDto> patchDocument)
         {
             var existingCategory = await _repository.GetCategory(_userContext.UserId, categoryName);
+            if (existingCategory == null)
+                throw new CategoryDoesNotExistException($"Category {categoryName} does not exist");
+
             var existingCategoryDto = _mapper.Map<CategoryDto>(existingCategory);
 
             patchDocument.ApplyTo(existingCategoryDto);

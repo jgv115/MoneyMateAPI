@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.Categories;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Profiles;

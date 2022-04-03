@@ -289,4 +289,16 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             Subcategories = new List<string> { "subcategory1", "subcategory2", "test subcategory" }
         }, returnedCategory);
     }
+
+    [Fact]
+    public async Task GivenAPatchCategoryRequestForACategoryThatDoesNotExist_WhenPatchCategoryIsCalled_Then404Returned()
+    {
+        var inputPatchDoc = "[{ \"op\": \"add\", \"path\": \"/subcategories/-\", \"value\": \"test subcategory\" }]";
+
+        var httpContent = new StringContent(inputPatchDoc,
+            Encoding.UTF8, "application/json-patch+json");
+        var response = await _httpClient.PatchAsync($"/api/categories/categoryname", httpContent);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }

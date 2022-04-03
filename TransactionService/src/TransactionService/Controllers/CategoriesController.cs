@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Constants;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.Categories;
 using TransactionService.Dtos;
 
 namespace TransactionService.Controllers

@@ -9,6 +9,7 @@ using TransactionService.Constants;
 using TransactionService.Controllers;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.Categories;
 using TransactionService.Dtos;
 using Xunit;
 
