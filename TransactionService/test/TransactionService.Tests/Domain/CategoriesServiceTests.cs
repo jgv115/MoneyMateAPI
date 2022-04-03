@@ -285,7 +285,7 @@ public class CategoriesServiceTests
             {
                 CategoryName = "testname",
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> { "test1", "test2" }
+                Subcategories = new List<string> {"test1", "test2"}
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CategoryDto>())).Returns(new Category());
@@ -307,7 +307,7 @@ public class CategoriesServiceTests
 
             const string expectedCategoryName = "categoryName";
             var expectedTransactionType = TransactionType.Expense;
-            var expectedSubcategories = new List<string> { "sub1", "sub2" };
+            var expectedSubcategories = new List<string> {"sub1", "sub2"};
 
             var inputDto = new CategoryDto
             {
@@ -359,17 +359,40 @@ public class CategoriesServiceTests
         }
 
         [Fact]
-        public async Task GivenCategoryNameThatDoesNotExist_ThenCategoryDoesNotExistExceptionShouldBeThrown()
+        public async Task GivenCategoryNameThatDoesNotExist_ThenBadUpdateCategoryRequestExceptionThrown()
         {
-
             _mockRepository.Setup(repository => repository.GetCategory(UserId, "name"))
                 .ReturnsAsync(() => null);
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mapper);
 
-            await Assert.ThrowsAsync<CategoryDoesNotExistException>(() => service.UpdateCategory("name", new JsonPatchDocument<CategoryDto>()));
+            await Assert.ThrowsAsync<BadUpdateCategoryRequestException>(() =>
+                service.UpdateCategory("name", new JsonPatchDocument<CategoryDto>()));
+        }
 
+        [Fact]
+        public async Task GivenAttemptToAddEmptySubcategory_ThenBadUpdateCategoryRequestExceptionThrown()
+        {
+            const string categoryName = "test-category";
+            var inputPatchDocument = new JsonPatchDocument<CategoryDto>(new List<Operation<CategoryDto>>
+            {
+                new()
+                {
+                    op = "add",
+                    path = "/subcategories/-",
+                    value = ""
+                }
+            }, new DefaultContractResolver());
+
+            _mockRepository.Setup(repository => repository.GetCategory(UserId, categoryName))
+                .ReturnsAsync(() => new Category());
+
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+                _mapper);
+
+            await Assert.ThrowsAsync<BadUpdateCategoryRequestException>(() =>
+                service.UpdateCategory(categoryName, inputPatchDocument));
         }
 
         [Theory]
@@ -406,7 +429,7 @@ public class CategoriesServiceTests
                     UserId = UserId,
                     CategoryName = CategoryName,
                     TransactionType = TransactionType.Expense,
-                    Subcategories = new List<string> { "test1", "test2" }
+                    Subcategories = new List<string> {"test1", "test2"}
                 };
             }
 

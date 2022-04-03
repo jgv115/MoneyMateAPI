@@ -40,7 +40,7 @@ namespace TransactionService.Middleware
                         };
                         break;
 
-                    case CategoryDoesNotExistException:
+                    case BadUpdateCategoryRequestException:
                         returnedStatusCode = (int)HttpStatusCode.BadRequest;
                         problemDetails = new ProblemDetails
                         {

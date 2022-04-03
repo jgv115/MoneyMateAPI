@@ -40,7 +40,8 @@ namespace TransactionService.Domain.Services.Categories
         {
             IEnumerable<Category> returnedCategories;
             if (transactionType.HasValue)
-                returnedCategories = await _repository.GetAllCategoriesForTransactionType(_userContext.UserId, transactionType.Value);
+                returnedCategories =
+                    await _repository.GetAllCategoriesForTransactionType(_userContext.UserId, transactionType.Value);
             else
                 returnedCategories = await _repository.GetAllCategories(_userContext.UserId);
 
@@ -61,9 +62,18 @@ namespace TransactionService.Domain.Services.Categories
         // TODO: can't change transactionType
         public async Task UpdateCategory(string categoryName, JsonPatchDocument<CategoryDto> patchDocument)
         {
+            patchDocument.Operations.ForEach(operation =>
+            {
+                if (operation.op == "add" && operation.path == "/subcategories/-")
+                {
+                    if (string.IsNullOrWhiteSpace(operation.value as string))
+                        throw new BadUpdateCategoryRequestException("Subcategory name should not be empty");
+                }
+            });
+
             var existingCategory = await _repository.GetCategory(_userContext.UserId, categoryName);
             if (existingCategory == null)
-                throw new CategoryDoesNotExistException($"Category {categoryName} does not exist");
+                throw new BadUpdateCategoryRequestException($"Category {categoryName} does not exist");
 
             var existingCategoryDto = _mapper.Map<CategoryDto>(existingCategory);
 
