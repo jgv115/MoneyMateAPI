@@ -46,6 +46,13 @@ namespace TransactionService.Controllers
             return Ok();
         }
 
+        [HttpDelete("{categoryName}")]
+        public async Task<IActionResult> Delete(string categoryName)
+        {
+            await _categoriesService.DeleteCategory(categoryName);
+            return Ok();
+        }
+
         // PATCH api/categories/{categoryName}
         [HttpPatch("{categoryName}")]
         public async Task<IActionResult> Patch(string categoryName,

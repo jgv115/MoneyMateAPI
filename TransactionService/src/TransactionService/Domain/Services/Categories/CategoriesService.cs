@@ -56,6 +56,12 @@ namespace TransactionService.Domain.Services.Categories
             return _repository.CreateCategory(newCategory);
         }
 
+        // TODO: check if there are some transactions that belong to this category
+        public Task DeleteCategory(string categoryName)
+        {
+            return _repository.DeleteCategory(_userContext.UserId, categoryName);
+        }
+
         // TODO: enforce one operation at a time.
         // TODO: Can't delete if there are still transactions
         // TODO: if want to change name then have to change it for all transactions

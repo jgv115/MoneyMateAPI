@@ -41,7 +41,7 @@ namespace TransactionService.Repositories
 
             if (loadedCategory is not null)
                 loadedCategory.UserId = ExtractPublicFacingUserId(loadedCategory.UserId);
-            
+
             return loadedCategory;
         }
 
@@ -108,6 +108,16 @@ namespace TransactionService.Repositories
             }
 
             await SaveCategory(newCategory);
+        }
+
+        public async Task DeleteCategory(string userId, string categoryName)
+        {
+            await _dbContext.DeleteAsync<Category>($"{userId}{HashKeySuffix}",
+                categoryName,
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
         }
 
         public Task UpdateCategory(Category updatedCategory)

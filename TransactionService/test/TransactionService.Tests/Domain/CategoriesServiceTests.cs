@@ -339,6 +339,39 @@ public class CategoriesServiceTests
         }
     }
 
+    public class DeleteCategory
+    {
+        private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
+        private readonly Mock<ICategoriesRepository> _mockRepository;
+
+        private readonly Mock<IMapper> _mockMapper;
+
+        private const string UserId = "userId-123";
+
+        public DeleteCategory()
+        {
+            _mockCurrentUserContext = new Mock<CurrentUserContext>();
+            _mockRepository = new Mock<ICategoriesRepository>();
+            _mockMapper = new Mock<IMapper>();
+
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(UserId);
+        }
+
+        [Fact]
+        public async Task GivenCategoryName_ThenRepositoryDeleteCategoryCalledWithCorrectArguments()
+        {
+            const string categoryName = "category Name 123";
+            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+                _mockMapper.Object);
+
+            _mockRepository.Setup(repository => repository.DeleteCategory(It.IsAny<string>(), It.IsAny<string>()));
+
+            await service.DeleteCategory(categoryName);
+
+            _mockRepository.Verify(repository => repository.DeleteCategory(UserId, categoryName));
+        }
+    }
+
     public class UpdateCategory
     {
         private readonly Mock<CurrentUserContext> _mockCurrentUserContext;

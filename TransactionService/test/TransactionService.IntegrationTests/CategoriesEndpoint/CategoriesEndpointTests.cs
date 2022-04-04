@@ -154,8 +154,8 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     [Fact]
     public async Task GivenValidRequest_WhenGetSubcategoriesIsCalled_ThenAllSubcategoriesAreReturned()
     {
-        var inputCategories = new List<string> { "category1", "category2", "category3" };
-        var expectedSubcategories = new List<string> { "test1", "test2", "test4" };
+        var inputCategories = new List<string> {"category1", "category2", "category3"};
+        var expectedSubcategories = new List<string> {"test1", "test2", "test4"};
 
         await _dynamoDbHelper.WriteIntoTable(inputCategories.Select(category => new Category
         {
@@ -179,7 +179,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     {
         const string inputCategoryName = "category123";
         var inputCategoryType = TransactionType.Expense;
-        var expectedSubcategories = new List<string> { "test1", "test2" };
+        var expectedSubcategories = new List<string> {"test1", "test2"};
 
         var inputDto = new CategoryDto
         {
@@ -234,7 +234,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         {
             CategoryName = duplicateCategoryName,
             TransactionType = duplicateTransactionType,
-            Subcategories = new List<string> { "subcategory1", "subcategory2" }
+            Subcategories = new List<string> {"subcategory1", "subcategory2"}
         };
 
         var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
@@ -243,6 +243,39 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
+    [Fact]
+    public async Task GivenCategoryName_WhenDeleteCategoryIsCalled_ThenCategoryIsDeleted()
+    {
+        const string categoryName = "category123";
+
+        var initialData = new List<Category>
+        {
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = categoryName,
+                TransactionType = TransactionType.Expense,
+                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+            },
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = "category2",
+                TransactionType = TransactionType.Income,
+                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+            }
+        };
+
+        await _dynamoDbHelper.WriteIntoTable(initialData);
+
+        var response = await _httpClient.DeleteAsync($"api/categories/{categoryName}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var returnedCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedUserId, categoryName);
+
+        Assert.Null(returnedCategory);
+    }
 
     [Fact]
     public async Task
@@ -286,7 +319,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             UserId = PersistedUserId,
             CategoryName = categoryName,
             TransactionType = TransactionType.Expense,
-            Subcategories = new List<string> { "subcategory1", "subcategory2", "test subcategory" }
+            Subcategories = new List<string> {"subcategory1", "subcategory2", "test subcategory"}
         }, returnedCategory);
     }
 

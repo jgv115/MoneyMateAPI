@@ -142,6 +142,29 @@ public class CategoriesControllerTests
     }
 
     [Fact]
+    public async Task GivenCategoryName_WhenDeleteInvoked_ThenCategoriesServiceCalled()
+    {
+        const string categoryName = "category-name123";
+        var controller = new CategoriesController(_mockCategoriesService.Object);
+
+        await controller.Delete(categoryName);
+
+        _mockCategoriesService.Verify(service => service.DeleteCategory(categoryName));
+    }
+
+    [Fact]
+    public async Task GivenCategoryName_WhenDeleteInvoked_Then200OkReturned()
+    {
+        const string categoryName = "category-name123";
+        var controller = new CategoriesController(_mockCategoriesService.Object);
+
+        var response = await controller.Delete(categoryName);
+
+        var objectResponse = Assert.IsType<OkResult>(response);
+        Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+    }
+
+    [Fact]
     public async Task
         GivenValidCategoryDto_WhenPatchInvoked_ThenCategoriesServiceCalledWithCorrectDto()
     {

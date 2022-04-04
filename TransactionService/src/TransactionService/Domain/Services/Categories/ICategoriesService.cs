@@ -15,6 +15,7 @@ namespace TransactionService.Domain.Services.Categories
         // TODO: don't expose domain model
         public Task<IEnumerable<Category>> GetAllCategories(TransactionType? transactionType);
         public Task CreateCategory(CategoryDto categoryDto);
+        public Task DeleteCategory(string categoryName);
         public Task UpdateCategory(string categoryName, JsonPatchDocument<CategoryDto> patchDocument);
     }
 }
