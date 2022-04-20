@@ -4,289 +4,302 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
+using TransactionService.Tests.Common;
 using TransactionService.ViewModels;
 using Xunit;
 
-namespace TransactionService.IntegrationTests.AnalyticsEndpoint
+namespace TransactionService.IntegrationTests.AnalyticsEndpoint;
+
+[Collection("IntegrationTests")]
+public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
 {
-    [Collection("IntegrationTests")]
-    public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
+    private readonly HttpClient HttpClient;
+    private readonly DynamoDbHelper DynamoDbHelper;
+    private const string UserId = "auth0|moneymatetest#Transaction";
+
+    public AnalyticsEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
-        private readonly HttpClient HttpClient;
-        private readonly DynamoDbHelper DynamoDbHelper;
-        private const string UserId = "auth0|moneymatetest#Transaction";
+        HttpClient = factory.CreateDefaultClient();
+        DynamoDbHelper = new DynamoDbHelper();
+    }
 
-        public AnalyticsEndpointTests(MoneyMateApiWebApplicationFactory factory)
-        {
-            HttpClient = factory.CreateDefaultClient();
-            DynamoDbHelper = new DynamoDbHelper();
-        }
+    public async Task InitializeAsync()
+    {
+        await DynamoDbHelper.CreateTable();
+    }
 
-        public async Task InitializeAsync()
-        {
-            await DynamoDbHelper.CreateTable();
-        }
+    public async Task DisposeAsync()
+    {
+        await DynamoDbHelper.DeleteTable();
+    }
 
-        public async Task DisposeAsync()
-        {
-            await DynamoDbHelper.DeleteTable();
-        }
+    [Fact]
+    public async Task
+        GivenStartAndEndInputParameters_WhenGetCategoriesBreakdownEndpointInvoked_ThenCorrectCategoriesReturned()
+    {
+        const string expectedCategory1 = "category1";
+        const int numberOfCategory1Transactions = 10;
+        const decimal category1TransactionsAmount = (decimal) 34.5;
 
-        [Fact]
-        public async Task
-            GivenStartAndEndInputParameters_WhenGetCategoriesBreakdownEndpointInvoked_ThenCorrectCategoriesReturned()
-        {
-            const string expectedCategory1 = "category1";
-            const int numberOfCategory1Transactions = 10;
-            const decimal category1TransactionsAmount = (decimal) 34.5;
+        const string expectedCategory2 = "category2";
+        const int numberOfCategory2Transactions = 5;
+        const decimal category2TransactionsAmount = (decimal) 34.5;
 
-            const string expectedCategory2 = "category2";
-            const int numberOfCategory2Transactions = 5;
-            const decimal category2TransactionsAmount = (decimal) 34.5;
+        const string expectedCategory3 = "category3";
+        const int numberOfCategory3Transactions = 2;
+        const decimal category3TransactionsAmount = (decimal) 34.5;
 
-            const string expectedCategory3 = "category3";
-            const int numberOfCategory3Transactions = 2;
-            const decimal category3TransactionsAmount = (decimal) 34.5;
+        var transactionList = new TransactionListBuilder(UserId)
+            .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
+                category1TransactionsAmount)
+            .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
+                category2TransactionsAmount)
+            .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
+                category3TransactionsAmount)
+            .Build();
 
-            var transactionList = new TransactionListBuilder()
-                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
-                    category1TransactionsAmount)
-                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
-                    category2TransactionsAmount)
-                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
-                    category3TransactionsAmount)
-                .Build();
+        await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
-            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["type"] = "expense";
+        query["start"] = new DateTime(2021, 4, 1).ToString("yyyy-MM-dd");
+        query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
+        var queryString = query.ToString();
 
-            var query = HttpUtility.ParseQueryString(string.Empty);
-            query["type"] = "expense";
-            query["start"] = new DateTime(2021, 4, 1).ToString("yyyy-MM-dd");
-            query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
-            var queryString = query.ToString();
+        var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");
+        response.EnsureSuccessStatusCode();
 
-            var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");
-            response.EnsureSuccessStatusCode();
-
-            var returnedString = await response.Content.ReadAsStringAsync();
-            var actualAnalyticsCategories = JsonSerializer.Deserialize<List<AnalyticsCategory>>(returnedString,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-            var expectedAnalyticsCategories = new List<AnalyticsCategory>
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var actualAnalyticsCategories = JsonSerializer.Deserialize<List<AnalyticsCategory>>(returnedString,
+            new JsonSerializerOptions
             {
-                new()
-                {
-                    CategoryName = expectedCategory1,
-                    TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory2,
-                    TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory3,
-                    TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
-                }
-            };
-            Assert.Equal(expectedAnalyticsCategories, actualAnalyticsCategories);
-        }
+                PropertyNameCaseInsensitive = true
+            });
 
-        [Fact]
-        public async Task
-            GivenFrequencyAndPeriodInputParameters_WhenGetCategoriesBreakdownEndpointInvoked_ThenCorrectCategoriesReturned()
+        var expectedAnalyticsCategories = new List<AnalyticsCategory>
         {
-            const string expectedCategory1 = "category1";
-            const int numberOfCategory1Transactions = 10;
-            const decimal category1TransactionsAmount = (decimal) 34.5;
-
-            const string expectedCategory2 = "category2";
-            const int numberOfCategory2Transactions = 5;
-            const decimal category2TransactionsAmount = (decimal) 34.5;
-
-            const string expectedCategory3 = "category3";
-            const int numberOfCategory3Transactions = 2;
-            const decimal category3TransactionsAmount = (decimal) 34.5;
-
-            var transactionList = new TransactionListBuilder()
-                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
-                    category1TransactionsAmount)
-                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
-                    category2TransactionsAmount)
-                .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
-                    category3TransactionsAmount)
-                .Build();
-
-            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
-
-            var query = HttpUtility.ParseQueryString(string.Empty);
-            query["type"] = "expense";
-            query["frequency"] = "MONTH";
-            query["periods"] = "0";
-            var queryString = query.ToString();
-
-            var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");
-            response.EnsureSuccessStatusCode();
-
-            var returnedString = await response.Content.ReadAsStringAsync();
-            var actualAnalyticsCategories = JsonSerializer.Deserialize<List<AnalyticsCategory>>(returnedString,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-            var expectedAnalyticsCategories = new List<AnalyticsCategory>
+            new()
             {
-                new()
-                {
-                    CategoryName = expectedCategory1,
-                    TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory2,
-                    TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
-                },
-                new()
-                {
-                    CategoryName = expectedCategory3,
-                    TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
-                }
-            };
-            Assert.Equal(expectedAnalyticsCategories, actualAnalyticsCategories);
-        }
+                CategoryName = expectedCategory1,
+                TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
+            },
+            new()
+            {
+                CategoryName = expectedCategory2,
+                TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
+            },
+            new()
+            {
+                CategoryName = expectedCategory3,
+                TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
+            }
+        };
+        Assert.Equal(expectedAnalyticsCategories, actualAnalyticsCategories);
+    }
 
-        [Fact]
-        public async Task
-            GivenStartAndEndInputParameters_WhenGetSubcategoriesBreakdownEndpointInvoked_ThenCorrectSubcategoriesReturned()
+    [Fact]
+    public async Task
+        GivenFrequencyAndPeriodInputParameters_WhenGetCategoriesBreakdownEndpointInvoked_ThenCorrectCategoriesReturned()
+    {
+        const string expectedCategory1 = "category1";
+        const int numberOfCategory1Transactions = 10;
+        const decimal category1TransactionsAmount = (decimal) 34.5;
+
+        const string expectedCategory2 = "category2";
+        const int numberOfCategory2Transactions = 5;
+        const decimal category2TransactionsAmount = (decimal) 34.5;
+
+        const string expectedCategory3 = "category3";
+        const int numberOfCategory3Transactions = 2;
+        const decimal category3TransactionsAmount = (decimal) 34.5;
+
+        var transactionList = new TransactionListBuilder(UserId)
+            .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
+                category1TransactionsAmount)
+            .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
+                category2TransactionsAmount)
+            .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
+                category3TransactionsAmount)
+            .Build();
+
+        await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["type"] = "expense";
+        query["frequency"] = "MONTH";
+        query["periods"] = "0";
+        var queryString = query.ToString();
+
+        var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");
+        response.EnsureSuccessStatusCode();
+
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var actualAnalyticsCategories = JsonSerializer.Deserialize<List<AnalyticsCategory>>(returnedString,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        var expectedAnalyticsCategories = new List<AnalyticsCategory>
         {
-            const string expectedCategory1 = "category1";
-            const string expectedSubcategory1 = "subcategory1";
-            const int numberOfSubcategory1Transactions = 10;
-            const decimal subcategory1TransactionsAmount = (decimal) 34.5;
+            new()
+            {
+                CategoryName = expectedCategory1,
+                TotalAmount = numberOfCategory1Transactions * category1TransactionsAmount
+            },
+            new()
+            {
+                CategoryName = expectedCategory2,
+                TotalAmount = numberOfCategory2Transactions * category2TransactionsAmount
+            },
+            new()
+            {
+                CategoryName = expectedCategory3,
+                TotalAmount = numberOfCategory3Transactions * category3TransactionsAmount
+            }
+        };
+        Assert.Equal(expectedAnalyticsCategories, actualAnalyticsCategories);
+    }
 
-            const string expectedCategory2 = "category2";
-            const string expectedSubcategory2 = "subcategory2";
-            const int numberOfSubcategory2Transactions = 5;
-            const decimal subcategory2TransactionsAmount = (decimal) 34.5;
+    [Fact]
+    public async Task
+        GivenStartAndEndInputParameters_WhenGetSubcategoriesBreakdownEndpointInvoked_ThenCorrectSubcategoriesReturned()
+    {
+        const string expectedCategory1 = "category1";
+        const string expectedSubcategory1 = "subcategory1";
+        const int numberOfSubcategory1Transactions = 10;
+        const decimal subcategory1TransactionsAmount = (decimal) 34.5;
 
-            const string expectedCategory3 = "category3";
-            const string expectedSubcategory3 = "subcategory3";
-            const int numberOfSubcategory3Transactions = 2;
-            const decimal subcategory3TransactionsAmount = (decimal) 34.5;
+        const string expectedCategory2 = "category2";
+        const string expectedSubcategory2 = "subcategory2";
+        const int numberOfSubcategory2Transactions = 5;
+        const decimal subcategory2TransactionsAmount = (decimal) 34.5;
+
+        const string expectedCategory3 = "category3";
+        const string expectedSubcategory3 = "subcategory3";
+        const int numberOfSubcategory3Transactions = 2;
+        const decimal subcategory3TransactionsAmount = (decimal) 34.5;
             
-            const string expectedSubcategory4 = "subcategory4";
-            const int numberOfSubcategory4Transactions = 2;
-            const decimal subcategory4TransactionsAmount = (decimal) 12.4;
+        const string expectedSubcategory4 = "subcategory4";
+        const int numberOfSubcategory4Transactions = 2;
+        const decimal subcategory4TransactionsAmount = (decimal) 12.4;
 
-            var transactionList = new TransactionListBuilder()
-                .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory1Transactions,
-                    expectedCategory1, expectedSubcategory1, subcategory1TransactionsAmount)
-                .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory2Transactions,
-                    expectedCategory2,
-                    expectedSubcategory2, subcategory2TransactionsAmount)
-                .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory3Transactions,
-                    expectedCategory3, expectedSubcategory3, subcategory3TransactionsAmount)
-                .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory4Transactions,
-                    expectedCategory3, expectedSubcategory4, subcategory4TransactionsAmount)
-                .Build();
+        var transactionList = new TransactionListBuilder(UserId)
+            .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory1Transactions,
+                expectedCategory1, expectedSubcategory1, subcategory1TransactionsAmount)
+            .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory2Transactions,
+                expectedCategory2,
+                expectedSubcategory2, subcategory2TransactionsAmount)
+            .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory3Transactions,
+                expectedCategory3, expectedSubcategory3, subcategory3TransactionsAmount)
+            .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory4Transactions,
+                expectedCategory3, expectedSubcategory4, subcategory4TransactionsAmount)
+            .Build();
 
-            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+        await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
-            var query = HttpUtility.ParseQueryString(string.Empty);
-            query["category"] = expectedCategory3;
-            query["start"] = new DateTime(2021, 4, 1).ToString("yyyy-MM-dd");
-            query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
-            var queryString = query.ToString();
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["category"] = expectedCategory3;
+        query["start"] = new DateTime(2021, 4, 1).ToString("yyyy-MM-dd");
+        query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
+        var queryString = query.ToString();
 
-            var response = await HttpClient.GetAsync($"/api/analytics/subcategories?{queryString}");
-            response.EnsureSuccessStatusCode();
+        var response = await HttpClient.GetAsync($"/api/analytics/subcategories?{queryString}");
+        response.EnsureSuccessStatusCode();
 
-            var returnedString = await response.Content.ReadAsStringAsync();
-            var actualAnalyticsCategories = JsonSerializer.Deserialize<List<AnalyticsSubcategory>>(returnedString,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-            var expectedAnalyticsSubcategories = new List<AnalyticsSubcategory>
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var actualAnalyticsCategories = JsonSerializer.Deserialize<List<AnalyticsSubcategory>>(returnedString,
+            new JsonSerializerOptions
             {
-                new()
-                {
-                    SubcategoryName = expectedSubcategory3,
-                    BelongsToCategory = expectedCategory3,
-                    TotalAmount = numberOfSubcategory3Transactions * subcategory3TransactionsAmount
-                },
-                new()
-                {
-                    SubcategoryName = expectedSubcategory4,
-                    BelongsToCategory = expectedCategory3,
-                    TotalAmount = numberOfSubcategory4Transactions * subcategory4TransactionsAmount
-                }
-            };
-            Assert.Equal(expectedAnalyticsSubcategories, actualAnalyticsCategories);
-        }
+                PropertyNameCaseInsensitive = true
+            });
 
-        public class TransactionListBuilder
+        var expectedAnalyticsSubcategories = new List<AnalyticsSubcategory>
         {
-            private readonly List<Transaction> _transactionList;
-
-            public TransactionListBuilder()
+            new()
             {
-                _transactionList = new List<Transaction>();
-            }
-
-            public List<Transaction> Build()
+                SubcategoryName = expectedSubcategory3,
+                BelongsToCategory = expectedCategory3,
+                TotalAmount = numberOfSubcategory3Transactions * subcategory3TransactionsAmount
+            },
+            new()
             {
-                return _transactionList;
+                SubcategoryName = expectedSubcategory4,
+                BelongsToCategory = expectedCategory3,
+                TotalAmount = numberOfSubcategory4Transactions * subcategory4TransactionsAmount
             }
+        };
+        Assert.Equal(expectedAnalyticsSubcategories, actualAnalyticsCategories);
+    }
+    
+    [Fact]
+    public async Task
+        GivenStartAndEndInputParameters_WhenGetPayerPayeeBreakdownEndpointInvoked_ThenCorrectAnalyticsPayerPayeesReturned()
+    {
+        Guid expectedPayerPayeeId1 = Guid.NewGuid();
+        const string expectedPayerPayeeName1 = "name1";
+        const int numberOfPayerPayee1Transactions = 6;
+        const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
 
-            public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndAmount(int number, string category,
-                decimal amount)
+        Guid expectedPayerPayeeId2 = Guid.NewGuid();
+        const string expectedPayerPayeeName2 = "name2";
+        const int numberOfPayerPayee2Transactions = 4;
+        const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
+
+        Guid expectedPayerPayeeId3 = Guid.NewGuid();
+        const string expectedPayerPayeeName3 = "name3";
+        const int numberOfPayerPayee3Transactions = 2;
+        const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
+
+        var transactionList = new TransactionListBuilder(UserId)
+            .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee1Transactions,
+                expectedPayerPayeeId1, expectedPayerPayeeName1, payerPayee1TransactionsAmount)
+            .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee2Transactions,
+                expectedPayerPayeeId2, expectedPayerPayeeName2, payerPayee2TransactionsAmount)
+            .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee3Transactions,
+                expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
+            .Build();
+
+        await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["start"] = new DateTime(2021, 4, 1).ToString("yyyy-MM-dd");
+        query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
+        var queryString = query.ToString();
+
+        var response = await HttpClient.GetAsync($"/api/analytics/payerpayees?{queryString}");
+        response.EnsureSuccessStatusCode();
+
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var actualAnalyticsPayerPayees = JsonSerializer.Deserialize<List<AnalyticsPayerPayee>>(returnedString,
+            new JsonSerializerOptions
             {
-                for (var i = 0; i < number; i++)
-                {
-                    _transactionList.Add(new Transaction
-                    {
-                        UserId = UserId,
-                        TransactionId = Guid.NewGuid().ToString(),
-                        TransactionTimestamp = DateTime.UtcNow.ToString("O"),
-                        TransactionType = "expense",
-                        Amount = amount,
-                        Category = category,
-                        Subcategory = "subcategory-1",
-                    });
-                }
+                PropertyNameCaseInsensitive = true
+            });
 
-                return this;
-            }
-
-            public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(int number,
-                string category, string subcategory, decimal amount)
+        var expectedAnalyticsPayerPayees = new List<AnalyticsPayerPayee>
+        {
+            new()
             {
-                for (var i = 0; i < number; i++)
-                {
-                    _transactionList.Add(new Transaction
-                    {
-                        UserId = UserId,
-                        TransactionId = Guid.NewGuid().ToString(),
-                        TransactionTimestamp = DateTime.UtcNow.ToString("O"),
-                        TransactionType = "expense",
-                        Amount = amount,
-                        Category = category,
-                        Subcategory = subcategory,
-                    });
-                }
-
-                return this;
-            }
-        }
+                PayerPayeeId = expectedPayerPayeeId1,
+                PayerPayeeName = expectedPayerPayeeName1,
+                TotalAmount = numberOfPayerPayee1Transactions * payerPayee1TransactionsAmount
+            },
+            new()
+            {
+                PayerPayeeId = expectedPayerPayeeId2,
+                PayerPayeeName = expectedPayerPayeeName2,
+                TotalAmount = numberOfPayerPayee2Transactions * payerPayee2TransactionsAmount
+            },
+            new()
+            {
+                PayerPayeeId = expectedPayerPayeeId3,
+                PayerPayeeName = expectedPayerPayeeName3,
+                TotalAmount = numberOfPayerPayee3Transactions * payerPayee3TransactionsAmount
+            },
+        };
+        Assert.Equal(expectedAnalyticsPayerPayees, actualAnalyticsPayerPayees);
     }
 }

@@ -21,7 +21,8 @@ namespace TransactionService.Services
             _timePeriodHelper = timePeriodHelper ?? throw new ArgumentNullException(nameof(timePeriodHelper));
         }
 
-        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(TransactionType type, int? count, DateTime start,
+        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(TransactionType type, int? count,
+            DateTime start,
             DateTime end)
         {
             var transactions = await _transactionService.GetTransactionsAsync(new GetTransactionsQuery
@@ -41,7 +42,8 @@ namespace TransactionService.Services
             return count.HasValue ? orderedCategories.Take(count.Value) : orderedCategories;
         }
 
-        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(TransactionType type, int? count, TimePeriod timePeriod)
+        public async Task<IEnumerable<AnalyticsCategory>> GetCategoriesBreakdown(TransactionType type, int? count,
+            TimePeriod timePeriod)
         {
             var dateRange = _timePeriodHelper.ResolveDateRange(timePeriod);
             return await GetCategoriesBreakdown(type, count, dateRange.Start, dateRange.End);
@@ -52,7 +54,7 @@ namespace TransactionService.Services
         {
             var transactions = await _transactionService.GetTransactionsAsync(new GetTransactionsQuery
             {
-                Categories = new List<string> { categoryName },
+                Categories = new List<string> {categoryName},
                 Start = start,
                 End = end,
             });
@@ -68,6 +70,29 @@ namespace TransactionService.Services
 
             if (count.HasValue) return orderedSubcategories.Take(count.Value);
             else return orderedSubcategories;
+        }
+
+        public async Task<IEnumerable<AnalyticsPayerPayee>> GetPayerPayeeBreakdown(TransactionType transactionType,
+            DateTime start, DateTime end)
+        {
+            var transactions = await _transactionService.GetTransactionsAsync(new GetTransactionsQuery
+            {
+                Type = transactionType,
+                Start = start,
+                End = end
+            });
+
+            var orderedPayerPayees = transactions
+                .GroupBy(transaction => new {transaction.PayerPayeeId, transaction.PayerPayeeName})
+                .Select(grouping => new AnalyticsPayerPayee
+                {
+                    PayerPayeeId = Guid.Parse(grouping.Key.PayerPayeeId),
+                    PayerPayeeName = grouping.Key.PayerPayeeName,
+                    TotalAmount = grouping.Sum(transaction => transaction.Amount)
+                })
+                .OrderByDescending(analyticsPayerPayee => analyticsPayerPayee.TotalAmount);
+
+            return orderedPayerPayees;
         }
     }
 }

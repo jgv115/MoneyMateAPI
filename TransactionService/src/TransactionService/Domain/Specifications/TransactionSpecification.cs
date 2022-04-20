@@ -50,7 +50,7 @@ namespace TransactionService.Domain.Specifications
             return _categories.Contains(item.Category);
         }
     }
-    
+
     public class SubcategoriesSpec : ITransactionSpecification
     {
         private readonly IEnumerable<string> _categories;
@@ -65,4 +65,19 @@ namespace TransactionService.Domain.Specifications
             return _categories.Contains(item.Subcategory);
         }
     }
+
+    // public class PayeeSpec : ITransactionSpecification
+    // {
+    //     private readonly IEnumerable<string> _payees;
+    //
+    //     public PayeeSpec(IEnumerable<string> payees)
+    //     {
+    //         _payees = payees;
+    //     }
+    //
+    //     public bool IsSatisfied(Transaction item)
+    //     {
+    //         return _payees.Contains(item.PayerPayeeId);
+    //     }
+    // }
 }

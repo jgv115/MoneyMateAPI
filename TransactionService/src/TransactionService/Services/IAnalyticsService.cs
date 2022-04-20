@@ -16,5 +16,8 @@ namespace TransactionService.Services
 
         public Task<IEnumerable<AnalyticsSubcategory>> GetSubcategoriesBreakdown(string categoryName, int? count,
             DateTime start, DateTime end);
+
+        public Task<IEnumerable<AnalyticsPayerPayee>> GetPayerPayeeBreakdown(TransactionType type, DateTime start,
+            DateTime end);
     }
 }

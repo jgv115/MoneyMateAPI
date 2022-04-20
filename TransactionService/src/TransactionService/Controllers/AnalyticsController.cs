@@ -35,12 +35,14 @@ namespace TransactionService.Controllers
             IEnumerable<AnalyticsCategory> analyticsCategories;
             if (start.HasValue && end.HasValue)
             {
-                analyticsCategories = await _analyticsService.GetCategoriesBreakdown(type, count, start.Value, end.Value);
+                analyticsCategories =
+                    await _analyticsService.GetCategoriesBreakdown(type, count, start.Value, end.Value);
             }
             else if (!string.IsNullOrEmpty(frequency) && periods.HasValue)
             {
                 analyticsCategories =
-                    await _analyticsService.GetCategoriesBreakdown(type, count, new TimePeriod(frequency, periods.Value));
+                    await _analyticsService.GetCategoriesBreakdown(type, count,
+                        new TimePeriod(frequency, periods.Value));
             }
             else
             {
@@ -52,7 +54,8 @@ namespace TransactionService.Controllers
         }
 
         [HttpGet("subcategories")]
-        public async Task<IActionResult> GetSubcategoriesBreakdown([FromQuery] GetSubcategoriesBreakdownQuery queryParams)
+        public async Task<IActionResult> GetSubcategoriesBreakdown(
+            [FromQuery] GetSubcategoriesBreakdownQuery queryParams)
         {
             var category = queryParams.Category;
             var count = queryParams.Count;
@@ -63,15 +66,42 @@ namespace TransactionService.Controllers
             IEnumerable<AnalyticsSubcategory> analyticsCategories;
             if (start.HasValue && end.HasValue)
             {
-                analyticsCategories = await _analyticsService.GetSubcategoriesBreakdown(category, count, start.Value, end.Value);
+                analyticsCategories =
+                    await _analyticsService.GetSubcategoriesBreakdown(category, count, start.Value, end.Value);
             }
             else
             {
                 analyticsCategories =
-                    await _analyticsService.GetSubcategoriesBreakdown(category, count, DateTime.MinValue, DateTime.MaxValue);
+                    await _analyticsService.GetSubcategoriesBreakdown(category, count, DateTime.MinValue,
+                        DateTime.MaxValue);
             }
 
             return Ok(analyticsCategories);
+        }
+
+        [HttpGet("payerPayees")]
+        public async Task<IActionResult> GetPayerPayeesBreakdown(
+            [FromQuery] GetPayerPayeesBreakdownQuery queryParams)
+        {
+            var type = queryParams.Type;
+            var start = queryParams.Start;
+            var end = queryParams.End;
+
+
+            IEnumerable<AnalyticsPayerPayee> analyticsCategoriesPayees;
+            if (start.HasValue && end.HasValue)
+            {
+                analyticsCategoriesPayees =
+                    await _analyticsService.GetPayerPayeeBreakdown(type, start.Value, end.Value);
+            }
+            else
+            {
+                analyticsCategoriesPayees =
+                    await _analyticsService.GetPayerPayeeBreakdown(type, DateTime.MinValue,
+                        DateTime.MaxValue);
+            }
+
+            return Ok(analyticsCategoriesPayees);
         }
 
         [HttpGet("aggregates")]

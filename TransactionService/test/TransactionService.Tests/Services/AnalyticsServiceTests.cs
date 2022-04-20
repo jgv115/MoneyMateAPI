@@ -10,6 +10,7 @@ using TransactionService.Domain.Services;
 using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Services;
+using TransactionService.Tests.Common;
 using TransactionService.ViewModels;
 using Xunit;
 
@@ -97,17 +98,17 @@ namespace TransactionService.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal)34.5;
+                const decimal category1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal)34.5;
+                const decimal category2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal)34.5;
+                const decimal category3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder()
+                var transactionList = new TransactionListBuilder("userId123")
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                         category1TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -157,17 +158,17 @@ namespace TransactionService.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal)34.5;
+                const decimal category1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal)34.5;
+                const decimal category2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal)34.5;
+                const decimal category3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder()
+                var transactionList = new TransactionListBuilder("userId123")
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                         category1TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -266,17 +267,17 @@ namespace TransactionService.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal)34.5;
+                const decimal category1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal)34.5;
+                const decimal category2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal)34.5;
+                const decimal category3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder()
+                var transactionList = new TransactionListBuilder("userId123")
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                         category1TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -330,19 +331,19 @@ namespace TransactionService.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal)34.5;
+                const decimal category1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal)34.5;
+                const decimal category2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal)34.5;
+                const decimal category3TransactionsAmount = (decimal) 34.5;
 
                 _mockTimePeriodHelper.Setup(helper => helper.ResolveDateRange(timePeriod)).Returns(dateRange);
 
-                var transactionList = new TransactionListBuilder()
+                var transactionList = new TransactionListBuilder("userId123")
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                         category1TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -424,7 +425,7 @@ namespace TransactionService.Tests.Services
                 _mockTransactionService.Verify(
                     transactionService => transactionService.GetTransactionsAsync(
                         It.Is<GetTransactionsQuery>(query =>
-                            query.Categories.SequenceEqual(new List<string> { expectedCategoryName })
+                            query.Categories.SequenceEqual(new List<string> {expectedCategoryName})
                             && query.Start == start && query.End == end
                         )));
             }
@@ -439,18 +440,18 @@ namespace TransactionService.Tests.Services
 
                 const string expectedSubcategory1 = "subcategory1";
                 const int numberOfSubcategory1Transactions = 24;
-                const decimal subcategory1TransactionsAmount = (decimal)34.5;
+                const decimal subcategory1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedSubcategory2 = "subcategory2";
                 const int numberOfSubcategory2Transactions = 20;
-                const decimal subcategory2TransactionsAmount = (decimal)34.5;
+                const decimal subcategory2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedSubcategory3 = "subcategory3";
                 const int numberOfSubcategory3Transactions = 10;
-                const decimal subcategory3TransactionsAmount = (decimal)34.5;
+                const decimal subcategory3TransactionsAmount = (decimal) 34.5;
 
 
-                var transactionList = new TransactionListBuilder()
+                var transactionList = new TransactionListBuilder("userId123")
                     .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory1Transactions,
                         expectedCategoryName, expectedSubcategory1,
                         subcategory1TransactionsAmount)
@@ -509,17 +510,17 @@ namespace TransactionService.Tests.Services
 
                 const string expectedSubcategory1 = "subcategory1";
                 const int numberOfSubcategory1Transactions = 24;
-                const decimal subcategory1TransactionsAmount = (decimal)34.5;
+                const decimal subcategory1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedSubcategory2 = "subcategory2";
                 const int numberOfSubcategory2Transactions = 20;
-                const decimal subcategory2TransactionsAmount = (decimal)34.5;
+                const decimal subcategory2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedSubcategory3 = "subcategory3";
                 const int numberOfSubcategory3Transactions = 10;
-                const decimal subcategory3TransactionsAmount = (decimal)34.5;
+                const decimal subcategory3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder()
+                var transactionList = new TransactionListBuilder("userId123")
                     .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory1Transactions,
                         expectedCategoryName, expectedSubcategory1,
                         subcategory1TransactionsAmount)
@@ -568,57 +569,114 @@ namespace TransactionService.Tests.Services
             }
         }
 
-        public class TransactionListBuilder
+        public class GetPayerPayeeBreakdown
         {
-            private readonly List<Transaction> _transactionList;
+            private readonly Mock<ITransactionHelperService> _mockTransactionService;
+            private readonly Mock<ITimePeriodHelper> _mockTimePeriodHelper;
 
-            public TransactionListBuilder()
+            public GetPayerPayeeBreakdown()
             {
-                _transactionList = new List<Transaction>();
+                _mockTransactionService = new Mock<ITransactionHelperService>();
+                _mockTimePeriodHelper = new Mock<ITimePeriodHelper>();
             }
 
-            public List<Transaction> Build()
+            [Fact]
+            public async Task
+                GivenInputParameters_ThenTransactionServiceCalledWithCorrectArguments()
             {
-                return _transactionList;
+                var expectedType = TransactionType.Expense;
+                var start = DateTime.MinValue;
+                var end = DateTime.MaxValue;
+
+                _mockTransactionService
+                    .Setup(helperService =>
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>())).ReturnsAsync(() =>
+                        new List<Transaction>
+                        {
+                            new Transaction
+                            {
+                                Amount = 123M,
+                                Category = "category",
+                                TransactionTimestamp = DateTime.Now.ToString("O"),
+                                Subcategory = "subcategory-1",
+                                TransactionId = "transaction-id-1",
+                                TransactionType = "expense",
+                            }
+                        });
+
+                var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
+                await service.GetPayerPayeeBreakdown(expectedType, start, end);
+
+                _mockTransactionService.Verify(transactionService => transactionService.GetTransactionsAsync(
+                    It.Is<GetTransactionsQuery>(query =>
+                        query.Start == start && query.End == end && query.Type == expectedType &&
+                        !query.Subcategories.Any() && !query.Categories.Any())
+                ));
             }
 
-            public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndAmount(int number, string category,
-                decimal amount)
+            [Fact]
+            public async Task
+                GivenListReturnedFromTransactionService_ThenCorrectAnalyticsPayerPayeeListReturned()
             {
-                for (var i = 0; i < number; i++)
+                var expectedType = TransactionType.Expense;
+                var start = DateTime.MinValue;
+                var end = DateTime.MaxValue;
+
+                Guid expectedPayerPayeeId1 = Guid.NewGuid();
+                const string expectedPayerPayeeName1 = "name1";
+                const int numberOfPayerPayee1Transactions = 24;
+                const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
+
+                Guid expectedPayerPayeeId2 = Guid.NewGuid();
+                const string expectedPayerPayeeName2 = "name2";
+                const int numberOfPayerPayee2Transactions = 20;
+                const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
+
+                Guid expectedPayerPayeeId3 = Guid.NewGuid();
+                const string expectedPayerPayeeName3 = "name3";
+                const int numberOfPayerPayee3Transactions = 10;
+                const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
+
+                var transactionList = new TransactionListBuilder("userId123")
+                    .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee1Transactions,
+                        expectedPayerPayeeId1, expectedPayerPayeeName1, payerPayee1TransactionsAmount)
+                    .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee2Transactions,
+                        expectedPayerPayeeId2, expectedPayerPayeeName2, payerPayee2TransactionsAmount)
+                    .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee3Transactions,
+                        expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
+                    .Build();
+
+                _mockTransactionService
+                    .Setup(helperService =>
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>()))
+                    .ReturnsAsync(() => transactionList);
+
+                var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
+                var analyticsPayerPayees = await service.GetPayerPayeeBreakdown(expectedType, start, end);
+
+                var expectedAnalyticsPayerPayees = new List<AnalyticsPayerPayee>
                 {
-                    _transactionList.Add(new Transaction
+                    new()
                     {
-                        Amount = amount,
-                        Category = category,
-                        TransactionTimestamp = DateTime.Now.ToString("O"),
-                        Subcategory = "subcategory-1",
-                        TransactionId = "transaction-id-1",
-                        TransactionType = "expense",
-                    });
-                }
-
-                return this;
-            }
-
-            public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(int number,
-                string category, string subcategory,
-                decimal amount)
-            {
-                for (var i = 0; i < number; i++)
-                {
-                    _transactionList.Add(new Transaction
+                        PayerPayeeId = expectedPayerPayeeId1,
+                        PayerPayeeName = expectedPayerPayeeName1,
+                        TotalAmount = numberOfPayerPayee1Transactions * payerPayee1TransactionsAmount
+                    },
+                    new()
                     {
-                        Amount = amount,
-                        Category = category,
-                        TransactionTimestamp = DateTime.Now.ToString("O"),
-                        Subcategory = subcategory,
-                        TransactionId = "transaction-id-1",
-                        TransactionType = "expense",
-                    });
-                }
+                        PayerPayeeId = expectedPayerPayeeId2,
+                        PayerPayeeName = expectedPayerPayeeName2,
+                        TotalAmount = numberOfPayerPayee2Transactions * payerPayee2TransactionsAmount
+                    },
+                    new()
+                    {
+                        PayerPayeeId = expectedPayerPayeeId3,
+                        PayerPayeeName = expectedPayerPayeeName3,
+                        TotalAmount = numberOfPayerPayee3Transactions * payerPayee3TransactionsAmount
+                    },
+                };
 
-                return this;
+                Assert.Equal(expectedAnalyticsPayerPayees, analyticsPayerPayees);
             }
         }
     }
