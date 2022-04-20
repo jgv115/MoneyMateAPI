@@ -34,9 +34,14 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         await _dynamoDbHelper.DeleteTable();
     }
 
-    [Fact]
+    [Theory]
+    [InlineData("test")]
+    [InlineData("te")]
+    [InlineData("t")]
+    [InlineData("T")]
     public async Task
-        GivenValidRequestWithSingleSearchWord_WhenGetAutocompletePayeesEndpointCalled_ThenCorrectPayeesReturned()
+        GivenValidRequestWithSingleSearchWord_WhenGetAutocompletePayeesEndpointCalled_ThenCorrectPayeesReturned(
+            string searchQuery)
     {
         var payee1 = new PayerPayee
         {
@@ -49,13 +54,13 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         {
             UserId = UserId,
             PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
-            PayerPayeeName = "test2",
+            PayerPayeeName = "Test2",
             ExternalId = Guid.NewGuid().ToString()
         };
         var expectedPayee2 = new PayerPayeeViewModel
         {
             PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
-            PayerPayeeName = "test2",
+            PayerPayeeName = "Test2",
             ExternalId = payee2.ExternalId
         };
 
@@ -81,7 +86,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
 
         await _dynamoDbHelper.WriteIntoTable(initialData);
 
-        var response = await _httpClient.GetAsync($"/api/payerspayees/payees/autocomplete?name=test");
+        var response = await _httpClient.GetAsync($"/api/payerspayees/payees/autocomplete?name={searchQuery}");
         response.EnsureSuccessStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
@@ -93,15 +98,15 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
 
         Assert.Equal(new List<PayerPayeeViewModel> {expectedPayee2}, returnedPayees);
     }
-    
+
     [Theory]
     [InlineData("multiword")]
     [InlineData("multiword pa")]
     [InlineData("Multiword Pa")]
     [InlineData("multiword Payee")]
-
     public async Task
-        GivenValidRequestWithMultipleSearchWords_WhenGetAutocompletePayeesEndpointCalled_ThenCorrectPayeesReturned(string searchQuery)
+        GivenValidRequestWithMultipleSearchWords_WhenGetAutocompletePayeesEndpointCalled_ThenCorrectPayeesReturned(
+            string searchQuery)
     {
         var payee1 = new PayerPayee
         {
@@ -218,15 +223,15 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
 
         Assert.Equal(new List<PayerPayeeViewModel> {expectedPayer2}, returnedPayees);
     }
-    
+
     [Theory]
     [InlineData("multiword")]
     [InlineData("multiword pa")]
     [InlineData("Multiword Pa")]
     [InlineData("multiword Payer")]
-
     public async Task
-        GivenValidRequestWithMultipleSearchWords_WhenGetAutocompletePayersEndpointCalled_ThenCorrectPayersReturned(string searchQuery)
+        GivenValidRequestWithMultipleSearchWords_WhenGetAutocompletePayersEndpointCalled_ThenCorrectPayersReturned(
+            string searchQuery)
     {
         var payee1 = new PayerPayee
         {
@@ -248,7 +253,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
             PayerPayeeName = "Multiword Payer",
             ExternalId = payer2.ExternalId
         };
-        
+
         var payer3 = new PayerPayee
         {
             UserId = UserId,
@@ -262,7 +267,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
             PayerPayeeName = "Multiword Payer 123",
             ExternalId = payer3.ExternalId
         };
-        
+
         var initialData = new List<PayerPayee>
         {
             new()

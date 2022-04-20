@@ -132,7 +132,7 @@ namespace TransactionService.Repositories
 
             await Task.WhenAll(tasks);
 
-            return payerPayeeResults;
+            return payerPayeeResults.DistinctBy(payerpayee => payerpayee.PayerPayeeId);
         }
 
         private async Task<IEnumerable<PayerPayee>> FindPayerPayee(string userId, string payerOrPayee,
