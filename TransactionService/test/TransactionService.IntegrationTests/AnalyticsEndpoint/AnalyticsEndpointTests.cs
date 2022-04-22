@@ -181,7 +181,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         const string expectedSubcategory3 = "subcategory3";
         const int numberOfSubcategory3Transactions = 2;
         const decimal subcategory3TransactionsAmount = (decimal) 34.5;
-            
+
         const string expectedSubcategory4 = "subcategory4";
         const int numberOfSubcategory4Transactions = 2;
         const decimal subcategory4TransactionsAmount = (decimal) 12.4;
@@ -233,7 +233,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         };
         Assert.Equal(expectedAnalyticsSubcategories, actualAnalyticsCategories);
     }
-    
+
     [Fact]
     public async Task
         GivenStartAndEndInputParameters_WhenGetPayerPayeeBreakdownEndpointInvoked_ThenCorrectAnalyticsPayerPayeesReturned()
@@ -265,6 +265,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
+        query["type"] = "expense";
         query["start"] = new DateTime(2021, 4, 1).ToString("yyyy-MM-dd");
         query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
         var queryString = query.ToString();

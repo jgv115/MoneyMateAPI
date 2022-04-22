@@ -7,7 +7,10 @@ namespace TransactionService.Domain.Models
     {
         [DynamoDBHashKey("UserIdQuery")] public string UserId { get; set; }
         [DynamoDBRangeKey("Subquery")] public string TransactionId { get; set; }
+
+        [DynamoDBLocalSecondaryIndexRangeKey("TransactionTimestamp")]
         public string TransactionTimestamp { get; set; }
+
         public string TransactionType { get; set; }
         public decimal Amount { get; init; }
         public string Category { get; init; }

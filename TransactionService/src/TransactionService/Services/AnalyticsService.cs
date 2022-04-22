@@ -86,8 +86,12 @@ namespace TransactionService.Services
                 .GroupBy(transaction => new {transaction.PayerPayeeId, transaction.PayerPayeeName})
                 .Select(grouping => new AnalyticsPayerPayee
                 {
-                    PayerPayeeId = Guid.Parse(grouping.Key.PayerPayeeId),
-                    PayerPayeeName = grouping.Key.PayerPayeeName,
+                    PayerPayeeId = grouping.Key.PayerPayeeId == Guid.Empty.ToString()
+                        ? Guid.Empty
+                        : Guid.Parse(grouping.Key.PayerPayeeId),
+                    PayerPayeeName = grouping.Key.PayerPayeeId == Guid.Empty.ToString()
+                        ? "Unspecified"
+                        : grouping.Key.PayerPayeeName,
                     TotalAmount = grouping.Sum(transaction => transaction.Amount)
                 })
                 .OrderByDescending(analyticsPayerPayee => analyticsPayerPayee.TotalAmount);

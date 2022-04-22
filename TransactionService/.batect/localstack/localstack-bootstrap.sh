@@ -50,7 +50,10 @@ aws --endpoint-url=http://localhost:4566 \
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Groceries\"},
       \"SubCategory\": {\"S\": \"Meat\"},
-      \"Note\": {\"S\": \"HUGE MEATS!\"}
+      \"Note\": {\"S\": \"HUGE MEATS!\"},
+      \"PayerPayeeId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915a\"},
+      \"PayerPayeeName\": {\"S\": \"Butcher1\"}
+
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
@@ -68,7 +71,9 @@ aws --endpoint-url=http://localhost:4566 \
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Groceries\"},
       \"SubCategory\": {\"S\": \"Meat\"},
-      \"Note\": {\"S\": \"HUGE MEATS!\"}
+      \"Note\": {\"S\": \"HUGE MEATS!\"},
+      \"PayerPayeeId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731915a\"},
+      \"PayerPayeeName\": {\"S\": \"Butcher1\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
@@ -86,7 +91,9 @@ aws --endpoint-url=http://localhost:4566 \
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Taxes\"},
       \"SubCategory\": {\"S\": \"Fees\"},
-      \"Note\": {\"S\": \"HUGE TAXES!\"}
+      \"Note\": {\"S\": \"HUGE TAXES!\"},
+      \"PayerPayeeId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c731916a\"},
+      \"PayerPayeeName\": {\"S\": \"ATO\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
@@ -104,7 +111,9 @@ aws --endpoint-url=http://localhost:4566 \
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Salary\"},
       \"SubCategory\": {\"S\": \"Bank Interest\"},
-      \"Note\": {\"S\": \"Westpac interest!\"}
+      \"Note\": {\"S\": \"Westpac interest!\"},
+      \"PayerPayeeId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c73191aa\"},
+      \"PayerPayeeName\": {\"S\": \"Westpac\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE

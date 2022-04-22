@@ -678,6 +678,71 @@ namespace TransactionService.Tests.Services
 
                 Assert.Equal(expectedAnalyticsPayerPayees, analyticsPayerPayees);
             }
+
+            [Fact]
+            public async Task
+                GivenListReturnedFromTransactionServiceWithoutPayerPayee_ThenCorrectAnalyticsPayerPayeeListReturned()
+            {
+                var expectedType = TransactionType.Expense;
+                var start = DateTime.MinValue;
+                var end = DateTime.MaxValue;
+
+                Guid expectedPayerPayeeId1 = Guid.NewGuid();
+                const string expectedPayerPayeeName1 = "name1";
+                const int numberOfPayerPayee1Transactions = 24;
+                const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
+
+                Guid expectedPayerPayeeId2 = Guid.NewGuid();
+                const string expectedPayerPayeeName2 = "name2";
+                const int numberOfPayerPayee2Transactions = 20;
+                const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
+
+                Guid expectedPayerPayeeId3 = Guid.Empty;
+                const string expectedPayerPayeeName3 = "";
+                const int numberOfPayerPayee3Transactions = 10;
+                const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
+
+                var transactionList = new TransactionListBuilder("userId123")
+                    .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee1Transactions,
+                        expectedPayerPayeeId1, expectedPayerPayeeName1, payerPayee1TransactionsAmount)
+                    .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee2Transactions,
+                        expectedPayerPayeeId2, expectedPayerPayeeName2, payerPayee2TransactionsAmount)
+                    .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee3Transactions,
+                        expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
+                    .Build();
+
+                _mockTransactionService
+                    .Setup(helperService =>
+                        helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>()))
+                    .ReturnsAsync(() => transactionList);
+
+                var service = new AnalyticsService(_mockTransactionService.Object, _mockTimePeriodHelper.Object);
+                var analyticsPayerPayees = await service.GetPayerPayeeBreakdown(expectedType, start, end);
+
+                var expectedAnalyticsPayerPayees = new List<AnalyticsPayerPayee>
+                {
+                    new()
+                    {
+                        PayerPayeeId = expectedPayerPayeeId1,
+                        PayerPayeeName = expectedPayerPayeeName1,
+                        TotalAmount = numberOfPayerPayee1Transactions * payerPayee1TransactionsAmount
+                    },
+                    new()
+                    {
+                        PayerPayeeId = expectedPayerPayeeId2,
+                        PayerPayeeName = expectedPayerPayeeName2,
+                        TotalAmount = numberOfPayerPayee2Transactions * payerPayee2TransactionsAmount
+                    },
+                    new()
+                    {
+                        PayerPayeeId = expectedPayerPayeeId3,
+                        PayerPayeeName = "Unspecified",
+                        TotalAmount = numberOfPayerPayee3Transactions * payerPayee3TransactionsAmount
+                    },
+                };
+
+                Assert.Equal(expectedAnalyticsPayerPayees, analyticsPayerPayees);
+            }
         }
     }
 }
