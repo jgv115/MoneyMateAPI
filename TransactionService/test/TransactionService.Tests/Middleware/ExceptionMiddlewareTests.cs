@@ -4,6 +4,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Middleware;
 using TransactionService.Repositories.Exceptions;
@@ -22,8 +24,9 @@ public class ExceptionMiddlewareTests
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
+        var logger = new Mock<ILogger<ExceptionMiddleware>>();
 
-        await middleware.Invoke(context);
+        await middleware.Invoke(context, logger.Object);
 
         Assert.Equal(409, context.Response.StatusCode);
 
@@ -49,8 +52,9 @@ public class ExceptionMiddlewareTests
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
+        var logger = new Mock<ILogger<ExceptionMiddleware>>();
 
-        await middleware.Invoke(context);
+        await middleware.Invoke(context, logger.Object);
 
         Assert.Equal(400, context.Response.StatusCode);
 
@@ -76,8 +80,9 @@ public class ExceptionMiddlewareTests
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
+        var logger = new Mock<ILogger<ExceptionMiddleware>>();
 
-        await middleware.Invoke(context);
+        await middleware.Invoke(context, logger.Object);
 
         Assert.Equal(500, context.Response.StatusCode);
 
