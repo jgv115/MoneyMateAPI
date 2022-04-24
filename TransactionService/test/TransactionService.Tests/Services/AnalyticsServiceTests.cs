@@ -693,12 +693,12 @@ namespace TransactionService.Tests.Services
                 const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
 
                 Guid expectedPayerPayeeId2 = Guid.NewGuid();
-                const string expectedPayerPayeeName2 = "name2";
+                const string expectedPayerPayeeName2 = null;
                 const int numberOfPayerPayee2Transactions = 20;
                 const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
 
-                Guid expectedPayerPayeeId3 = Guid.Empty;
-                const string expectedPayerPayeeName3 = "";
+                Guid? expectedPayerPayeeId3 = null;
+                const string expectedPayerPayeeName3 = null;
                 const int numberOfPayerPayee3Transactions = 10;
                 const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
 
@@ -735,7 +735,7 @@ namespace TransactionService.Tests.Services
                     },
                     new()
                     {
-                        PayerPayeeId = expectedPayerPayeeId3,
+                        PayerPayeeId = Guid.Empty,
                         PayerPayeeName = "Unspecified",
                         TotalAmount = numberOfPayerPayee3Transactions * payerPayee3TransactionsAmount
                     },

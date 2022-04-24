@@ -1,4 +1,5 @@
-﻿using TransactionService.Domain.Models;
+﻿using TransactionService.Constants;
+using TransactionService.Domain.Models;
 
 namespace TransactionService.Tests.Common;
 
@@ -59,8 +60,8 @@ public class TransactionListBuilder
         return this;
     }
 
-    public TransactionListBuilder WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(int number,
-        Guid payerPayeeId, string payerPayeeName, decimal amount)
+    public TransactionListBuilder WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(int number, Guid? payerPayeeId,
+        string? payerPayeeName, decimal amount, TransactionType transactionType = TransactionType.Expense)
     {
         for (var i = 0; i < number; i++)
         {
@@ -73,7 +74,7 @@ public class TransactionListBuilder
                 Subcategory = "subcategory123",
                 TransactionId = Guid.NewGuid().ToString(),
                 TransactionType = "expense",
-                PayerPayeeId = payerPayeeId.ToString(),
+                PayerPayeeId = payerPayeeId?.ToString(),
                 PayerPayeeName = payerPayeeName
             });
         }

@@ -111,9 +111,7 @@ aws --endpoint-url=http://localhost:4566 \
       \"Amount\": {\"N\": \"123.45\"},
       \"Category\": {\"S\": \"Salary\"},
       \"SubCategory\": {\"S\": \"Bank Interest\"},
-      \"Note\": {\"S\": \"Westpac interest!\"},
-      \"PayerPayeeId\": {\"S\": \"fa00567c-468e-4ccf-af4c-fca1c73191aa\"},
-      \"PayerPayeeName\": {\"S\": \"Westpac\"}
+      \"Note\": {\"S\": \"Westpac interest!\"}
   }" \
   --return-consumed-capacity TOTAL \
   --return-item-collection-metrics SIZE
