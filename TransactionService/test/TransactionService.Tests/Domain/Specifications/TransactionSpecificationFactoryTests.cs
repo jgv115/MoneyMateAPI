@@ -93,6 +93,31 @@ public class TransactionSpecificationFactoryTests
         }
         
         [Fact]
+        public void GivenPayerPayeeIdsInQuery_ThenSpecThatFiltersByPayerPayeeIdsIsReturned()
+        {
+            var factory = new TransactionSpecificationFactory();
+
+            var returnedSpec = factory.Create(new GetTransactionsQuery
+            {
+                PayerPayeeIds = new List<string> {"payer1", "payer2"}
+            });
+
+            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            {
+                PayerPayeeId = "payer1"
+            }));
+            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            {
+                PayerPayeeId = "payer2"
+            }));
+            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            {
+                PayerPayeeId = "payer3"
+            }));
+        }
+
+        
+        [Fact]
         public void GivenTypeAndCategoriesInQuery_ThenSpecThatFiltersByTypeAndCategoriesIsReturned()
         {
             var factory = new TransactionSpecificationFactory();

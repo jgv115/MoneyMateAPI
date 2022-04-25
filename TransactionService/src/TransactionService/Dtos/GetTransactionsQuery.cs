@@ -12,7 +12,7 @@ namespace TransactionService.Dtos
         public DateTime? End { get; set; }
 
         public List<string> Categories { get; set; } = new();
-        [FromQuery(Name = "subcategory")]
-        public List<string> Subcategories { get; set; } = new();
+        [FromQuery(Name = "subcategory")] public List<string> Subcategories { get; set; } = new();
+        [FromQuery(Name = "payerPayeeId")] public List<string> PayerPayeeIds { get; set; } = new();
     }
 }

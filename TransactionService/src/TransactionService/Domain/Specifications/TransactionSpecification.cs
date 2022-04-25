@@ -66,18 +66,18 @@ namespace TransactionService.Domain.Specifications
         }
     }
 
-    // public class PayeeSpec : ITransactionSpecification
-    // {
-    //     private readonly IEnumerable<string> _payees;
-    //
-    //     public PayeeSpec(IEnumerable<string> payees)
-    //     {
-    //         _payees = payees;
-    //     }
-    //
-    //     public bool IsSatisfied(Transaction item)
-    //     {
-    //         return _payees.Contains(item.PayerPayeeId);
-    //     }
-    // }
+    public class PayerPayeeIdsSpec : ITransactionSpecification
+    {
+        private readonly IEnumerable<string> _payerPayeeIds;
+    
+        public PayerPayeeIdsSpec(IEnumerable<string> payerPayeeIds)
+        {
+            _payerPayeeIds = payerPayeeIds;
+        }
+    
+        public bool IsSatisfied(Transaction item)
+        {
+            return _payerPayeeIds.Contains(item.PayerPayeeId);
+        }
+    }
 }

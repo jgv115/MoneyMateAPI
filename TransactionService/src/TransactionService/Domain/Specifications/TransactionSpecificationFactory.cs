@@ -24,6 +24,11 @@ namespace TransactionService.Domain.Specifications
                 specifications.Add(new SubcategoriesSpec(query.Subcategories));
             }
 
+            if (query.PayerPayeeIds.Any())
+            {
+                specifications.Add(new PayerPayeeIdsSpec(query.PayerPayeeIds));
+            }
+
             return new AndSpec(specifications);
         }
     }
