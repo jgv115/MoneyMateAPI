@@ -1,9 +1,9 @@
 {
-  "Home/Utilities": [
-    "Mortgage/Rent",
+  "Home & Utilities": [
+    "Mortgage & Rent",
     "Body Corporate Fees",
     "Council Rates",
-    "Furniture/Appliances",
+    "Furniture & Appliances",
     "Renovations & Home Improvement",
     "Electricity",
     "Gas",
@@ -20,7 +20,7 @@
     "Maintenance",
     "Fines"
   ],
-  "Insurance/Financial": [
+  "Insurance & Financial": [
     "Car Insurance",
     "Home & Contents Insurance",
     "Personal & Life Insurance",
@@ -35,7 +35,6 @@
     "Supermarket",
     "Butcher",
     "Fish",
-    "Fruit & Vegetables",
     "Bakery",
     "Alcohol"
   ],
@@ -56,16 +55,18 @@
     "Dental",
     "General Medical Expense"
   ],
-  "Entertainment/Eating Out": [
-    "Breakfast",
-    "Lunch",
-    "Dinner",
-    "Dessert",
-    "Refreshments",
+  "Entertainment": [
     "Bars & Clubs",
     "Books",
     "Digital Subscriptions",
     "Celebrations & Gifts",
-    "Events"
+    "Activities & Events"
+  ],
+  "Eating Out": [
+    "Breakfast",
+    "Lunch",
+    "Dinner",
+    "Dessert",
+    "Refreshments"
   ]
 }
