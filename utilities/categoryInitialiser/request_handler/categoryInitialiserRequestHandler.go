@@ -1,4 +1,4 @@
-package handler
+package request_handler
 
 import (
 	"categoryInitialiser/category_provider"
@@ -16,10 +16,12 @@ func HandleRequest(userId string, categoryProvider category_provider.CategoryPro
 	categories := make([]models.Category, 0)
 
 	for _, categoryDto := range categoryDtos {
+
 		categories = append(categories, models.Category{
-			UserIdQuery: fmt.Sprintf("auth0|%v#Categories", userId),
-			Subquery:      fmt.Sprintf("%vCategory#%v", categoryDto.CategoryType, categoryDto.CategoryName),
-			SubCategories: categoryDto.Subcategories,
+			UserIdQuery:     fmt.Sprintf("auth0|%v#Categories", userId),
+			Subquery:        categoryDto.CategoryName,
+			SubCategories:   categoryDto.Subcategories,
+			TransactionType: mapTransactionTypeStringToInt(categoryDto.CategoryType),
 		})
 	}
 
@@ -28,4 +30,12 @@ func HandleRequest(userId string, categoryProvider category_provider.CategoryPro
 		return err
 	}
 	return nil
+}
+
+func mapTransactionTypeStringToInt(transactionType string) int {
+	if transactionType == "expense" {
+		return 0
+	} else {
+		return 1
+	}
 }

@@ -1,11 +1,13 @@
+//go:build !integrationTest
 // +build !integrationTest
 
-package handler
+package request_handler
 
 import (
 	"categoryInitialiser/models"
-	"github.com/stretchr/testify/mock"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 )
 
 type MockCategoryProvider struct {
@@ -48,14 +50,20 @@ func TestHandleRequest(t *testing.T) {
 		var mockCategoriesRepository = new(MockCategoryRepository)
 
 		const userId = "testUserId123"
-		const expectedCategoryName = "Category1"
-		const expectedCategoryType = "TestType"
-		var expectedSubcategories = []string{"Subcategory1"}
+		const expectedCategoryName1 = "Category1"
+		var expectedSubcategories1 = []string{"Subcategory1"}
+		const expectedCategoryName2 = "Category2"
+		var expectedSubcategories2 = []string{"Subcategory2"}
 		var categoryDtos = []models.CategoryDto{
 			{
-				CategoryName:  expectedCategoryName,
-				CategoryType:  expectedCategoryType,
-				Subcategories: expectedSubcategories,
+				CategoryName:  expectedCategoryName1,
+				CategoryType:  "expense",
+				Subcategories: expectedSubcategories1,
+			},
+			{
+				CategoryName:  expectedCategoryName2,
+				CategoryType:  "income",
+				Subcategories: expectedSubcategories2,
 			},
 		}
 
@@ -69,9 +77,16 @@ func TestHandleRequest(t *testing.T) {
 
 		var expectedCategories = []models.Category{
 			{
-				UserIdQuery:   "auth0|" + userId + "#Categories",
-				Subquery:      expectedCategoryType + "Category#" + expectedCategoryName,
-				SubCategories: expectedSubcategories,
+				UserIdQuery:     "auth0|" + userId + "#Categories",
+				Subquery:        expectedCategoryName1,
+				SubCategories:   expectedSubcategories1,
+				TransactionType: 0,
+			},
+			{
+				UserIdQuery:     "auth0|" + userId + "#Categories",
+				Subquery:        expectedCategoryName2,
+				SubCategories:   expectedSubcategories2,
+				TransactionType: 1,
 			},
 		}
 

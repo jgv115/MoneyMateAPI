@@ -25,16 +25,13 @@ containers:
   localstack:
     image: localstack/localstack:latest
     environment:
-      DEFAULT_REGION: ap-southeast-2
-      TEST_AWS_ACCOUNT_ID: "000000000000"
       SERVICES: lambda,dynamodb
-      DEBUG: "1"
-      HOSTNAME_EXTERNAL: localstack
-      LOCALSTACK_HOSTNAME: localstack
+      DEBUG: 1
       AWS_ACCESS_KEY_ID: foo
       AWS_SECRET_ACCESS_KEY: bar
-      AWS_DEFAULT_REGION: ap-southeast-2
-      LAMBDA_EXECUTOR: docker
+      # AWS_REGION: ap-southeast-2
+      # HOSTNAME_EXTERNAL: localstack
+      LAMBDA_EXECUTOR: local
     volumes:
       - local: ./.batect/localstack/localstack-bootstrap.sh
         container: /docker-entrypoint-initaws.d/localstack-bootstrap.sh
@@ -55,7 +52,7 @@ containers:
       timeout: 10s
 
   golang:
-    image: golang:1.16.5
+    image: golang:1.18.4
     working_directory: /app
     volumes:
       - local: .
@@ -78,6 +75,10 @@ tasks:
       container: golang
       command: go test -v -count=1 ./...
 
+  start_localstack:
+    run:
+      container: localstack
+
   integration_tests:
     prerequisites:
       - build
@@ -90,6 +91,7 @@ tasks:
         AWS_ACCESS_KEY_ID: foo
         AWS_SECRET_ACCESS_KEY: bar
         AWS_DEFAULT_REGION: ap-southeast-2
+        LOCALSTACK_HOSTNAME: localstack
 
   terraform_plan:
     description: Runs terraform plan

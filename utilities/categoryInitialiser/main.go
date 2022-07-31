@@ -1,45 +1,28 @@
 package main
 
 import (
+	"categoryInitialiser/aws_utils"
 	"categoryInitialiser/category_provider"
-	"categoryInitialiser/handler"
 	"categoryInitialiser/models"
+	"categoryInitialiser/request_handler"
 	"categoryInitialiser/store"
 	_ "embed"
 	"errors"
 	"fmt"
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"os"
+
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 func handle(request models.IntialiseCategoriesRequest) (err error) {
 	categoryProvider, categoriesRepository, err := setupDependencies()
 
-	err = handler.HandleRequest(request.Id, categoryProvider, categoriesRepository)
+	err = request_handler.HandleRequest(request.Id, categoryProvider, categoriesRepository)
 	if err != nil {
 		return err
 	}
 
-	return
-}
-
-func createAWSSession() (sess *session.Session) {
-	localstackHostname, localstackFound := os.LookupEnv("LOCALSTACK_HOSTNAME")
-
-	fmt.Printf(">>> %+v\n", localstackFound)
-	if localstackFound {
-		sess = session.Must(session.NewSession(&aws.Config{
-			Endpoint: aws.String(fmt.Sprintf("http://%s:4566", localstackHostname)),
-			Region:   aws.String("ap-southeast-2"),
-		}))
-	} else {
-		sess = session.Must(session.NewSessionWithOptions(session.Options{
-			SharedConfigState: session.SharedConfigDisable,
-		}))
-	}
 	return
 }
 
@@ -56,7 +39,7 @@ func setupDependencies() (categoryProvider category_provider.CategoryProvider, c
 		return
 	}
 
-	awsSession := createAWSSession()
+	awsSession := aws_utils.CreateAWSSession(environment)
 	dynamoDbClient := dynamodb.New(awsSession)
 
 	categoriesRepository = &store.DynamoDbCategoriesRepository{
