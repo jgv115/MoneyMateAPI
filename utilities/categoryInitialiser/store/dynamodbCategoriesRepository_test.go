@@ -1,14 +1,16 @@
+//go:build !integrationTest
 // +build !integrationTest
 
 package store
 
 import (
 	"categoryInitialiser/models"
+	"testing"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
-	"testing"
 )
 
 type MockDynamoDbClient struct {
@@ -26,7 +28,7 @@ func createCategories(count int) (categories []models.Category) {
 		categories = append(categories, models.Category{
 			UserIdQuery: uuid.NewString(),
 			Subquery:    "test_subquery",
-			SubCategories: []string{
+			Subcategories: []string{
 				"test1", "test2",
 			},
 		})
@@ -60,7 +62,7 @@ func TestDynamoDbCategoriesRepository_SaveCategories(t *testing.T) {
 		}
 	})
 
-	t.Run("given input categories when SaveCategories invoked, then BatchWriteItem is called with RequestItems with SubCategories stringset", func(t *testing.T) {
+	t.Run("given input categories when SaveCategories invoked, then BatchWriteItem is called with RequestItems with Subcategories stringset", func(t *testing.T) {
 		var mockDynamoDbClient = new(MockDynamoDbClient)
 		const expectedTableName = "TestTableName"
 
@@ -76,10 +78,10 @@ func TestDynamoDbCategoriesRepository_SaveCategories(t *testing.T) {
 
 		mockDynamoDbClient.AssertNumberOfCalls(t, "BatchWriteItem", 1)
 		var actualBatchWriteItemInput = mockDynamoDbClient.Calls[0].Arguments.Get(0).(*dynamodb.BatchWriteItemInput)
-		subCategoriesDynamoDbItem := actualBatchWriteItemInput.RequestItems[expectedTableName][0].PutRequest.Item["SubCategories"]
+		subcategoriesDynamoDbItem := actualBatchWriteItemInput.RequestItems[expectedTableName][0].PutRequest.Item["Subcategories"]
 
-		if subCategoriesDynamoDbItem.SS == nil {
-			t.Errorf("expected subCategories to be a stringset but was not, subCategories item looks like this: %+v", subCategoriesDynamoDbItem)
+		if subcategoriesDynamoDbItem.SS == nil {
+			t.Errorf("expected subcategories to be a stringset but was not, subcategories item looks like this: %+v", subcategoriesDynamoDbItem)
 		}
 
 	})

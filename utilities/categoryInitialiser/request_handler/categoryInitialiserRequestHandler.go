@@ -20,7 +20,7 @@ func HandleRequest(userId string, categoryProvider category_provider.CategoryPro
 		categories = append(categories, models.Category{
 			UserIdQuery:     fmt.Sprintf("auth0|%v#Categories", userId),
 			Subquery:        categoryDto.CategoryName,
-			SubCategories:   categoryDto.Subcategories,
+			Subcategories:   categoryDto.Subcategories,
 			TransactionType: mapTransactionTypeStringToInt(categoryDto.CategoryType),
 		})
 	}

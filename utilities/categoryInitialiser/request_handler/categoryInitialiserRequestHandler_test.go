@@ -79,13 +79,13 @@ func TestHandleRequest(t *testing.T) {
 			{
 				UserIdQuery:     "auth0|" + userId + "#Categories",
 				Subquery:        expectedCategoryName1,
-				SubCategories:   expectedSubcategories1,
+				Subcategories:   expectedSubcategories1,
 				TransactionType: 0,
 			},
 			{
 				UserIdQuery:     "auth0|" + userId + "#Categories",
 				Subquery:        expectedCategoryName2,
-				SubCategories:   expectedSubcategories2,
+				Subcategories:   expectedSubcategories2,
 				TransactionType: 1,
 			},
 		}
