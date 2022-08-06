@@ -299,7 +299,59 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(new List<Transaction> {transaction1}, returnedTransactionList);
+            Assert.Equal(new List<Transaction> { transaction1 }, returnedTransactionList);
+        }
+
+        [Fact]
+        public async Task GivenPayerPayeeIdInputParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfTypeAreReturned()
+        {
+            var transactionType = "expense";
+            var transaction1 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = transactionType,
+                Amount = 123.45M,
+                Category = "Groceries",
+                Subcategory = "Meat",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
+                Note = "this is a note123"
+            };
+            var transaction2 = new Transaction
+            {
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+                TransactionTimestamp = DateTime.Now.ToString("o"),
+                TransactionType = "income",
+                Amount = 123.45M,
+                Category = "Income",
+                Subcategory = "Salary"
+            };
+
+            var transactionList = new List<Transaction>
+            {
+                transaction1,
+                transaction2
+            };
+            await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["payerPayeeId"] = "";
+            var queryString = query.ToString();
+
+            var response = await HttpClient.GetAsync($"/api/transactions?{queryString}");
+            response.EnsureSuccessStatusCode();
+
+            var returnedString = await response.Content.ReadAsStringAsync();
+            var returnedTransactionList = JsonSerializer.Deserialize<List<Transaction>>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            Assert.Equal(new List<Transaction> { transaction2 }, returnedTransactionList);
         }
 
         [Fact]
@@ -378,7 +430,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(new List<Transaction> {transaction1, transaction2, transaction4}, returnedTransactionList);
+            Assert.Equal(new List<Transaction> { transaction1, transaction2, transaction4 }, returnedTransactionList);
         }
 
         [Fact]
@@ -401,7 +453,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 new StringContent(inputDtoString, Encoding.UTF8, "application/json");
 
             var response = await HttpClient.PostAsync($"/api/transactions", httpContent);
-            
+
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
