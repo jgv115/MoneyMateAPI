@@ -41,57 +41,57 @@ namespace TransactionService.Tests.Helpers.TimePeriodHelpers
                 new DateRange(new DateTime(2010, 5, 1), new DateTime(2010, 5, 28).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2010, 5, 31)),
+                new DateTimeOffset(new DateTime(2010, 5, 31), TimeSpan.Zero),
                 new TimePeriod("MONTH", 0),
                 new DateRange(new DateTime(2010, 5, 1), new DateTime(2010, 5, 31).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2000, 2, 3)),
+                new DateTimeOffset(new DateTime(2000, 2, 3), TimeSpan.Zero),
                 new TimePeriod("MONTH", 2),
                 new DateRange(new DateTime(1999, 12, 1), new DateTime(2000, 1, 31).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2000, 12, 20)),
+                new DateTimeOffset(new DateTime(2000, 12, 20), TimeSpan.Zero),
                 new TimePeriod("MONTH", 3),
                 new DateRange(new DateTime(2000, 9, 1), new DateTime(2000, 11, 30).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2000, 2, 28)),
+                new DateTimeOffset(new DateTime(2000, 2, 28), TimeSpan.Zero),
                 new TimePeriod("MONTH", 5),
                 new DateRange(new DateTime(1999, 9, 1), new DateTime(2000, 1, 31).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2010, 5, 1)),
+                new DateTimeOffset(new DateTime(2010, 5, 1), TimeSpan.Zero),
                 new TimePeriod("MONTH", 5),
                 new DateRange(new DateTime(2009, 12, 1), new DateTime(2010, 4, 30).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2021, 10, 15)),
+                new DateTimeOffset(new DateTime(2021, 10, 15), TimeSpan.Zero),
                 new TimePeriod("WEEK", 0),
                 new DateRange(new DateTime(2021, 10, 11), new DateTime(2021, 10, 15).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2021, 10, 17)),
+                new DateTimeOffset(new DateTime(2021, 10, 17), TimeSpan.Zero),
                 new TimePeriod("WEEK", 0),
                 new DateRange(new DateTime(2021, 10, 11), new DateTime(2021, 10, 17).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2021, 10, 14)),
+                new DateTimeOffset(new DateTime(2021, 10, 14), TimeSpan.Zero),
                 new TimePeriod("WEEK", 0),
                 new DateRange(new DateTime(2021, 10, 11), new DateTime(2021, 10, 14).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2021, 10, 14)),
+                new DateTimeOffset(new DateTime(2021, 10, 14), TimeSpan.Zero),
                 new TimePeriod("WEEK", 2),
                 new DateRange(new DateTime(2021, 9, 27), new DateTime(2021, 10, 10).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2019, 4, 10)),
+                new DateTimeOffset(new DateTime(2019, 4, 10), TimeSpan.Zero),
                 new TimePeriod("WEEK", 1),
                 new DateRange(new DateTime(2019, 4, 1), new DateTime(2019, 4, 7).EndOfDay())
             };
             yield return new object[] {
-                new DateTimeOffset(new DateTime(2019, 3, 7)),
+                new DateTimeOffset(new DateTime(2019, 3, 7), TimeSpan.Zero),
                 new TimePeriod("WEEK", 3),
                 new DateRange(new DateTime(2019, 2, 11), new DateTime(2019, 3, 3).EndOfDay())
             };
