@@ -1,9 +1,19 @@
 using System;
+using System.Globalization;
 using FluentDateTime;
 using Microsoft.Extensions.Internal;
 
 namespace TransactionService.Helpers.TimePeriodHelpers
 {
+    public static class DateTimeExtensions
+    {
+        public static DateTime GetStartOfWeek(this DateTime dt, DayOfWeek startOfWeek)
+        {
+            int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
+            return dt.AddDays(-1 * diff).Date;
+        }
+    }
+
     public class TimePeriodHelper : ITimePeriodHelper
     {
         private readonly ISystemClock _systemClock;
@@ -28,12 +38,12 @@ namespace TransactionService.Helpers.TimePeriodHelpers
                     if (periods == 0)
                     {
                         endDate = currentDateTime.EndOfDay();
-                        startDate = currentDateTime.BeginningOfWeek();
+                        startDate = currentDateTime.GetStartOfWeek(DayOfWeek.Monday);
                     }
                     else
                     {
-                        endDate = currentDateTime.AddDays(-7).EndOfWeek();
-                        startDate = currentDateTime.AddDays(-7 * periods).BeginningOfWeek();
+                        endDate = currentDateTime.AddDays(-7).GetStartOfWeek(DayOfWeek.Monday).AddDays(6).EndOfDay();
+                        startDate = currentDateTime.AddDays(-7 * periods).GetStartOfWeek(DayOfWeek.Monday);
                     }
                     break;
 

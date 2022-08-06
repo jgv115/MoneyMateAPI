@@ -23,6 +23,7 @@ namespace TransactionService.Tests.Helpers.TimePeriodHelpers
         public void GivenTimePeriodInput_ThenCorrectDateRangeIsReturned(DateTimeOffset currentDateTime, TimePeriod inputTimePeriod, DateRange expectedDateRange)
         {
             _mockSystemClock.Setup(clock => clock.UtcNow).Returns(currentDateTime);
+
             var helper = new TimePeriodHelper(_mockSystemClock.Object);
 
             var returnedDateRange = helper.ResolveDateRange(inputTimePeriod);
