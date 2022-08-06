@@ -69,32 +69,32 @@ namespace TransactionService.Tests.Helpers.TimePeriodHelpers
             yield return new object[] {
                 new DateTime(2021, 10, 15),
                 new TimePeriod("WEEK", 0),
-                new DateRange(new DateTime(2021, 10, 10), new DateTime(2021, 10, 15).EndOfDay())
+                new DateRange(new DateTime(2021, 10, 11), new DateTime(2021, 10, 15).EndOfDay())
             };
             yield return new object[] {
                 new DateTime(2021, 10, 17),
                 new TimePeriod("WEEK", 0),
-                new DateRange(new DateTime(2021, 10, 17), new DateTime(2021, 10, 17).EndOfDay())
+                new DateRange(new DateTime(2021, 10, 11), new DateTime(2021, 10, 17).EndOfDay())
             };
             yield return new object[] {
                 new DateTime(2021, 10, 14),
                 new TimePeriod("WEEK", 0),
-                new DateRange(new DateTime(2021, 10, 10), new DateTime(2021, 10, 14).EndOfDay())
+                new DateRange(new DateTime(2021, 10, 11), new DateTime(2021, 10, 14).EndOfDay())
             };
             yield return new object[] {
                 new DateTime(2021, 10, 14),
                 new TimePeriod("WEEK", 2),
-                new DateRange(new DateTime(2021, 9, 26), new DateTime(2021, 10, 9).EndOfDay())
+                new DateRange(new DateTime(2021, 9, 27), new DateTime(2021, 10, 10).EndOfDay())
             };
             yield return new object[] {
                 new DateTime(2019, 4, 10),
                 new TimePeriod("WEEK", 1),
-                new DateRange(new DateTime(2019, 3, 31), new DateTime(2019, 4, 6).EndOfDay())
+                new DateRange(new DateTime(2019, 4, 1), new DateTime(2019, 4, 7).EndOfDay())
             };
             yield return new object[] {
                 new DateTime(2019, 3, 7),
                 new TimePeriod("WEEK", 3),
-                new DateRange(new DateTime(2019, 2, 10), new DateTime(2019, 3, 2).EndOfDay())
+                new DateRange(new DateTime(2019, 2, 11), new DateTime(2019, 3, 3).EndOfDay())
             };
         }
 

@@ -60,7 +60,7 @@ public class TransactionListBuilder
         return this;
     }
 
-    public TransactionListBuilder WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(int number, Guid? payerPayeeId,
+    public TransactionListBuilder WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(int number, string? payerPayeeId,
         string? payerPayeeName, decimal amount, TransactionType transactionType = TransactionType.Expense)
     {
         for (var i = 0; i < number; i++)
@@ -74,7 +74,7 @@ public class TransactionListBuilder
                 Subcategory = "subcategory123",
                 TransactionId = Guid.NewGuid().ToString(),
                 TransactionType = "expense",
-                PayerPayeeId = payerPayeeId?.ToString(),
+                PayerPayeeId = payerPayeeId,
                 PayerPayeeName = payerPayeeName
             });
         }

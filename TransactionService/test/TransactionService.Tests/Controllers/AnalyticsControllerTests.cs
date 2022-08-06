@@ -187,7 +187,7 @@ public class AnalyticsControllerTests
             new()
             {
                 PayerPayeeName = "name",
-                PayerPayeeId = Guid.NewGuid(),
+                PayerPayeeId = Guid.NewGuid().ToString(),
                 TotalAmount = 11234,
             }
         };
@@ -222,7 +222,7 @@ public class AnalyticsControllerTests
             new()
             {
                 PayerPayeeName = "name",
-                PayerPayeeId = Guid.NewGuid(),
+                PayerPayeeId = Guid.NewGuid().ToString(),
                 TotalAmount = 11234,
             }
         };

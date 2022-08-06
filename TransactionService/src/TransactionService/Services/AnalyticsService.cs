@@ -54,7 +54,7 @@ namespace TransactionService.Services
         {
             var transactions = await _transactionService.GetTransactionsAsync(new GetTransactionsQuery
             {
-                Categories = new List<string> {categoryName},
+                Categories = new List<string> { categoryName },
                 Start = start,
                 End = end,
             });
@@ -83,12 +83,10 @@ namespace TransactionService.Services
             });
 
             var orderedPayerPayees = transactions
-                .GroupBy(transaction => new {transaction?.PayerPayeeId, transaction?.PayerPayeeName})
+                .GroupBy(transaction => new { transaction?.PayerPayeeId, transaction?.PayerPayeeName })
                 .Select(grouping => new AnalyticsPayerPayee
                 {
-                    PayerPayeeId = string.IsNullOrEmpty(grouping.Key.PayerPayeeId)
-                        ? Guid.Empty
-                        : Guid.Parse(grouping.Key.PayerPayeeId),
+                    PayerPayeeId = grouping.Key.PayerPayeeId ?? "",
                     PayerPayeeName = string.IsNullOrEmpty(grouping.Key.PayerPayeeId)
                         ? "Unspecified"
                         : grouping.Key.PayerPayeeName,

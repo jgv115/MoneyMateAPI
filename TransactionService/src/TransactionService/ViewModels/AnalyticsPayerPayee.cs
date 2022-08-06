@@ -4,7 +4,7 @@ namespace TransactionService.ViewModels
 {
     public record AnalyticsPayerPayee
     {
-        public Guid PayerPayeeId { get; set; }
+        public string PayerPayeeId { get; set; }
         public string PayerPayeeName { get; init; }
         public decimal TotalAmount { get; init; }
     }

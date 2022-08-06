@@ -238,18 +238,18 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
     public async Task
         GivenStartAndEndInputParameters_WhenGetPayerPayeeBreakdownEndpointInvoked_ThenCorrectAnalyticsPayerPayeesReturned()
     {
-        Guid expectedPayerPayeeId1 = Guid.NewGuid();
+        var expectedPayerPayeeId1 = Guid.NewGuid().ToString();
         const string expectedPayerPayeeName1 = "name1";
         const int numberOfPayerPayee1Transactions = 6;
         const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
 
-        Guid expectedPayerPayeeId2 = Guid.NewGuid();
+        var expectedPayerPayeeId2 = Guid.NewGuid().ToString();
         const string expectedPayerPayeeName2 = "name2";
         const int numberOfPayerPayee2Transactions = 4;
         const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
 
-        Guid expectedPayerPayeeId3 = Guid.NewGuid();
-        const string expectedPayerPayeeName3 = "name3";
+        string expectedPayerPayeeId3 = null;
+        string expectedPayerPayeeName3 = null;
         const int numberOfPayerPayee3Transactions = 2;
         const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
 
@@ -296,8 +296,8 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
             },
             new()
             {
-                PayerPayeeId = expectedPayerPayeeId3,
-                PayerPayeeName = expectedPayerPayeeName3,
+                PayerPayeeId = "",
+                PayerPayeeName = "Unspecified",
                 TotalAmount = numberOfPayerPayee3Transactions * payerPayee3TransactionsAmount
             },
         };
