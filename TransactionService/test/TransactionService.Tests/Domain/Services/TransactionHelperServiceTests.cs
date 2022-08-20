@@ -13,7 +13,7 @@ using TransactionService.Middleware;
 using TransactionService.Repositories;
 using Xunit;
 
-namespace TransactionService.Tests.Domain
+namespace TransactionService.Tests.Domain.Services
 {
     public class TransactionHelperServiceTests
     {

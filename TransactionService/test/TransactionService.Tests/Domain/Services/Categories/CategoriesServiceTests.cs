@@ -9,7 +9,6 @@ using Moq;
 using Newtonsoft.Json.Serialization;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Dtos;
@@ -18,7 +17,7 @@ using TransactionService.Profiles;
 using TransactionService.Repositories;
 using Xunit;
 
-namespace TransactionService.Tests.Domain;
+namespace TransactionService.Tests.Domain.Services.Categories;
 
 public class CategoriesServiceTests
 {
@@ -285,7 +284,7 @@ public class CategoriesServiceTests
             {
                 CategoryName = "testname",
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"test1", "test2"}
+                Subcategories = new List<string> { "test1", "test2" }
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CategoryDto>())).Returns(new Category());
@@ -307,7 +306,7 @@ public class CategoriesServiceTests
 
             const string expectedCategoryName = "categoryName";
             var expectedTransactionType = TransactionType.Expense;
-            var expectedSubcategories = new List<string> {"sub1", "sub2"};
+            var expectedSubcategories = new List<string> { "sub1", "sub2" };
 
             var inputDto = new CategoryDto
             {
@@ -469,9 +468,7 @@ public class CategoriesServiceTests
 
             await service.UpdateCategory(testData.CategoryName, patchDoc);
 
-            _mockRepository.Verify(repository => repository.UpdateCategory(It.Is<Category>(category =>
-                category.CategoryName == testData.CategoryName &&
-                category.Subcategories.SequenceEqual(expectedCategory.Subcategories))));
+            _mockRepository.Verify(repository => repository.UpdateCategory(expectedCategory));
         }
 
         public class PatchDocumentTestData : IEnumerable<object[]>
@@ -487,7 +484,7 @@ public class CategoriesServiceTests
                     UserId = UserId,
                     CategoryName = CategoryName,
                     TransactionType = TransactionType.Expense,
-                    Subcategories = new List<string> {"test1", "test2"}
+                    Subcategories = new List<string> { "test1", "test2" }
                 };
             }
 
@@ -521,6 +518,26 @@ public class CategoriesServiceTests
                         {
                             op = "remove",
                             path = "/subcategories/1",
+                        }
+                    }, new DefaultContractResolver()),
+                    new Category
+                    {
+                        UserId = UserId,
+                        CategoryName = CategoryName,
+                        TransactionType = TransactionType.Expense,
+                        Subcategories = new List<string> {"test1"}
+                    }
+                };
+
+                yield return new object[]
+                {
+                    new JsonPatchDocument<CategoryDto>(new List<Operation<CategoryDto>>
+                    {
+                        new()
+                        {
+                            op = "replace",
+                            path = "/subcategories/1",
+                            value = "replaced subcategory name1"
                         }
                     }, new DefaultContractResolver()),
                     new Category

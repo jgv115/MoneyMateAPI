@@ -11,7 +11,7 @@ using TransactionService.Repositories;
 using TransactionService.ViewModels;
 using Xunit;
 
-namespace TransactionService.Tests.Domain
+namespace TransactionService.Tests.Domain.Services
 {
     public class PayerPayeeServiceTests
     {
