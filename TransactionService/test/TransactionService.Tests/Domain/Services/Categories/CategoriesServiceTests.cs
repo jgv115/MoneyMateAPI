@@ -46,7 +46,7 @@ public class CategoriesServiceTests
 
             await service.GetAllCategoryNames();
 
-            _mockRepository.Verify(repository => repository.GetAllCategories(expectedUserId));
+            _mockRepository.Verify(repository => repository.GetAllCategories());
         }
 
         [Fact]
@@ -66,7 +66,7 @@ public class CategoriesServiceTests
                 }
             };
 
-            _mockRepository.Setup(repository => repository.GetAllCategories(It.IsAny<string>()))
+            _mockRepository.Setup(repository => repository.GetAllCategories())
                 .ReturnsAsync(expectedReturnedCategoryList);
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -102,7 +102,7 @@ public class CategoriesServiceTests
                 _mockMapper.Object);
             service.GetSubcategories(expectedCategory);
 
-            _mockRepository.Verify(repository => repository.GetAllSubcategories(expectedUserId, expectedCategory));
+            _mockRepository.Verify(repository => repository.GetAllSubcategories(expectedCategory));
         }
     }
 
@@ -132,7 +132,7 @@ public class CategoriesServiceTests
 
             await service.GetAllCategories();
 
-            _mockRepository.Verify(repository => repository.GetAllCategories(expectedUserId));
+            _mockRepository.Verify(repository => repository.GetAllCategories());
         }
 
         [Theory]
@@ -152,7 +152,7 @@ public class CategoriesServiceTests
             await service.GetAllCategories(transactionType);
 
             _mockRepository.Verify(repository =>
-                repository.GetAllCategoriesForTransactionType(expectedUserId, transactionType));
+                repository.GetAllCategoriesForTransactionType(transactionType));
         }
 
         [Fact]
@@ -175,7 +175,7 @@ public class CategoriesServiceTests
                 }
             };
 
-            _mockRepository.Setup(repository => repository.GetAllCategories(It.IsAny<string>()))
+            _mockRepository.Setup(repository => repository.GetAllCategories())
                 .ReturnsAsync(expectedReturnedCategoryList);
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -205,7 +205,7 @@ public class CategoriesServiceTests
             };
 
             _mockRepository.Setup(repository =>
-                    repository.GetAllCategoriesForTransactionType(It.IsAny<string>(), It.IsAny<TransactionType>()))
+                    repository.GetAllCategoriesForTransactionType(It.IsAny<TransactionType>()))
                 .ReturnsAsync(expectedReturnedCategoryList);
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -235,7 +235,7 @@ public class CategoriesServiceTests
             };
 
             _mockRepository.Setup(repository =>
-                    repository.GetAllCategoriesForTransactionType(It.IsAny<string>(), It.IsAny<TransactionType>()))
+                    repository.GetAllCategoriesForTransactionType(It.IsAny<TransactionType>()))
                 .ReturnsAsync(returnedCategoryList);
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -284,7 +284,7 @@ public class CategoriesServiceTests
             {
                 CategoryName = "testname",
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> { "test1", "test2" }
+                Subcategories = new List<string> {"test1", "test2"}
             };
 
             _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CategoryDto>())).Returns(new Category());
@@ -306,7 +306,7 @@ public class CategoriesServiceTests
 
             const string expectedCategoryName = "categoryName";
             var expectedTransactionType = TransactionType.Expense;
-            var expectedSubcategories = new List<string> { "sub1", "sub2" };
+            var expectedSubcategories = new List<string> {"sub1", "sub2"};
 
             var inputDto = new CategoryDto
             {
@@ -363,11 +363,11 @@ public class CategoriesServiceTests
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockMapper.Object);
 
-            _mockRepository.Setup(repository => repository.DeleteCategory(It.IsAny<string>(), It.IsAny<string>()));
+            _mockRepository.Setup(repository => repository.DeleteCategory(It.IsAny<string>()));
 
             await service.DeleteCategory(categoryName);
 
-            _mockRepository.Verify(repository => repository.DeleteCategory(UserId, categoryName));
+            _mockRepository.Verify(repository => repository.DeleteCategory(categoryName));
         }
     }
 
@@ -393,7 +393,7 @@ public class CategoriesServiceTests
         [Fact]
         public async Task GivenCategoryNameThatDoesNotExist_ThenBadUpdateCategoryRequestExceptionThrown()
         {
-            _mockRepository.Setup(repository => repository.GetCategory(UserId, "name"))
+            _mockRepository.Setup(repository => repository.GetCategory("name"))
                 .ReturnsAsync(() => null);
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -417,7 +417,7 @@ public class CategoriesServiceTests
                 }
             }, new DefaultContractResolver());
 
-            _mockRepository.Setup(repository => repository.GetCategory(UserId, categoryName))
+            _mockRepository.Setup(repository => repository.GetCategory(categoryName))
                 .ReturnsAsync(() => new Category());
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -442,7 +442,7 @@ public class CategoriesServiceTests
                 }
             }, new DefaultContractResolver());
 
-            _mockRepository.Setup(repository => repository.GetCategory(UserId, categoryName))
+            _mockRepository.Setup(repository => repository.GetCategory(categoryName))
                 .ReturnsAsync(() => new Category());
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -460,7 +460,7 @@ public class CategoriesServiceTests
         {
             var testData = new PatchDocumentTestData();
 
-            _mockRepository.Setup(repository => repository.GetCategory(UserId, testData.CategoryName))
+            _mockRepository.Setup(repository => repository.GetCategory(testData.CategoryName))
                 .ReturnsAsync(() => testData.ExistingCategory);
 
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
@@ -484,7 +484,7 @@ public class CategoriesServiceTests
                     UserId = UserId,
                     CategoryName = CategoryName,
                     TransactionType = TransactionType.Expense,
-                    Subcategories = new List<string> { "test1", "test2" }
+                    Subcategories = new List<string> {"test1", "test2"}
                 };
             }
 
@@ -545,7 +545,7 @@ public class CategoriesServiceTests
                         UserId = UserId,
                         CategoryName = CategoryName,
                         TransactionType = TransactionType.Expense,
-                        Subcategories = new List<string> {"test1"}
+                        Subcategories = new List<string> {"test1", "replaced subcategory name1"}
                     }
                 };
             }

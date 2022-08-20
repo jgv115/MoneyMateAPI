@@ -112,7 +112,7 @@ namespace TransactionService
             }
 
             services.AddSingleton<ITransactionRepository, DynamoDbTransactionRepository>();
-            services.AddSingleton<ICategoriesRepository, DynamoDbCategoriesRepository>();
+            services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
             services.AddSingleton<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
         }
 

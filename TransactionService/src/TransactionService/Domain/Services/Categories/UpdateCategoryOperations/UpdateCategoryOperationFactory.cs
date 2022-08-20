@@ -28,10 +28,9 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
             Operation<CategoryDto> jsonPatchOperation)
         {
             if (jsonPatchOperation.op == "add" && jsonPatchOperation.path == "/subcategories/-")
-            
-                return new AddSubcategoryOperation(jsonPatchOperation, _categoriesRepository, existingCategoryName,
-                    _userContext);
-            
+
+                return new AddSubcategoryOperation(jsonPatchOperation, _categoriesRepository, existingCategoryName);
+
 
             throw new Exception();
         }

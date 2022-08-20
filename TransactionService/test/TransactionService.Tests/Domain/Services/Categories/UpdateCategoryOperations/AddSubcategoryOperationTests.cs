@@ -7,7 +7,6 @@ using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Dtos;
-using TransactionService.Middleware;
 using TransactionService.Repositories;
 using Xunit;
 
@@ -16,11 +15,6 @@ namespace TransactionService.Tests.Domain.Services.Categories.UpdateCategoryOper
 public class AddSubcategoryOperationTests
 {
     private readonly Mock<ICategoriesRepository> _mockCategoriesRepository = new();
-
-    private readonly CurrentUserContext _stubUserContext = new CurrentUserContext
-    {
-        UserId = "userid123"
-    };
 
     [Fact]
     public async Task GivenValidSubcategory_ThenUpdateCategoryCalledWithCorrectCategoryModel()
@@ -32,14 +26,13 @@ public class AddSubcategoryOperationTests
             path = "/subcategories/-",
             value = "new subcategory"
         };
-        var handler = new AddSubcategoryOperation(operation, _mockCategoriesRepository.Object, existingCategoryName,
-            _stubUserContext);
+        var handler = new AddSubcategoryOperation(operation, _mockCategoriesRepository.Object, existingCategoryName);
 
         _mockCategoriesRepository
-            .Setup(repository => repository.GetCategory(_stubUserContext.UserId, existingCategoryName)).ReturnsAsync(
+            .Setup(repository => repository.GetCategory(existingCategoryName)).ReturnsAsync(
                 new Category()
                 {
-                    UserId = _stubUserContext.UserId,
+                    UserId = "userId",
                     CategoryName = existingCategoryName,
                     TransactionType = TransactionType.Expense,
                     Subcategories = new List<string> {"subcategory1", "subcategory2"}
@@ -47,13 +40,8 @@ public class AddSubcategoryOperationTests
 
         await handler.ExecuteOperation();
 
-        _mockCategoriesRepository.Verify(repository => repository.UpdateCategory(new Category
-        {
-            UserId = _stubUserContext.UserId,
-            CategoryName = existingCategoryName,
-            TransactionType = TransactionType.Expense,
-            Subcategories = new List<string> {"subcategory1", "subcategory2", "new subcategory"}
-        }));
+        _mockCategoriesRepository.Verify(repository =>
+            repository.AddSubcategory(existingCategoryName, "new subcategory"));
     }
 
     [Fact]
@@ -67,11 +55,10 @@ public class AddSubcategoryOperationTests
             value = "new subcategory"
         };
 
-        var handler = new AddSubcategoryOperation(operation, _mockCategoriesRepository.Object, existingCategoryName,
-            _stubUserContext);
+        var handler = new AddSubcategoryOperation(operation, _mockCategoriesRepository.Object, existingCategoryName);
 
         _mockCategoriesRepository
-            .Setup(repository => repository.GetCategory(_stubUserContext.UserId, existingCategoryName))
+            .Setup(repository => repository.GetCategory(existingCategoryName))
             .ReturnsAsync((Category) null);
 
         await Assert.ThrowsAsync<UpdateCategoryOperationException>(() => handler.ExecuteOperation());
@@ -88,14 +75,13 @@ public class AddSubcategoryOperationTests
             path = "/subcategories/-",
             value = subcategoryName
         };
-        var handler = new AddSubcategoryOperation(operation, _mockCategoriesRepository.Object, existingCategoryName,
-            _stubUserContext);
+        var handler = new AddSubcategoryOperation(operation, _mockCategoriesRepository.Object, existingCategoryName);
 
         _mockCategoriesRepository
-            .Setup(repository => repository.GetCategory(_stubUserContext.UserId, existingCategoryName)).ReturnsAsync(
+            .Setup(repository => repository.GetCategory(existingCategoryName)).ReturnsAsync(
                 new Category()
                 {
-                    UserId = _stubUserContext.UserId,
+                    UserId = "userId",
                     CategoryName = existingCategoryName,
                     TransactionType = TransactionType.Expense,
                     Subcategories = new List<string> {subcategoryName, "subcategory1", "subcategory2"}
@@ -114,14 +100,13 @@ public class AddSubcategoryOperationTests
             path = "/subcategories/-",
             value = ""
         };
-        var handler = new AddSubcategoryOperation(operation, _mockCategoriesRepository.Object, existingCategoryName,
-            _stubUserContext);
+        var handler = new AddSubcategoryOperation(operation, _mockCategoriesRepository.Object, existingCategoryName);
 
         _mockCategoriesRepository
-            .Setup(repository => repository.GetCategory(_stubUserContext.UserId, existingCategoryName)).ReturnsAsync(
+            .Setup(repository => repository.GetCategory(existingCategoryName)).ReturnsAsync(
                 new Category()
                 {
-                    UserId = _stubUserContext.UserId,
+                    UserId = "userId",
                     CategoryName = existingCategoryName,
                     TransactionType = TransactionType.Expense,
                     Subcategories = new List<string> {"subcategory1", "subcategory2"}

@@ -33,7 +33,7 @@ namespace TransactionService.Domain.Services.Categories
 
         public Task<IEnumerable<string>> GetSubcategories(string category)
         {
-            return _repository.GetAllSubcategories(_userContext.UserId, category);
+            return _repository.GetAllSubcategories(category);
         }
 
         public async Task<IEnumerable<Category>> GetAllCategories(TransactionType? transactionType = null)
@@ -41,9 +41,9 @@ namespace TransactionService.Domain.Services.Categories
             IEnumerable<Category> returnedCategories;
             if (transactionType.HasValue)
                 returnedCategories =
-                    await _repository.GetAllCategoriesForTransactionType(_userContext.UserId, transactionType.Value);
+                    await _repository.GetAllCategoriesForTransactionType(transactionType.Value);
             else
-                returnedCategories = await _repository.GetAllCategories(_userContext.UserId);
+                returnedCategories = await _repository.GetAllCategories();
 
             return returnedCategories.OrderBy(category => category.CategoryName).ToList();
         }
@@ -59,7 +59,7 @@ namespace TransactionService.Domain.Services.Categories
         // TODO: check if there are some transactions that belong to this category
         public Task DeleteCategory(string categoryName)
         {
-            return _repository.DeleteCategory(_userContext.UserId, categoryName);
+            return _repository.DeleteCategory(categoryName);
         }
 
         // TODO: enforce one operation at a time.
@@ -80,7 +80,7 @@ namespace TransactionService.Domain.Services.Categories
                     throw new BadUpdateCategoryRequestException("Updating transaction type is not allowed");
             });
 
-            var existingCategory = await _repository.GetCategory(_userContext.UserId, categoryName);
+            var existingCategory = await _repository.GetCategory(categoryName);
             if (existingCategory == null)
                 throw new BadUpdateCategoryRequestException($"Category {categoryName} does not exist");
 
