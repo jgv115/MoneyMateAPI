@@ -1,7 +1,6 @@
 using System;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using TransactionService.Dtos;
-using TransactionService.Middleware;
 using TransactionService.Repositories;
 
 namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
@@ -12,16 +11,13 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
             Operation<CategoryDto> jsonPatchOperation);
     }
 
-    class UpdateCategoryOperationFactory : IUpdateCategoryOperationFactory
+    public class UpdateCategoryOperationFactory : IUpdateCategoryOperationFactory
     {
         private readonly ICategoriesRepository _categoriesRepository;
-        private readonly CurrentUserContext _userContext;
 
-        public UpdateCategoryOperationFactory(ICategoriesRepository categoriesRepository,
-            CurrentUserContext userContext)
+        public UpdateCategoryOperationFactory(ICategoriesRepository categoriesRepository)
         {
             _categoriesRepository = categoriesRepository;
-            _userContext = userContext;
         }
 
         public IUpdateCategoryOperation GetUpdateCategoryOperation(string existingCategoryName,

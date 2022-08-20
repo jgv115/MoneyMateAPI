@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Dtos;
-using TransactionService.Middleware;
 using TransactionService.Repositories;
 
 namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
