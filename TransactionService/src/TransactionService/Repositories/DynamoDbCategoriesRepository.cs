@@ -78,17 +78,7 @@ namespace TransactionService.Repositories
 
             return userCategoryList;
         }
-
-        public async Task<IEnumerable<string>> GetAllSubcategories(string userId, string category)
-        {
-            var returnedCategory = await _dbContext.LoadAsync<Category>($"{userId}{HashKeySuffix}", category,
-                new DynamoDBOperationConfig
-                {
-                    OverrideTableName = _tableName
-                });
-            return returnedCategory.Subcategories;
-        }
-
+        
         private async Task SaveCategory(Category newCategory)
         {
             newCategory.UserId += HashKeySuffix;
@@ -110,8 +100,18 @@ namespace TransactionService.Repositories
             await SaveCategory(newCategory);
         }
 
+        public async Task UpdateCategoryName(string categoryName, string newCategoryName)
+        {
+            // TODO: query transactions that have the existing category name
+            // TODO: edit them all to have the new category name
+            // TODO: get the category and change the name and push back to DB
+        }
+
         public async Task DeleteCategory(string userId, string categoryName)
         {
+            // TODO: query transactions to see if there are any with category attached
+            // TODO: throw an error if there are
+            // TODO: if not, then delete the category
             await _dbContext.DeleteAsync<Category>($"{userId}{HashKeySuffix}",
                 categoryName,
                 new DynamoDBOperationConfig
@@ -120,6 +120,47 @@ namespace TransactionService.Repositories
                 });
         }
 
+        public async Task<IEnumerable<string>> GetAllSubcategories(string userId, string category)
+        {
+            var returnedCategory = await _dbContext.LoadAsync<Category>($"{userId}{HashKeySuffix}", category,
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
+            return returnedCategory.Subcategories;
+        }
+
+        public async Task AddSubcategory(string userId, string categoryName, string newSubcategory)
+        {
+            // TODO: query existing category
+            // TODO: add new subcategory to it (transaction!)
+
+            var loadedCategory = await _dbContext.LoadAsync<Category>($"{userId}{HashKeySuffix}", categoryName,
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
+
+            loadedCategory.Subcategories.Add(newSubcategory);
+
+            await SaveCategory(loadedCategory);
+        }
+
+        public async Task UpdateSubcategoryName(string categoryName, string subcategoryName, string newSubcategoryName)
+        {
+            // TODO: look up transactions that have the subcategory attached
+            // TODO: edit them all to have the new subcategory
+            // TODO: then edit the category to change the name of the subcategory
+        }
+
+        public async Task DeleteSubcategory(string categoryName, string subcategory)
+        {
+            // TODO: query existing transactions that have the subcategory attached
+            // TODO: if something exists: then throw an error
+            // TODO: if nothing exists, then query the category and delete it (transaction!)
+        }
+
+        // TODO: deprecate this method
         public Task UpdateCategory(Category updatedCategory)
         {
             return SaveCategory(updatedCategory);
