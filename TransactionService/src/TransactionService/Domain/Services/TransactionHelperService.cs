@@ -33,7 +33,7 @@ namespace TransactionService.Domain.Services
                 queryParams.End.GetValueOrDefault(DateTime.MaxValue));
             var spec = _specificationFactory.Create(queryParams);
 
-            var filteredTransactions = await _repository.GetTransactions(_userContext.UserId, dateRange, spec);
+            var filteredTransactions = await _repository.GetTransactions(dateRange, spec);
             return filteredTransactions;
         }
 
@@ -55,7 +55,7 @@ namespace TransactionService.Domain.Services
 
         public Task DeleteTransaction(string transactionId)
         {
-            return _repository.DeleteTransaction(_userContext.UserId, transactionId);
+            return _repository.DeleteTransaction(transactionId);
         }
     }
 }

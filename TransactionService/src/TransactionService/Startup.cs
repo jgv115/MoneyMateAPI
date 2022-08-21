@@ -113,9 +113,9 @@ namespace TransactionService
                 services.AddAWSService<IAmazonDynamoDB>();
             }
 
-            services.AddSingleton<ITransactionRepository, DynamoDbTransactionRepository>();
+            services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
             services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
-            services.AddSingleton<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
+            services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

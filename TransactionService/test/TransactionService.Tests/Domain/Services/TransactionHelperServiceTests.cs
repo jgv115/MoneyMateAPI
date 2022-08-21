@@ -86,8 +86,8 @@ namespace TransactionService.Tests.Domain.Services
                     }
                 };
                 _mockTransactionRepository
-                    .Setup(repository => repository.GetTransactions(expectedUserId,
-                        new DateRange(DateTime.MinValue, DateTime.MaxValue), It.IsAny<ITransactionSpecification>()))
+                    .Setup(repository => repository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
+                        It.IsAny<ITransactionSpecification>()))
                     .ReturnsAsync(() => expectedTransactionList);
 
                 var response = await service.GetTransactionsAsync(new GetTransactionsQuery());
@@ -107,9 +107,9 @@ namespace TransactionService.Tests.Domain.Services
 
                 ITransactionSpecification calledWithSpecification = null;
                 _mockTransactionRepository
-                    .Setup(repository => repository.GetTransactions(expectedUserId,
-                        new DateRange(DateTime.MinValue, DateTime.MaxValue), It.IsAny<ITransactionSpecification>()))
-                    .Callback((string _, DateRange _, ITransactionSpecification transactionSpecification) =>
+                    .Setup(repository => repository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
+                        It.IsAny<ITransactionSpecification>()))
+                    .Callback((DateRange _, ITransactionSpecification transactionSpecification) =>
                     {
                         calledWithSpecification = transactionSpecification;
                     });
@@ -277,18 +277,14 @@ namespace TransactionService.Tests.Domain.Services
             public async Task
                 GivenTransactionId_WhenDeleteTransactionInvoked_ThenRepositoryDeleteTransactionCalledWithCorrectArgument()
             {
-                const string expectedUserId = "id123";
                 var expectedTransactionId = Guid.NewGuid().ToString();
-
-                _mockCurrentUserContext.SetupGet(context => context.UserId)
-                    .Returns(expectedUserId);
 
                 var service = new TransactionHelperService(_mockCurrentUserContext.Object,
                     _mockTransactionRepository.Object, _mockMapper.Object);
                 await service.DeleteTransaction(expectedTransactionId);
 
                 _mockTransactionRepository.Verify(repository =>
-                    repository.DeleteTransaction(expectedUserId, expectedTransactionId));
+                    repository.DeleteTransaction(expectedTransactionId));
             }
         }
     }

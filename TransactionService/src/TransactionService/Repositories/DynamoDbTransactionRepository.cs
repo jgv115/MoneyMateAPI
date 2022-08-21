@@ -8,84 +8,36 @@ using Amazon.DynamoDBv2.DocumentModel;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
+using TransactionService.Middleware;
 
 namespace TransactionService.Repositories
 {
     public class DynamoDbTransactionRepository : ITransactionRepository
     {
+        private readonly string _userId;
         private readonly DynamoDBContext _dbContext;
         private readonly string _tableName;
 
         private const string HashKeySuffix = "#Transaction";
 
-        public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient)
+        public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient, CurrentUserContext currentUserContext)
         {
             if (dbClient == null)
             {
                 throw new ArgumentNullException(nameof(dbClient));
             }
 
+            _userId = currentUserContext.UserId;
             _dbContext = new DynamoDBContext(dbClient);
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
 
-        public async Task<List<Transaction>> GetAllTransactionsAsync(string userId, DateTime start, DateTime end)
-        {
-            return await _dbContext.QueryAsync<Transaction>($"{userId}{HashKeySuffix}", QueryOperator.Between, new[]
-            {
-                $"{start:O}", $"{end:O}"
-            }, new DynamoDBOperationConfig
-            {
-                OverrideTableName = _tableName,
-                IndexName = "TransactionTimestampIndex"
-            }).GetRemainingAsync();
-        }
-
-        public async Task<List<Transaction>> GetAllTransactionsAsync(string userId, DateTime start,
-            DateTime end, string transactionType)
-        {
-            return await _dbContext.QueryAsync<Transaction>($"{userId}{HashKeySuffix}", QueryOperator.Between, new[]
-            {
-                $"{start:O}", $"{end:O}"
-            }, new DynamoDBOperationConfig
-            {
-                OverrideTableName = _tableName,
-                IndexName = "TransactionTimestampIndex",
-                QueryFilter = new List<ScanCondition>
-                {
-                    {
-                        new("TransactionType", ScanOperator.BeginsWith, transactionType)
-                    }
-                }
-            }).GetRemainingAsync();
-        }
-
-        public async Task<List<Transaction>> GetAllTransactionsByCategoryAsync(string userId, string categoryName,
-            DateTime start, DateTime end)
-        {
-            return await _dbContext.QueryAsync<Transaction>($"{userId}{HashKeySuffix}", QueryOperator.Between, new[]
-            {
-                $"{start:O}", $"{end:O}"
-            }, new DynamoDBOperationConfig
-            {
-                OverrideTableName = _tableName,
-                IndexName = "TransactionTimestampIndex",
-                QueryFilter = new List<ScanCondition>
-                {
-                    {
-                        new("Category", ScanOperator.Equal, categoryName)
-                    }
-                }
-            }).GetRemainingAsync();
-        }
-
-        public async Task<List<Transaction>> GetTransactions(string userId, DateRange dateRange,
-            ITransactionSpecification spec)
+        public async Task<List<Transaction>> GetTransactions(DateRange dateRange, ITransactionSpecification spec)
         {
             var start = dateRange.Start;
             var end = dateRange.End;
 
-            var transactions = await _dbContext.QueryAsync<Transaction>($"{userId}{HashKeySuffix}",
+            var transactions = await _dbContext.QueryAsync<Transaction>($"{_userId}{HashKeySuffix}",
                 QueryOperator.Between, new[]
                 {
                     $"{start:O}", $"{end:O}"
@@ -112,9 +64,9 @@ namespace TransactionService.Repositories
             await StoreTransaction(newTransaction);
         }
 
-        public async Task DeleteTransaction(string userId, string transactionId)
+        public async Task DeleteTransaction(string transactionId)
         {
-            await _dbContext.DeleteAsync<Transaction>($"{userId}{HashKeySuffix}", transactionId,
+            await _dbContext.DeleteAsync<Transaction>($"{_userId}{HashKeySuffix}", transactionId,
                 new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName
