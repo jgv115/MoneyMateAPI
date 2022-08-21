@@ -17,6 +17,7 @@ using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories;
+using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Profiles;
@@ -77,6 +78,7 @@ namespace TransactionService
             services.AddScoped<CurrentUserContext>();
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
             services.AddScoped<ICategoriesService, CategoriesService>();
+            services.AddScoped<IUpdateCategoryOperationFactory, UpdateCategoryOperationFactory>();
             services.AddScoped<IPayerPayeeService, PayerPayeeService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
 

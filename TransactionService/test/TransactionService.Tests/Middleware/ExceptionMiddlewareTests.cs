@@ -44,11 +44,11 @@ public class ExceptionMiddlewareTests
     }
     
     [Fact]
-    public async Task GivenBadUpdateCategoryRequestExceptionThrown_ThenCorrectProblemDetailsReturned()
+    public async Task GivenUpdateCategoryOperationExceptionThrown_ThenCorrectProblemDetailsReturned()
     {
         var expectedMessage = "message 123";
         var middleware = new ExceptionMiddleware(_ =>
-            throw new BadUpdateCategoryRequestException(expectedMessage));
+            throw new UpdateCategoryOperationException(expectedMessage));
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();

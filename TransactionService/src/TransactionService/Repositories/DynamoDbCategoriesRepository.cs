@@ -81,14 +81,12 @@ namespace TransactionService.Repositories
             return userCategoryList;
         }
 
-        private async Task SaveCategory(Category newCategory)
-        {
-            newCategory.UserId += HashKeySuffix;
-            await _dbContext.SaveAsync(newCategory, new DynamoDBOperationConfig
+        private async Task SaveCategory(Category newCategory) => await _dbContext.SaveAsync(newCategory,
+            new DynamoDBOperationConfig
             {
                 OverrideTableName = _tableName
             });
-        }
+
 
         public async Task CreateCategory(Category newCategory)
         {
@@ -99,6 +97,7 @@ namespace TransactionService.Repositories
                     $"Category with name {newCategory.CategoryName} already exists");
             }
 
+            newCategory.UserId += HashKeySuffix;
             await SaveCategory(newCategory);
         }
 

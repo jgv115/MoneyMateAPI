@@ -5,7 +5,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Services.Categories.Exceptions;
+using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Dtos;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
@@ -17,12 +17,15 @@ namespace TransactionService.Domain.Services.Categories
         private readonly CurrentUserContext _userContext;
         private readonly ICategoriesRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IUpdateCategoryOperationFactory _updateCategoryOperationFactory;
 
-        public CategoriesService(CurrentUserContext userContext, ICategoriesRepository repository, IMapper mapper)
+        public CategoriesService(CurrentUserContext userContext, ICategoriesRepository repository, IMapper mapper,
+            IUpdateCategoryOperationFactory updateCategoryOperationFactory)
         {
             _userContext = userContext;
             _repository = repository;
             _mapper = mapper;
+            _updateCategoryOperationFactory = updateCategoryOperationFactory;
         }
 
         public async Task<IEnumerable<string>> GetAllCategoryNames()
@@ -68,30 +71,17 @@ namespace TransactionService.Domain.Services.Categories
         // TODO: can't change transactionType
         public async Task UpdateCategory(string categoryName, JsonPatchDocument<CategoryDto> patchDocument)
         {
-            patchDocument.Operations.ForEach(operation =>
+            foreach (var patchOperation in patchDocument.Operations)
             {
-                if (operation.op == "add" && operation.path == "/subcategories/-")
-                {
-                    if (string.IsNullOrWhiteSpace(operation.value as string))
-                        throw new BadUpdateCategoryRequestException("Subcategory name should not be empty");
-                }
-
-                if (operation.op == "replace" && operation.path == "/transactionType")
-                    throw new BadUpdateCategoryRequestException("Updating transaction type is not allowed");
-            });
-
-            var existingCategory = await _repository.GetCategory(categoryName);
-            if (existingCategory == null)
-                throw new BadUpdateCategoryRequestException($"Category {categoryName} does not exist");
-
-            var existingCategoryDto = _mapper.Map<CategoryDto>(existingCategory);
-
-            patchDocument.ApplyTo(existingCategoryDto);
-
-            var newCategory = _mapper.Map<Category>(existingCategoryDto);
-            newCategory.UserId = _userContext.UserId;
-
-            await _repository.UpdateCategory(newCategory);
+                var updateCategoryOperation =
+                    _updateCategoryOperationFactory.GetUpdateCategoryOperation(categoryName, patchOperation);
+                await updateCategoryOperation.ExecuteOperation();
+            }
+            // patchDocument.Operations.ForEach(operation =>
+            // {
+            //     if (operation.op == "replace" && operation.path == "/transactionType")
+            //         throw new BadUpdateCategoryRequestException("Updating transaction type is not allowed");
+            // });
         }
     }
 }
