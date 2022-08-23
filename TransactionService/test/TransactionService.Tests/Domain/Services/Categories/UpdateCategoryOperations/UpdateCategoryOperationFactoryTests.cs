@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Moq;
+using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Dtos;
 using TransactionService.Repositories;
@@ -13,14 +14,16 @@ namespace TransactionService.Tests.Domain.Services.Categories.UpdateCategoryOper
 public class UpdateCategoryOperationFactoryTests
 {
     private readonly Mock<ICategoriesRepository> _mockCategoriesRepository = new();
+    private readonly Mock<ITransactionHelperService> _mockTransactionHelperService = new();
     public string CategoryName = "name123";
 
     [Theory]
     [ClassData(typeof(PatchDocumentTestData))]
-    public void GivenJsonPatchOperationForAddingSubcategory_ThenCorrectOperationReturned(
+    public void GivenJsonPatchOperationForUpdatingACategory_ThenCorrectOperationReturned(
         Operation<CategoryDto> patchOperation, Type updateCategoryOperationType)
     {
-        var factory = new UpdateCategoryOperationFactory(_mockCategoriesRepository.Object);
+        var factory =
+            new UpdateCategoryOperationFactory(_mockCategoriesRepository.Object, _mockTransactionHelperService.Object);
 
         var updateCategoryOperation = factory.GetUpdateCategoryOperation(CategoryName, patchOperation);
 
@@ -41,6 +44,16 @@ public class UpdateCategoryOperationFactoryTests
                     value = "new subcategory",
                 },
                 typeof(AddSubcategoryOperation)
+            };
+
+            yield return new object[]
+            {
+                new Operation<CategoryDto>
+                {
+                    op = "remove",
+                    path = "/subcategories/1"
+                },
+                typeof(DeleteSubcategoryOperation)
             };
 
 

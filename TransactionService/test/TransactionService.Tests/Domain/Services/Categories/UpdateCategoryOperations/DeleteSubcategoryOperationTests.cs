@@ -22,7 +22,7 @@ public class DeleteSubcategoryOperationTests
     {
         const string categoryName = "categoryName";
         var operation = new DeleteSubcategoryOperation(_categoriesRepositoryMock.Object,
-            _transactionServiceMock.Object, categoryName, "subcategory");
+            _transactionServiceMock.Object, categoryName, 0);
 
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
             .ReturnsAsync((Category) null);
@@ -35,7 +35,7 @@ public class DeleteSubcategoryOperationTests
     {
         const string categoryName = "categoryName";
         var operation = new DeleteSubcategoryOperation(_categoriesRepositoryMock.Object,
-            _transactionServiceMock.Object, categoryName, "subcategory");
+            _transactionServiceMock.Object, categoryName, 2);
 
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
             .ReturnsAsync(new Category
@@ -52,7 +52,7 @@ public class DeleteSubcategoryOperationTests
         const string categoryName = "categoryName";
         const string subcategoryName = "subcategory123";
         var operation = new DeleteSubcategoryOperation(_categoriesRepositoryMock.Object,
-            _transactionServiceMock.Object, categoryName, subcategoryName);
+            _transactionServiceMock.Object, categoryName, 2);
 
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
             .ReturnsAsync(new Category
@@ -89,7 +89,7 @@ public class DeleteSubcategoryOperationTests
         const string categoryName = "categoryName";
         const string subcategoryName = "subcategory name";
         var operation = new DeleteSubcategoryOperation(_categoriesRepositoryMock.Object,
-            _transactionServiceMock.Object, categoryName, subcategoryName);
+            _transactionServiceMock.Object, categoryName, 2);
 
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
             .ReturnsAsync(new Category

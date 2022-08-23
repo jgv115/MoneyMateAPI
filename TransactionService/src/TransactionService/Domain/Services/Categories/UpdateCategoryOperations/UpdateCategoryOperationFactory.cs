@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using TransactionService.Dtos;
 using TransactionService.Repositories;
@@ -14,19 +15,26 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
     public class UpdateCategoryOperationFactory : IUpdateCategoryOperationFactory
     {
         private readonly ICategoriesRepository _categoriesRepository;
+        private readonly ITransactionHelperService _transactionHelperService;
 
-        public UpdateCategoryOperationFactory(ICategoriesRepository categoriesRepository)
+        public UpdateCategoryOperationFactory(ICategoriesRepository categoriesRepository,
+            ITransactionHelperService transactionHelperService)
         {
             _categoriesRepository = categoriesRepository;
+            _transactionHelperService = transactionHelperService;
         }
 
         public IUpdateCategoryOperation GetUpdateCategoryOperation(string existingCategoryName,
             Operation<CategoryDto> jsonPatchOperation)
         {
             if (jsonPatchOperation.op == "add" && jsonPatchOperation.path == "/subcategories/-")
-
                 return new AddSubcategoryOperation(jsonPatchOperation, _categoriesRepository, existingCategoryName);
-
+            else if (jsonPatchOperation.op == "remove" && jsonPatchOperation.path.StartsWith("/subcategories/"))
+            {
+                var subcategoryIndex = int.Parse(jsonPatchOperation.path.Split("/").Last());
+                return new DeleteSubcategoryOperation(_categoriesRepository, _transactionHelperService,
+                    existingCategoryName, subcategoryIndex);
+            }
 
             throw new Exception();
         }
