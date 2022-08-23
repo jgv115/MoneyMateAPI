@@ -279,7 +279,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
     [Fact]
     public async Task
-        GivenAPatchCategoryRequestForACategoryThatExists_WhenPatchCategoryIsCalled_ThenCategoryIsUpdated()
+        GivenAnAddCategoryPatchRequestForACategoryThatExists_WhenPatchCategoryIsCalled_ThenCategoryIsUpdated()
     {
         const string categoryName = "category123";
 
@@ -333,5 +333,51 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         var response = await _httpClient.PatchAsync($"/api/categories/categoryname", httpContent);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task
+        GivenDeleteSubcategoryPatchRequest_ThenSubcategoryIsDeleted()
+    {
+        const string categoryName = "category123";
+
+        var initialData = new List<Category>
+        {
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = categoryName,
+                TransactionType = TransactionType.Expense,
+                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+            },
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = "category2",
+                TransactionType = TransactionType.Income,
+                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+            }
+        };
+
+        await _dynamoDbHelper.WriteIntoTable(initialData);
+
+
+        var inputPatchDoc = "[{ \"op\": \"remove\", \"path\": \"/subcategories/0\"}]";
+
+        var httpContent = new StringContent(inputPatchDoc,
+            Encoding.UTF8, "application/json-patch+json");
+        var response = await _httpClient.PatchAsync($"/api/categories/{categoryName}", httpContent);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var returnedCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedUserId, categoryName);
+
+        Assert.Equal(new Category
+        {
+            UserId = PersistedUserId,
+            CategoryName = categoryName,
+            TransactionType = TransactionType.Expense,
+            Subcategories = new List<string> {"subcategory2"}
+        }, returnedCategory);
     }
 }

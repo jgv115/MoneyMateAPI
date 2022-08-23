@@ -156,9 +156,15 @@ namespace TransactionService.Repositories
 
         public async Task DeleteSubcategory(string categoryName, string subcategory)
         {
-            // TODO: query existing transactions that have the subcategory attached
-            // TODO: if something exists: then throw an error
-            // TODO: if nothing exists, then query the category and delete it (transaction!)
+            var category = await _dbContext.LoadAsync<Category>($"{_userId}{HashKeySuffix}", categoryName,
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
+            category.Subcategories.Remove(subcategory);
+
+
+            await SaveCategory(category);
         }
 
         // TODO: deprecate this method
