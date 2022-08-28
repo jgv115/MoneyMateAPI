@@ -15,6 +15,7 @@ public class UpdateCategoryOperationFactoryTests
 {
     private readonly Mock<ICategoriesRepository> _mockCategoriesRepository = new();
     private readonly Mock<ITransactionHelperService> _mockTransactionHelperService = new();
+    private readonly Mock<ITransactionRepository> _mockTransactionRepository = new();
     public string CategoryName = "name123";
 
     [Theory]
@@ -23,7 +24,8 @@ public class UpdateCategoryOperationFactoryTests
         Operation<CategoryDto> patchOperation, Type updateCategoryOperationType)
     {
         var factory =
-            new UpdateCategoryOperationFactory(_mockCategoriesRepository.Object, _mockTransactionHelperService.Object);
+            new UpdateCategoryOperationFactory(_mockCategoriesRepository.Object, _mockTransactionHelperService.Object,
+                _mockTransactionRepository.Object);
 
         var updateCategoryOperation = factory.GetUpdateCategoryOperation(CategoryName, patchOperation);
 
@@ -54,6 +56,16 @@ public class UpdateCategoryOperationFactoryTests
                     path = "/subcategories/1"
                 },
                 typeof(DeleteSubcategoryOperation)
+            };
+
+            yield return new object[]
+            {
+                new Operation<CategoryDto>
+                {
+                    op = "replace",
+                    path = "/subcategories/1"
+                },
+                typeof(UpdateSubcategoryNameOperation)
             };
 
 

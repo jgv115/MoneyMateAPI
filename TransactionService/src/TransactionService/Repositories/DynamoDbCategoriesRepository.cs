@@ -133,9 +133,6 @@ namespace TransactionService.Repositories
 
         public async Task AddSubcategory(string categoryName, string newSubcategory)
         {
-            // TODO: query existing category
-            // TODO: add new subcategory to it (transaction!)
-
             var loadedCategory = await _dbContext.LoadAsync<Category>($"{_userId}{HashKeySuffix}", categoryName,
                 new DynamoDBOperationConfig
                 {
@@ -149,9 +146,16 @@ namespace TransactionService.Repositories
 
         public async Task UpdateSubcategoryName(string categoryName, string subcategoryName, string newSubcategoryName)
         {
-            // TODO: look up transactions that have the subcategory attached
-            // TODO: edit them all to have the new subcategory
-            // TODO: then edit the category to change the name of the subcategory
+            var loadedCategory = await _dbContext.LoadAsync<Category>($"{_userId}{HashKeySuffix}", categoryName,
+                new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName
+                });
+
+            loadedCategory.Subcategories.Remove(subcategoryName);
+            loadedCategory.Subcategories.Add(newSubcategoryName);
+
+            await SaveCategory(loadedCategory);
         }
 
         public async Task DeleteSubcategory(string categoryName, string subcategory)

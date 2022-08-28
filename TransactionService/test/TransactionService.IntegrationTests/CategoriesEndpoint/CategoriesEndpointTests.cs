@@ -380,4 +380,50 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             Subcategories = new List<string> {"subcategory2"}
         }, returnedCategory);
     }
+
+    [Fact]
+    public async Task
+        GivenUpdateSubcategoryNamePatchRequest_ThenSubcategoryIsRenamed()
+    {
+        const string categoryName = "category123";
+
+        var initialData = new List<Category>
+        {
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = categoryName,
+                TransactionType = TransactionType.Expense,
+                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+            },
+            new()
+            {
+                UserId = PersistedUserId,
+                CategoryName = "category2",
+                TransactionType = TransactionType.Income,
+                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+            }
+        };
+
+        await _dynamoDbHelper.WriteIntoTable(initialData);
+
+        var inputPatchDoc =
+            "[{ \"op\": \"replace\", \"path\": \"/subcategories/0\", \"value\": \"renamed subcategory\"}]";
+
+        var httpContent = new StringContent(inputPatchDoc,
+            Encoding.UTF8, "application/json-patch+json");
+        var response = await _httpClient.PatchAsync($"/api/categories/{categoryName}", httpContent);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var returnedCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedUserId, categoryName);
+
+        Assert.Equal(new Category
+        {
+            UserId = PersistedUserId,
+            CategoryName = categoryName,
+            TransactionType = TransactionType.Expense,
+            Subcategories = new List<string> {"renamed subcategory", "subcategory2"}
+        }, returnedCategory);
+    }
 }

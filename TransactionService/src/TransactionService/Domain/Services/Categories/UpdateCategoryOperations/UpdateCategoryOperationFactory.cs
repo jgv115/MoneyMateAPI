@@ -15,13 +15,15 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
     public class UpdateCategoryOperationFactory : IUpdateCategoryOperationFactory
     {
         private readonly ICategoriesRepository _categoriesRepository;
+        private readonly ITransactionRepository _transactionRepository;
         private readonly ITransactionHelperService _transactionHelperService;
 
         public UpdateCategoryOperationFactory(ICategoriesRepository categoriesRepository,
-            ITransactionHelperService transactionHelperService)
+            ITransactionHelperService transactionHelperService, ITransactionRepository transactionRepository)
         {
             _categoriesRepository = categoriesRepository;
             _transactionHelperService = transactionHelperService;
+            _transactionRepository = transactionRepository;
         }
 
         public IUpdateCategoryOperation GetUpdateCategoryOperation(string existingCategoryName,
@@ -34,6 +36,13 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
                 var subcategoryIndex = int.Parse(jsonPatchOperation.path.Split("/").Last());
                 return new DeleteSubcategoryOperation(_categoriesRepository, _transactionHelperService,
                     existingCategoryName, subcategoryIndex);
+            }
+            else if (jsonPatchOperation.op == "replace" && jsonPatchOperation.path.StartsWith("/subcategories/"))
+            {
+                var subcategoryIndex = int.Parse(jsonPatchOperation.path.Split("/").Last());
+                var newSubcategoryName = (string) jsonPatchOperation.value;
+                return new UpdateSubcategoryNameOperation(_categoriesRepository, _transactionHelperService,
+                    _transactionRepository, existingCategoryName, subcategoryIndex, newSubcategoryName);
             }
 
             throw new Exception();
