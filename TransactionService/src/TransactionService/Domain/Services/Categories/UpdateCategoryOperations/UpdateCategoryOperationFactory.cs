@@ -44,6 +44,18 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
                 return new UpdateSubcategoryNameOperation(_categoriesRepository, _transactionHelperService,
                     _transactionRepository, existingCategoryName, subcategoryIndex, newSubcategoryName);
             }
+            else if (jsonPatchOperation.op == "replace" && jsonPatchOperation.path == "/categoryName")
+            {
+                var newCategoryName = (string) jsonPatchOperation.value;
+                return new UpdateCategoryNameOperation(_categoriesRepository, _transactionHelperService,
+                    _transactionRepository, existingCategoryName, newCategoryName);
+            }
+
+            // patchDocument.Operations.ForEach(operation =>
+            // {
+            //     if (operation.op == "replace" && operation.path == "/transactionType")
+            //         throw new BadUpdateCategoryRequestException("Updating transaction type is not allowed");
+            // });
 
             throw new Exception();
         }

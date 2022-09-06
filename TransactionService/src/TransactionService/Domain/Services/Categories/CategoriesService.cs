@@ -65,10 +65,6 @@ namespace TransactionService.Domain.Services.Categories
             return _repository.DeleteCategory(categoryName);
         }
 
-        // TODO: enforce one operation at a time.
-        // TODO: Can't delete if there are still transactions
-        // TODO: if want to change name then have to change it for all transactions
-        // TODO: can't change transactionType
         public async Task UpdateCategory(string categoryName, JsonPatchDocument<CategoryDto> patchDocument)
         {
             foreach (var patchOperation in patchDocument.Operations)
@@ -77,11 +73,6 @@ namespace TransactionService.Domain.Services.Categories
                     _updateCategoryOperationFactory.GetUpdateCategoryOperation(categoryName, patchOperation);
                 await updateCategoryOperation.ExecuteOperation();
             }
-            // patchDocument.Operations.ForEach(operation =>
-            // {
-            //     if (operation.op == "replace" && operation.path == "/transactionType")
-            //         throw new BadUpdateCategoryRequestException("Updating transaction type is not allowed");
-            // });
         }
     }
 }

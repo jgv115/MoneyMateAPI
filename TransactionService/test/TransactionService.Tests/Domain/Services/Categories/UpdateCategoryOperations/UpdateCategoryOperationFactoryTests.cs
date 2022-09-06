@@ -68,6 +68,16 @@ public class UpdateCategoryOperationFactoryTests
                 typeof(UpdateSubcategoryNameOperation)
             };
 
+            yield return new object[]
+            {
+                new Operation<CategoryDto>
+                {
+                    op = "replace",
+                    path = "/categoryName"
+                },
+                typeof(UpdateCategoryNameOperation)
+            };
+
 
             // yield return new object[]
             // {

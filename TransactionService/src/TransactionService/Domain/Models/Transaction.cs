@@ -13,7 +13,7 @@ namespace TransactionService.Domain.Models
 
         public string TransactionType { get; set; }
         public decimal Amount { get; init; }
-        public string Category { get; init; }
+        public string Category { get; set; }
         [DynamoDBProperty("SubCategory")] public string Subcategory { get; set; }
         public string PayerPayeeId { get; set; }
         public string PayerPayeeName { get; set; }

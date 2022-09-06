@@ -37,6 +37,13 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             await DynamoDbHelper.DeleteTable();
         }
 
+        private List<Transaction> ConvertToPublicFacingUserIds(List<Transaction> transactionList)
+        {
+            transactionList.ForEach(transaction => { transaction.UserId = transaction.UserId.Split("#")[0]; });
+
+            return transactionList;
+        }
+
         [Fact]
         public async Task GivenNoInputParameters_WhenGetTransactionsIsCalled_ThenAllTransactionsAreReturned()
         {
@@ -97,7 +104,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(transactionList, returnedTransactionList);
+            Assert.Equal(ConvertToPublicFacingUserIds(transactionList), returnedTransactionList);
         }
 
         [Fact]
@@ -164,7 +171,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             {
                 transaction1, transaction2
             };
-            Assert.Equal(expectedTransactionList, returnedTransactionList);
+            Assert.Equal(ConvertToPublicFacingUserIds(expectedTransactionList), returnedTransactionList);
         }
 
         [Fact]
@@ -245,7 +252,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             {
                 transaction1, transaction2, transaction3
             };
-            Assert.Equal(expectedTransactionList, returnedTransactionList);
+            Assert.Equal(ConvertToPublicFacingUserIds(expectedTransactionList), returnedTransactionList);
         }
 
         [Fact]
@@ -299,11 +306,12 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(new List<Transaction> { transaction1 }, returnedTransactionList);
+            Assert.Equal(ConvertToPublicFacingUserIds(new List<Transaction> {transaction1}), returnedTransactionList);
         }
 
         [Fact]
-        public async Task GivenPayerPayeeIdInputParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfTypeAreReturned()
+        public async Task
+            GivenPayerPayeeIdInputParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfTypeAreReturned()
         {
             var transactionType = "expense";
             var transaction1 = new Transaction
@@ -351,7 +359,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(new List<Transaction> { transaction2 }, returnedTransactionList);
+            Assert.Equal(ConvertToPublicFacingUserIds(new List<Transaction> {transaction2}), returnedTransactionList);
         }
 
         [Fact]
@@ -430,7 +438,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(new List<Transaction> { transaction1, transaction2, transaction4 }, returnedTransactionList);
+            Assert.Equal(ConvertToPublicFacingUserIds(new List<Transaction> {transaction1, transaction2, transaction4}),
+                returnedTransactionList);
         }
 
         [Fact]

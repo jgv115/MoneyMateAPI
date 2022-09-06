@@ -32,6 +32,8 @@ namespace TransactionService.Repositories
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
 
+        private string ExtractPublicFacingUserId(string input) => input.Split("#")[0];
+
         public async Task<List<Transaction>> GetTransactions(DateRange dateRange, ITransactionSpecification spec)
         {
             var start = dateRange.Start;
@@ -47,7 +49,11 @@ namespace TransactionService.Repositories
                     IndexName = "TransactionTimestampIndex"
                 }).GetRemainingAsync();
 
-            return transactions.Where(transaction => spec.IsSatisfied(transaction)).ToList();
+            return transactions.Where(transaction => spec.IsSatisfied(transaction)).Select(transaction =>
+            {
+                transaction.UserId = ExtractPublicFacingUserId(transaction.UserId);
+                return transaction;
+            }).ToList();
         }
 
         public async Task StoreTransaction(Transaction newTransaction)

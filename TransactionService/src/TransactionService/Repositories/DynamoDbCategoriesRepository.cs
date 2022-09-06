@@ -174,6 +174,7 @@ namespace TransactionService.Repositories
         // TODO: deprecate this method
         public Task UpdateCategory(Category updatedCategory)
         {
+            updatedCategory.UserId += HashKeySuffix;
             return SaveCategory(updatedCategory);
         }
     }
