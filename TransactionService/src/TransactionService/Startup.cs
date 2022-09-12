@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using FluentValidation.AspNetCore;
@@ -112,6 +113,12 @@ namespace TransactionService
                 services.AddDefaultAWSOptions(awsOptions);
                 services.AddAWSService<IAmazonDynamoDB>();
             }
+
+            services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
+            services.AddSingleton(new DynamoDbRepositoryConfig
+            {
+                TableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}"
+            });
 
             services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
             services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();

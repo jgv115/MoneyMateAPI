@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using TransactionService.Constants;
@@ -14,22 +13,17 @@ namespace TransactionService.Repositories
 {
     public class DynamoDbCategoriesRepository : ICategoriesRepository
     {
-        private readonly DynamoDBContext _dbContext;
+        private readonly IDynamoDBContext _dbContext;
         private readonly string _userId;
         private readonly string _tableName;
 
         private const string HashKeySuffix = "#Categories";
 
-        public DynamoDbCategoriesRepository(IAmazonDynamoDB dbClient, CurrentUserContext userContext)
+        public DynamoDbCategoriesRepository(DynamoDbRepositoryConfig config, IDynamoDBContext dbContext, CurrentUserContext userContext)
         {
-            if (dbClient == null)
-            {
-                throw new ArgumentNullException(nameof(dbClient));
-            }
-
             _userId = userContext.UserId;
-            _dbContext = new DynamoDBContext(dbClient);
-            _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
+            _dbContext = dbContext;
+            _tableName = config.TableName;
         }
 
         private string ExtractPublicFacingUserId(string input) => input.Split("#")[0];
