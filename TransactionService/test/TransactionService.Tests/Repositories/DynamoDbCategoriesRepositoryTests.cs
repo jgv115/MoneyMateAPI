@@ -305,7 +305,7 @@ public class DynamoDbCategoriesRepositoryTests
     }
 
     [Fact]
-    public async Task Given_WhenAddSubcategoryInvoked_ThenCategorySavedCorrectly()
+    public async Task GivenNewSubcategoryName_WhenAddSubcategoryInvoked_ThenCategorySavedCorrectly()
     {
         const string categoryName = "test-category-123";
         const string newSubcategoryName = "new-subcategory";
@@ -330,6 +330,90 @@ public class DynamoDbCategoriesRepositoryTests
                 UserId = UserId,
                 TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"test1", "test2", newSubcategoryName}
+            }, It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
+            It.IsAny<CancellationToken>()));
+    }
+
+    [Fact]
+    public async Task GivenNewSubcategoryName_WhenUpdateSubcategoryNameInvoked_ThenCategorySavedCorrectly()
+    {
+        const string categoryName = "test-category-123";
+        const string existingSubcategoryName = "existing-subcategory";
+        const string newSubcategoryName = "new-subcategory";
+        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+
+        _dynamoDbContextMock.Setup(context =>
+            context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+                It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
+                It.IsAny<CancellationToken>())).ReturnsAsync(() => new Category()
+        {
+            CategoryName = categoryName,
+            UserId = UserId,
+            TransactionType = TransactionType.Expense,
+            Subcategories = new List<string> {"test1", existingSubcategoryName}
+        });
+
+        await repository.UpdateSubcategoryName(categoryName, existingSubcategoryName, newSubcategoryName);
+
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+            {
+                CategoryName = categoryName,
+                UserId = UserId,
+                TransactionType = TransactionType.Expense,
+                Subcategories = new List<string> {"test1", newSubcategoryName}
+            }, It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
+            It.IsAny<CancellationToken>()));
+    }
+
+    [Fact]
+    public async Task GivenSubcategoryName_WhenDeleteSubcategoryInvoked_ThenCategorySavedCorrectly()
+    {
+        const string categoryName = "test-category-123";
+        const string subcategoryName = "new-subcategory";
+        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+
+        _dynamoDbContextMock.Setup(context =>
+            context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+                It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
+                It.IsAny<CancellationToken>())).ReturnsAsync(() => new Category()
+        {
+            CategoryName = categoryName,
+            UserId = UserId,
+            TransactionType = TransactionType.Expense,
+            Subcategories = new List<string> {subcategoryName, "test2"}
+        });
+
+        await repository.DeleteSubcategory(categoryName, subcategoryName);
+
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+            {
+                CategoryName = categoryName,
+                UserId = UserId,
+                TransactionType = TransactionType.Expense,
+                Subcategories = new List<string> {"test2"}
+            }, It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
+            It.IsAny<CancellationToken>()));
+    }
+
+    [Fact]
+    public async Task GivenUpdatedCategoryinput_WhenUpdateCategoryInvoked_ThenCorrectCategorySaved()
+    {
+        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+
+        await repository.UpdateCategory(new Category()
+        {
+            CategoryName = "categoryName",
+            UserId = UserId,
+            TransactionType = TransactionType.Expense,
+            Subcategories = new List<string> {"test1", "test2"}
+        });
+
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+            {
+                CategoryName = "categoryName",
+                UserId = $"{UserId}#Categories",
+                TransactionType = TransactionType.Expense,
+                Subcategories = new List<string> {"test1", "test2"}
             }, It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
             It.IsAny<CancellationToken>()));
     }
