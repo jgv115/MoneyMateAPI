@@ -21,70 +21,52 @@ namespace TransactionService.Domain.Services
             _repository = repo ?? throw new ArgumentNullException(nameof(repo));
         }
 
+        private PayerPayeeViewModel MapPayerPayeeToViewModel(PayerPayee payerPayee)
+        => new PayerPayeeViewModel
+        {
+            ExternalId = payerPayee.ExternalId,
+            PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+            PayerPayeeName = payerPayee.PayerPayeeName
+        };
+
+        private IEnumerable<PayerPayeeViewModel> MapPayerPayeesToViewModels(IEnumerable<PayerPayee> payerPayees)
+        => payerPayees.Select(payer => MapPayerPayeeToViewModel(payer));
+
+
         public async Task<IEnumerable<PayerPayeeViewModel>> GetPayers()
         {
             var payers = await _repository.GetPayers(_userContext.UserId);
-            return payers.Select(payer => new PayerPayeeViewModel
-            {
-                ExternalId = payer.ExternalId,
-                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
-                PayerPayeeName = payer.PayerPayeeName
-            });
+            return MapPayerPayeesToViewModels(payers);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees()
         {
             var payees = await _repository.GetPayees(_userContext.UserId);
-            return payees.Select(payer => new PayerPayeeViewModel
-            {
-                ExternalId = payer.ExternalId,
-                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
-                PayerPayeeName = payer.PayerPayeeName
-            });
+            return MapPayerPayeesToViewModels(payees);
         }
 
         public async Task<PayerPayeeViewModel> GetPayer(Guid payerPayeeId)
         {
             var payer = await _repository.GetPayer(_userContext.UserId, payerPayeeId);
-            return new PayerPayeeViewModel
-            {
-                ExternalId = payer.ExternalId,
-                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
-                PayerPayeeName = payer.PayerPayeeName
-            };
+            return MapPayerPayeeToViewModel(payer);
         }
 
         public async Task<PayerPayeeViewModel> GetPayee(Guid payerPayeeId)
         {
             var payee = await _repository.GetPayee(_userContext.UserId, payerPayeeId);
-            return new PayerPayeeViewModel
-            {
-                ExternalId = payee.ExternalId,
-                PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
-                PayerPayeeName = payee.PayerPayeeName
-            };
+            return MapPayerPayeeToViewModel(payee);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName)
         {
             var payers = await _repository.AutocompletePayer(_userContext.UserId, payerName);
-            return payers.Select(payer => new PayerPayeeViewModel
-            {
-                ExternalId = payer.ExternalId,
-                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
-                PayerPayeeName = payer.PayerPayeeName
-            });
+            return MapPayerPayeesToViewModels(payers);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayee(string payeeName)
         {
             var payees = await _repository.AutocompletePayee(_userContext.UserId, payeeName);
-            return payees.Select(payee => new PayerPayeeViewModel
-            {
-                ExternalId = payee.ExternalId,
-                PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
-                PayerPayeeName = payee.PayerPayeeName
-            });
+            return MapPayerPayeesToViewModels(payees);
         }
 
         public async Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee)
