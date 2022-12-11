@@ -1,8 +1,6 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace TransactionService
 {
@@ -24,7 +22,6 @@ namespace TransactionService
         {
             builder
                 .UseStartup<Startup>();
-
         }
 
         /// <summary>
@@ -36,8 +33,7 @@ namespace TransactionService
         /// <param name="builder"></param>
         protected override void Init(IHostBuilder builder)
         {
+            builder.UseSerilog((context, configuration) => { configuration.MinimumLevel.Information().WriteTo.Console(); });
         }
-        
-        
     }
 }
