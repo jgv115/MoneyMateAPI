@@ -65,7 +65,7 @@ containers:
     working_directory: /code/infra
 
   localstack:
-    image: localstack/localstack:0.13.0
+    image: localstack/localstack:1.3.0
     environment:
       SERVICES: dynamodb
       AWS_ACCESS_KEY_ID: fake

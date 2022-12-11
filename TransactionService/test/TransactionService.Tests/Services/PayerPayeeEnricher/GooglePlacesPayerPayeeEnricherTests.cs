@@ -1,96 +1,137 @@
+using System.Net;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using GoogleApi.Entities.Common.Enums;
-using GoogleApi.Entities.Places.Details.Request;
-using GoogleApi.Entities.Places.Details.Request.Enums;
-using GoogleApi.Entities.Places.Details.Response;
-using GoogleApi.Interfaces.Places;
+using Microsoft.Extensions.Options;
 using Moq;
+using Moq.Protected;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Models;
+using TransactionService.Services.PayerPayeeEnricher.Options;
 using Xunit;
 
 namespace TransactionService.Tests.Services.PayerPayeeEnricher;
 
+public class MockHttpClientBuilder
+{
+    private readonly Mock<HttpMessageHandler> _httpMessageHandlerMock;
+
+    public MockHttpClientBuilder()
+    {
+        _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
+    }
+
+    public MockHttpClientBuilder SetupMockResponse<TResponse>(
+        HttpMethod method,
+        string uri,
+        HttpStatusCode responseStatusCode,
+        TResponse responseObject
+    )
+    {
+        _httpMessageHandlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.Is<HttpRequestMessage>(message =>
+                    message.Method == HttpMethod.Get &&
+                    message.RequestUri.ToString() == uri),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonSerializer.Serialize(responseObject))
+            });
+
+        return this;
+    }
+
+    public HttpClient Build() => new(_httpMessageHandlerMock.Object);
+}
+
 public class GooglePlacesPayerPayeeEnricherTests
 {
-    private readonly Mock<IDetailsApi> _mockDetailsApi = new();
-
     [Fact]
     public async Task
         GivenInputIdentifier_WhenGetExtraPayerPayeeDetailsInvoked_ThenCorrectExtraPayerPayeeDetailsReturned()
     {
-        var enricher = new GooglePlacesPayerPayeeEnricher(_mockDetailsApi.Object);
+        const string expectedIdentifier = "external-id-123";
+        var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
+        {
+            GooglePlaceApiBaseUri = "http://base-uri/",
+            ApiKey = "key"
+        });
 
-        const string expectedPlaceId = "placeId123";
-        _mockDetailsApi.Setup(detailsApi => detailsApi
-            .QueryAsync(It.Is<PlacesDetailsRequest>(request =>
-                    request.PlaceId == expectedPlaceId && request.Fields == FieldTypes.Address_Component),
-                It.IsAny<CancellationToken>())).ReturnsAsync(
-            () => new PlacesDetailsResponse
-            {
-                Result = new DetailsResult
+        var stubHttpClient = new MockHttpClientBuilder()
+            .SetupMockResponse(HttpMethod.Get,
+                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=formatted_address",
+                HttpStatusCode.OK,
+                new GooglePlaceDetailsResponse
                 {
-                    FormattedAddress = "output address"
-                }
-            });
+                    Result = new()
+                    {
+                        FormattedAddress = "address123"
+                    },
+                    Status = "OK"
+                })
+            .Build();
 
-        var payerPayeeDetails = await enricher.GetExtraPayerPayeeDetails(expectedPlaceId);
+        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions);
 
+        var payerPayeeDetails = await enricher.GetExtraPayerPayeeDetails(expectedIdentifier);
         var expectedPayerPayeeDetails = new ExtraPayerPayeeDetails
         {
-            Address = "output address"
+            Address = "address123"
         };
-
         Assert.Equal(expectedPayerPayeeDetails, payerPayeeDetails);
     }
 
     [Fact]
     public async Task GivenInputIdentifierNotFound_WhenGetExtraPayerPayeeDetailsInvoked_ThenNewPlaceIdRequested()
     {
-        var enricher = new GooglePlacesPayerPayeeEnricher(_mockDetailsApi.Object);
-
-        _mockDetailsApi.Setup(detailsApi => detailsApi
-            .QueryAsync(It.Is<PlacesDetailsRequest>(request =>
-                    request.PlaceId == "inputPlaceId" && request.Fields == FieldTypes.Address_Component),
-                It.IsAny<CancellationToken>())).ReturnsAsync(
-            () => new PlacesDetailsResponse
-            {
-                Status = Status.NotFound
-            });
-
-
-        _mockDetailsApi.Setup(detailsApi => detailsApi
-            .QueryAsync(It.Is<PlacesDetailsRequest>(request =>
-                    request.PlaceId == "inputPlaceId" && request.Fields == FieldTypes.Place_Id),
-                It.IsAny<CancellationToken>())).ReturnsAsync(
-            () => new PlacesDetailsResponse
-            {
-                Result = new()
+        const string expectedIdentifier = "external-id-123";
+        var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
+        {
+            GooglePlaceApiBaseUri = "http://base-uri/",
+            ApiKey = "key"
+        });
+    
+        var stubHttpClient = new MockHttpClientBuilder()
+            .SetupMockResponse(HttpMethod.Get,
+                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=formatted_address",
+                HttpStatusCode.OK,
+                new GooglePlaceDetailsResponse
                 {
-                    PlaceId = "new placeId"
-                }
-            });
-
-        _mockDetailsApi.Setup(detailsApi => detailsApi
-            .QueryAsync(It.Is<PlacesDetailsRequest>(request =>
-                    request.PlaceId == "new placeId" && request.Fields == FieldTypes.Address_Component),
-                It.IsAny<CancellationToken>())).ReturnsAsync(
-            () => new PlacesDetailsResponse
-            {
-                Result = new DetailsResult
+                    Status = "NOT_FOUND"
+                })
+            .SetupMockResponse(HttpMethod.Get,
+                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=place_id",
+                HttpStatusCode.OK,
+                new GooglePlaceDetailsResponse
                 {
-                    FormattedAddress = "output address"
-                }
-            });
-
-        var payerPayeeDetails = await enricher.GetExtraPayerPayeeDetails("inputPlaceId");
-
+                    Result = new()
+                    {
+                        PlaceId = "new-place-id-123"
+                    }
+                })
+            .SetupMockResponse(HttpMethod.Get,
+                $"http://base-uri/maps/api/place/details/json?key=key&place_id=new-place-id-123&fields=formatted_address",
+                HttpStatusCode.OK,
+                new GooglePlaceDetailsResponse
+                {
+                    Result = new()
+                    {
+                        FormattedAddress = "address123"
+                    },
+                    Status = "OK"
+                })
+            .Build();
+    
+        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions);
+    
+        var payerPayeeDetails = await enricher.GetExtraPayerPayeeDetails(expectedIdentifier);
         var expectedPayerPayeeDetails = new ExtraPayerPayeeDetails
         {
-            Address = "output address"
+            Address = "address123"
         };
-
         Assert.Equal(expectedPayerPayeeDetails, payerPayeeDetails);
     }
 }

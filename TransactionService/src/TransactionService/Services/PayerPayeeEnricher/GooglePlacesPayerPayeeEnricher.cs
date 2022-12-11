@@ -1,52 +1,62 @@
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
-using GoogleApi.Entities.Common.Enums;
-using GoogleApi.Entities.Places.Details.Request.Enums;
-using GoogleApi.Interfaces.Places;
+using Microsoft.Extensions.Options;
 using TransactionService.Services.PayerPayeeEnricher.Models;
+using TransactionService.Services.PayerPayeeEnricher.Options;
 
 namespace TransactionService.Services.PayerPayeeEnricher
 {
     public class GooglePlacesPayerPayeeEnricher : IPayerPayeeEnricher
     {
-        private readonly IDetailsApi _detailsApi;
+        private readonly HttpClient _httpClient;
+        private readonly GooglePlaceApiOptions _placeApiOptions;
 
-        public GooglePlacesPayerPayeeEnricher(IDetailsApi detailsApi)
+        public GooglePlacesPayerPayeeEnricher(HttpClient httpClient, IOptions<GooglePlaceApiOptions> placeApiOptions)
         {
-            _detailsApi = detailsApi;
+            _httpClient = httpClient;
+            _placeApiOptions = placeApiOptions.Value;
+        }
+
+        private async Task<GooglePlaceDetailsResponse> _getGooglePlaceDetails(string placeId, string fields)
+        {
+            var queryParameters = new Dictionary<string, string>
+            {
+                {"key", _placeApiOptions.ApiKey},
+                {"place_id", placeId},
+                {"fields", fields}
+            };
+            var dictFormUrlEncoded = new FormUrlEncodedContent(queryParameters);
+            var queryString = await dictFormUrlEncoded.ReadAsStringAsync();
+            var url = new Uri(new Uri(_placeApiOptions.GooglePlaceApiBaseUri, UriKind.Absolute),
+                new Uri($"maps/api/place/details/json?{queryString}", UriKind.Relative));
+
+            var response = await _httpClient.GetAsync(url);
+            return await response.Content.ReadFromJsonAsync<GooglePlaceDetailsResponse>();
         }
 
         private async Task<string> _refreshPlaceId(string placeId)
         {
-            var test = await _detailsApi.QueryAsync(new()
-            {
-                PlaceId = placeId,
-                Fields = FieldTypes.Place_Id
-            });
+            var response = await _getGooglePlaceDetails(placeId, "place_id");
 
-            return test.Result.PlaceId;
+            return response.Result.PlaceId;
         }
 
         public async Task<ExtraPayerPayeeDetails> GetExtraPayerPayeeDetails(string identifier)
         {
-            var details = await _detailsApi.QueryAsync(new()
-            {
-                PlaceId = identifier,
-                Fields = FieldTypes.Address_Component,
-            });
+            var placeDetailsResponse = await _getGooglePlaceDetails(identifier, "formatted_address");
 
-            if (details.Status == Status.NotFound)
+            if (placeDetailsResponse.Status == "NOT_FOUND")
             {
                 var newPlaceId = await _refreshPlaceId(identifier);
-                details = await _detailsApi.QueryAsync(new()
-                {
-                    PlaceId = newPlaceId,
-                    Fields = FieldTypes.Address_Component,
-                });
+                placeDetailsResponse = await _getGooglePlaceDetails(newPlaceId, "formatted_address");
             }
-
+            
             return new ExtraPayerPayeeDetails
             {
-                Address = details.Result.FormattedAddress
+                Address = placeDetailsResponse.Result.FormattedAddress
             };
         }
     }

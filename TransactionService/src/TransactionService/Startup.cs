@@ -8,7 +8,6 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +23,8 @@ using TransactionService.Middleware;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
 using TransactionService.Services;
+using TransactionService.Services.PayerPayeeEnricher;
+using TransactionService.Services.PayerPayeeEnricher.Options;
 
 namespace TransactionService
 {
@@ -60,8 +61,6 @@ namespace TransactionService
             services.AddControllersWithViews().AddNewtonsoftJson();
 
             var auth0Settings = Configuration.GetSection("Auth0");
-            Console.WriteLine(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
-            Console.WriteLine(auth0Settings.GetSection("Authority").Value);
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -123,6 +122,10 @@ namespace TransactionService
             services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
             services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
             services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
+
+            services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
+            services.Configure<GooglePlaceApiOptions>(options =>
+                Configuration.GetSection("GooglePlaceApi").Bind(options));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -134,7 +137,7 @@ namespace TransactionService
 
             app.UseMiddleware<ExceptionMiddleware>();
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -144,15 +147,7 @@ namespace TransactionService
             app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/health"),
                 builder => builder.UseMiddleware<UserContextMiddleware>());
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapGet("/",
-                    async context =>
-                    {
-                        await context.Response.WriteAsync("Welcome to running ASP.NET Core on AWS Lambda");
-                    });
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }
