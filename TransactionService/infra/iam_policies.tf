@@ -73,3 +73,33 @@ resource "aws_iam_policy_attachment" transaction_service_lambda_dynamodb {
     aws_iam_role.transaction_service_lambda.name]
   policy_arn = aws_iam_policy.transaction_service_lambda_dynamodb.arn
 }
+
+# Parameter Store
+data "aws_ssm_parameter" google_maps_api_key {
+  name = "/GooglePlaceApi/ApiKey"
+}
+
+data "aws_iam_policy_document" google_maps_api_key_access {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameter",
+    ]
+    resources = [
+      data.aws_ssm_parameter.google_maps_api_key.arn,
+    ]
+  }
+}
+
+resource "aws_iam_policy" transaction_service_lambda_parameter_store {
+  name = "${local.transaction_service_lambda_name}_parameter_store_acesss_policy_${terraform.workspace}"
+  policy = data.aws_iam_policy_document.google_maps_api_key_access.json
+}
+
+resource "aws_iam_policy_attachment" transaction_service_lambda_parameter_store {
+
+  name = "${local.transaction_service_lambda_name}_parameter_store_access_attachment_${terraform.workspace}"
+  roles = [
+    aws_iam_role.transaction_service_lambda.name]
+  policy_arn = aws_iam_policy.transaction_service_lambda_parameter_store.arn
+}

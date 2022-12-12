@@ -1,4 +1,6 @@
+using Amazon.Extensions.NETCore.Setup;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
@@ -21,6 +23,11 @@ namespace TransactionService
         protected override void Init(IWebHostBuilder builder)
         {
             builder
+                .ConfigureAppConfiguration((context, configurationBuilder) =>
+                {
+                    // Add local AWS Systems Manager to inject secrets
+                    configurationBuilder.AddSystemsManager("/");
+                })
                 .UseStartup<Startup>();
         }
 
@@ -33,7 +40,10 @@ namespace TransactionService
         /// <param name="builder"></param>
         protected override void Init(IHostBuilder builder)
         {
-            builder.UseSerilog((context, configuration) => { configuration.MinimumLevel.Information().WriteTo.Console(); });
+            builder.UseSerilog((context, configuration) =>
+            {
+                configuration.MinimumLevel.Information().WriteTo.Console();
+            });
         }
     }
 }

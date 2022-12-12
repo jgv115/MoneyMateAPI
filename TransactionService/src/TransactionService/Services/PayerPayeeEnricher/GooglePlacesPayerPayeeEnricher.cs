@@ -30,7 +30,7 @@ namespace TransactionService.Services.PayerPayeeEnricher
             };
             var dictFormUrlEncoded = new FormUrlEncodedContent(queryParameters);
             var queryString = await dictFormUrlEncoded.ReadAsStringAsync();
-            var url = new Uri(new Uri(_placeApiOptions.GooglePlaceApiBaseUri, UriKind.Absolute),
+            var url = new Uri(new Uri(_placeApiOptions.PlaceDetailsBaseUri, UriKind.Absolute),
                 new Uri($"maps/api/place/details/json?{queryString}", UriKind.Relative));
 
             var response = await _httpClient.GetAsync(url);

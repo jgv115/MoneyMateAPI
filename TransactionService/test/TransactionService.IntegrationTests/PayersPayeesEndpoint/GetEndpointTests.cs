@@ -175,7 +175,8 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = payer.PayerPayeeName,
-                ExternalId = payer.ExternalId
+                ExternalId = payer.ExternalId,
+                Address = "1 Hello Street Vic Australia 3123"
             };
             await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payer});
 

@@ -56,7 +56,7 @@ public class GooglePlacesPayerPayeeEnricherTests
         const string expectedIdentifier = "external-id-123";
         var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
         {
-            GooglePlaceApiBaseUri = "http://base-uri/",
+            PlaceDetailsBaseUri = "http://base-uri/",
             ApiKey = "key"
         });
 
@@ -90,7 +90,7 @@ public class GooglePlacesPayerPayeeEnricherTests
         const string expectedIdentifier = "external-id-123";
         var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
         {
-            GooglePlaceApiBaseUri = "http://base-uri/",
+            PlaceDetailsBaseUri = "http://base-uri/",
             ApiKey = "key"
         });
     

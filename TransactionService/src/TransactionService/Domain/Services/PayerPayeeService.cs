@@ -6,6 +6,8 @@ using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
+using TransactionService.Services.PayerPayeeEnricher;
+using TransactionService.Services.PayerPayeeEnricher.Models;
 using TransactionService.ViewModels;
 
 namespace TransactionService.Domain.Services
@@ -14,23 +16,36 @@ namespace TransactionService.Domain.Services
     {
         private readonly CurrentUserContext _userContext;
         private readonly IPayerPayeeRepository _repository;
+        private readonly IPayerPayeeEnricher _payerPayeeEnricher;
 
-        public PayerPayeeService(CurrentUserContext userContext, IPayerPayeeRepository repo)
+        public PayerPayeeService(CurrentUserContext userContext, IPayerPayeeRepository repo,
+            IPayerPayeeEnricher payerPayeeEnricher)
         {
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _repository = repo ?? throw new ArgumentNullException(nameof(repo));
+            _payerPayeeEnricher = payerPayeeEnricher;
         }
 
         private PayerPayeeViewModel MapPayerPayeeToViewModel(PayerPayee payerPayee)
-        => new PayerPayeeViewModel
-        {
-            ExternalId = payerPayee.ExternalId,
-            PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
-            PayerPayeeName = payerPayee.PayerPayeeName
-        };
+            => new PayerPayeeViewModel
+            {
+                ExternalId = payerPayee.ExternalId,
+                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+                PayerPayeeName = payerPayee.PayerPayeeName
+            };
+
+        private PayerPayeeViewModel MapPayerPayeeAndDetailsToViewModel(PayerPayee payerPayee,
+            ExtraPayerPayeeDetails details)
+            => new PayerPayeeViewModel
+            {
+                ExternalId = payerPayee.ExternalId,
+                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+                PayerPayeeName = payerPayee.PayerPayeeName,
+                Address = details.Address
+            };
 
         private IEnumerable<PayerPayeeViewModel> MapPayerPayeesToViewModels(IEnumerable<PayerPayee> payerPayees)
-        => payerPayees.Select(payer => MapPayerPayeeToViewModel(payer));
+            => payerPayees.Select(payer => MapPayerPayeeToViewModel(payer));
 
 
         public async Task<IEnumerable<PayerPayeeViewModel>> GetPayers()
@@ -48,7 +63,8 @@ namespace TransactionService.Domain.Services
         public async Task<PayerPayeeViewModel> GetPayer(Guid payerPayeeId)
         {
             var payer = await _repository.GetPayer(_userContext.UserId, payerPayeeId);
-            return MapPayerPayeeToViewModel(payer);
+            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payer.ExternalId);
+            return MapPayerPayeeAndDetailsToViewModel(payer, details);
         }
 
         public async Task<PayerPayeeViewModel> GetPayee(Guid payerPayeeId)
