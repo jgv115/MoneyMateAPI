@@ -84,6 +84,7 @@ data "aws_iam_policy_document" google_maps_api_key_access {
     effect = "Allow"
     actions = [
       "ssm:GetParameter",
+      "ssm:GetParametersByPath"
     ]
     resources = [
       data.aws_ssm_parameter.google_maps_api_key.arn,
