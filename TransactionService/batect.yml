@@ -11,6 +11,7 @@ project_name: moneymate_api
   AWS__Region: ap-southeast-2
   AWS__LocalMode: "true"
   AWS__ServiceUrl: "http://localstack:4566"
+  GooglePlaceApi__PlaceDetailsBaseUri: "http://google_api_mock:5000"
 
 containers:
   dotnet_build_env:
@@ -88,7 +89,7 @@ containers:
   localstack_clean:
     additional_hostnames:
       - localstack
-    image: localstack/localstack:1.3.0
+    image: localstack/localstack:1.2.0
     environment:
       SERVICES: dynamodb,ssm
       AWS_ACCESS_KEY_ID: fake
@@ -131,6 +132,7 @@ tasks:
     description: Runs integration tests
     dependencies:
       - localstack_clean
+      - google_api_mock
     run:
       container: dotnet_build_env
       command: dotnet test test/TransactionService.IntegrationTests
