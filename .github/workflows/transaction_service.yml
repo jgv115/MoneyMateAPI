@@ -76,7 +76,7 @@ jobs:
   provision_infra_test:
     name: Provision Infra for Test
     needs: 
-      - plan_infra_test
+      - build_and_push_to_ecr
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: test
@@ -112,7 +112,7 @@ jobs:
   provision_infra_prod:
     name: Provision Infra for Prod
     needs:
-      - plan_infra_prod
+      - provision_infra_test
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: prod
