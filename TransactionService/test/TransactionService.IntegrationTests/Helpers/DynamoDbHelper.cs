@@ -43,7 +43,7 @@ namespace TransactionService.IntegrationTests.Helpers
                 AuthenticationRegion = awsRegion
             };
 
-            _dynamoDbClient = new AmazonDynamoDBClient("test", "test", clientConfig);
+            _dynamoDbClient = new AmazonDynamoDBClient(awsKey, awsSecret, clientConfig);
             _dynamoDbContext = new DynamoDBContext(_dynamoDbClient,
                 new DynamoDBOperationConfig { OverrideTableName = TableName });
         }
