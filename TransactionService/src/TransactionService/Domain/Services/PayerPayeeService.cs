@@ -70,7 +70,8 @@ namespace TransactionService.Domain.Services
         public async Task<PayerPayeeViewModel> GetPayee(Guid payerPayeeId)
         {
             var payee = await _repository.GetPayee(_userContext.UserId, payerPayeeId);
-            return MapPayerPayeeToViewModel(payee);
+            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payee.ExternalId);
+            return MapPayerPayeeAndDetailsToViewModel(payee, details);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName)
