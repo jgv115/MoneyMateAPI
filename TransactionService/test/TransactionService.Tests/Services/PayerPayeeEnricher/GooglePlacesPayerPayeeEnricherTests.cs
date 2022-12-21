@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
 using TransactionService.Services.PayerPayeeEnricher;
+using TransactionService.Services.PayerPayeeEnricher.Exceptions;
 using TransactionService.Services.PayerPayeeEnricher.Models;
 using TransactionService.Services.PayerPayeeEnricher.Options;
 using Xunit;
@@ -37,7 +38,7 @@ public class MockHttpClientBuilder
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
             {
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = responseStatusCode,
                 Content = new StringContent(JsonSerializer.Serialize(responseObject))
             });
 
@@ -93,7 +94,7 @@ public class GooglePlacesPayerPayeeEnricherTests
             PlaceDetailsBaseUri = "http://base-uri/",
             ApiKey = "key"
         });
-    
+
         var stubHttpClient = new MockHttpClientBuilder()
             .SetupMockResponse(HttpMethod.Get,
                 $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=formatted_address",
@@ -124,14 +125,42 @@ public class GooglePlacesPayerPayeeEnricherTests
                     Status = "OK"
                 })
             .Build();
-    
+
         var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions);
-    
+
         var payerPayeeDetails = await enricher.GetExtraPayerPayeeDetails(expectedIdentifier);
         var expectedPayerPayeeDetails = new ExtraPayerPayeeDetails
         {
             Address = "address123"
         };
         Assert.Equal(expectedPayerPayeeDetails, payerPayeeDetails);
+    }
+
+    [Fact]
+    public async Task
+        GivenApiReturnsUnsuccessfulResponse_WhenGetExtraPayerPayeeDetailsInvoked_ThenPayerPayeeEnricherExceptionThrown()
+    {
+        const string expectedIdentifier = "external-id-123";
+
+        var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
+        {
+            PlaceDetailsBaseUri = "http://base-uri/",
+            ApiKey = "key"
+        });
+
+        var stubHttpClient = new MockHttpClientBuilder()
+            .SetupMockResponse(HttpMethod.Get,
+                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=formatted_address",
+                HttpStatusCode.InternalServerError,
+                "failed")
+            .Build();
+
+        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions);
+
+        var thrownException =
+            await Assert.ThrowsAsync<PayerPayeeEnricherException>(() =>
+                enricher.GetExtraPayerPayeeDetails(expectedIdentifier));
+
+        Assert.Contains("failed", thrownException.Message);
     }
 }

@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using TransactionService.Services.PayerPayeeEnricher.Exceptions;
 using TransactionService.Services.PayerPayeeEnricher.Models;
 using TransactionService.Services.PayerPayeeEnricher.Options;
 
@@ -34,6 +35,13 @@ namespace TransactionService.Services.PayerPayeeEnricher
                 new Uri($"maps/api/place/details/json?{queryString}", UriKind.Relative));
 
             var response = await _httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                throw new PayerPayeeEnricherException(
+                    $"Received an unsuccessful status code from Google Place Details API. Status code: {response.StatusCode}, body: {errorResponse}");
+            }
+
             return await response.Content.ReadFromJsonAsync<GooglePlaceDetailsResponse>();
         }
 
@@ -53,7 +61,7 @@ namespace TransactionService.Services.PayerPayeeEnricher
                 var newPlaceId = await _refreshPlaceId(identifier);
                 placeDetailsResponse = await _getGooglePlaceDetails(newPlaceId, "formatted_address");
             }
-            
+
             return new ExtraPayerPayeeDetails
             {
                 Address = placeDetailsResponse.Result.FormattedAddress
