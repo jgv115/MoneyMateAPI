@@ -15,7 +15,7 @@ namespace TransactionService.Repositories
 {
     public class DynamoDbPayerPayeeRepository : IPayerPayeeRepository
     {
-        private readonly DynamoDBContext _dbContext;
+        private readonly IDynamoDBContext _dbContext;
         private readonly string _tableName;
 
         private const string HashKeySuffix = "#PayersPayees";
@@ -27,11 +27,9 @@ namespace TransactionService.Repositories
             {"payer", "payer#"}
         };
 
-        public DynamoDbPayerPayeeRepository(IAmazonDynamoDB dbClient)
+        public DynamoDbPayerPayeeRepository(IDynamoDBContext dbContext)
         {
-            if (dbClient == null) throw new ArgumentNullException(nameof(dbClient));
-
-            _dbContext = new DynamoDBContext(dbClient);
+            _dbContext = dbContext;
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
 
@@ -51,6 +49,27 @@ namespace TransactionService.Repositories
             return payers;
         }
 
+        public async Task<IEnumerable<PayerPayee>> GetPayees(string userId, PaginationSpec paginationSpec)
+        {
+            var payees = await _dbContext.QueryAsync<PayerPayee>(
+                $"{userId}{HashKeySuffix}",
+                QueryOperator.BeginsWith, new[] {"payee#"}, new DynamoDBOperationConfig
+                {
+                    OverrideTableName = _tableName,
+                }
+            ).GetRemainingAsync();
+            
+            if (paginationSpec.Offset > payees.Count - 1)
+                return new List<PayerPayee>();
+
+            var number = Math.Min(paginationSpec.Limit, payees.Count - paginationSpec.Offset);
+            var tempList = payees.GetRange(paginationSpec.Offset , number);
+
+            tempList.AsParallel().ForAll(payee => payee.PayerPayeeId = ExtractRangeKeyData(payee.PayerPayeeId));
+
+            return payees;
+        }
+        
         public async Task<IEnumerable<PayerPayee>> GetPayees(string userId)
         {
             var payees = await _dbContext.QueryAsync<PayerPayee>(
