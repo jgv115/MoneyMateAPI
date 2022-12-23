@@ -34,16 +34,6 @@ namespace TransactionService.Domain.Services
                 PayerPayeeName = payerPayee.PayerPayeeName
             };
 
-        private PayerPayeeViewModel MapPayerPayeeAndDetailsToViewModel(PayerPayee payerPayee,
-            ExtraPayerPayeeDetails details)
-            => new PayerPayeeViewModel
-            {
-                ExternalId = payerPayee.ExternalId,
-                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
-                PayerPayeeName = payerPayee.PayerPayeeName,
-                Address = details.Address
-            };
-
         private IEnumerable<PayerPayeeViewModel> MapPayerPayeesToViewModels(IEnumerable<PayerPayee> payerPayees)
             => payerPayees.Select(payer => MapPayerPayeeToViewModel(payer));
 
@@ -60,18 +50,31 @@ namespace TransactionService.Domain.Services
             return MapPayerPayeesToViewModels(payees);
         }
 
+        private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee payerPayee)
+        {
+            if (string.IsNullOrEmpty(payerPayee.ExternalId))
+                return MapPayerPayeeToViewModel(payerPayee);
+
+            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payerPayee.ExternalId);
+            return new PayerPayeeViewModel
+            {
+                ExternalId = payerPayee.ExternalId,
+                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+                PayerPayeeName = payerPayee.PayerPayeeName,
+                Address = details.Address
+            };
+        }
+
         public async Task<PayerPayeeViewModel> GetPayer(Guid payerPayeeId)
         {
             var payer = await _repository.GetPayer(_userContext.UserId, payerPayeeId);
-            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payer.ExternalId);
-            return MapPayerPayeeAndDetailsToViewModel(payer, details);
+            return await EnrichAndMapPayerPayeeToViewModel(payer);
         }
 
         public async Task<PayerPayeeViewModel> GetPayee(Guid payerPayeeId)
         {
             var payee = await _repository.GetPayee(_userContext.UserId, payerPayeeId);
-            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payee.ExternalId);
-            return MapPayerPayeeAndDetailsToViewModel(payee, details);
+            return await EnrichAndMapPayerPayeeToViewModel(payee);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName)
