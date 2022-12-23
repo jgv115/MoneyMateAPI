@@ -8,6 +8,7 @@ namespace TransactionService.Repositories
     public interface IPayerPayeeRepository
     {
         public Task<IEnumerable<PayerPayee>> GetPayers(string userId);
+        public Task<IEnumerable<PayerPayee>> GetPayees(string userId, PaginationSpec paginationSpec);
         public Task<IEnumerable<PayerPayee>> GetPayees(string userId);
         public Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId);
         public Task<PayerPayee> GetPayee(string userId, Guid payerPayeeId);
