@@ -50,6 +50,19 @@ namespace TransactionService.Domain.Services
             return MapPayerPayeesToViewModels(payees);
         }
 
+        private async Task<IEnumerable<PayerPayeeViewModel>> EnrichAndMapPayerPayeesToViewModels(
+            IEnumerable<PayerPayee> payerPayees)
+        {
+            var viewModels = new List<PayerPayeeViewModel>();
+            foreach (var payerPayee in payerPayees)
+            {
+                var enrichedPayerPayee = await EnrichAndMapPayerPayeeToViewModel(payerPayee);
+                viewModels.Add(enrichedPayerPayee);
+            }
+
+            return viewModels;
+        }
+
         private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee payerPayee)
         {
             if (string.IsNullOrEmpty(payerPayee.ExternalId))
@@ -80,13 +93,13 @@ namespace TransactionService.Domain.Services
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName)
         {
             var payers = await _repository.AutocompletePayer(_userContext.UserId, payerName);
-            return MapPayerPayeesToViewModels(payers);
+            return await EnrichAndMapPayerPayeesToViewModels(payers);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayee(string payeeName)
         {
             var payees = await _repository.AutocompletePayee(_userContext.UserId, payeeName);
-            return MapPayerPayeesToViewModels(payees);
+            return await EnrichAndMapPayerPayeesToViewModels(payees);
         }
 
         public async Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee)

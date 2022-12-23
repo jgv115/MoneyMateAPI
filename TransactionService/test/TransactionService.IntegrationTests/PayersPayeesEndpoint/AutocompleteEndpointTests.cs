@@ -17,6 +17,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
     private readonly HttpClient _httpClient;
     private readonly DynamoDbHelper _dynamoDbHelper;
     private const string UserId = "auth0|moneymatetest#PayersPayees";
+    private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
 
     public AutocompleteEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
@@ -61,7 +62,8 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         {
             PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
             PayerPayeeName = "Test2",
-            ExternalId = payee2.ExternalId
+            ExternalId = payee2.ExternalId,
+            Address = ExpectedAddress
         };
 
         var initialData = new List<PayerPayee>
@@ -126,7 +128,8 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         {
             PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
             PayerPayeeName = "Multiword Payee",
-            ExternalId = payee2.ExternalId
+            ExternalId = payee2.ExternalId,
+            Address = ExpectedAddress
         };
 
         var initialData = new List<PayerPayee>
@@ -186,7 +189,8 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         {
             PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
             PayerPayeeName = "test2",
-            ExternalId = payer2.ExternalId
+            ExternalId = payer2.ExternalId,
+            Address = ExpectedAddress
         };
 
         var initialData = new List<PayerPayee>
@@ -251,7 +255,8 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         {
             PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
             PayerPayeeName = "Multiword Payer",
-            ExternalId = payer2.ExternalId
+            ExternalId = payer2.ExternalId,
+            Address = ExpectedAddress
         };
 
         var payer3 = new PayerPayee
@@ -265,7 +270,8 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         {
             PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcec12"),
             PayerPayeeName = "Multiword Payer 123",
-            ExternalId = payer3.ExternalId
+            ExternalId = payer3.ExternalId,
+            Address = ExpectedAddress
         };
 
         var initialData = new List<PayerPayee>
