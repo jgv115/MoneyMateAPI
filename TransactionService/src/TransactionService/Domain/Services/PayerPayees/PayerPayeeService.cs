@@ -25,38 +25,6 @@ namespace TransactionService.Domain.Services.PayerPayees
             _payerPayeeEnricher = payerPayeeEnricher;
         }
 
-        private PayerPayeeViewModel MapPayerPayeeToViewModel(PayerPayee payerPayee)
-            => new PayerPayeeViewModel
-            {
-                ExternalId = payerPayee.ExternalId,
-                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
-                PayerPayeeName = payerPayee.PayerPayeeName
-            };
-
-        private IEnumerable<PayerPayeeViewModel> MapPayerPayeesToViewModels(IEnumerable<PayerPayee> payerPayees)
-            => payerPayees.Select(payer => MapPayerPayeeToViewModel(payer));
-
-
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayers(int offset, int limit)
-        {
-            var payers = await _repository.GetPayers(_userContext.UserId, new PaginationSpec
-            {
-                Limit = limit,
-                Offset = offset
-            });
-            return MapPayerPayeesToViewModels(payers);
-        }
-
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees(int offset, int limit)
-        {
-            var payees = await _repository.GetPayees(_userContext.UserId, new PaginationSpec
-            {
-                Limit = limit,
-                Offset = offset
-            });
-            return MapPayerPayeesToViewModels(payees);
-        }
-
         private async Task<IEnumerable<PayerPayeeViewModel>> EnrichAndMapPayerPayeesToViewModels(
             IEnumerable<PayerPayee> payerPayees)
         {
@@ -68,7 +36,12 @@ namespace TransactionService.Domain.Services.PayerPayees
         private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee payerPayee)
         {
             if (string.IsNullOrEmpty(payerPayee.ExternalId))
-                return MapPayerPayeeToViewModel(payerPayee);
+                return new PayerPayeeViewModel
+                {
+                    ExternalId = payerPayee.ExternalId,
+                    PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+                    PayerPayeeName = payerPayee.PayerPayeeName
+                };
 
             var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payerPayee.ExternalId);
             return new PayerPayeeViewModel
@@ -78,6 +51,26 @@ namespace TransactionService.Domain.Services.PayerPayees
                 PayerPayeeName = payerPayee.PayerPayeeName,
                 Address = details.Address
             };
+        }
+
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayers(int offset, int limit)
+        {
+            var payers = await _repository.GetPayers(_userContext.UserId, new PaginationSpec
+            {
+                Limit = limit,
+                Offset = offset
+            });
+            return await EnrichAndMapPayerPayeesToViewModels(payers);
+        }
+
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees(int offset, int limit)
+        {
+            var payees = await _repository.GetPayees(_userContext.UserId, new PaginationSpec
+            {
+                Limit = limit,
+                Offset = offset
+            });
+            return await EnrichAndMapPayerPayeesToViewModels(payees);
         }
 
         public async Task<PayerPayeeViewModel> GetPayer(Guid payerPayeeId)

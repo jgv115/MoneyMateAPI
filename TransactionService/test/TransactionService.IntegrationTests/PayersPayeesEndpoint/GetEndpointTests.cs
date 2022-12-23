@@ -17,6 +17,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         private readonly HttpClient _httpClient;
         private readonly DynamoDbHelper _dynamoDbHelper;
         private const string UserId = "auth0|moneymatetest#PayersPayees";
+        private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
 
         public GetEndpointTests(MoneyMateApiWebApplicationFactory factory)
         {
@@ -48,7 +49,8 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfb"),
                 PayerPayeeName = "payer1",
-                ExternalId = payer1.ExternalId
+                ExternalId = payer1.ExternalId,
+                Address = ExpectedAddress
             };
             var payer2 = new PayerPayee
             {
@@ -61,7 +63,8 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
                 PayerPayeeName = "payer2",
-                ExternalId = payer2.ExternalId
+                ExternalId = payer2.ExternalId,
+                Address = ExpectedAddress
             };
 
             var initialData = new List<PayerPayee>
@@ -109,7 +112,8 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfb"),
                 PayerPayeeName = "payee1",
-                ExternalId = payee1.ExternalId
+                ExternalId = payee1.ExternalId,
+                Address = ExpectedAddress
             };
             var payee2 = new PayerPayee
             {
@@ -122,7 +126,8 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             {
                 PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
                 PayerPayeeName = "payee2",
-                ExternalId = payee2.ExternalId
+                ExternalId = payee2.ExternalId,
+                Address = ExpectedAddress
             };
 
             var initialData = new List<PayerPayee>

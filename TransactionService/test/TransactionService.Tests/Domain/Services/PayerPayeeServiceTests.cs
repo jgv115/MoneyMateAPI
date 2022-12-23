@@ -48,6 +48,8 @@ namespace TransactionService.Tests.Domain.Services
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
+            const int limit = 25;
+            const int offset = 2;
             var payers = new List<PayerPayee>
             {
                 new()
@@ -65,26 +67,41 @@ namespace TransactionService.Tests.Domain.Services
                     ExternalId = "id1234"
                 }
             };
-
-            const int limit = 25;
-            const int offset = 2;
-            var payerViewModels = payers.Select(payer => new PayerPayeeViewModel
-            {
-                ExternalId = payer.ExternalId,
-                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
-                PayerPayeeName = payer.PayerPayeeName
-            });
-
             _mockRepository.Setup(repository => repository.GetPayers(userId, new PaginationSpec
                 {
                     Limit = limit,
                     Offset = offset
                 }))
                 .ReturnsAsync(() => payers);
+
+            var addresses = new[]
+            {
+                "1 address",
+                "2 address"
+            };
+            _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails("id123")).ReturnsAsync(() =>
+                new ExtraPayerPayeeDetails
+                {
+                    Address = addresses[0]
+                });
+            _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails("id1234")).ReturnsAsync(() =>
+                new ExtraPayerPayeeDetails
+                {
+                    Address = addresses[1]
+                });
+
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockPayerPayeeEnricher.Object);
 
             var response = await service.GetPayers(offset, limit);
+
+            var payerViewModels = payers.Select((payer, index) => new PayerPayeeViewModel
+            {
+                ExternalId = payer.ExternalId,
+                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
+                PayerPayeeName = payer.PayerPayeeName,
+                Address = addresses[index]
+            });
             Assert.Equal(payerViewModels, response);
         }
 
@@ -94,6 +111,8 @@ namespace TransactionService.Tests.Domain.Services
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
+            const int limit = 25;
+            const int offset = 2;
             var payees = new List<PayerPayee>
             {
                 new()
@@ -111,25 +130,40 @@ namespace TransactionService.Tests.Domain.Services
                     ExternalId = "id1234"
                 }
             };
-
-            const int limit = 25;
-            const int offset = 2;
             _mockRepository.Setup(repository => repository.GetPayees(userId, new PaginationSpec
                 {
                     Limit = limit,
                     Offset = offset
                 }))
                 .ReturnsAsync(() => payees);
+
+            var addresses = new[]
+            {
+                "1 address",
+                "2 address"
+            };
+            _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails("id123")).ReturnsAsync(() =>
+                new ExtraPayerPayeeDetails
+                {
+                    Address = addresses[0]
+                });
+            _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails("id1234")).ReturnsAsync(() =>
+                new ExtraPayerPayeeDetails
+                {
+                    Address = addresses[1]
+                });
+
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockPayerPayeeEnricher.Object);
 
             var response = await service.GetPayees(offset, limit);
 
-            var payeeViewModels = payees.Select(payee => new PayerPayeeViewModel
+            var payeeViewModels = payees.Select((payee, index) => new PayerPayeeViewModel
             {
                 ExternalId = payee.ExternalId,
                 PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
-                PayerPayeeName = payee.PayerPayeeName
+                PayerPayeeName = payee.PayerPayeeName,
+                Address = addresses[index]
             });
             Assert.Equal(payeeViewModels, response);
         }
