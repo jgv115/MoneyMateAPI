@@ -7,7 +7,6 @@ using TransactionService.Dtos;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 using TransactionService.Services.PayerPayeeEnricher;
-using TransactionService.Services.PayerPayeeEnricher.Models;
 using TransactionService.ViewModels;
 
 namespace TransactionService.Domain.Services
@@ -53,14 +52,9 @@ namespace TransactionService.Domain.Services
         private async Task<IEnumerable<PayerPayeeViewModel>> EnrichAndMapPayerPayeesToViewModels(
             IEnumerable<PayerPayee> payerPayees)
         {
-            var viewModels = new List<PayerPayeeViewModel>();
-            foreach (var payerPayee in payerPayees)
-            {
-                var enrichedPayerPayee = await EnrichAndMapPayerPayeeToViewModel(payerPayee);
-                viewModels.Add(enrichedPayerPayee);
-            }
-
-            return viewModels;
+            var enrichTasks = payerPayees.Select(payerPayee => EnrichAndMapPayerPayeeToViewModel(payerPayee));
+            var results = await Task.WhenAll(enrichTasks);
+            return results.ToList();
         }
 
         private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee payerPayee)
