@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TransactionService.Services.PayerPayeeEnricher.Exceptions;
 using TransactionService.Services.PayerPayeeEnricher.Models;
@@ -14,10 +15,13 @@ namespace TransactionService.Services.PayerPayeeEnricher
     {
         private readonly HttpClient _httpClient;
         private readonly GooglePlaceApiOptions _placeApiOptions;
+        private readonly ILogger<GooglePlacesPayerPayeeEnricher> _logger;
 
-        public GooglePlacesPayerPayeeEnricher(HttpClient httpClient, IOptions<GooglePlaceApiOptions> placeApiOptions)
+        public GooglePlacesPayerPayeeEnricher(HttpClient httpClient, IOptions<GooglePlaceApiOptions> placeApiOptions,
+            ILogger<GooglePlacesPayerPayeeEnricher> logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
             _placeApiOptions = placeApiOptions.Value;
         }
 
@@ -58,6 +62,8 @@ namespace TransactionService.Services.PayerPayeeEnricher
 
             if (placeDetailsResponse.Status == "NOT_FOUND")
             {
+                _logger.LogInformation(
+                    $"Google Place Details response is not found for id: {identifier}, trying to refresh it");
                 var newPlaceId = await _refreshPlaceId(identifier);
                 placeDetailsResponse = await _getGooglePlaceDetails(newPlaceId, "formatted_address");
             }

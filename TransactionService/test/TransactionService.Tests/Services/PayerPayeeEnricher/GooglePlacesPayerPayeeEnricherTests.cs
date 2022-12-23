@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
@@ -50,6 +51,8 @@ public class MockHttpClientBuilder
 
 public class GooglePlacesPayerPayeeEnricherTests
 {
+    private readonly Mock<ILogger<GooglePlacesPayerPayeeEnricher>> _mockLogger = new();
+
     [Fact]
     public async Task
         GivenInputIdentifier_WhenGetExtraPayerPayeeDetailsInvoked_ThenCorrectExtraPayerPayeeDetailsReturned()
@@ -75,7 +78,7 @@ public class GooglePlacesPayerPayeeEnricherTests
                 })
             .Build();
 
-        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions);
+        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions, _mockLogger.Object);
 
         var payerPayeeDetails = await enricher.GetExtraPayerPayeeDetails(expectedIdentifier);
         var expectedPayerPayeeDetails = new ExtraPayerPayeeDetails
@@ -126,7 +129,7 @@ public class GooglePlacesPayerPayeeEnricherTests
                 })
             .Build();
 
-        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions);
+        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions, _mockLogger.Object);
 
         var payerPayeeDetails = await enricher.GetExtraPayerPayeeDetails(expectedIdentifier);
         var expectedPayerPayeeDetails = new ExtraPayerPayeeDetails
@@ -155,7 +158,7 @@ public class GooglePlacesPayerPayeeEnricherTests
                 "failed")
             .Build();
 
-        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions);
+        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions, _mockLogger.Object);
 
         var thrownException =
             await Assert.ThrowsAsync<PayerPayeeEnricherException>(() =>
