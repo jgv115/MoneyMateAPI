@@ -70,20 +70,6 @@ namespace TransactionService.Repositories
             return paginatedPayees;
         }
 
-        public async Task<IEnumerable<PayerPayee>> GetPayees(string userId)
-        {
-            var payees = await _dbContext.QueryAsync<PayerPayee>(
-                $"{userId}{HashKeySuffix}",
-                QueryOperator.BeginsWith, new[] {"payee#"}, new DynamoDBOperationConfig
-                {
-                    OverrideTableName = _tableName,
-                }
-            ).GetRemainingAsync();
-            payees.AsParallel().ForAll(payee => payee.PayerPayeeId = ExtractRangeKeyData(payee.PayerPayeeId));
-
-            return payees;
-        }
-
         public async Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId)
         {
             var payer = await _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
