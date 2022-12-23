@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Dtos;
 using TransactionService.Middleware;
@@ -44,19 +43,7 @@ namespace TransactionService.Tests.Domain.Services
         }
 
         [Fact]
-        public async Task GivenValidUserContext_WhenGetPayersInvoked_ThenRepositoryCalledWithCorrectArguments()
-        {
-            var userId = Guid.NewGuid().ToString();
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
-            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
-                _mockPayerPayeeEnricher.Object);
-            await service.GetPayers();
-
-            _mockRepository.Verify(repository => repository.GetPayers(userId));
-        }
-
-        [Fact]
-        public async Task GivenRepositoryResponse_WhenGetPayersInvoked_CorrectIEnumerableReturned()
+        public async Task GivenOffsetAndLimit_WhenGetPayersInvoked_CorrectIEnumerableReturned()
         {
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
@@ -79,6 +66,8 @@ namespace TransactionService.Tests.Domain.Services
                 }
             };
 
+            const int limit = 25;
+            const int offset = 2;
             var payerViewModels = payers.Select(payer => new PayerPayeeViewModel
             {
                 ExternalId = payer.ExternalId,
@@ -86,17 +75,21 @@ namespace TransactionService.Tests.Domain.Services
                 PayerPayeeName = payer.PayerPayeeName
             });
 
-            _mockRepository.Setup(repository => repository.GetPayers(It.IsAny<string>()))
+            _mockRepository.Setup(repository => repository.GetPayers(userId, new PaginationSpec
+                {
+                    Limit = limit,
+                    Offset = offset
+                }))
                 .ReturnsAsync(() => payers);
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockPayerPayeeEnricher.Object);
 
-            var response = await service.GetPayers();
+            var response = await service.GetPayers(offset, limit);
             Assert.Equal(payerViewModels, response);
         }
 
         [Fact]
-        public async Task GivenOffsetAnd_WhenGetPayeesInvoked_CorrectPayerPayeeModelsReturned()
+        public async Task GivenOffsetAndLimit_WhenGetPayeesInvoked_CorrectPayerPayeeModelsReturned()
         {
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);

@@ -20,9 +20,9 @@ namespace TransactionService.Controllers
         }
 
         [HttpGet("payers")]
-        public async Task<IActionResult> GetPayers()
+        public async Task<IActionResult> GetPayers(int offset = 0, int limit = 10)
         {
-            var payers = await _payerPayeeService.GetPayers();
+            var payers = await _payerPayeeService.GetPayers(offset, limit);
             return Ok(payers);
         }
 

@@ -34,7 +34,21 @@ namespace TransactionService.Repositories
 
         private string ExtractRangeKeyData(string rangeKey) => rangeKey.Split("#")[1];
 
-        public async Task<IEnumerable<PayerPayee>> GetPayers(string userId)
+        private IEnumerable<PayerPayee> PaginateResults(List<PayerPayee> results, PaginationSpec paginationSpec)
+        {
+            var paginatedPayees = results
+                .Skip(paginationSpec.Offset)
+                .Take(paginationSpec.Limit)
+                .Select(payerPayee =>
+                {
+                    payerPayee.PayerPayeeId = ExtractRangeKeyData(payerPayee.PayerPayeeId);
+                    return payerPayee;
+                });
+
+            return paginatedPayees;
+        }
+
+        public async Task<IEnumerable<PayerPayee>> GetPayers(string userId, PaginationSpec paginationSpec)
         {
             var payers = await _dbContext.QueryAsync<PayerPayee>(
                 $"{userId}{HashKeySuffix}",
@@ -44,8 +58,8 @@ namespace TransactionService.Repositories
                 }
             ).GetRemainingAsync();
 
-            payers.AsParallel().ForAll(payer => payer.PayerPayeeId = ExtractRangeKeyData(payer.PayerPayeeId));
-            return payers;
+            return PaginateResults(payers, paginationSpec);
+
         }
 
         public async Task<IEnumerable<PayerPayee>> GetPayees(string userId, PaginationSpec paginationSpec)
@@ -58,16 +72,7 @@ namespace TransactionService.Repositories
                 }
             ).GetRemainingAsync();
 
-            var paginatedPayees = payees
-                .Skip(paginationSpec.Offset)
-                .Take(paginationSpec.Limit)
-                .Select(payerPayee =>
-                {
-                    payerPayee.PayerPayeeId = ExtractRangeKeyData(payerPayee.PayerPayeeId);
-                    return payerPayee;
-                });
-
-            return paginatedPayees;
+            return PaginateResults(payees, paginationSpec);
         }
 
         public async Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId)

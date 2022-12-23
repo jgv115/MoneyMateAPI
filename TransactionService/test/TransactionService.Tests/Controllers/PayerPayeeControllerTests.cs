@@ -48,7 +48,37 @@ namespace TransactionService.Tests.Controllers
                 }
             };
 
-            _mockService.Setup(service => service.GetPayers()).ReturnsAsync(() => payers);
+            const int offset = 5;
+            const int limit = 20;
+            _mockService.Setup(service => service.GetPayers(offset, limit)).ReturnsAsync(() => payers);
+            var controller = new PayersPayeesController(_mockService.Object);
+            var response = await controller.GetPayers(offset, limit);
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payers, objectResponse.Value);
+        }
+
+        [Fact]
+        public async Task GivenOffsetAndLimitNotProvided_WhenGetPayersInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var payers = new List<PayerPayeeViewModel>
+            {
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
+                },
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
+                }
+            };
+
+            _mockService.Setup(service => service.GetPayers(0, 10)).ReturnsAsync(() => payers);
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.GetPayers();
             var objectResponse = Assert.IsType<OkObjectResult>(response);
@@ -56,6 +86,7 @@ namespace TransactionService.Tests.Controllers
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
             Assert.Equal(payers, objectResponse.Value);
         }
+
 
         [Fact]
         public async Task GivenPayerPayeeServiceReturnsObject_WhenGetPayeesInvoked_ThenReturns200OKWithCorrectList()
