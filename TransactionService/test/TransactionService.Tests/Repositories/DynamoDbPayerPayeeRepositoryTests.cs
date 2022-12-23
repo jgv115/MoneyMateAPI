@@ -29,50 +29,8 @@ public class DynamoDbPayerPayeeRepositoryTests
         UserId = UserId
     };
 
-    private static List<PayerPayee> RemoveSortKeyMetaData(List<PayerPayee> payerPayees) =>
-        payerPayees.Select(payerPayee => new PayerPayee()
-        {
-            UserId = payerPayee.UserId,
-            ExternalId = payerPayee.ExternalId,
-            PayerPayeeId = payerPayee.PayerPayeeId.Split("#")[1],
-            PayerPayeeName = payerPayee.PayerPayeeName
-        }).ToList();
-
-
     public class GetPayeesPaginatedTestData : IEnumerable<object[]>
     {
-        private readonly List<PayerPayee> _payees = new()
-        {
-            new()
-            {
-                UserId = $"{UserId}#PayersPayees",
-                ExternalId = "123",
-                PayerPayeeId = "payee#id1",
-                PayerPayeeName = "name1"
-            },
-            new()
-            {
-                UserId = $"{UserId}#PayersPayees",
-                ExternalId = "234",
-                PayerPayeeId = "payee#id2",
-                PayerPayeeName = "name2"
-            },
-            new()
-            {
-                UserId = $"{UserId}#PayersPayees",
-                ExternalId = "345",
-                PayerPayeeId = "payee#id3",
-                PayerPayeeName = "name3"
-            },
-            new()
-            {
-                UserId = $"{UserId}#PayersPayees",
-                ExternalId = "456",
-                PayerPayeeId = "payee#id4",
-                PayerPayeeName = "name4"
-            }
-        };
-
         public IEnumerator<object[]> GetEnumerator()
         {
             yield return new object[]
@@ -81,21 +39,164 @@ public class DynamoDbPayerPayeeRepositoryTests
             };
             yield return new object[]
             {
-                _payees, 0, 3, RemoveSortKeyMetaData(new List<PayerPayee>
+                new List<PayerPayee>()
                 {
-                    _payees[0],
-                    _payees[1],
-                    _payees[2]
-                })
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "123",
+                        PayerPayeeId = "payee#id1",
+                        PayerPayeeName = "name1"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "234",
+                        PayerPayeeId = "payee#id2",
+                        PayerPayeeName = "name2"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "345",
+                        PayerPayeeId = "payee#id3",
+                        PayerPayeeName = "name3"
+                    }
+                },
+                0, 2, new List<PayerPayee>()
+                {
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "123",
+                        PayerPayeeId = "id1",
+                        PayerPayeeName = "name1"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "234",
+                        PayerPayeeId = "id2",
+                        PayerPayeeName = "name2"
+                    },
+                }
             };
             yield return new object[]
             {
-                _payees, 3, 2, RemoveSortKeyMetaData(new List<PayerPayee>
+                new List<PayerPayee>()
                 {
-                    _payees[3],
-                })
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "123",
+                        PayerPayeeId = "payee#id1",
+                        PayerPayeeName = "name1"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "234",
+                        PayerPayeeId = "payee#id2",
+                        PayerPayeeName = "name2"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "345",
+                        PayerPayeeId = "payee#id3",
+                        PayerPayeeName = "name3"
+                    },
+                },
+                0, 10, new List<PayerPayee>()
+                {
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "123",
+                        PayerPayeeId = "id1",
+                        PayerPayeeName = "name1"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "234",
+                        PayerPayeeId = "id2",
+                        PayerPayeeName = "name2"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "345",
+                        PayerPayeeId = "id3",
+                        PayerPayeeName = "name3"
+                    },
+                }
             };
-            yield return new object[] {_payees, 4, 2, new List<PayerPayee>()};
+            yield return new object[]
+            {
+                new List<PayerPayee>()
+                {
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "123",
+                        PayerPayeeId = "payee#id1",
+                        PayerPayeeName = "name1"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "234",
+                        PayerPayeeId = "payee#id2",
+                        PayerPayeeName = "name2"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "345",
+                        PayerPayeeId = "payee#id3",
+                        PayerPayeeName = "name3"
+                    }
+                },
+                2, 2, new List<PayerPayee>
+                {
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "345",
+                        PayerPayeeId = "id3",
+                        PayerPayeeName = "name3"
+                    }
+                }
+            };
+            yield return new object[]
+            {
+                new List<PayerPayee>()
+                {
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "123",
+                        PayerPayeeId = "payee#id1",
+                        PayerPayeeName = "name1"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "234",
+                        PayerPayeeId = "payee#id2",
+                        PayerPayeeName = "name2"
+                    },
+                    new()
+                    {
+                        UserId = $"{UserId}#PayersPayees",
+                        ExternalId = "345",
+                        PayerPayeeId = "payee#id3",
+                        PayerPayeeName = "name3"
+                    }
+                },
+                4, 2, new List<PayerPayee>()
+            };
         }
 
         IEnumerator IEnumerable.GetEnumerator()

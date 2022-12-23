@@ -58,9 +58,6 @@ namespace TransactionService.Repositories
                 }
             ).GetRemainingAsync();
 
-            if (paginationSpec.Offset >= payees.Count)
-                return new List<PayerPayee>();
-
             var paginatedPayees = payees
                 .Skip(paginationSpec.Offset)
                 .Take(paginationSpec.Limit)
