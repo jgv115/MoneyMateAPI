@@ -18,6 +18,8 @@ using Microsoft.Extensions.Options;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
+using TransactionService.Domain.Services.PayerPayees;
+using TransactionService.Domain.Services.Transactions;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Profiles;

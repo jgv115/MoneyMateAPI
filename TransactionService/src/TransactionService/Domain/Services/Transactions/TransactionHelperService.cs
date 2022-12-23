@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Specifications;
+using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 
-namespace TransactionService.Domain.Services
+namespace TransactionService.Domain.Services.Transactions
 {
     public class TransactionHelperService : ITransactionHelperService
     {

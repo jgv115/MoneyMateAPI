@@ -4,7 +4,7 @@ using System.Linq;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
 
-namespace TransactionService.Domain.Specifications
+namespace TransactionService.Domain.Services.Transactions.Specifications
 {
     public class AndSpec : ITransactionSpecification
     {

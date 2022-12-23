@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TransactionService.Constants;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.Transactions;
 using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.ViewModels;

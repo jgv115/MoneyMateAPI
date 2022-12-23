@@ -9,7 +9,7 @@ using TransactionService.Repositories;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.ViewModels;
 
-namespace TransactionService.Domain.Services
+namespace TransactionService.Domain.Services.PayerPayees
 {
     public class PayerPayeeService : IPayerPayeeService
     {

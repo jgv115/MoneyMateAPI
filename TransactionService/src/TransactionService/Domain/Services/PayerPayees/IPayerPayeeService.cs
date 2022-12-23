@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using TransactionService.Dtos;
 using TransactionService.ViewModels;
 
-namespace TransactionService.Domain.Services
+namespace TransactionService.Domain.Services.PayerPayees
 {
     public interface IPayerPayeeService
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TransactionService.Dtos;
 
-namespace TransactionService.Domain.Specifications
+namespace TransactionService.Domain.Services.Transactions.Specifications
 {
     public class TransactionSpecificationFactory
     {

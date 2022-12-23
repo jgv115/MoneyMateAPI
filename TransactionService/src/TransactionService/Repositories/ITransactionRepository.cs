@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Specifications;
+using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
 
 namespace TransactionService.Repositories

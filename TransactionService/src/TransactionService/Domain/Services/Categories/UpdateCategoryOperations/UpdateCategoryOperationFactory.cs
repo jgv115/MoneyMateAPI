@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.JsonPatch.Operations;
+using TransactionService.Domain.Services.Transactions;
 using TransactionService.Dtos;
 using TransactionService.Repositories;
 

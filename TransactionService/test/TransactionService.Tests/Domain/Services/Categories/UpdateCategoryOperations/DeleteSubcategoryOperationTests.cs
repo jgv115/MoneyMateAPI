@@ -6,6 +6,7 @@ using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
+using TransactionService.Domain.Services.Transactions;
 using TransactionService.Dtos;
 using TransactionService.Repositories;
 using Xunit;

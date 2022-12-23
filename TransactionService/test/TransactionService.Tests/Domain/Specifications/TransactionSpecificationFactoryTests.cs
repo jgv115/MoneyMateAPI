@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Specifications;
+using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Dtos;
 using Xunit;
 

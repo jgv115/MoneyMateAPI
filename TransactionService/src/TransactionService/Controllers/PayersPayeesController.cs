@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Dtos;
 
 namespace TransactionService.Controllers

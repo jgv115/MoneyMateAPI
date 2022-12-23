@@ -7,6 +7,7 @@ using Moq;
 using TransactionService.Controllers;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Dtos;
 using TransactionService.ViewModels;
 using Xunit;

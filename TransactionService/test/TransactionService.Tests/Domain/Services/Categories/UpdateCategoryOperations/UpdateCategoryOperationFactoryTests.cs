@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.JsonPatch.Operations;
 using Moq;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
+using TransactionService.Domain.Services.Transactions;
 using TransactionService.Dtos;
 using TransactionService.Repositories;
 using Xunit;

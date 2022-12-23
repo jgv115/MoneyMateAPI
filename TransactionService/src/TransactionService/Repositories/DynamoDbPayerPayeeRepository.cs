@@ -35,7 +35,7 @@ namespace TransactionService.Repositories
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
 
-        private string extractRangeKeyData(string rangeKey) => rangeKey.Split("#")[1];
+        private string ExtractRangeKeyData(string rangeKey) => rangeKey.Split("#")[1];
 
         public async Task<IEnumerable<PayerPayee>> GetPayers(string userId)
         {
@@ -47,7 +47,7 @@ namespace TransactionService.Repositories
                 }
             ).GetRemainingAsync();
 
-            payers.AsParallel().ForAll(payer => payer.PayerPayeeId = extractRangeKeyData(payer.PayerPayeeId));
+            payers.AsParallel().ForAll(payer => payer.PayerPayeeId = ExtractRangeKeyData(payer.PayerPayeeId));
             return payers;
         }
 
@@ -60,7 +60,7 @@ namespace TransactionService.Repositories
                     OverrideTableName = _tableName,
                 }
             ).GetRemainingAsync();
-            payees.AsParallel().ForAll(payee => payee.PayerPayeeId = extractRangeKeyData(payee.PayerPayeeId));
+            payees.AsParallel().ForAll(payee => payee.PayerPayeeId = ExtractRangeKeyData(payee.PayerPayeeId));
 
             return payees;
         }
@@ -72,7 +72,7 @@ namespace TransactionService.Repositories
                 {
                     OverrideTableName = _tableName,
                 });
-            payer.PayerPayeeId = extractRangeKeyData(payer.PayerPayeeId);
+            payer.PayerPayeeId = ExtractRangeKeyData(payer.PayerPayeeId);
             return payer;
         }
 
@@ -83,7 +83,7 @@ namespace TransactionService.Repositories
                 {
                     OverrideTableName = _tableName,
                 });
-            payee.PayerPayeeId = extractRangeKeyData(payee.PayerPayeeId);
+            payee.PayerPayeeId = ExtractRangeKeyData(payee.PayerPayeeId);
             return payee;
         }
 
@@ -125,7 +125,7 @@ namespace TransactionService.Repositories
 
                 results.ForAll(payerPayee =>
                 {
-                    payerPayee.PayerPayeeId = extractRangeKeyData(payerPayee.PayerPayeeId);
+                    payerPayee.PayerPayeeId = ExtractRangeKeyData(payerPayee.PayerPayeeId);
                     payerPayeeResults.Add(payerPayee);
                 });
             });

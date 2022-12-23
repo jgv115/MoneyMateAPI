@@ -1,6 +1,6 @@
 using TransactionService.Domain.Models;
 
-namespace TransactionService.Domain.Specifications
+namespace TransactionService.Domain.Services.Transactions.Specifications
 {
     public interface ITransactionSpecification
     {

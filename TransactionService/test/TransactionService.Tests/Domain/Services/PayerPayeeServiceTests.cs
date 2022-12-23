@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Moq;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Dtos;
 using TransactionService.Middleware;
 using TransactionService.Repositories;

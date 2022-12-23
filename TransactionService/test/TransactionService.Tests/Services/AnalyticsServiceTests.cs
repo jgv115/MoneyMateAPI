@@ -7,6 +7,7 @@ using Moq;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
+using TransactionService.Domain.Services.Transactions;
 using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Services;
