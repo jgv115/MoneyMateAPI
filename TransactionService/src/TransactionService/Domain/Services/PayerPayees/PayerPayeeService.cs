@@ -43,9 +43,13 @@ namespace TransactionService.Domain.Services.PayerPayees
             return MapPayerPayeesToViewModels(payers);
         }
 
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees()
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees(int offset, int limit)
         {
-            var payees = await _repository.GetPayees(_userContext.UserId);
+            var payees = await _repository.GetPayees(_userContext.UserId, new PaginationSpec
+            {
+                Limit = limit,
+                Offset = offset
+            });
             return MapPayerPayeesToViewModels(payees);
         }
 

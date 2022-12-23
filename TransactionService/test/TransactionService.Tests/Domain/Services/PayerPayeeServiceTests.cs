@@ -96,19 +96,7 @@ namespace TransactionService.Tests.Domain.Services
         }
 
         [Fact]
-        public async Task GivenValidUserContext_WhenGetPayeesInvoked_ThenRepositoryCalledWithCorrectArguments()
-        {
-            var userId = Guid.NewGuid().ToString();
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
-            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
-                _mockPayerPayeeEnricher.Object);
-            await service.GetPayees();
-
-            _mockRepository.Verify(repository => repository.GetPayees(userId));
-        }
-
-        [Fact]
-        public async Task GivenRepositoryResponse_WhenGetPayeesInvoked_CorrectIEnumerableReturned()
+        public async Task GivenOffsetAnd_WhenGetPayeesInvoked_CorrectPayerPayeeModelsReturned()
         {
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
@@ -131,18 +119,25 @@ namespace TransactionService.Tests.Domain.Services
                 }
             };
 
+            const int limit = 25;
+            const int offset = 2;
+            _mockRepository.Setup(repository => repository.GetPayees(userId, new PaginationSpec
+                {
+                    Limit = limit,
+                    Offset = offset
+                }))
+                .ReturnsAsync(() => payees);
+            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
+                _mockPayerPayeeEnricher.Object);
+
+            var response = await service.GetPayees(offset, limit);
+
             var payeeViewModels = payees.Select(payee => new PayerPayeeViewModel
             {
                 ExternalId = payee.ExternalId,
                 PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
                 PayerPayeeName = payee.PayerPayeeName
             });
-            _mockRepository.Setup(repository => repository.GetPayees(It.IsAny<string>()))
-                .ReturnsAsync(() => payees);
-            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
-                _mockPayerPayeeEnricher.Object);
-
-            var response = await service.GetPayees();
             Assert.Equal(payeeViewModels, response);
         }
 
@@ -350,7 +345,7 @@ namespace TransactionService.Tests.Domain.Services
             const string expectedAddress = "1 expected address street vic";
             var payerPayeeId1 = Guid.Parse("4c88ca6d-13f7-4b50-8ba9-bfea3a112f98");
             var payerPayeeId2 = Guid.Parse("6c3e3ec4-eb7a-411e-addb-7c779fd39cbb");
-            
+
             var repositoryPayees = new List<PayerPayee>
             {
                 new()
@@ -376,7 +371,7 @@ namespace TransactionService.Tests.Domain.Services
                     {
                         Address = expectedAddress
                     });
-            
+
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockPayerPayeeEnricher.Object);
             var actualPayees = await service.AutocompletePayee(payeeName);

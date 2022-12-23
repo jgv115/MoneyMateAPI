@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Dtos;
 
@@ -42,9 +41,9 @@ namespace TransactionService.Controllers
         }
 
         [HttpGet("payees")]
-        public async Task<IActionResult> GetPayees()
+        public async Task<IActionResult> GetPayees(int offset = 0, int limit = 10)
         {
-            var payees = await _payerPayeeService.GetPayees();
+            var payees = await _payerPayeeService.GetPayees(offset, limit);
             return Ok(payees);
         }
 
