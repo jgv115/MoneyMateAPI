@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TransactionService.Controllers.Exceptions;
 using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Dtos;
 
@@ -19,9 +20,19 @@ namespace TransactionService.Controllers
             _payerPayeeService = payerPayeeService ?? throw new ArgumentNullException(nameof(payerPayeeService));
         }
 
+        private void ValidatePaginationParameters(int offset, int limit)
+        {
+            if (offset < 0)
+                throw new QueryParameterInvalidException("Invalid offset value");
+            if (limit < 0 || limit > 20)
+                throw new QueryParameterInvalidException("Invalid limit value");
+        }
+
         [HttpGet("payers")]
         public async Task<IActionResult> GetPayers(int offset = 0, int limit = 10)
         {
+            ValidatePaginationParameters(offset, limit);
+
             var payers = await _payerPayeeService.GetPayers(offset, limit);
             return Ok(payers);
         }
@@ -43,6 +54,7 @@ namespace TransactionService.Controllers
         [HttpGet("payees")]
         public async Task<IActionResult> GetPayees(int offset = 0, int limit = 10)
         {
+            ValidatePaginationParameters(offset, limit);
             var payees = await _payerPayeeService.GetPayees(offset, limit);
             return Ok(payees);
         }

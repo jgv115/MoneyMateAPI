@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers;
-using TransactionService.Domain.Models;
-using TransactionService.Domain.Services;
+using TransactionService.Controllers.Exceptions;
 using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Dtos;
 using TransactionService.ViewModels;
@@ -27,6 +26,19 @@ namespace TransactionService.Tests.Controllers
         public void GivenNullPayerPayeeService_WhenConstructorInvoked_ThenThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new PayersPayeesController(null));
+        }
+
+        [Theory]
+        [InlineData(-1, 10, "Invalid offset value")]
+        [InlineData(0, 21, "Invalid limit value")]
+        [InlineData(0, -1, "Invalid limit value")]
+        public async Task GivenInvalidOffset_WhenGetPayersInvoked_ThenQueryParameterInvalidExceptionThrown(int offset,
+            int limit, string exceptionMessage)
+        {
+            var repository = new PayersPayeesController(_mockService.Object);
+            var exception = await Assert.ThrowsAsync<QueryParameterInvalidException>(() => repository.GetPayers(offset, limit));
+            
+            Assert.Equal(exceptionMessage, exception.Message);
         }
 
         [Fact]
@@ -59,6 +71,19 @@ namespace TransactionService.Tests.Controllers
             Assert.Equal(payers, objectResponse.Value);
         }
 
+        [Theory]
+        [InlineData(-1, 10, "Invalid offset value")]
+        [InlineData(0, 21, "Invalid limit value")]
+        [InlineData(0, -1, "Invalid limit value")]
+        public async Task GivenInvalidOffset_WhenGetPayeesInvoked_ThenQueryParameterInvalidExceptionThrown(int offset,
+            int limit, string exceptionMessage)
+        {
+            var repository = new PayersPayeesController(_mockService.Object);
+            var exception = await Assert.ThrowsAsync<QueryParameterInvalidException>(() => repository.GetPayees(offset, limit));
+            
+            Assert.Equal(exceptionMessage, exception.Message);
+        }
+        
         [Fact]
         public async Task GivenOffsetAndLimitNotProvided_WhenGetPayersInvoked_ThenReturns200OKWithCorrectList()
         {

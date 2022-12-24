@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using TransactionService.Domain.Services;
+using TransactionService.Controllers.Exceptions;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Repositories.Exceptions;
 
@@ -48,6 +48,16 @@ namespace TransactionService.Middleware
                         {
                             Status = returnedStatusCode,
                             Title = "Bad update category request",
+                            Detail = ex.Message
+                        };
+                        break;
+
+                    case QueryParameterInvalidException:
+                        returnedStatusCode = (int) HttpStatusCode.BadRequest;
+                        problemDetails = new ProblemDetails
+                        {
+                            Status = returnedStatusCode,
+                            Title = "Invalid query parameter",
                             Detail = ex.Message
                         };
                         break;

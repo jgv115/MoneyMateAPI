@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using TransactionService.Controllers.Exceptions;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Middleware;
 using TransactionService.Repositories.Exceptions;
@@ -68,6 +69,32 @@ public class ExceptionMiddlewareTests
             Title = "Bad update category request",
             Detail = expectedMessage
         };
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+    }
+
+    [Fact]
+    public async Task GivenQueryParameterInvalidExceptionThrown_ThenCorrectProblemDetailsReturned()
+    {
+        const string expectedMessage = "invalid query parameter!";
+        var middleware = new ExceptionMiddleware(_ => throw new QueryParameterInvalidException(expectedMessage));
+        
+        var httpContext = new DefaultHttpContext();
+        httpContext.Response.Body = new MemoryStream();
+        var mockLogger = new Mock<ILogger<ExceptionMiddleware>>();
+
+        await middleware.Invoke(httpContext, mockLogger.Object);
+
+        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
+        var reader = new StreamReader(httpContext.Response.Body);
+        var responseBodyString = reader.ReadToEnd();
+
+        var expectedResponseBody = new ProblemDetails
+        {
+            Status = 400,
+            Title = "Invalid query parameter",
+            Detail = expectedMessage
+        };
+        
         Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
     }
     
