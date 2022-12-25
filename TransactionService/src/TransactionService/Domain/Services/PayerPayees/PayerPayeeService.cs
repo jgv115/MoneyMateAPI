@@ -108,9 +108,17 @@ namespace TransactionService.Domain.Services.PayerPayees
                 UserId = _userContext.UserId
             });
 
+            if (!string.IsNullOrEmpty(newPayerPayee.ExternalId))
+                return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
+                {
+                    PayerPayeeId = payerPayeeId.ToString(),
+                    PayerPayeeName = newPayerPayee.Name,
+                    ExternalId = newPayerPayee.ExternalId,
+                    UserId = _userContext.UserId
+                });
+
             return new PayerPayeeViewModel
             {
-                ExternalId = newPayerPayee.ExternalId,
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name
             };

@@ -439,7 +439,6 @@ namespace TransactionService.Tests.Domain.Services
             GivenValidCreatePayerPayeeDto_ThenRepositoryCalledWithCorrectPayerPayeeModel()
         {
             const string expectedPayerName = "payer name 123";
-            const string expectedExternalId = "externalId123";
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
@@ -448,24 +447,31 @@ namespace TransactionService.Tests.Domain.Services
             await service.CreatePayer(new CreatePayerPayeeDto
             {
                 Name = expectedPayerName,
-                ExternalId = expectedExternalId
             });
 
             _mockRepository.Verify(repository => repository.CreatePayer(It.Is<PayerPayee>(payerPayee =>
                 payerPayee.UserId == userId &&
-                payerPayee.ExternalId == expectedExternalId &&
+                payerPayee.ExternalId == null &&
                 payerPayee.PayerPayeeName == expectedPayerName &&
                 !Guid.Parse(payerPayee.PayerPayeeId).Equals(Guid.Empty)
             )));
         }
 
         [Fact]
-        public async Task GivenRepositoryResponse_ThenCorrectPayerReturned()
+        public async Task GivenPayerCreatedAndExternalIdIsNotEmpty_ThenCorrectPayerReturned()
         {
             const string expectedPayerName = "payer name 123";
             const string expectedExternalId = "externalId123";
+            const string expectedAddress = "address123";
+
             var userId = Guid.NewGuid().ToString();
             _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+
+            _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails(expectedExternalId))
+                .ReturnsAsync(() => new ExtraPayerPayeeDetails
+                {
+                    Address = expectedAddress
+                });
 
             var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
                 _mockPayerPayeeEnricher.Object);
@@ -478,6 +484,28 @@ namespace TransactionService.Tests.Domain.Services
             Assert.Equal(expectedExternalId, actualPayer.ExternalId);
             Assert.Equal(expectedPayerName, actualPayer.PayerPayeeName);
             Assert.NotEqual(Guid.Empty, actualPayer.PayerPayeeId);
+            Assert.Equal(expectedAddress, actualPayer.Address);
+        }
+        
+        [Fact]
+        public async Task GivenPayerCreatedAndExternalIdIsEmpty_ThenCorrectPayerReturned()
+        {
+            const string expectedPayerName = "payer name 123";
+
+            var userId = Guid.NewGuid().ToString();
+            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+
+            var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
+                _mockPayerPayeeEnricher.Object);
+            var actualPayer = await service.CreatePayer(new CreatePayerPayeeDto
+            {
+                Name = expectedPayerName,
+            });
+
+            Assert.Null(actualPayer.ExternalId);
+            Assert.Equal(expectedPayerName, actualPayer.PayerPayeeName);
+            Assert.NotEqual(Guid.Empty, actualPayer.PayerPayeeId);
+            Assert.Null(actualPayer.Address);
         }
     }
 

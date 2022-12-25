@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ using TransactionService.Domain.Models;
 using TransactionService.Dtos;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
+using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
@@ -37,7 +40,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         }
         
         [Fact]
-        public async Task GivenRequestWithEmptyExternalId_WhenPostPayerEndpointCalled_ThenCorrectPayerPersisted()
+        public async Task GivenRequestWithEmptyExternalId_WhenPostPayerEndpointCalled_ThenCorrectPayerPersistedAndReturned()
         {
             const string expectedPayerName = "test payer123";
             var cratePayerDto = new CreatePayerPayeeDto
@@ -49,7 +52,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
 
             var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
             response.EnsureSuccessStatusCode();
-
+            
             var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
 
             Assert.Collection(scanOutput,
@@ -62,6 +65,14 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                     var payerPayeeId = Guid.Parse(payerPayee.PayerPayeeId.Split("payer#")[1]);
                     Assert.NotEqual(Guid.Empty, payerPayeeId);
                 });
+
+            var savedPayer = scanOutput.First();
+            var returnedPayer = await response.Content.ReadFromJsonAsync<PayerPayeeViewModel>();
+            Assert.Equal(new PayerPayeeViewModel
+            {
+                PayerPayeeId = Guid.Parse(savedPayer.PayerPayeeId.Split("payer#")[1]),
+                PayerPayeeName = savedPayer.PayerPayeeName
+            }, returnedPayer);
         }
 
         [Fact]
@@ -137,7 +148,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         [InlineData("test payee123", "test external id 123")]
         [InlineData("test payee123", null)]
         public async Task
-            GivenExistingPayeesInDatabase_WhenPostPayerEndpointCalled_ThenDuplicatePayeeShouldNotBePersisted(
+            GivenExistingPayeesInDatabase_WhenPostPayeeEndpointCalled_ThenDuplicatePayeeShouldNotBePersisted(
                 string expectedPayeeName, string expectedExternalId)
         {
             var payee = new PayerPayee
