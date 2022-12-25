@@ -420,7 +420,7 @@ public class PayerPayeeServiceTests
         Assert.Equal(expectedPayees, actualPayees);
     }
 }
-    
+
 public class PayerPayeeServiceCreatePayeeTests
 {
     private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
@@ -439,7 +439,6 @@ public class PayerPayeeServiceCreatePayeeTests
         GivenValidCreatePayerPayeeDto_ThenRepositoryCalledWithCorrectPayerPayeeModel()
     {
         const string expectedPayeeName = "payee name 123";
-        const string expectedExternalId = "externalId123";
         var userId = Guid.NewGuid().ToString();
         _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
@@ -448,12 +447,11 @@ public class PayerPayeeServiceCreatePayeeTests
         await service.CreatePayee(new CreatePayerPayeeDto
         {
             Name = expectedPayeeName,
-            ExternalId = expectedExternalId
         });
 
         _mockRepository.Verify(repository => repository.CreatePayee(It.Is<PayerPayee>(payerPayee =>
             payerPayee.UserId == userId &&
-            payerPayee.ExternalId == expectedExternalId &&
+            payerPayee.ExternalId == null &&
             payerPayee.PayerPayeeName == expectedPayeeName &&
             !Guid.Parse(payerPayee.PayerPayeeId).Equals(Guid.Empty)
         )));
@@ -464,8 +462,15 @@ public class PayerPayeeServiceCreatePayeeTests
     {
         const string expectedPayeeName = "payer name 123";
         const string expectedExternalId = "externalId123";
+        const string expectedAddress = "1 address VIC";
         var userId = Guid.NewGuid().ToString();
         _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
+
+        _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails(expectedExternalId))
+            .ReturnsAsync(() => new ExtraPayerPayeeDetails
+            {
+                Address = expectedAddress
+            });
 
         var service = new PayerPayeeService(_mockCurrentUserContext.Object, _mockRepository.Object,
             _mockPayerPayeeEnricher.Object);
@@ -478,9 +483,10 @@ public class PayerPayeeServiceCreatePayeeTests
         Assert.Equal(expectedExternalId, actualPayee.ExternalId);
         Assert.Equal(expectedPayeeName, actualPayee.PayerPayeeName);
         Assert.NotEqual(Guid.Empty, actualPayee.PayerPayeeId);
+        Assert.Equal(expectedAddress, actualPayee.Address);
     }
 }
-    
+
 public class PayerPayeeServiceCreatePayerTests
 {
     private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
@@ -546,7 +552,7 @@ public class PayerPayeeServiceCreatePayerTests
         Assert.NotEqual(Guid.Empty, actualPayer.PayerPayeeId);
         Assert.Equal(expectedAddress, actualPayer.Address);
     }
-        
+
     [Fact]
     public async Task GivenPayerCreatedAndExternalIdIsEmpty_ThenCorrectPayerReturned()
     {

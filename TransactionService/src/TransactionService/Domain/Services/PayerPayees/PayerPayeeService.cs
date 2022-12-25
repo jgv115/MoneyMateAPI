@@ -97,50 +97,46 @@ namespace TransactionService.Domain.Services.PayerPayees
             return await EnrichAndMapPayerPayeesToViewModels(payees);
         }
 
+        // TODO: might be some coupling issues here - we are assuming repository will store exactly as we are inputting
         public async Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee)
         {
-            var payerPayeeId = Guid.NewGuid();
+            var payerPayeeId = Guid.NewGuid().ToString();
             await _repository.CreatePayer(new PayerPayee
             {
-                PayerPayeeId = payerPayeeId.ToString(),
+                PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
                 ExternalId = newPayerPayee.ExternalId,
                 UserId = _userContext.UserId
             });
 
-            if (!string.IsNullOrEmpty(newPayerPayee.ExternalId))
-                return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
-                {
-                    PayerPayeeId = payerPayeeId.ToString(),
-                    PayerPayeeName = newPayerPayee.Name,
-                    ExternalId = newPayerPayee.ExternalId,
-                    UserId = _userContext.UserId
-                });
-
-            return new PayerPayeeViewModel
+            return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
             {
                 PayerPayeeId = payerPayeeId,
-                PayerPayeeName = newPayerPayee.Name
-            };
+                PayerPayeeName = newPayerPayee.Name,
+                ExternalId = newPayerPayee.ExternalId,
+                UserId = _userContext.UserId
+            });
         }
 
         public async Task<PayerPayeeViewModel> CreatePayee(CreatePayerPayeeDto newPayerPayee)
         {
-            var payerPayeeId = Guid.NewGuid();
+            var payerPayeeId = Guid.NewGuid().ToString();
+            
             await _repository.CreatePayee(new PayerPayee
             {
-                PayerPayeeId = payerPayeeId.ToString(),
+                PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
                 ExternalId = newPayerPayee.ExternalId,
                 UserId = _userContext.UserId
             });
 
-            return new PayerPayeeViewModel
+            return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
             {
-                ExternalId = newPayerPayee.ExternalId,
                 PayerPayeeId = payerPayeeId,
-                PayerPayeeName = newPayerPayee.Name
-            };
+                PayerPayeeName = newPayerPayee.Name,
+                ExternalId = newPayerPayee.ExternalId,
+                UserId = _userContext.UserId
+            });
         }
     }
 }

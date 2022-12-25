@@ -22,6 +22,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         private readonly HttpClient _httpClient;
         private readonly DynamoDbHelper _dynamoDbHelper;
         private const string UserId = "auth0|moneymatetest#PayersPayees";
+        private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
 
         public PostEndpointTests(MoneyMateApiWebApplicationFactory factory)
         {
@@ -38,9 +39,10 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         {
             await _dynamoDbHelper.DeleteTable();
         }
-        
+
         [Fact]
-        public async Task GivenRequestWithEmptyExternalId_WhenPostPayerEndpointCalled_ThenCorrectPayerPersistedAndReturned()
+        public async Task
+            GivenRequestWithEmptyExternalId_WhenPostPayerEndpointCalled_ThenCorrectPayerPersistedAndReturned()
         {
             const string expectedPayerName = "test payer123";
             var cratePayerDto = new CreatePayerPayeeDto
@@ -52,7 +54,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
 
             var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
             response.EnsureSuccessStatusCode();
-            
+
             var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
 
             Assert.Collection(scanOutput,
@@ -76,7 +78,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         }
 
         [Fact]
-        public async Task GivenValidRequest_WhenPostPayeeEndpointCalled_ThenCorrectPayeePersisted()
+        public async Task GivenValidRequest_WhenPostPayeeEndpointCalled_ThenCorrectPayeePersistedAndReturned()
         {
             const string expectedPayeeName = "test payee123";
             const string expectedExternalId = "test external id 123";
@@ -103,6 +105,16 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                     var payerPayeeId = Guid.Parse(payerPayee.PayerPayeeId.Split("payee#")[1]);
                     Assert.NotEqual(Guid.Empty, payerPayeeId);
                 });
+
+            var savedPayee = scanOutput.First();
+            var returnedPayer = await response.Content.ReadFromJsonAsync<PayerPayeeViewModel>();
+            Assert.Equal(new PayerPayeeViewModel
+            {
+                PayerPayeeId = Guid.Parse(savedPayee.PayerPayeeId.Split("payee#")[1]),
+                PayerPayeeName = savedPayee.PayerPayeeName,
+                ExternalId = expectedExternalId,
+                Address = ExpectedAddress
+            }, returnedPayer);
         }
 
         [Theory]
@@ -136,14 +148,14 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                     PayerPayeeId = $"payer#12345676532",
                 }
             });
-            
+
             var httpContent =
                 new StringContent(JsonSerializer.Serialize(createPayerDto), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
-        
+
         [Theory]
         [InlineData("test payee123", "test external id 123")]
         [InlineData("test payee123", null)]
@@ -175,7 +187,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                     PayerPayeeId = $"payee#12345676532",
                 }
             });
-            
+
             var httpContent =
                 new StringContent(JsonSerializer.Serialize(createPayerDto), Encoding.UTF8, "application/json");
 
