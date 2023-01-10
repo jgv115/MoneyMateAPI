@@ -28,7 +28,7 @@ variable "moneymate_api_identifiers" {
 variable moneymate_web_domain {
   default = {
     "dev": "http://localhost:3000",
-    "test": "https://moneymate-test.onrender.com",
+    "test": "https://test.moneymate.benong.id.au",
     "prod": "https://moneymate.benong.id.au"
   }
 }
