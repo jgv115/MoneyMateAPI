@@ -29,9 +29,9 @@ resource "auth0_client" moneymate_app {
 resource "auth0_client" moneymate_web {
   name = "MoneyMate Web"
   app_type = "regular_web"
-  callbacks = ["http://localhost:3000/callback"]
-  allowed_logout_urls                 = ["http://localhost:3000/callback"]
-  web_origins                         = ["http://localhost:3000/callback"]
+  callbacks = ["${lookup(var.moneymate_web_domain, terraform.workspace)}/callback"]
+  allowed_logout_urls                 = ["${lookup(var.moneymate_web_domain, terraform.workspace)}"]
+  web_origins                         = ["${lookup(var.moneymate_web_domain, terraform.workspace)}"]
   cross_origin_auth = false
   custom_login_page_on = true
   grant_types = ["authorization_code", "implicit", "refresh_token"]
