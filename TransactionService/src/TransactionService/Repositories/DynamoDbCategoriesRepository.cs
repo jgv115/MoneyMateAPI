@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -78,7 +77,7 @@ namespace TransactionService.Repositories
         private async Task SaveCategory(Category newCategory) => await _dbContext.SaveAsync(newCategory,
             new DynamoDBOperationConfig
             {
-                OverrideTableName = _tableName
+                OverrideTableName = _tableName,
             });
 
 
@@ -95,11 +94,12 @@ namespace TransactionService.Repositories
             await SaveCategory(newCategory);
         }
 
-        public async Task UpdateCategoryName(string categoryName, string newCategoryName)
+        public async Task UpdateCategoryName(Category category, string newCategoryName)
         {
-            // TODO: query transactions that have the existing category name
-            // TODO: edit them all to have the new category name
-            // TODO: get the category and change the name and push back to DB
+            await DeleteCategory(category.CategoryName);
+            
+            category.CategoryName = newCategoryName;
+            await CreateCategory(category);
         }
 
         public async Task DeleteCategory(string categoryName)
@@ -163,13 +163,6 @@ namespace TransactionService.Repositories
 
 
             await SaveCategory(category);
-        }
-
-        // TODO: deprecate this method
-        public Task UpdateCategory(Category updatedCategory)
-        {
-            updatedCategory.UserId += HashKeySuffix;
-            return SaveCategory(updatedCategory);
         }
     }
 }

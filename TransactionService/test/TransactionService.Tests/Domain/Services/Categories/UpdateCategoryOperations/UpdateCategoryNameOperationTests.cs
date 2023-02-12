@@ -34,7 +34,7 @@ public class UpdateCategoryNameOperationTests
     }
 
     [Fact]
-    public async Task GivenNoTransactionsExistWithCategory_ThenUpdateCategoryCalledWithCorrectArguments()
+    public async Task GivenNoTransactionsExistWithCategory_ThenUpdateCategoryNameCalledWithCorrectArguments()
     {
         var operation = new UpdateCategoryNameOperation(_mockCategoryRepository.Object,
             _mockTransactionService.Object, _mockTransactionRepository.Object, "categoryName",
@@ -57,13 +57,13 @@ public class UpdateCategoryNameOperationTests
         await operation.ExecuteOperation();
 
         _mockCategoryRepository.Verify(repository =>
-            repository.UpdateCategory(new Category
+            repository.UpdateCategoryName(new Category
             {
-                CategoryName = "newCategory",
+                CategoryName = "categoryName",
                 Subcategories = new List<string> {"subcategory", "test1"},
                 UserId = "us123",
                 TransactionType = TransactionType.Expense
-            }));
+            }, "newCategory"));
     }
 
     [Fact]
@@ -124,12 +124,12 @@ public class UpdateCategoryNameOperationTests
 
 
         _mockCategoryRepository.Verify(repository =>
-            repository.UpdateCategory(new Category
+            repository.UpdateCategoryName(new Category
             {
-                CategoryName = "newCategory",
+                CategoryName = "categoryName",
                 Subcategories = new List<string> {"subcategory", "test1"},
                 UserId = "us123",
                 TransactionType = TransactionType.Expense
-            }));
+            }, "newCategory"));
     }
 }

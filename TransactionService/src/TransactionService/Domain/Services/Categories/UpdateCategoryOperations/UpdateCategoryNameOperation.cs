@@ -49,8 +49,7 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
                     await _transactionRepository.PutTransaction(transaction);
                 }
 
-            existingCategory.CategoryName = _newCategoryName;
-            await _categoriesRepository.UpdateCategory(existingCategory);
+            await _categoriesRepository.UpdateCategoryName(existingCategory, _newCategoryName);
         }
     }
 }

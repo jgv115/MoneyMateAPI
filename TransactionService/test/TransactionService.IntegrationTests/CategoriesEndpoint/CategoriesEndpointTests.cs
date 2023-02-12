@@ -565,6 +565,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
+        // Test that new category exists
         var returnedCategory =
             await _dynamoDbHelper.QueryTable<Category>(PersistedCategoriesUserId, "renamed category");
 
@@ -575,6 +576,10 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             TransactionType = TransactionType.Expense,
             Subcategories = new List<string> {"subcategory1", "subcategory2"}
         }, returnedCategory);
+        
+        // Test that old category does not exist
+        var oldCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedCategoriesUserId, categoryName);
+        Assert.Null(oldCategory);
 
         transaction1.Category = "renamed category";
         transaction3.Category = "renamed category";

@@ -272,6 +272,34 @@ public class DynamoDbCategoriesRepositoryTests
     }
 
     [Fact]
+    public async Task GivenCategoryAndNewCategoryName_WhenUpdateCategoryNameInvoked_ThenCategoryDeletedAndRecreated()
+    {
+        var inputCategory = new Category()
+        {
+            CategoryName = "categoryName",
+            UserId = UserId,
+            TransactionType = TransactionType.Expense,
+            Subcategories = new List<string> {"test1", "test2"}
+        };
+        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+
+        await repository.UpdateCategoryName(inputCategory, "new categoryName");
+        
+        _dynamoDbContextMock.Verify(context => context.DeleteAsync<Category>($"{UserId}#Categories", "categoryName",
+            It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
+            It.IsAny<CancellationToken>()));
+        
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+            {
+                CategoryName = "new categoryName",
+                UserId = $"{UserId}#Categories",
+                TransactionType = TransactionType.Expense,
+                Subcategories = new List<string> {"test1", "test2"}
+            }, It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
+            It.IsAny<CancellationToken>()));
+    }
+
+    [Fact]
     public async Task GivenCategoryName_WhenDeleteCategoryInvoked_ThenCategoryDeletedCorrectly()
     {
         const string categoryName = "test-category-123";
@@ -391,29 +419,6 @@ public class DynamoDbCategoriesRepositoryTests
                 UserId = UserId,
                 TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"test2"}
-            }, It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
-            It.IsAny<CancellationToken>()));
-    }
-
-    [Fact]
-    public async Task GivenUpdatedCategoryinput_WhenUpdateCategoryInvoked_ThenCorrectCategorySaved()
-    {
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
-
-        await repository.UpdateCategory(new Category()
-        {
-            CategoryName = "categoryName",
-            UserId = UserId,
-            TransactionType = TransactionType.Expense,
-            Subcategories = new List<string> {"test1", "test2"}
-        });
-
-        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
-            {
-                CategoryName = "categoryName",
-                UserId = $"{UserId}#Categories",
-                TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"test1", "test2"}
             }, It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
             It.IsAny<CancellationToken>()));
     }
