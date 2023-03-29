@@ -108,6 +108,29 @@ containers:
       retries: 5
       start_period: 10s
       timeout: 10s
+      
+  cockroachdb:
+    image: cockroachdb/cockroach:v22.2.6
+    ports:
+      - local: 26257
+        container: 26257
+      - local: 8080
+        container: 8080
+    environment:
+      COCKROACH_DATABASE: moneymate_db_local
+    health_check: 
+      command: curl -f http://localhost:8080/health?ready=1
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    command: start-single-node --insecure
+        
+  flyway:
+    image: flyway/flyway:9.16
+    volumes:
+      - local: ./sql
+        container: /flyway/sql
+    entrypoint: sh
   
   google_api_mock:
     build_directory: .batect/google_api_mock
@@ -138,7 +161,19 @@ tasks:
     run:
       container: dotnet_build_env
       command: dotnet test test/TransactionService.IntegrationTests
-
+     
+  start_clean_db:
+    run:
+      container: cockroachdb
+      
+  
+  start_db:
+    dependencies:
+      - cockroachdb
+    run:
+      container: flyway
+      command: -c "flyway -url=jdbc:postgresql://cockroachdb:26257/moneymate_db_local -user=root -connectRetries=60 migrate && tail -f /dev/null"
+  
   start_localstack:
     description: Starts localstack only
     dependencies:

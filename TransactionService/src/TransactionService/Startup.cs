@@ -15,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
-using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Domain.Services.PayerPayees;
@@ -24,6 +23,7 @@ using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
+using TransactionService.Repositories.CockroachDb;
 using TransactionService.Services;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Options;
@@ -121,14 +121,29 @@ namespace TransactionService
                 TableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}"
             });
 
+            var cockroachDbConnectionString =
+                Configuration.GetSection("CockroachDb").GetValue<string>("ConnectionString");
+
+            services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
+            services.AddSingleton<CockroachDbCategoriesRepository>();
+
             services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
-            services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
+
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "dev")
+            {
+                services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
+            }
+            else
+            {
+                services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
+            }
+
             services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
 
             services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
             services.Configure<GooglePlaceApiOptions>(options =>
                 Configuration.GetSection("GooglePlaceApi").Bind(options));
-            
+
             Console.WriteLine(((IConfigurationRoot) Configuration).GetDebugView());
         }
 
