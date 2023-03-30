@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using TransactionService.Controllers.Transactions.Dtos;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions.Specifications;
-using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
+using TransactionService.Repositories.DynamoDb;
 
 namespace TransactionService.Domain.Services.Transactions
 {

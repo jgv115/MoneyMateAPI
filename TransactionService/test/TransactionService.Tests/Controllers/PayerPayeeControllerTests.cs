@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers;
 using TransactionService.Controllers.Exceptions;
+using TransactionService.Controllers.PayersPayees;
+using TransactionService.Controllers.PayersPayees.Dtos;
+using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Services.PayerPayees;
-using TransactionService.Dtos;
-using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers

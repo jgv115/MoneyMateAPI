@@ -24,6 +24,7 @@ using TransactionService.Middleware;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
 using TransactionService.Repositories.CockroachDb;
+using TransactionService.Repositories.DynamoDb;
 using TransactionService.Services;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Options;
@@ -129,14 +130,16 @@ namespace TransactionService
 
             services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
 
-            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "dev")
-            {
-                services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
-            }
-            else
-            {
-                services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
-            }
+            // if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "dev")
+            // {
+            //     services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
+            // }
+            // else
+            // {
+            //     services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
+            // }
+            services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
+
 
             services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
 

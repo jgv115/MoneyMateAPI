@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.JsonPatch.Operations;
+using TransactionService.Controllers.Categories.Dtos;
 using TransactionService.Domain.Services.Transactions;
-using TransactionService.Dtos;
 using TransactionService.Repositories;
+using TransactionService.Repositories.DynamoDb;
 
 namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
 {

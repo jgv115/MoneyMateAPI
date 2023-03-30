@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using TransactionService.Constants;
+using TransactionService.Controllers.Categories.Dtos;
 using TransactionService.Domain.Models;
-using TransactionService.Dtos;
 
 namespace TransactionService.Domain.Services.Categories
 {

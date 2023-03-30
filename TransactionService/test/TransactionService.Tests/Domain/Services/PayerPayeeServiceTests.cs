@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
+using TransactionService.Controllers.PayersPayees.Dtos;
+using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.PayerPayees;
-using TransactionService.Dtos;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
+using TransactionService.Repositories.DynamoDb;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Models;
-using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.Tests.Domain.Services;

@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers;
-using TransactionService.Dtos;
+using TransactionService.Controllers.Analytics;
+using TransactionService.Controllers.Analytics.ViewModels;
+using TransactionService.Controllers.Categories.Dtos;
+using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Services;
-using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers;

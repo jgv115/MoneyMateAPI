@@ -4,10 +4,10 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using TransactionService.Controllers.Analytics.ViewModels;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using TransactionService.Tests.Common;
-using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.AnalyticsEndpoint;

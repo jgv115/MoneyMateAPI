@@ -8,6 +8,7 @@ using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
+using TransactionService.Repositories.DynamoDb;
 using TransactionService.Repositories.Exceptions;
 using Xunit;
 

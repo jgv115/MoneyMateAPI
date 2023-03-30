@@ -1,8 +1,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch.Operations;
+using TransactionService.Controllers.Categories.Dtos;
 using TransactionService.Domain.Services.Categories.Exceptions;
-using TransactionService.Dtos;
 using TransactionService.Repositories;
+using TransactionService.Repositories.DynamoDb;
 
 namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
 {

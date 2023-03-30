@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TransactionService.Constants;
+using TransactionService.Controllers.Analytics.ViewModels;
 using TransactionService.Helpers.TimePeriodHelpers;
-using TransactionService.ViewModels;
 
 namespace TransactionService.Services
 {

@@ -50,7 +50,4 @@
       <Content Include=".batect\localstack\localstack-bootstrap.sh" />
       <Content Remove=".batect\localstack\**" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Infrastructure" />
-    </ItemGroup>
 </Project>

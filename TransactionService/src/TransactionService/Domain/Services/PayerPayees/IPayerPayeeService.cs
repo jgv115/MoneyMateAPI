@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TransactionService.Dtos;
-using TransactionService.ViewModels;
+using TransactionService.Controllers.PayersPayees.Dtos;
+using TransactionService.Controllers.PayersPayees.ViewModels;
 
 namespace TransactionService.Domain.Services.PayerPayees
 {

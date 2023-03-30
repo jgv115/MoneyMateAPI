@@ -1,5 +1,6 @@
 using System;
 using TransactionService.Repositories;
+using TransactionService.Repositories.DynamoDb;
 using Xunit;
 
 namespace TransactionService.Tests.Repositories

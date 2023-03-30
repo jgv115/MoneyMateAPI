@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
-using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint

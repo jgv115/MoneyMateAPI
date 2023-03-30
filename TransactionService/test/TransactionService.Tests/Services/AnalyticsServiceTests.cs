@@ -5,14 +5,14 @@ using System.Text.Unicode;
 using System.Threading.Tasks;
 using Moq;
 using TransactionService.Constants;
+using TransactionService.Controllers.Analytics.ViewModels;
+using TransactionService.Controllers.Transactions.Dtos;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Transactions;
-using TransactionService.Dtos;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Services;
 using TransactionService.Tests.Common;
-using TransactionService.ViewModels;
 using Xunit;
 
 namespace TransactionService.Tests.Services

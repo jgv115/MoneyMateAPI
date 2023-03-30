@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TransactionService.Controllers.PayersPayees.Dtos;
+using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
-using TransactionService.Dtos;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
+using TransactionService.Repositories.DynamoDb;
 using TransactionService.Services.PayerPayeeEnricher;
-using TransactionService.ViewModels;
 
 namespace TransactionService.Domain.Services.PayerPayees
 {

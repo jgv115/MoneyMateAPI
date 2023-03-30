@@ -7,6 +7,7 @@ using AutoMapper;
 using Dapper;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb.Entities;
+using TransactionService.Repositories.DynamoDb;
 using TransactionType = TransactionService.Constants.TransactionType;
 
 namespace TransactionService.Repositories.CockroachDb
