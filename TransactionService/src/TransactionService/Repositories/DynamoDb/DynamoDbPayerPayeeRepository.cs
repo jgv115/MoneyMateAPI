@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using AutoMapper.Internal;
-using TransactionService.Domain.Models;
 using TransactionService.Helpers;
+using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Repositories.Exceptions;
 
 namespace TransactionService.Repositories.DynamoDb

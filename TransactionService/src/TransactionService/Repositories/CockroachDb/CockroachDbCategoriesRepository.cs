@@ -51,7 +51,7 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        public async Task<Domain.Models.Category> GetCategory(string categoryName)
+        public async Task<DynamoDb.Models.Category> GetCategory(string categoryName)
         {
             var query = @"SELECT c.Id, u.Id as UserId, c.name as Name, s.Id, s.Name as Name FROM category c
                             JOIN users u on c.user_id = u.id and u.user_identifier = @user_identifier
@@ -60,10 +60,10 @@ namespace TransactionService.Repositories.CockroachDb
 
             var categories = await QueryAndBuildCategory(query,
                 new {user_identifier = _userContext.UserId, categoryName = categoryName});
-            return _mapper.Map<Category, Domain.Models.Category>(categories.Distinct().First());
+            return _mapper.Map<Category, DynamoDb.Models.Category>(categories.Distinct().First());
         }
 
-        public async Task<IEnumerable<Domain.Models.Category>> GetAllCategories()
+        public async Task<IEnumerable<DynamoDb.Models.Category>> GetAllCategories()
         {
             var query =
                 @"SELECT c.id, u.id as UserId, c.name as Name, tt.name as TransactionType, s.Id, s.name as Name FROM category c
@@ -73,10 +73,10 @@ namespace TransactionService.Repositories.CockroachDb
 
             var categories = await QueryAndBuildCategory(query,
                 new {user_identifier = _userContext.UserId});
-            return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories.Distinct());
+            return _mapper.Map<IEnumerable<Category>, List<DynamoDb.Models.Category>>(categories.Distinct());
         }
 
-        public async Task<IEnumerable<Domain.Models.Category>> GetAllCategoriesForTransactionType(
+        public async Task<IEnumerable<DynamoDb.Models.Category>> GetAllCategoriesForTransactionType(
             TransactionType transactionType)
         {
             var query =
@@ -89,10 +89,10 @@ namespace TransactionService.Repositories.CockroachDb
             var categories = await QueryAndBuildCategory(query,
                 new {user_identifier = _userContext.UserId, transaction_type = transactionType.ToString()});
 
-            return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories.Distinct());
+            return _mapper.Map<IEnumerable<Category>, List<DynamoDb.Models.Category>>(categories.Distinct());
         }
 
-        public async Task CreateCategory(Domain.Models.Category newCategory)
+        public async Task CreateCategory(DynamoDb.Models.Category newCategory)
         {
             using (var connection = _context.CreateConnection())
             {
@@ -137,7 +137,7 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        public Task UpdateCategoryName(Domain.Models.Category category, string newCategoryName)
+        public Task UpdateCategoryName(DynamoDb.Models.Category category, string newCategoryName)
         {
             throw new System.NotImplementedException();
         }

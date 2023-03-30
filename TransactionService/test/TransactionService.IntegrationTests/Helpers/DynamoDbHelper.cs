@@ -6,7 +6,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Configuration;
-using TransactionService.Domain.Models;
+using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.IntegrationTests.Helpers
 {

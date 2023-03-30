@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using TransactionService.Controllers.Transactions.Dtos;
-using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
+using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Domain.Services.Transactions
 {

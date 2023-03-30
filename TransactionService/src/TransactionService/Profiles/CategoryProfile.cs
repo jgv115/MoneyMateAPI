@@ -1,6 +1,6 @@
 using AutoMapper;
 using TransactionService.Controllers.Categories.Dtos;
-using TransactionService.Domain.Models;
+using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Profiles
 {

@@ -7,8 +7,8 @@ using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Transactions;
 using TransactionService.Controllers.Transactions.Dtos;
-using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions;
+using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers.Transactions

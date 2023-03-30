@@ -5,11 +5,11 @@ using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
-using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
+using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Domain.Services.Categories
 {

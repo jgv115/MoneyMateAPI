@@ -9,9 +9,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
-using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
+using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint

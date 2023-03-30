@@ -8,9 +8,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
-using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
+using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.CategoriesEndpoint;

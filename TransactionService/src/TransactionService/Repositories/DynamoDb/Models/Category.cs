@@ -4,7 +4,7 @@ using System.Linq;
 using Amazon.DynamoDBv2.DataModel;
 using TransactionService.Constants;
 
-namespace TransactionService.Domain.Models
+namespace TransactionService.Repositories.DynamoDb.Models
 {
     [DynamoDBTable("MoneyMate_TransactionDB_dev")]
     public record Category

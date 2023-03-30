@@ -5,10 +5,10 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Moq;
 using TransactionService.Constants;
-using TransactionService.Domain.Models;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
+using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Repositories.Exceptions;
 using Xunit;
 

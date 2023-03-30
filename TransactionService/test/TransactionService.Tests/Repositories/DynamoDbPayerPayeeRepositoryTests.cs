@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Moq;
-using TransactionService.Domain.Models;
 using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
+using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Repositories;

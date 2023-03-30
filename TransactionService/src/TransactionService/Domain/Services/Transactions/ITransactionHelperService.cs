@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TransactionService.Controllers.Transactions.Dtos;
-using TransactionService.Domain.Models;
+using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Domain.Services.Transactions
 {
