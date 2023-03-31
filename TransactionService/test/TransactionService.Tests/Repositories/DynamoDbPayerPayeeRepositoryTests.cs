@@ -8,6 +8,7 @@ using AutoMapper;
 using Moq;
 using TransactionService.Domain.Models;
 using TransactionService.Middleware;
+using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
 using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;

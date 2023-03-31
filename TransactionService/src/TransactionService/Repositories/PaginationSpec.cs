@@ -1,4 +1,4 @@
-namespace TransactionService.Repositories.DynamoDb
+namespace TransactionService.Repositories
 {
     public record PaginationSpec
     {
