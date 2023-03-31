@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch.Operations;
 using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Repositories;
@@ -33,7 +34,6 @@ public class AddSubcategoryOperationTests
             .Setup(repository => repository.GetCategory(existingCategoryName)).ReturnsAsync(
                 new Category()
                 {
-                    UserId = "userId",
                     CategoryName = existingCategoryName,
                     TransactionType = TransactionType.Expense,
                     Subcategories = new List<string> {"subcategory1", "subcategory2"}
@@ -82,7 +82,6 @@ public class AddSubcategoryOperationTests
             .Setup(repository => repository.GetCategory(existingCategoryName)).ReturnsAsync(
                 new Category()
                 {
-                    UserId = "userId",
                     CategoryName = existingCategoryName,
                     TransactionType = TransactionType.Expense,
                     Subcategories = new List<string> {subcategoryName, "subcategory1", "subcategory2"}
@@ -107,7 +106,6 @@ public class AddSubcategoryOperationTests
             .Setup(repository => repository.GetCategory(existingCategoryName)).ReturnsAsync(
                 new Category()
                 {
-                    UserId = "userId",
                     CategoryName = existingCategoryName,
                     TransactionType = TransactionType.Expense,
                     Subcategories = new List<string> {"subcategory1", "subcategory2"}

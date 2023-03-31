@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Transactions.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
@@ -42,11 +43,10 @@ public class UpdateSubcategoryNameOperationTests
             "newsubcategory");
 
         _mockCategoryRepository.Setup(repository => repository.GetCategory("categoryName"))
-            .ReturnsAsync(new Category
+            .ReturnsAsync(new Category()
             {
                 CategoryName = "categoryName",
                 Subcategories = new List<string> {"subcategory", "test1"},
-                UserId = "us123",
                 TransactionType = TransactionType.Expense
             });
 
@@ -70,11 +70,10 @@ public class UpdateSubcategoryNameOperationTests
             "newsubcategory");
 
         _mockCategoryRepository.Setup(repository => repository.GetCategory("categoryName"))
-            .ReturnsAsync(new Category
+            .ReturnsAsync(new Category()
             {
                 CategoryName = "categoryName",
                 Subcategories = new List<string> {"subcategory", "test1"},
-                UserId = "us123",
                 TransactionType = TransactionType.Expense
             });
 

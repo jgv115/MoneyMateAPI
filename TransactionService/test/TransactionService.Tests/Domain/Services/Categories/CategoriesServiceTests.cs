@@ -9,13 +9,12 @@ using Moq;
 using Newtonsoft.Json.Serialization;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Categories;
-using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Middleware;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
 using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
@@ -280,36 +279,13 @@ public class CategoriesServiceTests
     {
         private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
         private readonly Mock<ICategoriesRepository> _mockRepository;
-        private readonly Mock<IMapper> _mockMapper;
+        private readonly IMapper _stubMapper;
 
         public CreateCategory()
         {
             _mockCurrentUserContext = new Mock<CurrentUserContext>();
             _mockRepository = new Mock<ICategoriesRepository>();
-            _mockMapper = new Mock<IMapper>();
-        }
-
-
-        // TODO: take away mock mapper?
-        [Fact]
-        public async Task
-            GivenValidCreateCategory_ThenMapperShouldBeCalledWithCorrectArguments()
-        {
-            var expectedCategoryDto = new CategoryDto
-            {
-                CategoryName = "testname",
-                TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"test1", "test2"}
-            };
-
-            _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CategoryDto>())).Returns(new Category());
-
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
-                _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
-
-            await service.CreateCategory(expectedCategoryDto);
-
-            _mockMapper.Verify(mapper => mapper.Map<Category>(expectedCategoryDto));
+            _stubMapper = new MapperConfiguration(cfg => { cfg.AddProfile<CategoryProfile>(); }).CreateMapper();
         }
 
         [Fact]
@@ -330,22 +306,15 @@ public class CategoriesServiceTests
                 Subcategories = expectedSubcategories
             };
 
-            var expectedCategory = new Category
+            var expectedCategory = new Category()
             {
-                UserId = expectedUserId,
                 CategoryName = expectedCategoryName,
                 TransactionType = expectedTransactionType,
                 Subcategories = expectedSubcategories,
             };
 
-            _mockMapper.Setup(mapper => mapper.Map<Category>(It.IsAny<CategoryDto>())).Returns(new Category
-            {
-                CategoryName = expectedCategoryName,
-                Subcategories = expectedSubcategories
-            });
-
             var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
-                _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
+                _stubMapper, new FakeUpdateCategoryOperationFactory());
 
             await service.CreateCategory(inputDto);
 

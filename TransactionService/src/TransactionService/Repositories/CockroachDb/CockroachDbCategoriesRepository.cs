@@ -7,7 +7,6 @@ using AutoMapper;
 using Dapper;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb.Entities;
-using TransactionService.Repositories.DynamoDb;
 using TransactionType = TransactionService.Constants.TransactionType;
 
 namespace TransactionService.Repositories.CockroachDb
@@ -51,7 +50,7 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        public async Task<DynamoDb.Models.Category> GetCategory(string categoryName)
+        public async Task<Domain.Models.Category> GetCategory(string categoryName)
         {
             var query = @"SELECT c.Id, u.Id as UserId, c.name as Name, s.Id, s.Name as Name FROM category c
                             JOIN users u on c.user_id = u.id and u.user_identifier = @user_identifier
@@ -60,10 +59,10 @@ namespace TransactionService.Repositories.CockroachDb
 
             var categories = await QueryAndBuildCategory(query,
                 new {user_identifier = _userContext.UserId, categoryName = categoryName});
-            return _mapper.Map<Category, DynamoDb.Models.Category>(categories.Distinct().First());
+            return _mapper.Map<Category, Domain.Models.Category>(categories.Distinct().First());
         }
 
-        public async Task<IEnumerable<DynamoDb.Models.Category>> GetAllCategories()
+        public async Task<IEnumerable<Domain.Models.Category>> GetAllCategories()
         {
             var query =
                 @"SELECT c.id, u.id as UserId, c.name as Name, tt.name as TransactionType, s.Id, s.name as Name FROM category c
@@ -73,10 +72,10 @@ namespace TransactionService.Repositories.CockroachDb
 
             var categories = await QueryAndBuildCategory(query,
                 new {user_identifier = _userContext.UserId});
-            return _mapper.Map<IEnumerable<Category>, List<DynamoDb.Models.Category>>(categories.Distinct());
+            return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories.Distinct());
         }
 
-        public async Task<IEnumerable<DynamoDb.Models.Category>> GetAllCategoriesForTransactionType(
+        public async Task<IEnumerable<Domain.Models.Category>> GetAllCategoriesForTransactionType(
             TransactionType transactionType)
         {
             var query =
@@ -89,10 +88,10 @@ namespace TransactionService.Repositories.CockroachDb
             var categories = await QueryAndBuildCategory(query,
                 new {user_identifier = _userContext.UserId, transaction_type = transactionType.ToString()});
 
-            return _mapper.Map<IEnumerable<Category>, List<DynamoDb.Models.Category>>(categories.Distinct());
+            return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories.Distinct());
         }
 
-        public async Task CreateCategory(DynamoDb.Models.Category newCategory)
+        public async Task CreateCategory(Domain.Models.Category newDynamoDbCategory)
         {
             using (var connection = _context.CreateConnection())
             {
@@ -110,15 +109,15 @@ namespace TransactionService.Repositories.CockroachDb
                     RETURNING id";
 
                     var categoryParameters = new DynamicParameters();
-                    categoryParameters.Add(name: "@new_category_name", value: newCategory.CategoryName, DbType.String);
+                    categoryParameters.Add(name: "@new_category_name", value: newDynamoDbCategory.CategoryName, DbType.String);
                     categoryParameters.Add(name: "@user_identifier", value: _userContext.UserId, DbType.String);
-                    categoryParameters.Add(name: "@transaction_type", value: newCategory.TransactionType.ToString(),
+                    categoryParameters.Add(name: "@transaction_type", value: newDynamoDbCategory.TransactionType.ToString(),
                         DbType.String);
 
                     var returnedId =
                         await connection.QuerySingleAsync<Guid>(insertCategoryQuery, categoryParameters, transaction);
 
-                    if (newCategory.Subcategories.Any())
+                    if (newDynamoDbCategory.Subcategories.Any())
                     {
                         var insertSubcategoryQuery =
                             @"WITH input (subcategory_name, category_id) AS (VALUES(@subcategory_name, @category_id))
@@ -128,7 +127,7 @@ namespace TransactionService.Repositories.CockroachDb
 
 
                         var subcategoryParams =
-                            newCategory.Subcategories.Select(s => new {subcategory_name = s, category_id = returnedId});
+                            newDynamoDbCategory.Subcategories.Select(s => new {subcategory_name = s, category_id = returnedId});
                         await connection.ExecuteAsync(insertSubcategoryQuery, subcategoryParams, transaction);
                     }
 
@@ -137,9 +136,9 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        public Task UpdateCategoryName(DynamoDb.Models.Category category, string newCategoryName)
+        public Task UpdateCategoryName(Domain.Models.Category category, string newCategoryName)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task DeleteCategory(string categoryName)

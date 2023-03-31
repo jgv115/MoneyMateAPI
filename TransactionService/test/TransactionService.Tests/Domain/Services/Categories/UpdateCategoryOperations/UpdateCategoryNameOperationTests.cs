@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Transactions.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
@@ -42,11 +43,10 @@ public class UpdateCategoryNameOperationTests
             "newCategory");
 
         _mockCategoryRepository.Setup(repository => repository.GetCategory("categoryName"))
-            .ReturnsAsync(new Category
+            .ReturnsAsync(new Category()
             {
                 CategoryName = "categoryName",
                 Subcategories = new List<string> {"subcategory", "test1"},
-                UserId = "us123",
                 TransactionType = TransactionType.Expense
             });
 
@@ -58,11 +58,10 @@ public class UpdateCategoryNameOperationTests
         await operation.ExecuteOperation();
 
         _mockCategoryRepository.Verify(repository =>
-            repository.UpdateCategoryName(new Category
+            repository.UpdateCategoryName(new Category()
             {
                 CategoryName = "categoryName",
                 Subcategories = new List<string> {"subcategory", "test1"},
-                UserId = "us123",
                 TransactionType = TransactionType.Expense
             }, "newCategory"));
     }
@@ -75,11 +74,10 @@ public class UpdateCategoryNameOperationTests
             "newCategory");
 
         _mockCategoryRepository.Setup(repository => repository.GetCategory("categoryName"))
-            .ReturnsAsync(new Category
+            .ReturnsAsync(new Category()
             {
                 CategoryName = "categoryName",
                 Subcategories = new List<string> {"subcategory", "test1"},
-                UserId = "us123",
                 TransactionType = TransactionType.Expense
             });
 
@@ -125,11 +123,10 @@ public class UpdateCategoryNameOperationTests
 
 
         _mockCategoryRepository.Verify(repository =>
-            repository.UpdateCategoryName(new Category
+            repository.UpdateCategoryName(new Category()
             {
                 CategoryName = "categoryName",
                 Subcategories = new List<string> {"subcategory", "test1"},
-                UserId = "us123",
                 TransactionType = TransactionType.Expense
             }, "newCategory"));
     }

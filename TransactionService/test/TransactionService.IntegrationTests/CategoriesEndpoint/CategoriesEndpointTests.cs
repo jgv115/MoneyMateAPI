@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using TransactionService.Repositories.DynamoDb.Models;
@@ -46,7 +47,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             new object[]
             {
                 "",
-                new List<Category>
+                new List<DynamoDbCategory>
                 {
                     new()
                     {
@@ -71,7 +72,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             new object[]
             {
                 "?transactionType=expense",
-                new List<Category>
+                new List<DynamoDbCategory>
                 {
                     new()
                     {
@@ -84,7 +85,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             new object[]
             {
                 "?transactionType=income",
-                new List<Category>
+                new List<DynamoDbCategory>
                 {
                     new()
                     {
@@ -106,9 +107,9 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     [Theory]
     [MemberData(nameof(CategoriesEndpointTestData))]
     public async Task GivenValidRequest_WhenGetCategoriesIsCalledWithCategoryType_ThenAllCategoriesAreReturned(
-        string queryString, List<Category> expectedCategories)
+        string queryString, List<DynamoDbCategory> expectedCategories)
     {
-        var initialData = new List<Category>
+        var initialData = new List<DynamoDbCategory>
         {
             new()
             {
@@ -148,7 +149,6 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         for (var i = 0; i < expectedCategories.Count; i++)
         {
             Assert.Equal(expectedCategories[i].CategoryName, returnedCategoriesList![i].CategoryName);
-            Assert.Equal(expectedCategories[i].UserId, returnedCategoriesList[i].UserId);
             Assert.Equal(expectedCategories[i].Subcategories, returnedCategoriesList[i].Subcategories);
         }
     }
@@ -159,7 +159,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         var inputCategories = new List<string> {"category1", "category2", "category3"};
         var expectedSubcategories = new List<string> {"test1", "test2", "test4"};
 
-        await _dynamoDbHelper.WriteIntoTable(inputCategories.Select(category => new Category
+        await _dynamoDbHelper.WriteIntoTable(inputCategories.Select(category => new DynamoDbCategory
         {
             UserId = PersistedCategoriesUserId,
             CategoryName = category,
@@ -195,7 +195,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         response.EnsureSuccessStatusCode();
 
-        var returnedCategories = await _dynamoDbHelper.ScanTable<Category>();
+        var returnedCategories = await _dynamoDbHelper.ScanTable<DynamoDbCategory>();
 
         Assert.Collection(returnedCategories, category =>
         {
@@ -212,7 +212,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         const string duplicateCategoryName = "category123";
         var duplicateTransactionType = TransactionType.Expense;
 
-        var initialData = new List<Category>
+        var initialData = new List<DynamoDbCategory>
         {
             new()
             {
@@ -250,7 +250,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     {
         const string categoryName = "category123";
 
-        var initialData = new List<Category>
+        var initialData = new List<DynamoDbCategory>
         {
             new()
             {
@@ -274,7 +274,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedCategoriesUserId, categoryName);
+        var returnedCategory = await _dynamoDbHelper.QueryTable<DynamoDbCategory>(PersistedCategoriesUserId, categoryName);
 
         Assert.Null(returnedCategory);
     }
@@ -285,7 +285,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     {
         const string categoryName = "category123";
 
-        var initialData = new List<Category>
+        var initialData = new List<DynamoDbCategory>
         {
             new()
             {
@@ -314,9 +314,9 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedCategoriesUserId, categoryName);
+        var returnedCategory = await _dynamoDbHelper.QueryTable<DynamoDbCategory>(PersistedCategoriesUserId, categoryName);
 
-        Assert.Equal(new Category
+        Assert.Equal(new DynamoDbCategory
         {
             UserId = PersistedCategoriesUserId,
             CategoryName = categoryName,
@@ -343,7 +343,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     {
         const string categoryName = "category123";
 
-        var initialData = new List<Category>
+        var initialData = new List<DynamoDbCategory>
         {
             new()
             {
@@ -372,9 +372,9 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedCategoriesUserId, categoryName);
+        var returnedCategory = await _dynamoDbHelper.QueryTable<DynamoDbCategory>(PersistedCategoriesUserId, categoryName);
 
-        Assert.Equal(new Category
+        Assert.Equal(new DynamoDbCategory
         {
             UserId = PersistedCategoriesUserId,
             CategoryName = categoryName,
@@ -390,7 +390,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         const string categoryName = "category123";
         const string existingSubcategoryName = "subcategory1";
 
-        var initialCategories = new List<Category>
+        var initialCategories = new List<DynamoDbCategory>
         {
             new()
             {
@@ -466,9 +466,9 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedCategoriesUserId, categoryName);
+        var returnedCategory = await _dynamoDbHelper.QueryTable<DynamoDbCategory>(PersistedCategoriesUserId, categoryName);
 
-        Assert.Equal(new Category
+        Assert.Equal(new DynamoDbCategory
         {
             UserId = PersistedCategoriesUserId,
             CategoryName = categoryName,
@@ -489,7 +489,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     {
         const string categoryName = "category123";
 
-        var initialCategories = new List<Category>
+        var initialCategories = new List<DynamoDbCategory>
         {
             new()
             {
@@ -567,9 +567,9 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         // Test that new category exists
         var returnedCategory =
-            await _dynamoDbHelper.QueryTable<Category>(PersistedCategoriesUserId, "renamed category");
+            await _dynamoDbHelper.QueryTable<DynamoDbCategory>(PersistedCategoriesUserId, "renamed category");
 
-        Assert.Equal(new Category
+        Assert.Equal(new DynamoDbCategory
         {
             UserId = PersistedCategoriesUserId,
             CategoryName = "renamed category",
@@ -578,7 +578,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
         }, returnedCategory);
         
         // Test that old category does not exist
-        var oldCategory = await _dynamoDbHelper.QueryTable<Category>(PersistedCategoriesUserId, categoryName);
+        var oldCategory = await _dynamoDbHelper.QueryTable<DynamoDbCategory>(PersistedCategoriesUserId, categoryName);
         Assert.Null(oldCategory);
 
         transaction1.Category = "renamed category";

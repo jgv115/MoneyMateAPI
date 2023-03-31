@@ -3,10 +3,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using AutoMapper;
 using Moq;
 using TransactionService.Constants;
+using TransactionService.Domain.Models;
 using TransactionService.Middleware;
-using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
 using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Repositories.Exceptions;
@@ -17,6 +18,7 @@ namespace TransactionService.Tests.Repositories;
 public class DynamoDbCategoriesRepositoryTests
 {
     private readonly Mock<IDynamoDBContext> _dynamoDbContextMock = new();
+    private readonly IMapper _stubMapper;
     private const string UserId = "test-user-123";
     private const string TableName = "table-name123";
 
@@ -30,17 +32,24 @@ public class DynamoDbCategoriesRepositoryTests
         UserId = UserId
     };
 
+    public DynamoDbCategoriesRepositoryTests()
+    {
+        var mapperConfig = new MapperConfiguration(cfg => cfg.AddMaps(typeof(DynamoDbCategoriesRepository)));
+        _stubMapper = new Mapper(mapperConfig);
+    }
+
     [Fact]
     public async Task GivenCategoryFound_WhenGetCategoryInvoked_ThenCorrectCategoryReturned()
     {
         const string categoryName = "category-name-123";
 
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
-        _dynamoDbContextMock.Setup(context => context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+        _dynamoDbContextMock.Setup(context => context.LoadAsync<DynamoDbCategory>($"{UserId}#Categories", categoryName,
                 It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Category()
+            .ReturnsAsync(new DynamoDbCategory()
             {
                 CategoryName = categoryName,
                 UserId = $"{UserId}#Categories",
@@ -52,7 +61,6 @@ public class DynamoDbCategoriesRepositoryTests
         Assert.Equal(new Category()
         {
             CategoryName = categoryName,
-            UserId = UserId,
             TransactionType = TransactionType.Expense
         }, returnedCategory);
     }
@@ -62,11 +70,12 @@ public class DynamoDbCategoriesRepositoryTests
     {
         const string categoryName = "category-name-123";
 
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
-        _dynamoDbContextMock.Setup(context => context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+        _dynamoDbContextMock.Setup(context => context.LoadAsync<DynamoDbCategory>($"{UserId}#Categories", categoryName,
                 It.IsAny<DynamoDBOperationConfig>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Category) null);
+            .ReturnsAsync((DynamoDbCategory) null);
 
         var returnedCategory = await repository.GetCategory(categoryName);
 
@@ -78,12 +87,13 @@ public class DynamoDbCategoriesRepositoryTests
     public async Task
         GivenCategoriesReturnedFromDynamoDb_WhenGetAllCategoriesInvoked_ThenCorrectUserCategoryListReturned()
     {
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
-        var mockAsyncSearch = new Mock<AsyncSearch<Category>>();
+        var mockAsyncSearch = new Mock<AsyncSearch<DynamoDbCategory>>();
 
         mockAsyncSearch.Setup(search => search.GetRemainingAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Category>
+            .ReturnsAsync(new List<DynamoDbCategory>
             {
                 new()
                 {
@@ -102,7 +112,7 @@ public class DynamoDbCategoriesRepositoryTests
             });
 
         _dynamoDbContextMock.Setup(context =>
-                context.QueryAsync<Category>($"{UserId}#Categories",
+                context.QueryAsync<DynamoDbCategory>($"{UserId}#Categories",
                     It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName)))
             .Returns(mockAsyncSearch.Object);
 
@@ -113,14 +123,12 @@ public class DynamoDbCategoriesRepositoryTests
             new()
             {
                 CategoryName = "categoryName1",
-                UserId = UserId,
                 TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"test1", "test2"}
             },
             new()
             {
                 CategoryName = "categoryName2",
-                UserId = UserId,
                 TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"test3", "test4"}
             }
@@ -131,16 +139,17 @@ public class DynamoDbCategoriesRepositoryTests
     public async Task
         GivenInputCategoryType_WhenGetAllCategoriesForTransactionTypeInvoked_ThenCorrectQueryFilterIsUsed()
     {
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
-        var mockAsyncSearch = new Mock<AsyncSearch<Category>>();
+        var mockAsyncSearch = new Mock<AsyncSearch<DynamoDbCategory>>();
 
         mockAsyncSearch.Setup(search => search.GetRemainingAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Category>());
+            .ReturnsAsync(new List<DynamoDbCategory>());
 
         DynamoDBOperationConfig operationConfig = new();
         _dynamoDbContextMock.Setup(context =>
-                context.QueryAsync<Category>($"{UserId}#Categories",
+                context.QueryAsync<DynamoDbCategory>($"{UserId}#Categories",
                     It.IsAny<DynamoDBOperationConfig>()))
             .Callback((object _, DynamoDBOperationConfig config) => operationConfig = config)
             .Returns(mockAsyncSearch.Object);
@@ -163,12 +172,13 @@ public class DynamoDbCategoriesRepositoryTests
     public async Task
         GivenInputCategoryType_WhenGetAllCategoriesForTransactionTypeInvoked_ThenCorrectCategoriesReturned()
     {
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
-        var mockAsyncSearch = new Mock<AsyncSearch<Category>>();
+        var mockAsyncSearch = new Mock<AsyncSearch<DynamoDbCategory>>();
 
         mockAsyncSearch.Setup(search => search.GetRemainingAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Category>
+            .ReturnsAsync(new List<DynamoDbCategory>
             {
                 new()
                 {
@@ -187,7 +197,7 @@ public class DynamoDbCategoriesRepositoryTests
             });
 
         _dynamoDbContextMock.Setup(context =>
-                context.QueryAsync<Category>($"{UserId}#Categories",
+                context.QueryAsync<DynamoDbCategory>($"{UserId}#Categories",
                     It.IsAny<DynamoDBOperationConfig>()))
             .Returns(mockAsyncSearch.Object);
 
@@ -198,14 +208,12 @@ public class DynamoDbCategoriesRepositoryTests
             new()
             {
                 CategoryName = "categoryName1",
-                UserId = UserId,
                 TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"test1", "test2"}
             },
             new()
             {
                 CategoryName = "categoryName2",
-                UserId = UserId,
                 TransactionType = TransactionType.Expense,
                 Subcategories = new List<string> {"test3", "test4"}
             }
@@ -215,14 +223,15 @@ public class DynamoDbCategoriesRepositoryTests
     [Fact]
     public async Task GivenCategoryAlreadyExists_WhenCreateCategoryInvoked_ThenRepositoryItemExistsExceptionThrown()
     {
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
         const string categoryName = "category-name-123";
 
-        _dynamoDbContextMock.Setup(context => context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+        _dynamoDbContextMock.Setup(context => context.LoadAsync<DynamoDbCategory>($"{UserId}#Categories", categoryName,
                 It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Category()
+            .ReturnsAsync(new DynamoDbCategory()
             {
                 CategoryName = categoryName,
                 UserId = $"{UserId}#Categories",
@@ -232,7 +241,6 @@ public class DynamoDbCategoriesRepositoryTests
         var inputCategory = new Category()
         {
             CategoryName = categoryName,
-            UserId = UserId,
             TransactionType = TransactionType.Expense,
             Subcategories = new List<string> {"test1", "test2"}
         };
@@ -243,26 +251,26 @@ public class DynamoDbCategoriesRepositoryTests
     [Fact]
     public async Task GivenCategoryDoesNotExist_WhenCreateCategoryInvoked_ThenCategorySavedCorrectly()
     {
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
         const string categoryName = "category-name-123";
 
-        _dynamoDbContextMock.Setup(context => context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+        _dynamoDbContextMock.Setup(context => context.LoadAsync<DynamoDbCategory>($"{UserId}#Categories", categoryName,
                 It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Category) null);
+            .ReturnsAsync((DynamoDbCategory) null);
 
         var inputCategory = new Category()
         {
             CategoryName = categoryName,
-            UserId = UserId,
             TransactionType = TransactionType.Expense,
             Subcategories = new List<string> {"test1", "test2"}
         };
 
         await repository.CreateCategory(inputCategory);
 
-        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new DynamoDbCategory()
             {
                 CategoryName = categoryName,
                 UserId = $"{UserId}#Categories",
@@ -278,19 +286,20 @@ public class DynamoDbCategoriesRepositoryTests
         var inputCategory = new Category()
         {
             CategoryName = "categoryName",
-            UserId = UserId,
             TransactionType = TransactionType.Expense,
             Subcategories = new List<string> {"test1", "test2"}
         };
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
         await repository.UpdateCategoryName(inputCategory, "new categoryName");
-        
-        _dynamoDbContextMock.Verify(context => context.DeleteAsync<Category>($"{UserId}#Categories", "categoryName",
+
+        _dynamoDbContextMock.Verify(context => context.DeleteAsync<DynamoDbCategory>($"{UserId}#Categories",
+            "categoryName",
             It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
             It.IsAny<CancellationToken>()));
-        
-        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new DynamoDbCategory()
             {
                 CategoryName = "new categoryName",
                 UserId = $"{UserId}#Categories",
@@ -304,11 +313,13 @@ public class DynamoDbCategoriesRepositoryTests
     public async Task GivenCategoryName_WhenDeleteCategoryInvoked_ThenCategoryDeletedCorrectly()
     {
         const string categoryName = "test-category-123";
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
         await repository.DeleteCategory(categoryName);
 
-        _dynamoDbContextMock.Verify(context => context.DeleteAsync<Category>($"{UserId}#Categories", categoryName,
+        _dynamoDbContextMock.Verify(context => context.DeleteAsync<DynamoDbCategory>($"{UserId}#Categories",
+            categoryName,
             It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
             It.IsAny<CancellationToken>()));
     }
@@ -317,13 +328,14 @@ public class DynamoDbCategoriesRepositoryTests
     public async Task GivenCategoryName_WhenGetAllSubcategoriesInvoked_ThenSubcategoriesQueriedCorrectly()
     {
         const string categoryName = "test-category-123";
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
         var expectedSubcategories = new List<string> {"hello1", "hello2"};
         _dynamoDbContextMock.Setup(context =>
-            context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+            context.LoadAsync<DynamoDbCategory>($"{UserId}#Categories", categoryName,
                 It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
-                It.IsAny<CancellationToken>())).ReturnsAsync(() => new Category
+                It.IsAny<CancellationToken>())).ReturnsAsync(() => new DynamoDbCategory
         {
             Subcategories = expectedSubcategories
         });
@@ -338,12 +350,13 @@ public class DynamoDbCategoriesRepositoryTests
     {
         const string categoryName = "test-category-123";
         const string newSubcategoryName = "new-subcategory";
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
         _dynamoDbContextMock.Setup(context =>
-            context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+            context.LoadAsync<DynamoDbCategory>($"{UserId}#Categories", categoryName,
                 It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
-                It.IsAny<CancellationToken>())).ReturnsAsync(() => new Category()
+                It.IsAny<CancellationToken>())).ReturnsAsync(() => new DynamoDbCategory()
         {
             CategoryName = categoryName,
             UserId = UserId,
@@ -353,7 +366,7 @@ public class DynamoDbCategoriesRepositoryTests
 
         await repository.AddSubcategory(categoryName, newSubcategoryName);
 
-        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new DynamoDbCategory()
             {
                 CategoryName = categoryName,
                 UserId = UserId,
@@ -369,12 +382,13 @@ public class DynamoDbCategoriesRepositoryTests
         const string categoryName = "test-category-123";
         const string existingSubcategoryName = "existing-subcategory";
         const string newSubcategoryName = "new-subcategory";
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
         _dynamoDbContextMock.Setup(context =>
-            context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+            context.LoadAsync<DynamoDbCategory>($"{UserId}#Categories", categoryName,
                 It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
-                It.IsAny<CancellationToken>())).ReturnsAsync(() => new Category()
+                It.IsAny<CancellationToken>())).ReturnsAsync(() => new DynamoDbCategory()
         {
             CategoryName = categoryName,
             UserId = UserId,
@@ -384,7 +398,7 @@ public class DynamoDbCategoriesRepositoryTests
 
         await repository.UpdateSubcategoryName(categoryName, existingSubcategoryName, newSubcategoryName);
 
-        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new DynamoDbCategory()
             {
                 CategoryName = categoryName,
                 UserId = UserId,
@@ -399,12 +413,13 @@ public class DynamoDbCategoriesRepositoryTests
     {
         const string categoryName = "test-category-123";
         const string subcategoryName = "new-subcategory";
-        var repository = new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext);
+        var repository =
+            new DynamoDbCategoriesRepository(_stubConfig, _dynamoDbContextMock.Object, _userContext, _stubMapper);
 
         _dynamoDbContextMock.Setup(context =>
-            context.LoadAsync<Category>($"{UserId}#Categories", categoryName,
+            context.LoadAsync<DynamoDbCategory>($"{UserId}#Categories", categoryName,
                 It.Is<DynamoDBOperationConfig>(config => config.OverrideTableName == TableName),
-                It.IsAny<CancellationToken>())).ReturnsAsync(() => new Category()
+                It.IsAny<CancellationToken>())).ReturnsAsync(() => new DynamoDbCategory()
         {
             CategoryName = categoryName,
             UserId = UserId,
@@ -414,7 +429,7 @@ public class DynamoDbCategoriesRepositoryTests
 
         await repository.DeleteSubcategory(categoryName, subcategoryName);
 
-        _dynamoDbContextMock.Verify(context => context.SaveAsync(new Category()
+        _dynamoDbContextMock.Verify(context => context.SaveAsync(new DynamoDbCategory()
             {
                 CategoryName = categoryName,
                 UserId = UserId,

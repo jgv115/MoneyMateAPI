@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Transactions.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
@@ -40,7 +41,7 @@ public class DeleteSubcategoryOperationTests
             _transactionServiceMock.Object, categoryName, 2);
 
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
-            .ReturnsAsync(new Category
+            .ReturnsAsync(new Category()
             {
                 Subcategories = new List<string>() {"hello1", "hello2"}
             });
@@ -57,7 +58,7 @@ public class DeleteSubcategoryOperationTests
             _transactionServiceMock.Object, categoryName, 2);
 
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
-            .ReturnsAsync(new Category
+            .ReturnsAsync(new Category()
             {
                 Subcategories = new List<string>() {"hello1", "hello2", subcategoryName}
             });
@@ -94,9 +95,8 @@ public class DeleteSubcategoryOperationTests
             _transactionServiceMock.Object, categoryName, 2);
 
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
-            .ReturnsAsync(new Category
+            .ReturnsAsync(new Category()
             {
-                UserId = "user123",
                 CategoryName = categoryName,
                 TransactionType = TransactionType.Expense,
                 Subcategories = new List<string>() {"hello1", "hello2", subcategoryName}
