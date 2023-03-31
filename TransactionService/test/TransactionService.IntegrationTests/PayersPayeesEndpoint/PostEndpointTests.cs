@@ -55,7 +55,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
+            var scanOutput = await _dynamoDbHelper.ScanTable<DynamoDbPayerPayee>();
 
             Assert.Collection(scanOutput,
                 payerPayee =>
@@ -93,7 +93,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             var response = await _httpClient.PostAsync("api/payerspayees/payees", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var scanOutput = await _dynamoDbHelper.ScanTable<PayerPayee>();
+            var scanOutput = await _dynamoDbHelper.ScanTable<DynamoDbPayerPayee>();
 
             Assert.Collection(scanOutput,
                 payerPayee =>
@@ -124,7 +124,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             GivenExistingPayersInDatabase_WhenPostPayerEndpointCalled_ThenDuplicatePayerShouldNotBePersisted(
                 string expectedPayerName, string expectedExternalId)
         {
-            var payer = new PayerPayee
+            var payer = new DynamoDbPayerPayee
             {
                 UserId = UserId,
                 PayerPayeeId = $"payer#1234567",
@@ -137,7 +137,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 ExternalId = expectedExternalId
             };
 
-            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee>
+            await _dynamoDbHelper.WriteIntoTable(new List<DynamoDbPayerPayee>
             {
                 payer,
                 new()
@@ -163,7 +163,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
             GivenExistingPayeesInDatabase_WhenPostPayeeEndpointCalled_ThenDuplicatePayeeShouldNotBePersisted(
                 string expectedPayeeName, string expectedExternalId)
         {
-            var payee = new PayerPayee
+            var payee = new DynamoDbPayerPayee
             {
                 UserId = UserId,
                 PayerPayeeId = $"payee#1234567",
@@ -176,7 +176,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 ExternalId = expectedExternalId
             };
 
-            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee>
+            await _dynamoDbHelper.WriteIntoTable(new List<DynamoDbPayerPayee>
             {
                 payee,
                 new()

@@ -4,8 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using AutoMapper;
 using Moq;
-using TransactionService.Repositories;
+using TransactionService.Domain.Models;
+using TransactionService.Middleware;
 using TransactionService.Repositories.DynamoDb;
 using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
@@ -23,17 +25,27 @@ public class DynamoDbPayerPayeeRepositoryTests
         TableName = TableName
     };
 
+    private readonly CurrentUserContext _currentUserContext = new CurrentUserContext() {UserId = UserId};
+    private readonly IMapper _stubMapper;
+
+    public DynamoDbPayerPayeeRepositoryTests()
+    {
+        _stubMapper = new MapperConfiguration(cfg =>
+                cfg.AddMaps(typeof(DynamoDbPayerPayeeRepository)))
+            .CreateMapper();
+    }
+
     public class GetPayeesPaginatedTestData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
             yield return new object[]
             {
-                new List<PayerPayee>(), 0, 2, new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>(), 0, 2, new List<PayerPayee>()
             };
             yield return new object[]
             {
-                new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>()
                 {
                     new()
                     {
@@ -61,14 +73,12 @@ public class DynamoDbPayerPayeeRepositoryTests
                 {
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "123",
                         PayerPayeeId = "id1",
                         PayerPayeeName = "name1"
                     },
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "234",
                         PayerPayeeId = "id2",
                         PayerPayeeName = "name2"
@@ -77,7 +87,7 @@ public class DynamoDbPayerPayeeRepositoryTests
             };
             yield return new object[]
             {
-                new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>()
                 {
                     new()
                     {
@@ -105,21 +115,18 @@ public class DynamoDbPayerPayeeRepositoryTests
                 {
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "123",
                         PayerPayeeId = "id1",
                         PayerPayeeName = "name1"
                     },
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "234",
                         PayerPayeeId = "id2",
                         PayerPayeeName = "name2"
                     },
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "345",
                         PayerPayeeId = "id3",
                         PayerPayeeName = "name3"
@@ -128,7 +135,7 @@ public class DynamoDbPayerPayeeRepositoryTests
             };
             yield return new object[]
             {
-                new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>()
                 {
                     new()
                     {
@@ -156,7 +163,6 @@ public class DynamoDbPayerPayeeRepositoryTests
                 {
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "345",
                         PayerPayeeId = "id3",
                         PayerPayeeName = "name3"
@@ -165,7 +171,7 @@ public class DynamoDbPayerPayeeRepositoryTests
             };
             yield return new object[]
             {
-                new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>()
                 {
                     new()
                     {
@@ -201,16 +207,19 @@ public class DynamoDbPayerPayeeRepositoryTests
 
     [Theory]
     [ClassData(typeof(GetPayeesPaginatedTestData))]
-    public async Task GivenPaginationSpec_WhenGetPayeesInvoked_ThenCorrectPayeesReturned(List<PayerPayee> payees,
+    public async Task GivenPaginationSpec_WhenGetPayeesInvoked_ThenCorrectPayeesReturned(
+        List<DynamoDbPayerPayee> payees,
         int offset, int limit, List<PayerPayee> expectedReturnedPayees)
     {
-        var repository = new DynamoDbPayerPayeeRepository(_stubConfig, _dynamoDbContextMock.Object);
+        var repository =
+            new DynamoDbPayerPayeeRepository(_stubConfig, _dynamoDbContextMock.Object, _currentUserContext,
+                _stubMapper);
 
-        var mockAsyncSearch = new Mock<AsyncSearch<PayerPayee>>();
+        var mockAsyncSearch = new Mock<AsyncSearch<DynamoDbPayerPayee>>();
         mockAsyncSearch.Setup(search => search.GetRemainingAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => payees);
 
-        _dynamoDbContextMock.Setup(context => context.QueryAsync<PayerPayee>($"{UserId}#PayersPayees",
+        _dynamoDbContextMock.Setup(context => context.QueryAsync<DynamoDbPayerPayee>($"{UserId}#PayersPayees",
             QueryOperator.BeginsWith, new[] {"payee#"},
             It.Is<DynamoDBOperationConfig>(
                 config => config.OverrideTableName == TableName))).Returns(mockAsyncSearch.Object);
@@ -224,18 +233,18 @@ public class DynamoDbPayerPayeeRepositoryTests
 
         Assert.Equal(expectedReturnedPayees, returnedPayees);
     }
-    
-        public class GetPayersPaginatedTestData : IEnumerable<object[]>
+
+    public class GetPayersPaginatedTestData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
             yield return new object[]
             {
-                new List<PayerPayee>(), 0, 2, new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>(), 0, 2, new List<PayerPayee>()
             };
             yield return new object[]
             {
-                new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>()
                 {
                     new()
                     {
@@ -263,14 +272,12 @@ public class DynamoDbPayerPayeeRepositoryTests
                 {
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "123",
                         PayerPayeeId = "id1",
                         PayerPayeeName = "name1"
                     },
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "234",
                         PayerPayeeId = "id2",
                         PayerPayeeName = "name2"
@@ -279,7 +286,7 @@ public class DynamoDbPayerPayeeRepositoryTests
             };
             yield return new object[]
             {
-                new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>()
                 {
                     new()
                     {
@@ -307,21 +314,18 @@ public class DynamoDbPayerPayeeRepositoryTests
                 {
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "123",
                         PayerPayeeId = "id1",
                         PayerPayeeName = "name1"
                     },
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "234",
                         PayerPayeeId = "id2",
                         PayerPayeeName = "name2"
                     },
                     new()
                     {
-                        UserId = $"{UserId}#PayersPayees",
                         ExternalId = "345",
                         PayerPayeeId = "id3",
                         PayerPayeeName = "name3"
@@ -330,7 +334,7 @@ public class DynamoDbPayerPayeeRepositoryTests
             };
             yield return new object[]
             {
-                new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>()
                 {
                     new()
                     {
@@ -354,7 +358,7 @@ public class DynamoDbPayerPayeeRepositoryTests
                         PayerPayeeName = "name3"
                     }
                 },
-                2, 2, new List<PayerPayee>
+                2, 2, new List<DynamoDbPayerPayee>
                 {
                     new()
                     {
@@ -367,7 +371,7 @@ public class DynamoDbPayerPayeeRepositoryTests
             };
             yield return new object[]
             {
-                new List<PayerPayee>()
+                new List<DynamoDbPayerPayee>()
                 {
                     new()
                     {
@@ -391,7 +395,7 @@ public class DynamoDbPayerPayeeRepositoryTests
                         PayerPayeeName = "name3"
                     }
                 },
-                4, 2, new List<PayerPayee>()
+                4, 2, new List<DynamoDbPayerPayee>()
             };
         }
 
@@ -403,16 +407,18 @@ public class DynamoDbPayerPayeeRepositoryTests
 
     [Theory]
     [ClassData(typeof(GetPayeesPaginatedTestData))]
-    public async Task GivenPaginationSpec_WhenGetPayersInvoked_ThenCorrectPayersReturned(List<PayerPayee> payers,
+    public async Task GivenPaginationSpec_WhenGetPayersInvoked_ThenCorrectPayersReturned(
+        List<DynamoDbPayerPayee> payers,
         int offset, int limit, List<PayerPayee> expectedReturnedPayees)
     {
-        var repository = new DynamoDbPayerPayeeRepository(_stubConfig, _dynamoDbContextMock.Object);
+        var repository = new DynamoDbPayerPayeeRepository(_stubConfig, _dynamoDbContextMock.Object, _currentUserContext,
+            _stubMapper);
 
-        var mockAsyncSearch = new Mock<AsyncSearch<PayerPayee>>();
+        var mockAsyncSearch = new Mock<AsyncSearch<DynamoDbPayerPayee>>();
         mockAsyncSearch.Setup(search => search.GetRemainingAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => payers);
 
-        _dynamoDbContextMock.Setup(context => context.QueryAsync<PayerPayee>($"{UserId}#PayersPayees",
+        _dynamoDbContextMock.Setup(context => context.QueryAsync<DynamoDbPayerPayee>($"{UserId}#PayersPayees",
             QueryOperator.BeginsWith, new[] {"payer#"},
             It.Is<DynamoDBOperationConfig>(
                 config => config.OverrideTableName == TableName))).Returns(mockAsyncSearch.Object);

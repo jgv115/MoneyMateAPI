@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
-using AutoMapper.Internal;
+using AutoMapper;
+using TransactionService.Domain.Models;
 using TransactionService.Helpers;
+using TransactionService.Middleware;
 using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Repositories.Exceptions;
 
@@ -15,7 +17,9 @@ namespace TransactionService.Repositories.DynamoDb
     public class DynamoDbPayerPayeeRepository : IPayerPayeeRepository
     {
         private readonly IDynamoDBContext _dbContext;
+        private readonly string _userId;
         private readonly string _tableName;
+        private readonly IMapper _mapper;
 
         private const string HashKeySuffix = "#PayersPayees";
         private const string PayerPayeeNameIndex = "PayerPayeeNameIndex";
@@ -26,31 +30,29 @@ namespace TransactionService.Repositories.DynamoDb
             {"payer", "payer#"}
         };
 
-        public DynamoDbPayerPayeeRepository(DynamoDbRepositoryConfig config, IDynamoDBContext dbContext)
+        public DynamoDbPayerPayeeRepository(DynamoDbRepositoryConfig config, IDynamoDBContext dbContext,
+            CurrentUserContext userContext, IMapper mapper)
         {
             _dbContext = dbContext;
+            _userId = userContext.UserId;
+            _mapper = mapper;
             _tableName = config.TableName;
         }
 
-        private string ExtractRangeKeyData(string rangeKey) => rangeKey.Split("#")[1];
 
-        private IEnumerable<PayerPayee> PaginateResults(List<PayerPayee> results, PaginationSpec paginationSpec)
+        private IEnumerable<DynamoDbPayerPayee> PaginateResults(List<DynamoDbPayerPayee> results,
+            PaginationSpec paginationSpec)
         {
             var paginatedPayees = results
                 .Skip(paginationSpec.Offset)
-                .Take(paginationSpec.Limit)
-                .Select(payerPayee =>
-                {
-                    payerPayee.PayerPayeeId = ExtractRangeKeyData(payerPayee.PayerPayeeId);
-                    return payerPayee;
-                });
+                .Take(paginationSpec.Limit);
 
             return paginatedPayees;
         }
 
         public async Task<IEnumerable<PayerPayee>> GetPayers(string userId, PaginationSpec paginationSpec)
         {
-            var payers = await _dbContext.QueryAsync<PayerPayee>(
+            var payers = await _dbContext.QueryAsync<DynamoDbPayerPayee>(
                 $"{userId}{HashKeySuffix}",
                 QueryOperator.BeginsWith, new[] {"payer#"}, new DynamoDBOperationConfig
                 {
@@ -58,13 +60,13 @@ namespace TransactionService.Repositories.DynamoDb
                 }
             ).GetRemainingAsync();
 
-            return PaginateResults(payers, paginationSpec);
-
+            var paginatedPayers = PaginateResults(payers, paginationSpec);
+            return _mapper.Map<IEnumerable<DynamoDbPayerPayee>, IEnumerable<PayerPayee>>(paginatedPayers);
         }
 
         public async Task<IEnumerable<PayerPayee>> GetPayees(string userId, PaginationSpec paginationSpec)
         {
-            var payees = await _dbContext.QueryAsync<PayerPayee>(
+            var payees = await _dbContext.QueryAsync<DynamoDbPayerPayee>(
                 $"{userId}{HashKeySuffix}",
                 QueryOperator.BeginsWith, new[] {"payee#"}, new DynamoDBOperationConfig
                 {
@@ -72,35 +74,34 @@ namespace TransactionService.Repositories.DynamoDb
                 }
             ).GetRemainingAsync();
 
-            return PaginateResults(payees, paginationSpec);
+            var paginatedPayees = PaginateResults(payees, paginationSpec);
+            return _mapper.Map<IEnumerable<DynamoDbPayerPayee>, IEnumerable<PayerPayee>>(paginatedPayees);
         }
 
         public async Task<PayerPayee> GetPayer(string userId, Guid payerPayeeId)
         {
-            var payer = await _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+            var payer = await _dbContext.LoadAsync<DynamoDbPayerPayee>($"{userId}{HashKeySuffix}",
                 $"{_rangeKeyPrefixes["payer"]}{payerPayeeId}", new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName,
                 });
-            payer.PayerPayeeId = ExtractRangeKeyData(payer.PayerPayeeId);
-            return payer;
+            return _mapper.Map<DynamoDbPayerPayee, PayerPayee>(payer);
         }
 
         public async Task<PayerPayee> GetPayee(string userId, Guid payerPayeeId)
         {
-            var payee = await _dbContext.LoadAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+            var payee = await _dbContext.LoadAsync<DynamoDbPayerPayee>($"{userId}{HashKeySuffix}",
                 $"{_rangeKeyPrefixes["payee"]}{payerPayeeId}", new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName,
                 });
-            payee.PayerPayeeId = ExtractRangeKeyData(payee.PayerPayeeId);
-            return payee;
+            return _mapper.Map<DynamoDbPayerPayee, PayerPayee>(payee);
         }
 
-        private async Task<PayerPayee> QueryPayerPayee(string userId, string payerOrPayee, string name,
+        private async Task<DynamoDbPayerPayee> QueryPayerPayee(string userId, string payerOrPayee, string name,
             string externalId)
         {
-            var results = await _dbContext.QueryAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+            var results = await _dbContext.QueryAsync<DynamoDbPayerPayee>($"{userId}{HashKeySuffix}",
                 QueryOperator.Equal, new[] {name}, new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName,
@@ -118,10 +119,10 @@ namespace TransactionService.Repositories.DynamoDb
         private async Task<IEnumerable<PayerPayee>> QueryPayerPayee(string userId, string payerOrPayee,
             IEnumerable<string> nameSearchQueries)
         {
-            var payerPayeeResults = new ConcurrentBag<PayerPayee>();
+            var payerPayeeResults = new ConcurrentBag<DynamoDbPayerPayee>();
             var tasks = nameSearchQueries.Select(async searchQuery =>
             {
-                var results = await _dbContext.QueryAsync<PayerPayee>($"{userId}{HashKeySuffix}",
+                var results = await _dbContext.QueryAsync<DynamoDbPayerPayee>($"{userId}{HashKeySuffix}",
                     QueryOperator.BeginsWith, new[] {searchQuery}, new DynamoDBOperationConfig
                     {
                         OverrideTableName = _tableName,
@@ -133,16 +134,17 @@ namespace TransactionService.Repositories.DynamoDb
                     }
                 ).GetRemainingAsync();
 
-                results.ForAll(payerPayee =>
+                foreach (var dynamoDbPayerPayee in results)
                 {
-                    payerPayee.PayerPayeeId = ExtractRangeKeyData(payerPayee.PayerPayeeId);
-                    payerPayeeResults.Add(payerPayee);
-                });
+                    payerPayeeResults.Add(dynamoDbPayerPayee);
+                }
             });
 
             await Task.WhenAll(tasks);
 
-            return payerPayeeResults.DistinctBy(payerpayee => payerpayee.PayerPayeeId);
+            var distinctPayerPayees = payerPayeeResults.DistinctBy(payerpayee => payerpayee.PayerPayeeId);
+
+            return _mapper.Map<IEnumerable<DynamoDbPayerPayee>, IEnumerable<PayerPayee>>(distinctPayerPayees);
         }
 
         private async Task<IEnumerable<PayerPayee>> FindPayerPayee(string userId, string payerOrPayee,
@@ -184,7 +186,7 @@ namespace TransactionService.Repositories.DynamoDb
         {
             if (payerOrPayee is "payer" or "payee")
             {
-                var foundPayerPayee = await QueryPayerPayee(newPayerPayee.UserId, payerOrPayee,
+                var foundPayerPayee = await QueryPayerPayee(_userId, payerOrPayee,
                     newPayerPayee.PayerPayeeName,
                     newPayerPayee.ExternalId);
 
@@ -194,9 +196,11 @@ namespace TransactionService.Repositories.DynamoDb
                         $"{payerOrPayee} with name {newPayerPayee.PayerPayeeName} and externalId {newPayerPayee.ExternalId} already exists");
                 }
 
-                newPayerPayee.UserId += HashKeySuffix;
-                newPayerPayee.PayerPayeeId = $"{_rangeKeyPrefixes[payerOrPayee]}{newPayerPayee.PayerPayeeId}";
-                await _dbContext.SaveAsync(newPayerPayee, new DynamoDBOperationConfig
+                var newDynamoDbPayerPayee = _mapper.Map<PayerPayee, DynamoDbPayerPayee>(newPayerPayee);
+
+                newDynamoDbPayerPayee.UserId = $"{_userId}{HashKeySuffix}";
+                newDynamoDbPayerPayee.PayerPayeeId = $"{_rangeKeyPrefixes[payerOrPayee]}{newPayerPayee.PayerPayeeId}";
+                await _dbContext.SaveAsync(newDynamoDbPayerPayee, new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName
                 });
@@ -212,9 +216,9 @@ namespace TransactionService.Repositories.DynamoDb
             await StorePayerPayee(newPayerPayee, "payer");
         }
 
-        public async Task CreatePayee(PayerPayee newPayerPayee)
+        public async Task CreatePayee(PayerPayee newDynamoDbPayerPayee)
         {
-            await StorePayerPayee(newPayerPayee, "payee");
+            await StorePayerPayee(newDynamoDbPayerPayee, "payee");
         }
 
         public Task PutPayer(string userId)

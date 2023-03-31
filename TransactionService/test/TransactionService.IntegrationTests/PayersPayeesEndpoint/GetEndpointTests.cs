@@ -38,7 +38,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         [Fact]
         public async Task GivenValidRequest_WhenGetPayersEndpointCalled_ThenAllCorrectPayersReturned()
         {
-            var payer1 = new PayerPayee
+            var payer1 = new DynamoDbPayerPayee
             {
                 UserId = UserId,
                 PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
@@ -52,7 +52,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 ExternalId = payer1.ExternalId,
                 Address = ExpectedAddress
             };
-            var payer2 = new PayerPayee
+            var payer2 = new DynamoDbPayerPayee
             {
                 UserId = UserId,
                 PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
@@ -67,7 +67,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 Address = ExpectedAddress
             };
 
-            var initialData = new List<PayerPayee>
+            var initialData = new List<DynamoDbPayerPayee>
             {
                 payer1,
                 payer2,
@@ -101,7 +101,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         [Fact]
         public async Task GivenValidRequest_WhenGetPayeesEndpointCalled_ThenCorrectPayeesReturned()
         {
-            var payee1 = new PayerPayee
+            var payee1 = new DynamoDbPayerPayee
             {
                 UserId = UserId,
                 PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
@@ -115,7 +115,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 ExternalId = payee1.ExternalId,
                 Address = ExpectedAddress
             };
-            var payee2 = new PayerPayee
+            var payee2 = new DynamoDbPayerPayee
             {
                 UserId = UserId,
                 PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
@@ -130,7 +130,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 Address = ExpectedAddress
             };
 
-            var initialData = new List<PayerPayee>
+            var initialData = new List<DynamoDbPayerPayee>
             {
                 new()
                 {
@@ -169,7 +169,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         public async Task GivenValidRequest_WhenGetPayerEndpointCalled_ThenCorrectPayerReturned()
         {
             var payerPayeeId = Guid.NewGuid();
-            var payer = new PayerPayee
+            var payer = new DynamoDbPayerPayee
             {
                 UserId = UserId,
                 PayerPayeeId = $"payer#{payerPayeeId.ToString()}",
@@ -183,7 +183,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 ExternalId = payer.ExternalId,
                 Address = "1 Hello Street Vic Australia 3123"
             };
-            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payer});
+            await _dynamoDbHelper.WriteIntoTable(new List<DynamoDbPayerPayee> {payer});
 
             var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
             response.EnsureSuccessStatusCode();
@@ -201,7 +201,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         public async Task GivenValidRequest_WhenGetPayeeEndpointCalled_ThenCorrectPayeeReturned()
         {
             var payerPayeeId = Guid.NewGuid();
-            var payee = new PayerPayee
+            var payee = new DynamoDbPayerPayee
             {
                 UserId = UserId,
                 PayerPayeeId = $"payee#{payerPayeeId.ToString()}",
@@ -215,7 +215,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
                 ExternalId = payee.ExternalId,
                 Address = "1 Hello Street Vic Australia 3123"
             };
-            await _dynamoDbHelper.WriteIntoTable(new List<PayerPayee> {payee});
+            await _dynamoDbHelper.WriteIntoTable(new List<DynamoDbPayerPayee> {payee});
 
             var response = await _httpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
             response.EnsureSuccessStatusCode();

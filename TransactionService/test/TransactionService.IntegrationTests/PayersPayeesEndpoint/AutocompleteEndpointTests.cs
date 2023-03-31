@@ -44,14 +44,14 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         GivenValidRequestWithSingleSearchWord_WhenGetAutocompletePayeesEndpointCalled_ThenCorrectPayeesReturned(
             string searchQuery)
     {
-        var payee1 = new PayerPayee
+        var payee1 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
             PayerPayeeName = "payee1",
             ExternalId = Guid.NewGuid().ToString()
         };
-        var payee2 = new PayerPayee
+        var payee2 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
@@ -66,7 +66,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
             Address = ExpectedAddress
         };
 
-        var initialData = new List<PayerPayee>
+        var initialData = new List<DynamoDbPayerPayee>
         {
             new()
             {
@@ -110,14 +110,14 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         GivenValidRequestWithMultipleSearchWords_WhenGetAutocompletePayeesEndpointCalled_ThenCorrectPayeesReturned(
             string searchQuery)
     {
-        var payee1 = new PayerPayee
+        var payee1 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
             PayerPayeeName = "payee1",
             ExternalId = Guid.NewGuid().ToString()
         };
-        var payee2 = new PayerPayee
+        var payee2 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
@@ -132,7 +132,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
             Address = ExpectedAddress
         };
 
-        var initialData = new List<PayerPayee>
+        var initialData = new List<DynamoDbPayerPayee>
         {
             new()
             {
@@ -171,14 +171,14 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
     public async Task
         GivenValidRequestWithSingleSearchWord_WhenGetAutocompletePayersEndpointCalled_ThenCorrectPayersReturned()
     {
-        var payer1 = new PayerPayee
+        var payer1 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
             PayerPayeeName = "payer1",
             ExternalId = Guid.NewGuid().ToString()
         };
-        var payer2 = new PayerPayee
+        var payer2 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
@@ -193,7 +193,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
             Address = ExpectedAddress
         };
 
-        var initialData = new List<PayerPayee>
+        var initialData = new List<DynamoDbPayerPayee>
         {
             new()
             {
@@ -237,14 +237,14 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
         GivenValidRequestWithMultipleSearchWords_WhenGetAutocompletePayersEndpointCalled_ThenCorrectPayersReturned(
             string searchQuery)
     {
-        var payee1 = new PayerPayee
+        var payee1 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payee#9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
             PayerPayeeName = "payer1",
             ExternalId = Guid.NewGuid().ToString()
         };
-        var payer2 = new PayerPayee
+        var payer2 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
@@ -259,7 +259,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
             Address = ExpectedAddress
         };
 
-        var payer3 = new PayerPayee
+        var payer3 = new DynamoDbPayerPayee
         {
             UserId = UserId,
             PayerPayeeId = "payer#9540cf4a-f21b-4cac-9e8b-168d12dcec12",
@@ -274,7 +274,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
             Address = ExpectedAddress
         };
 
-        var initialData = new List<PayerPayee>
+        var initialData = new List<DynamoDbPayerPayee>
         {
             new()
             {

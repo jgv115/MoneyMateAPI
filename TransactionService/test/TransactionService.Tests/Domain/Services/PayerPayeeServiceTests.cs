@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Moq;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
@@ -55,14 +56,12 @@ public class PayerPayeeServiceTests
         {
             new()
             {
-                UserId = "userId123",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name123",
                 ExternalId = "id123"
             },
             new()
             {
-                UserId = "userId1234",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name123",
                 ExternalId = "id1234"
@@ -119,14 +118,12 @@ public class PayerPayeeServiceTests
             new()
             {
                 PayerPayeeId = Guid.NewGuid().ToString(),
-                UserId = "userId123",
                 PayerPayeeName = "name123",
                 ExternalId = "id123"
             },
             new()
             {
                 PayerPayeeId = Guid.NewGuid().ToString(),
-                UserId = "userId1234",
                 PayerPayeeName = "name123",
                 ExternalId = "id1234"
             }
@@ -190,7 +187,6 @@ public class PayerPayeeServiceTests
             .ReturnsAsync(() => new PayerPayee
             {
                 ExternalId = externalId,
-                UserId = userId,
                 PayerPayeeId = payerPayeeId.ToString(),
                 PayerPayeeName = name
             });
@@ -226,7 +222,6 @@ public class PayerPayeeServiceTests
         _mockRepository.Setup(repository => repository.GetPayer(userId, payerPayeeId))
             .ReturnsAsync(() => new PayerPayee
             {
-                UserId = userId,
                 PayerPayeeId = payerPayeeId.ToString(),
                 PayerPayeeName = name
             });
@@ -259,7 +254,6 @@ public class PayerPayeeServiceTests
             .ReturnsAsync(() => new PayerPayee
             {
                 ExternalId = externalId,
-                UserId = userId,
                 PayerPayeeId = payerPayeeId.ToString(),
                 PayerPayeeName = name
             });
@@ -295,7 +289,6 @@ public class PayerPayeeServiceTests
         _mockRepository.Setup(repository => repository.GetPayee(userId, payerPayeeId))
             .ReturnsAsync(() => new PayerPayee
             {
-                UserId = userId,
                 PayerPayeeId = payerPayeeId.ToString(),
                 PayerPayeeName = name
             });
@@ -322,13 +315,11 @@ public class PayerPayeeServiceTests
             new()
             {
                 ExternalId = "externalId1",
-                UserId = "userId",
                 PayerPayeeId = payerPayeeId1.ToString(),
                 PayerPayeeName = "name1"
             },
             new()
             {
-                UserId = "userId",
                 PayerPayeeId = payerPayeeId2.ToString(),
                 PayerPayeeName = "name2"
             }
@@ -379,13 +370,11 @@ public class PayerPayeeServiceTests
             new()
             {
                 ExternalId = "externalId1",
-                UserId = "userId",
                 PayerPayeeId = payerPayeeId1.ToString(),
                 PayerPayeeName = "name1"
             },
             new()
             {
-                UserId = "userId",
                 PayerPayeeId = payerPayeeId2.ToString(),
                 PayerPayeeName = "name2"
             }
@@ -451,7 +440,6 @@ public class PayerPayeeServiceCreatePayeeTests
         });
 
         _mockRepository.Verify(repository => repository.CreatePayee(It.Is<PayerPayee>(payerPayee =>
-            payerPayee.UserId == userId &&
             payerPayee.ExternalId == null &&
             payerPayee.PayerPayeeName == expectedPayeeName &&
             !Guid.Parse(payerPayee.PayerPayeeId).Equals(Guid.Empty)
@@ -517,7 +505,6 @@ public class PayerPayeeServiceCreatePayerTests
         });
 
         _mockRepository.Verify(repository => repository.CreatePayer(It.Is<PayerPayee>(payerPayee =>
-            payerPayee.UserId == userId &&
             payerPayee.ExternalId == null &&
             payerPayee.PayerPayeeName == expectedPayerName &&
             !Guid.Parse(payerPayee.PayerPayeeId).Equals(Guid.Empty)

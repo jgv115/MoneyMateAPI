@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
+using TransactionService.Domain.Models;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
@@ -34,22 +35,22 @@ namespace TransactionService.Domain.Services.PayerPayees
             return results.ToList();
         }
 
-        private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee payerPayee)
+        private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee dynamoDbPayerPayee)
         {
-            if (string.IsNullOrEmpty(payerPayee.ExternalId))
+            if (string.IsNullOrEmpty(dynamoDbPayerPayee.ExternalId))
                 return new PayerPayeeViewModel
                 {
-                    ExternalId = payerPayee.ExternalId,
-                    PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
-                    PayerPayeeName = payerPayee.PayerPayeeName
+                    ExternalId = dynamoDbPayerPayee.ExternalId,
+                    PayerPayeeId = Guid.Parse(dynamoDbPayerPayee.PayerPayeeId),
+                    PayerPayeeName = dynamoDbPayerPayee.PayerPayeeName
                 };
 
-            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payerPayee.ExternalId);
+            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(dynamoDbPayerPayee.ExternalId);
             return new PayerPayeeViewModel
             {
-                ExternalId = payerPayee.ExternalId,
-                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
-                PayerPayeeName = payerPayee.PayerPayeeName,
+                ExternalId = dynamoDbPayerPayee.ExternalId,
+                PayerPayeeId = Guid.Parse(dynamoDbPayerPayee.PayerPayeeId),
+                PayerPayeeName = dynamoDbPayerPayee.PayerPayeeName,
                 Address = details.Address
             };
         }
@@ -107,7 +108,6 @@ namespace TransactionService.Domain.Services.PayerPayees
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
                 ExternalId = newPayerPayee.ExternalId,
-                UserId = _userContext.UserId
             });
 
             return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
@@ -115,7 +115,6 @@ namespace TransactionService.Domain.Services.PayerPayees
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
                 ExternalId = newPayerPayee.ExternalId,
-                UserId = _userContext.UserId
             });
         }
 
@@ -128,7 +127,6 @@ namespace TransactionService.Domain.Services.PayerPayees
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
                 ExternalId = newPayerPayee.ExternalId,
-                UserId = _userContext.UserId
             });
 
             return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
@@ -136,7 +134,6 @@ namespace TransactionService.Domain.Services.PayerPayees
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
                 ExternalId = newPayerPayee.ExternalId,
-                UserId = _userContext.UserId
             });
         }
     }
