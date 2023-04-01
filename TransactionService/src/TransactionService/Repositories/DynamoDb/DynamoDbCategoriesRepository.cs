@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
@@ -29,9 +28,7 @@ namespace TransactionService.Repositories.DynamoDb
             _mapper = mapper;
             _tableName = config.TableName;
         }
-
-        private string ExtractPublicFacingUserId(string input) => input.Split("#")[0];
-
+        
         public async Task<Category> GetCategory(string categoryName)
         {
             var loadedCategory = await _dbContext.LoadAsync<DynamoDbCategory>($"{_userId}{HashKeySuffix}", categoryName,
@@ -39,9 +36,6 @@ namespace TransactionService.Repositories.DynamoDb
                 {
                     OverrideTableName = _tableName
                 });
-
-            if (loadedCategory is not null)
-                loadedCategory.UserId = ExtractPublicFacingUserId(loadedCategory.UserId);
 
             return _mapper.Map<DynamoDbCategory, Category>(loadedCategory);
         }
@@ -53,9 +47,6 @@ namespace TransactionService.Repositories.DynamoDb
                 {
                     OverrideTableName = _tableName
                 }).GetRemainingAsync();
-
-            userCategoryList.AsParallel().ForAll(category =>
-                category.UserId = ExtractPublicFacingUserId(category.UserId));
 
             return _mapper.Map<List<DynamoDbCategory>, List<Category>>(userCategoryList);
         }
@@ -72,9 +63,6 @@ namespace TransactionService.Repositories.DynamoDb
                     },
                     OverrideTableName = _tableName
                 }).GetRemainingAsync();
-
-            userCategoryList.AsParallel().ForAll(category =>
-                category.UserId = ExtractPublicFacingUserId(category.UserId));
 
             return _mapper.Map<List<DynamoDbCategory>, List<Category>>(userCategoryList);
         }
