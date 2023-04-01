@@ -4,13 +4,10 @@ using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Transactions.Dtos;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Domain.Services.Transactions;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
-using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Domain.Services.Categories.UpdateCategoryOperations;

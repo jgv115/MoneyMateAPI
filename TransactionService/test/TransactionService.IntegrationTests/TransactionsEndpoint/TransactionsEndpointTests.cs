@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -7,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using TransactionService.Controllers.Transactions.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using TransactionService.Repositories.DynamoDb.Models;
@@ -37,17 +39,26 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             await DynamoDbHelper.DeleteTable();
         }
 
-        private List<Transaction> ConvertToPublicFacingUserIds(List<Transaction> transactionList)
+        private List<Transaction> ConvertToDomainTransaction(List<DynamoDbTransaction> dynamoDbTransactions)
         {
-            transactionList.ForEach(transaction => { transaction.UserId = transaction.UserId.Split("#")[0]; });
-
-            return transactionList;
+            return dynamoDbTransactions.Select(transaction => new Transaction
+            {
+                Amount = transaction.Amount,
+                Category = transaction.Category,
+                Note = transaction.Note,
+                Subcategory = transaction.Subcategory,
+                TransactionId = transaction.TransactionId,
+                TransactionTimestamp = transaction.TransactionTimestamp,
+                TransactionType = transaction.TransactionType,
+                PayerPayeeId = transaction.PayerPayeeId,
+                PayerPayeeName = transaction.PayerPayeeName
+            }).ToList();
         }
 
         [Fact]
         public async Task GivenNoInputParameters_WhenGetTransactionsIsCalled_ThenAllTransactionsAreReturned()
         {
-            var transaction1 = new Transaction
+            var transaction1 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
@@ -59,7 +70,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 PayerPayeeName = "name2",
                 Subcategory = "Salary"
             };
-            var transaction2 = new Transaction
+            var transaction2 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
@@ -72,7 +83,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
-            var transaction3 = new Transaction
+            var transaction3 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -86,7 +97,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             };
 
 
-            var transactionList = new List<Transaction>
+            var transactionList = new List<DynamoDbTransaction>
             {
                 transaction1,
                 transaction2,
@@ -104,13 +115,13 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(ConvertToPublicFacingUserIds(transactionList), returnedTransactionList);
+            Assert.Equal(ConvertToDomainTransaction(transactionList), returnedTransactionList);
         }
 
         [Fact]
         public async Task GivenStartDateInputParameter_WhenGetTransactionsIsCalled_ThenCorrectTransactionsAreReturned()
         {
-            var transaction1 = new Transaction
+            var transaction1 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
@@ -121,7 +132,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Meat",
                 Note = "this is a note123"
             };
-            var transaction2 = new Transaction
+            var transaction2 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -132,7 +143,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Meat"
             };
 
-            var transaction3 = new Transaction
+            var transaction3 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
@@ -144,7 +155,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Note = "this is a note123"
             };
 
-            var transactionList = new List<Transaction>
+            var transactionList = new List<DynamoDbTransaction>
             {
                 transaction1,
                 transaction2,
@@ -167,17 +178,17 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            var expectedTransactionList = new List<Transaction>
+            var expectedTransactionList = ConvertToDomainTransaction(new List<DynamoDbTransaction>
             {
                 transaction1, transaction2
-            };
-            Assert.Equal(ConvertToPublicFacingUserIds(expectedTransactionList), returnedTransactionList);
+            });
+            Assert.Equal(expectedTransactionList, returnedTransactionList);
         }
 
         [Fact]
         public async Task GivenEndDateInputParameter_WhenGetTransactionsIsCalled_ThenCorrectTransactionsAreReturned()
         {
-            var transaction1 = new Transaction
+            var transaction1 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionTimestamp = new DateTime(2021, 3, 1).ToString("O"),
@@ -188,7 +199,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Meat",
                 Note = "this is a note123"
             };
-            var transaction2 = new Transaction
+            var transaction2 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -198,7 +209,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = "Groceries",
                 Subcategory = "Meat"
             };
-            var transaction3 = new Transaction
+            var transaction3 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
@@ -209,7 +220,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Meat"
             };
 
-            var transaction4 = new Transaction
+            var transaction4 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915d",
@@ -221,7 +232,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Note = "this is a note123"
             };
 
-            var transactionList = new List<Transaction>
+            var transactionList = new List<DynamoDbTransaction>
             {
                 transaction1,
                 transaction2,
@@ -248,18 +259,18 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             returnedTransactionList!.Sort((transaction, transaction5) =>
                 String.CompareOrdinal(transaction.TransactionId, transaction5.TransactionId));
 
-            var expectedTransactionList = new List<Transaction>
+            var expectedTransactionList = ConvertToDomainTransaction(new List<DynamoDbTransaction>
             {
                 transaction1, transaction2, transaction3
-            };
-            Assert.Equal(ConvertToPublicFacingUserIds(expectedTransactionList), returnedTransactionList);
+            });
+            Assert.Equal(expectedTransactionList, returnedTransactionList);
         }
 
         [Fact]
         public async Task GivenTypeInputParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfTypeAreReturned()
         {
             var transactionType = "expense";
-            var transaction1 = new Transaction
+            var transaction1 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
@@ -272,7 +283,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
-            var transaction2 = new Transaction
+            var transaction2 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -285,7 +296,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Salary"
             };
 
-            var transactionList = new List<Transaction>
+            var transactionList = new List<DynamoDbTransaction>
             {
                 transaction1,
                 transaction2
@@ -306,7 +317,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(ConvertToPublicFacingUserIds(new List<Transaction> {transaction1}), returnedTransactionList);
+            Assert.Equal(ConvertToDomainTransaction(new List<DynamoDbTransaction> {transaction1}),
+                returnedTransactionList);
         }
 
         [Fact]
@@ -314,7 +326,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             GivenPayerPayeeIdInputParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfTypeAreReturned()
         {
             var transactionType = "expense";
-            var transaction1 = new Transaction
+            var transaction1 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
@@ -327,7 +339,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
-            var transaction2 = new Transaction
+            var transaction2 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -338,7 +350,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Salary"
             };
 
-            var transactionList = new List<Transaction>
+            var transactionList = new List<DynamoDbTransaction>
             {
                 transaction1,
                 transaction2
@@ -359,7 +371,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(ConvertToPublicFacingUserIds(new List<Transaction> {transaction2}), returnedTransactionList);
+            Assert.Equal(ConvertToDomainTransaction(new List<DynamoDbTransaction> {transaction2}),
+                returnedTransactionList);
         }
 
         [Fact]
@@ -367,7 +380,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             GivenCategoriesParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfCategoryAreReturned()
         {
             var transactionType = "expense";
-            var transaction1 = new Transaction
+            var transaction1 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
@@ -380,7 +393,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 PayerPayeeName = "name1",
                 Note = "this is a note123"
             };
-            var transaction2 = new Transaction
+            var transaction2 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -392,7 +405,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 PayerPayeeName = "name2",
                 Subcategory = "Salary"
             };
-            var transaction3 = new Transaction
+            var transaction3 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
@@ -404,7 +417,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 PayerPayeeName = "name2",
                 Subcategory = "Salary"
             };
-            var transaction4 = new Transaction
+            var transaction4 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915d",
@@ -417,7 +430,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Dinner"
             };
 
-            var transactionList = new List<Transaction>
+            var transactionList = new List<DynamoDbTransaction>
             {
                 transaction1,
                 transaction2,
@@ -438,7 +451,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                     PropertyNameCaseInsensitive = true
                 });
 
-            Assert.Equal(ConvertToPublicFacingUserIds(new List<Transaction> {transaction1, transaction2, transaction4}),
+            Assert.Equal(
+                ConvertToDomainTransaction(new List<DynamoDbTransaction> {transaction1, transaction2, transaction4}),
                 returnedTransactionList);
         }
 
@@ -499,7 +513,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var response = await HttpClient.PostAsync($"/api/transactions", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var returnedTransactions = await DynamoDbHelper.ScanTable<Transaction>();
+            var returnedTransactions = await DynamoDbHelper.ScanTable<DynamoDbTransaction>();
 
             Assert.Single(returnedTransactions);
             Assert.Equal(expectedAmount, returnedTransactions[0].Amount);
@@ -517,7 +531,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
         {
             var expectedTransactionId = Guid.NewGuid().ToString();
 
-            var transaction1 = new Transaction
+            var transaction1 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = expectedTransactionId,
@@ -528,7 +542,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Meat",
                 Note = "this is a note123"
             };
-            var transaction2 = new Transaction
+            var transaction2 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -539,7 +553,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Meat"
             };
 
-            var transactionList = new List<Transaction>
+            var transactionList = new List<DynamoDbTransaction>
             {
                 transaction1,
                 transaction2
@@ -573,8 +587,9 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var response = await HttpClient.PutAsync($"/api/transactions/{expectedTransactionId}", httpContent);
             response.EnsureSuccessStatusCode();
 
-            var returnedTransaction = await DynamoDbHelper.QueryTable<Transaction>(UserId, expectedTransactionId);
-            var expectedTransaction = new Transaction
+            var returnedTransaction =
+                await DynamoDbHelper.QueryTable<DynamoDbTransaction>(UserId, expectedTransactionId);
+            var expectedTransaction = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = expectedTransactionId,
@@ -595,7 +610,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
         {
             var expectedTransactionId = Guid.NewGuid().ToString();
 
-            var transaction1 = new Transaction
+            var transaction1 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = expectedTransactionId,
@@ -605,7 +620,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Category = "Groceries",
                 Subcategory = "Meat"
             };
-            var transaction2 = new Transaction
+            var transaction2 = new DynamoDbTransaction
             {
                 UserId = UserId,
                 TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -616,7 +631,7 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
                 Subcategory = "Meat"
             };
 
-            var transactionList = new List<Transaction>
+            var transactionList = new List<DynamoDbTransaction>
             {
                 transaction1,
                 transaction2
@@ -625,7 +640,8 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
             var response = await HttpClient.DeleteAsync($"/api/transactions/{expectedTransactionId}");
             response.EnsureSuccessStatusCode();
 
-            var returnedTransaction = await DynamoDbHelper.QueryTable<Transaction>(UserId, expectedTransactionId);
+            var returnedTransaction =
+                await DynamoDbHelper.QueryTable<DynamoDbTransaction>(UserId, expectedTransactionId);
             Assert.Null(returnedTransaction);
         }
     }

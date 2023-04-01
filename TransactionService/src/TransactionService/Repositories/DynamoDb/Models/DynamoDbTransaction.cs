@@ -3,7 +3,7 @@ using Amazon.DynamoDBv2.DataModel;
 namespace TransactionService.Repositories.DynamoDb.Models
 {
     [DynamoDBTable("MoneyMate_TransactionDB_dev")]
-    public record Transaction
+    public record DynamoDbTransaction
     {
         [DynamoDBHashKey("UserIdQuery")] public string UserId { get; set; }
         [DynamoDBRangeKey("Subquery")] public string TransactionId { get; set; }

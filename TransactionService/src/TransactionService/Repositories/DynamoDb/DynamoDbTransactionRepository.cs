@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using AutoMapper;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
@@ -16,30 +18,31 @@ namespace TransactionService.Repositories.DynamoDb
     {
         private readonly string _userId;
         private readonly DynamoDBContext _dbContext;
+        private readonly IMapper _mapper;
         private readonly string _tableName;
 
         private const string HashKeySuffix = "#Transaction";
 
-        public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient, CurrentUserContext currentUserContext)
+        public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient, CurrentUserContext currentUserContext, IMapper mapper)
         {
             if (dbClient == null)
             {
                 throw new ArgumentNullException(nameof(dbClient));
             }
 
+            _mapper = mapper;
+
             _userId = currentUserContext.UserId;
             _dbContext = new DynamoDBContext(dbClient);
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
-
-        private string ExtractPublicFacingUserId(string input) => input.Split("#")[0];
-
+        
         public async Task<List<Transaction>> GetTransactions(DateRange dateRange, ITransactionSpecification spec)
         {
             var start = dateRange.Start;
             var end = dateRange.End;
 
-            var transactions = await _dbContext.QueryAsync<Transaction>($"{_userId}{HashKeySuffix}",
+            var transactions = await _dbContext.QueryAsync<DynamoDbTransaction>($"{_userId}{HashKeySuffix}",
                 QueryOperator.Between, new[]
                 {
                     $"{start:O}", $"{end:O}"
@@ -49,30 +52,30 @@ namespace TransactionService.Repositories.DynamoDb
                     IndexName = "TransactionTimestampIndex"
                 }).GetRemainingAsync();
 
-            return transactions.Where(transaction => spec.IsSatisfied(transaction)).Select(transaction =>
-            {
-                transaction.UserId = ExtractPublicFacingUserId(transaction.UserId);
-                return transaction;
-            }).ToList();
+            var filteredTransactions = transactions.Where(transaction => spec.IsSatisfied(transaction)).ToList();
+
+            return _mapper.Map<List<DynamoDbTransaction>, List<Transaction>>(filteredTransactions);
         }
 
         public async Task StoreTransaction(Transaction newTransaction)
         {
-            newTransaction.UserId += HashKeySuffix;
-            await _dbContext.SaveAsync(newTransaction, new DynamoDBOperationConfig
+            var newDynamoDbTransaction = _mapper.Map<Transaction, DynamoDbTransaction>(newTransaction);
+
+            newDynamoDbTransaction.UserId = $"{_userId}{HashKeySuffix}";
+            await _dbContext.SaveAsync(newDynamoDbTransaction, new DynamoDBOperationConfig
             {
                 OverrideTableName = _tableName
             });
         }
 
-        public async Task PutTransaction(Transaction newTransaction)
+        public async Task PutTransaction(Transaction newDynamoDbTransaction)
         {
-            await StoreTransaction(newTransaction);
+            await StoreTransaction(newDynamoDbTransaction);
         }
 
         public async Task DeleteTransaction(string transactionId)
         {
-            await _dbContext.DeleteAsync<Transaction>($"{_userId}{HashKeySuffix}", transactionId,
+            await _dbContext.DeleteAsync<DynamoDbTransaction>($"{_userId}{HashKeySuffix}", transactionId,
                 new DynamoDBOperationConfig
                 {
                     OverrideTableName = _tableName

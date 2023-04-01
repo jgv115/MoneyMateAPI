@@ -205,7 +205,7 @@ namespace TransactionService.IntegrationTests.Helpers
             }
         }
 
-        public async Task WriteTransactionsIntoTable(IEnumerable<Transaction> items)
+        public async Task WriteTransactionsIntoTable(IEnumerable<DynamoDbTransaction> items)
         {
             foreach (var item in items)
             {

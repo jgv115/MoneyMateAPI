@@ -7,8 +7,8 @@ using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Transactions;
 using TransactionService.Controllers.Transactions.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions;
-using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers.Transactions
@@ -46,7 +46,6 @@ namespace TransactionService.Tests.Controllers.Transactions
                 TransactionType = "expense",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name1",
-                UserId = "userid-1"
             };
 
             var transaction2 = new Transaction
@@ -59,7 +58,6 @@ namespace TransactionService.Tests.Controllers.Transactions
                 TransactionType = "expense",
                 PayerPayeeId = Guid.NewGuid().ToString(),
                 PayerPayeeName = "name2",
-                UserId = "userid-2"
             };
 
             var expectedTransactionList = new List<Transaction>

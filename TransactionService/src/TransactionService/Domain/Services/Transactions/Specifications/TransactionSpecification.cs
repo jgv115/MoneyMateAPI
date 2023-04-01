@@ -15,7 +15,7 @@ namespace TransactionService.Domain.Services.Transactions.Specifications
             _specifications = specifications;
         }
 
-        public bool IsSatisfied(Transaction item)
+        public bool IsSatisfied(DynamoDbTransaction item)
         {
             return _specifications.All(spec => spec.IsSatisfied(item));
         }
@@ -30,7 +30,7 @@ namespace TransactionService.Domain.Services.Transactions.Specifications
             _transactionType = transactionType;
         }
 
-        public bool IsSatisfied(Transaction item)
+        public bool IsSatisfied(DynamoDbTransaction item)
         {
             return item.TransactionType.Equals(_transactionType.ToString(), StringComparison.OrdinalIgnoreCase);
         }
@@ -45,7 +45,7 @@ namespace TransactionService.Domain.Services.Transactions.Specifications
             _categories = categories;
         }
 
-        public bool IsSatisfied(Transaction item)
+        public bool IsSatisfied(DynamoDbTransaction item)
         {
             return _categories.Contains(item.Category);
         }
@@ -60,7 +60,7 @@ namespace TransactionService.Domain.Services.Transactions.Specifications
             _subcategories = subcategories;
         }
 
-        public bool IsSatisfied(Transaction item)
+        public bool IsSatisfied(DynamoDbTransaction item)
         {
             return _subcategories.Contains(item.Subcategory);
         }
@@ -75,7 +75,7 @@ namespace TransactionService.Domain.Services.Transactions.Specifications
             _payerPayeeIds = payerPayeeIds;
         }
     
-        public bool IsSatisfied(Transaction item)
+        public bool IsSatisfied(DynamoDbTransaction item)
         {
             return _payerPayeeIds.Contains(item.PayerPayeeId);
         }

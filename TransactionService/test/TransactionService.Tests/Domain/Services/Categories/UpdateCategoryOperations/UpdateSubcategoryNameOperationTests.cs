@@ -5,13 +5,10 @@ using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Transactions.Dtos;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Domain.Services.Transactions;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
-using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Domain.Services.Categories.UpdateCategoryOperations;
@@ -79,7 +76,6 @@ public class UpdateSubcategoryNameOperationTests
 
         var transaction1 = new Transaction
         {
-            UserId = "user123",
             Amount = 123,
             Category = "categoryName",
             TransactionTimestamp = DateTime.Now.ToString("O"),
@@ -91,7 +87,6 @@ public class UpdateSubcategoryNameOperationTests
         };
         var transaction2 = new Transaction
         {
-            UserId = "user123",
             Amount = 1234,
             Category = "categoryName",
             TransactionTimestamp = DateTime.Now.ToString("O"),

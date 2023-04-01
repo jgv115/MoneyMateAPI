@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
 using Xunit;
@@ -11,7 +12,7 @@ namespace TransactionService.Tests.Repositories
         public void GivenNullIAmazonDynamoDB_WhenConstructorInvoked_ThenArgumentNullExceptionIsThrown()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                new DynamoDbTransactionRepository(null, null));
+                new DynamoDbTransactionRepository(null, null, null));
         }
     }
 }

@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Moq;
 using TransactionService.Controllers.Categories.Dtos;
-using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Domain.Services.Transactions;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
 using Xunit;
 
 namespace TransactionService.Tests.Domain.Services.Categories.UpdateCategoryOperations;

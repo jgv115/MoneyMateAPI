@@ -3,27 +3,23 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using TransactionService.Controllers.Transactions.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
-using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Domain.Services.Transactions
 {
     public class TransactionHelperService : ITransactionHelperService
     {
-        private readonly CurrentUserContext _userContext;
         private readonly ITransactionRepository _repository;
         private readonly IMapper _mapper;
         private readonly TransactionSpecificationFactory _specificationFactory;
 
-        public TransactionHelperService(CurrentUserContext userContext, ITransactionRepository repository,
-            IMapper mapper)
+        public TransactionHelperService(ITransactionRepository repository, IMapper mapper)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _specificationFactory = new TransactionSpecificationFactory();
         }
@@ -42,7 +38,6 @@ namespace TransactionService.Domain.Services.Transactions
         {
             var transaction = _mapper.Map<Transaction>(transactionDto);
             transaction.TransactionId = Guid.NewGuid().ToString();
-            transaction.UserId = _userContext.UserId;
             return _repository.StoreTransaction(transaction);
         }
 
@@ -50,7 +45,6 @@ namespace TransactionService.Domain.Services.Transactions
         {
             var transaction = _mapper.Map<Transaction>(putTransactionDto);
             transaction.TransactionId = transactionId;
-            transaction.UserId = _userContext.UserId;
             return _repository.PutTransaction(transaction);
         }
 

@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using TransactionService.Controllers.Analytics.ViewModels;
+using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
+using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Tests.Common;
 using Xunit;
 
@@ -35,6 +38,24 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         await DynamoDbHelper.DeleteTable();
     }
 
+    private List<DynamoDbTransaction> MapTransactionToDynamoDbTransaction(List<Transaction> transactions)
+    {
+        return transactions.Select(
+            transaction => new DynamoDbTransaction
+            {
+                TransactionType = transaction.TransactionType,
+                PayerPayeeId = transaction.PayerPayeeId,
+                PayerPayeeName = transaction.PayerPayeeName,
+                TransactionTimestamp = transaction.TransactionTimestamp,
+                Subcategory = transaction.Subcategory,
+                TransactionId = transaction.TransactionId,
+                Category = transaction.Category,
+                Note = transaction.Note,
+                Amount = transaction.Amount,
+                UserId = UserId
+            }).ToList();
+    }
+
     [Fact]
     public async Task
         GivenStartAndEndInputParameters_WhenGetCategoriesBreakdownEndpointInvoked_ThenCorrectCategoriesReturned()
@@ -51,7 +72,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         const int numberOfCategory3Transactions = 2;
         const decimal category3TransactionsAmount = (decimal) 34.5;
 
-        var transactionList = new TransactionListBuilder(UserId)
+        var transactionList = new TransactionListBuilder()
             .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                 category1TransactionsAmount)
             .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -60,7 +81,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
                 category3TransactionsAmount)
             .Build();
 
-        await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+        await DynamoDbHelper.WriteTransactionsIntoTable(MapTransactionToDynamoDbTransaction(transactionList));
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";
@@ -115,7 +136,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         const int numberOfCategory3Transactions = 2;
         const decimal category3TransactionsAmount = (decimal) 34.5;
 
-        var transactionList = new TransactionListBuilder(UserId)
+        var transactionList = new TransactionListBuilder()
             .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                 category1TransactionsAmount)
             .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -124,7 +145,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
                 category3TransactionsAmount)
             .Build();
 
-        await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+        await DynamoDbHelper.WriteTransactionsIntoTable(MapTransactionToDynamoDbTransaction(transactionList));
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";
@@ -186,7 +207,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         const int numberOfSubcategory4Transactions = 2;
         const decimal subcategory4TransactionsAmount = (decimal) 12.4;
 
-        var transactionList = new TransactionListBuilder(UserId)
+        var transactionList = new TransactionListBuilder()
             .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory1Transactions,
                 expectedCategory1, expectedSubcategory1, subcategory1TransactionsAmount)
             .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory2Transactions,
@@ -198,7 +219,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
                 expectedCategory3, expectedSubcategory4, subcategory4TransactionsAmount)
             .Build();
 
-        await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+        await DynamoDbHelper.WriteTransactionsIntoTable(MapTransactionToDynamoDbTransaction(transactionList));
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["category"] = expectedCategory3;
@@ -253,7 +274,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         const int numberOfPayerPayee3Transactions = 2;
         const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
 
-        var transactionList = new TransactionListBuilder(UserId)
+        var transactionList = new TransactionListBuilder()
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee1Transactions,
                 expectedPayerPayeeId1, expectedPayerPayeeName1, payerPayee1TransactionsAmount)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee2Transactions,
@@ -262,7 +283,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
                 expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
             .Build();
 
-        await DynamoDbHelper.WriteTransactionsIntoTable(transactionList);
+        await DynamoDbHelper.WriteTransactionsIntoTable(MapTransactionToDynamoDbTransaction(transactionList));
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";

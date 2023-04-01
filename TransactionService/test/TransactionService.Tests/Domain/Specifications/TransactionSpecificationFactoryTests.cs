@@ -18,7 +18,7 @@ public class TransactionSpecificationFactoryTests
             var returnedSpec = factory.Create(new GetTransactionsQuery());
 
 
-            Assert.True(returnedSpec.IsSatisfied(new Transaction()));
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction()));
         }
 
         [Fact]
@@ -32,11 +32,11 @@ public class TransactionSpecificationFactoryTests
             });
 
 
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "expense"
             }));
-            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            Assert.False(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "income"
             }));
@@ -53,15 +53,15 @@ public class TransactionSpecificationFactoryTests
             });
 
 
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 Category = "category1"
             }));
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 Category = "category2"
             }));
-            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            Assert.False(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 Category = "invalid category"
             }));
@@ -78,15 +78,15 @@ public class TransactionSpecificationFactoryTests
             });
 
 
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 Subcategory = "subcategory1"
             }));
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 Subcategory = "subcategory2"
             }));
-            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            Assert.False(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 Subcategory = "invalid subcategory"
             }));
@@ -102,15 +102,15 @@ public class TransactionSpecificationFactoryTests
                 PayerPayeeIds = new List<string> {"payer1", "payer2"}
             });
 
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 PayerPayeeId = "payer1"
             }));
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 PayerPayeeId = "payer2"
             }));
-            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            Assert.False(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 PayerPayeeId = "payer3"
             }));
@@ -129,22 +129,22 @@ public class TransactionSpecificationFactoryTests
             });
 
 
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "expense",
                 Category = "category1"
             }));
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "expense",
                 Category = "category2"
             }));
-            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            Assert.False(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "expense",
                 Category = "invalid subcategory"
             }));
-            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            Assert.False(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "income",
                 Category = "category1"
@@ -163,22 +163,22 @@ public class TransactionSpecificationFactoryTests
             });
 
 
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "expense",
                 Subcategory = "subcategory1"
             }));
-            Assert.True(returnedSpec.IsSatisfied(new Transaction
+            Assert.True(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "expense",
                 Subcategory = "subcategory2"
             }));
-            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            Assert.False(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "expense",
                 Subcategory = "invalid subcategory"
             }));
-            Assert.False(returnedSpec.IsSatisfied(new Transaction
+            Assert.False(returnedSpec.IsSatisfied(new DynamoDbTransaction
             {
                 TransactionType = "income",
                 Subcategory = "subcategory1"

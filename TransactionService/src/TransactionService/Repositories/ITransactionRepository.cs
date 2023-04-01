@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
-using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Repositories
 {
@@ -11,8 +11,8 @@ namespace TransactionService.Repositories
         public Task<List<Transaction>> GetTransactions(DateRange dateRange,
             ITransactionSpecification spec);
 
-        public Task StoreTransaction(Transaction newTransaction);
-        public Task PutTransaction(Transaction newTransaction);
+        public Task StoreTransaction(Transaction newDynamoDbTransaction);
+        public Task PutTransaction(Transaction newDynamoDbTransaction);
         public Task DeleteTransaction(string transactionId);
     }
 }

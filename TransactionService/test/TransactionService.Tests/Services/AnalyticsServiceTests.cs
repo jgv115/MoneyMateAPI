@@ -7,6 +7,7 @@ using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Analytics.ViewModels;
 using TransactionService.Controllers.Transactions.Dtos;
+using TransactionService.Domain.Models;
 using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Transactions;
 using TransactionService.Helpers.TimePeriodHelpers;
@@ -68,7 +69,7 @@ namespace TransactionService.Tests.Services
                         helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>())).ReturnsAsync(() =>
                         new List<Transaction>
                         {
-                            new Transaction
+                            new()
                             {
                                 Amount = 123M,
                                 Category = "category",
@@ -99,17 +100,17 @@ namespace TransactionService.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal)34.5;
+                const decimal category1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal)34.5;
+                const decimal category2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal)34.5;
+                const decimal category3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder("userId123")
+                var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                         category1TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -159,17 +160,17 @@ namespace TransactionService.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal)34.5;
+                const decimal category1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal)34.5;
+                const decimal category2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal)34.5;
+                const decimal category3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder("userId123")
+                var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                         category1TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -268,17 +269,17 @@ namespace TransactionService.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal)34.5;
+                const decimal category1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal)34.5;
+                const decimal category2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal)34.5;
+                const decimal category3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder("userId123")
+                var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                         category1TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -332,19 +333,19 @@ namespace TransactionService.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal)34.5;
+                const decimal category1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal)34.5;
+                const decimal category2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal)34.5;
+                const decimal category3TransactionsAmount = (decimal) 34.5;
 
                 _mockTimePeriodHelper.Setup(helper => helper.ResolveDateRange(timePeriod)).Returns(dateRange);
 
-                var transactionList = new TransactionListBuilder("userId123")
+                var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
                         category1TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory2Transactions, expectedCategory2,
@@ -409,7 +410,7 @@ namespace TransactionService.Tests.Services
                         ))
                     .ReturnsAsync(() => new List<Transaction>
                     {
-                        new Transaction
+                        new()
                         {
                             Amount = 123M,
                             Category = "category",
@@ -426,7 +427,7 @@ namespace TransactionService.Tests.Services
                 _mockTransactionService.Verify(
                     transactionService => transactionService.GetTransactionsAsync(
                         It.Is<GetTransactionsQuery>(query =>
-                            query.Categories.SequenceEqual(new List<string> { expectedCategoryName })
+                            query.Categories.SequenceEqual(new List<string> {expectedCategoryName})
                             && query.Start == start && query.End == end
                         )));
             }
@@ -441,18 +442,18 @@ namespace TransactionService.Tests.Services
 
                 const string expectedSubcategory1 = "subcategory1";
                 const int numberOfSubcategory1Transactions = 24;
-                const decimal subcategory1TransactionsAmount = (decimal)34.5;
+                const decimal subcategory1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedSubcategory2 = "subcategory2";
                 const int numberOfSubcategory2Transactions = 20;
-                const decimal subcategory2TransactionsAmount = (decimal)34.5;
+                const decimal subcategory2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedSubcategory3 = "subcategory3";
                 const int numberOfSubcategory3Transactions = 10;
-                const decimal subcategory3TransactionsAmount = (decimal)34.5;
+                const decimal subcategory3TransactionsAmount = (decimal) 34.5;
 
 
-                var transactionList = new TransactionListBuilder("userId123")
+                var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory1Transactions,
                         expectedCategoryName, expectedSubcategory1,
                         subcategory1TransactionsAmount)
@@ -511,17 +512,17 @@ namespace TransactionService.Tests.Services
 
                 const string expectedSubcategory1 = "subcategory1";
                 const int numberOfSubcategory1Transactions = 24;
-                const decimal subcategory1TransactionsAmount = (decimal)34.5;
+                const decimal subcategory1TransactionsAmount = (decimal) 34.5;
 
                 const string expectedSubcategory2 = "subcategory2";
                 const int numberOfSubcategory2Transactions = 20;
-                const decimal subcategory2TransactionsAmount = (decimal)34.5;
+                const decimal subcategory2TransactionsAmount = (decimal) 34.5;
 
                 const string expectedSubcategory3 = "subcategory3";
                 const int numberOfSubcategory3Transactions = 10;
-                const decimal subcategory3TransactionsAmount = (decimal)34.5;
+                const decimal subcategory3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder("userId123")
+                var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory1Transactions,
                         expectedCategoryName, expectedSubcategory1,
                         subcategory1TransactionsAmount)
@@ -594,7 +595,7 @@ namespace TransactionService.Tests.Services
                         helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>())).ReturnsAsync(() =>
                         new List<Transaction>
                         {
-                            new Transaction
+                            new()
                             {
                                 Amount = 123M,
                                 Category = "category",
@@ -626,19 +627,19 @@ namespace TransactionService.Tests.Services
                 var expectedPayerPayeeId1 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName1 = "name1";
                 const int numberOfPayerPayee1Transactions = 24;
-                const decimal payerPayee1TransactionsAmount = (decimal)34.5;
+                const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
 
                 var expectedPayerPayeeId2 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName2 = "name2";
                 const int numberOfPayerPayee2Transactions = 20;
-                const decimal payerPayee2TransactionsAmount = (decimal)34.5;
+                const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
 
                 var expectedPayerPayeeId3 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName3 = "name3";
                 const int numberOfPayerPayee3Transactions = 10;
-                const decimal payerPayee3TransactionsAmount = (decimal)34.5;
+                const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder("userId123")
+                var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee1Transactions,
                         expectedPayerPayeeId1, expectedPayerPayeeName1, payerPayee1TransactionsAmount)
                     .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee2Transactions,
@@ -691,19 +692,19 @@ namespace TransactionService.Tests.Services
                 var expectedPayerPayeeId1 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName1 = "name1";
                 const int numberOfPayerPayee1Transactions = 24;
-                const decimal payerPayee1TransactionsAmount = (decimal)34.5;
+                const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
 
                 var expectedPayerPayeeId2 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName2 = null;
                 const int numberOfPayerPayee2Transactions = 20;
-                const decimal payerPayee2TransactionsAmount = (decimal)34.5;
+                const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
 
                 string expectedPayerPayeeId3 = null;
                 const string expectedPayerPayeeName3 = null;
                 const int numberOfPayerPayee3Transactions = 10;
-                const decimal payerPayee3TransactionsAmount = (decimal)34.5;
+                const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
 
-                var transactionList = new TransactionListBuilder("userId123")
+                var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee1Transactions,
                         expectedPayerPayeeId1, expectedPayerPayeeName1, payerPayee1TransactionsAmount)
                     .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee2Transactions,

@@ -410,7 +410,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         await _dynamoDbHelper.WriteIntoTable(initialCategories);
 
-        var transaction1 = new Transaction
+        var transaction1 = new DynamoDbTransaction
         {
             UserId = PersistedTransactionsUserId,
             TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
@@ -422,7 +422,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             PayerPayeeId = Guid.NewGuid().ToString(),
             PayerPayeeName = "name2",
         };
-        var transaction2 = new Transaction
+        var transaction2 = new DynamoDbTransaction
         {
             UserId = PersistedTransactionsUserId,
             TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -435,7 +435,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             PayerPayeeName = "name1",
             Note = "this is a note123"
         };
-        var transaction3 = new Transaction
+        var transaction3 = new DynamoDbTransaction
         {
             UserId = PersistedTransactionsUserId,
             TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
@@ -448,7 +448,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             PayerPayeeName = "name2",
         };
 
-        var transactionList = new List<Transaction>
+        var transactionList = new List<DynamoDbTransaction>
         {
             transaction1,
             transaction2,
@@ -478,7 +478,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         transaction1.Subcategory = "renamed subcategory";
         transaction3.Subcategory = "renamed subcategory";
-        var returnedTransactions = await _dynamoDbHelper.QueryTable<Transaction>(PersistedTransactionsUserId);
+        var returnedTransactions = await _dynamoDbHelper.QueryTable<DynamoDbTransaction>(PersistedTransactionsUserId);
 
         Assert.Equal(transactionList, returnedTransactions);
     }
@@ -509,7 +509,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         await _dynamoDbHelper.WriteIntoTable(initialCategories);
 
-        var transaction1 = new Transaction
+        var transaction1 = new DynamoDbTransaction
         {
             UserId = PersistedTransactionsUserId,
             TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
@@ -521,7 +521,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             PayerPayeeId = Guid.NewGuid().ToString(),
             PayerPayeeName = "name2",
         };
-        var transaction2 = new Transaction
+        var transaction2 = new DynamoDbTransaction
         {
             UserId = PersistedTransactionsUserId,
             TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
@@ -534,7 +534,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             PayerPayeeName = "name1",
             Note = "this is a note123"
         };
-        var transaction3 = new Transaction
+        var transaction3 = new DynamoDbTransaction
         {
             UserId = PersistedTransactionsUserId,
             TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
@@ -547,7 +547,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
             PayerPayeeName = "name2",
         };
 
-        var transactionList = new List<Transaction>
+        var transactionList = new List<DynamoDbTransaction>
         {
             transaction1,
             transaction2,
@@ -583,7 +583,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
 
         transaction1.Category = "renamed category";
         transaction3.Category = "renamed category";
-        var returnedTransactions = await _dynamoDbHelper.QueryTable<Transaction>(PersistedTransactionsUserId);
+        var returnedTransactions = await _dynamoDbHelper.QueryTable<DynamoDbTransaction>(PersistedTransactionsUserId);
 
         Assert.Equal(transactionList, returnedTransactions);
     }

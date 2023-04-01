@@ -1,16 +1,15 @@
 ﻿using TransactionService.Constants;
+using TransactionService.Domain.Models;
 using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Tests.Common;
 
 public class TransactionListBuilder
 {
-    private readonly string _userId;
     private readonly List<Transaction> _transactionList;
 
-    public TransactionListBuilder(string userId)
+    public TransactionListBuilder()
     {
-        _userId = userId;
         _transactionList = new List<Transaction>();
     }
 
@@ -24,9 +23,8 @@ public class TransactionListBuilder
     {
         for (var i = 0; i < number; i++)
         {
-            _transactionList.Add(new Transaction
+            _transactionList.Add(new Transaction()
             {
-                UserId = _userId,
                 Amount = amount,
                 Category = category,
                 TransactionTimestamp = DateTime.Now.ToString("O"),
@@ -47,7 +45,6 @@ public class TransactionListBuilder
         {
             _transactionList.Add(new Transaction
             {
-                UserId = _userId,
                 Amount = amount,
                 Category = category,
                 TransactionTimestamp = DateTime.Now.ToString("O"),
@@ -67,7 +64,6 @@ public class TransactionListBuilder
         {
             _transactionList.Add(new Transaction
             {
-                UserId = _userId,
                 Amount = amount,
                 Category = "category123",
                 TransactionTimestamp = DateTime.Now.ToString("O"),
