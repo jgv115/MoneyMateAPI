@@ -43,8 +43,8 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
             {
                 var subcategoryIndex = int.Parse(jsonPatchOperation.path.Split("/").Last());
                 var newSubcategoryName = (string) jsonPatchOperation.value;
-                return new UpdateSubcategoryNameOperation(_categoriesRepository, _transactionHelperService,
-                    _transactionRepository, existingCategoryName, subcategoryIndex, newSubcategoryName);
+                return new UpdateSubcategoryNameOperation(_categoriesRepository, existingCategoryName, subcategoryIndex,
+                    newSubcategoryName);
             }
             else if (jsonPatchOperation.op == "replace" && jsonPatchOperation.path == "/categoryName")
             {

@@ -1,10 +1,14 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using AutoMapper;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
+using TransactionService.Domain.Services.Transactions.Specifications;
+using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Repositories.Exceptions;
@@ -18,17 +22,20 @@ namespace TransactionService.Repositories.DynamoDb
         private readonly string _userId;
         private readonly string _tableName;
 
+        private readonly ITransactionRepository _transactionRepository;
+
         private const string HashKeySuffix = "#Categories";
 
         public DynamoDbCategoriesRepository(DynamoDbRepositoryConfig config, IDynamoDBContext dbContext,
-            CurrentUserContext userContext, IMapper mapper)
+            CurrentUserContext userContext, IMapper mapper, ITransactionRepository transactionRepository)
         {
             _userId = userContext.UserId;
             _dbContext = dbContext;
             _mapper = mapper;
+            _transactionRepository = transactionRepository;
             _tableName = config.TableName;
         }
-        
+
         public async Task<Category> GetCategory(string categoryName)
         {
             var loadedCategory = await _dbContext.LoadAsync<DynamoDbCategory>($"{_userId}{HashKeySuffix}", categoryName,
@@ -94,7 +101,7 @@ namespace TransactionService.Repositories.DynamoDb
         public async Task UpdateCategoryName(Category category, string newCategoryName)
         {
             await DeleteCategory(category.CategoryName);
-            
+
             category.CategoryName = newCategoryName;
             await CreateCategory(category);
         }
@@ -137,6 +144,21 @@ namespace TransactionService.Repositories.DynamoDb
 
         public async Task UpdateSubcategoryName(string categoryName, string subcategoryName, string newSubcategoryName)
         {
+            var subcategoryTransactions =
+                await _transactionRepository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
+                    new AndSpec(new List<ITransactionSpecification>
+                    {
+                        new CategoriesSpec(new List<string> {categoryName}),
+                        new SubcategoriesSpec(new List<string> {subcategoryName})
+                    }));
+
+            if (subcategoryTransactions.Any())
+                foreach (var subcategoryTransaction in subcategoryTransactions)
+                {
+                    subcategoryTransaction.Subcategory = newSubcategoryName;
+                    await _transactionRepository.PutTransaction(subcategoryTransaction);
+                }
+
             var loadedCategory = await _dbContext.LoadAsync<DynamoDbCategory>($"{_userId}{HashKeySuffix}", categoryName,
                 new DynamoDBOperationConfig
                 {
@@ -145,7 +167,7 @@ namespace TransactionService.Repositories.DynamoDb
 
             loadedCategory.Subcategories.Remove(subcategoryName);
             loadedCategory.Subcategories.Add(newSubcategoryName);
-
+            
             await SaveCategory(loadedCategory);
         }
 
