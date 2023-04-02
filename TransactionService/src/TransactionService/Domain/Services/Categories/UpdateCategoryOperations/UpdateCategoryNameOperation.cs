@@ -38,18 +38,6 @@ namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
                 throw new UpdateCategoryOperationException(
                     $"Failed to execute UpdateCategoryNameOperation, category {_existingCategoryName} does not exist");
 
-            var transactions = await _transactionHelperService.GetTransactionsAsync(new GetTransactionsQuery
-            {
-                Categories = new List<string> {_existingCategoryName},
-            });
-
-            if (transactions.Any())
-                foreach (var transaction in transactions)
-                {
-                    transaction.Category = _newCategoryName;
-                    await _transactionRepository.PutTransaction(transaction);
-                }
-
             await _categoriesRepository.UpdateCategoryName(existingCategory, _newCategoryName);
         }
     }

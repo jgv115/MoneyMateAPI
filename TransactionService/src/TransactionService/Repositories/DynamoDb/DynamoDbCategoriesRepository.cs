@@ -100,6 +100,17 @@ namespace TransactionService.Repositories.DynamoDb
 
         public async Task UpdateCategoryName(Category category, string newCategoryName)
         {
+            var categoryTransactions =
+                await _transactionRepository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
+                    new CategoriesSpec(new List<string> {category.CategoryName}));
+
+            if (categoryTransactions.Any())
+                foreach (var subcategoryTransaction in categoryTransactions)
+                {
+                    subcategoryTransaction.Category = newCategoryName;
+                    await _transactionRepository.PutTransaction(subcategoryTransaction);
+                }
+
             await DeleteCategory(category.CategoryName);
 
             category.CategoryName = newCategoryName;
@@ -167,7 +178,7 @@ namespace TransactionService.Repositories.DynamoDb
 
             loadedCategory.Subcategories.Remove(subcategoryName);
             loadedCategory.Subcategories.Add(newSubcategoryName);
-            
+
             await SaveCategory(loadedCategory);
         }
 

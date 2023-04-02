@@ -33,7 +33,7 @@ public class UpdateCategoryNameOperationTests
     }
 
     [Fact]
-    public async Task GivenNoTransactionsExistWithCategory_ThenUpdateCategoryNameCalledWithCorrectArguments()
+    public async Task GivenCategoryExists_ThenUpdateCategoryNameCalledWithCorrectArguments()
     {
         var operation = new UpdateCategoryNameOperation(_mockCategoryRepository.Object,
             _mockTransactionService.Object, _mockTransactionRepository.Object, "categoryName",
@@ -47,75 +47,7 @@ public class UpdateCategoryNameOperationTests
                 TransactionType = TransactionType.Expense
             });
 
-        _mockTransactionService.Setup(service => service.GetTransactionsAsync(new GetTransactionsQuery
-        {
-            Categories = new List<string> {"categoryName"},
-        })).ReturnsAsync(new List<Transaction>());
-
         await operation.ExecuteOperation();
-
-        _mockCategoryRepository.Verify(repository =>
-            repository.UpdateCategoryName(new Category()
-            {
-                CategoryName = "categoryName",
-                Subcategories = new List<string> {"subcategory", "test1"},
-                TransactionType = TransactionType.Expense
-            }, "newCategory"));
-    }
-
-    [Fact]
-    public async Task GivenTransactionsExistWithCategory_ThenTransactionsAreModifiedBeforeUpdatingCategoryName()
-    {
-        var operation = new UpdateCategoryNameOperation(_mockCategoryRepository.Object,
-            _mockTransactionService.Object, _mockTransactionRepository.Object, "categoryName",
-            "newCategory");
-
-        _mockCategoryRepository.Setup(repository => repository.GetCategory("categoryName"))
-            .ReturnsAsync(new Category()
-            {
-                CategoryName = "categoryName",
-                Subcategories = new List<string> {"subcategory", "test1"},
-                TransactionType = TransactionType.Expense
-            });
-
-        var transaction1 = new Transaction
-        {
-            Amount = 123,
-            Category = "categoryName",
-            TransactionTimestamp = DateTime.Now.ToString("O"),
-            Subcategory = "subcategory",
-            TransactionId = Guid.NewGuid().ToString(),
-            TransactionType = "expense",
-            PayerPayeeId = "id",
-            PayerPayeeName = "name"
-        };
-        var transaction2 = new Transaction
-        {
-            Amount = 1234,
-            Category = "categoryName",
-            TransactionTimestamp = DateTime.Now.ToString("O"),
-            Subcategory = "subcategory",
-            TransactionId = Guid.NewGuid().ToString(),
-            TransactionType = "expense",
-            PayerPayeeId = "id",
-            PayerPayeeName = "name"
-        };
-
-        _mockTransactionService.Setup(service => service.GetTransactionsAsync(new GetTransactionsQuery
-        {
-            Categories = new List<string> {"categoryName"},
-        })).ReturnsAsync(new List<Transaction>
-        {
-            transaction1, transaction2
-        });
-
-        await operation.ExecuteOperation();
-
-        transaction1.Category = "newCategory";
-        transaction2.Category = "newCategory";
-        _mockTransactionRepository.Verify(repository => repository.PutTransaction(transaction1), Times.Once);
-        _mockTransactionRepository.Verify(repository => repository.PutTransaction(transaction2), Times.Once);
-
 
         _mockCategoryRepository.Verify(repository =>
             repository.UpdateCategoryName(new Category()
