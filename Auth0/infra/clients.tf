@@ -1,7 +1,7 @@
 resource "auth0_client" moneymate_app {
   name = "MoneyMate App"
   app_type = "native"
-  callbacks = ["com.jgv115.moneymateapp://login-callback"]
+  callbacks = ["moneymateapp://${var.auth0_domain}/android/com.jgv115.moneymateapp/callback", "com.jgv115.moneymateapp://${var.auth0_domain}/ios/com.jgv115.moneymateapp/callback"]
   cross_origin_auth = false
   custom_login_page_on = true
   grant_types = ["authorization_code", "implicit", "refresh_token"]
