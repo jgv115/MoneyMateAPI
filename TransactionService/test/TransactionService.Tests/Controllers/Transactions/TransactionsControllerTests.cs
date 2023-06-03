@@ -23,6 +23,45 @@ namespace TransactionService.Tests.Controllers.Transactions
         }
 
         [Fact]
+        public async Task GivenValidTransactinoId_WhenGetByIdIsInvoked_ThenReturns200Ok()
+        {
+            var controller = new TransactionsController(_mockTransactionHelperService.Object);
+
+            _mockTransactionHelperService.Setup(service => service.GetTransactionById("id123"))
+                .ReturnsAsync(new Transaction());
+
+            var response = await controller.GetById("id123");
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+        }
+
+        [Fact]
+        public async Task GivenValidTransactinoId_WhenGetByIdIsInvoked_ThenCorrectTransactionReturned()
+        {
+            var controller = new TransactionsController(_mockTransactionHelperService.Object);
+
+            var expectedTransaction = new Transaction
+            {
+                Amount = (decimal) 1.0,
+                Category = "category-1",
+                TransactionTimestamp = DateTime.Now.ToString("O"),
+                Subcategory = "subcategory-1",
+                TransactionId = "transaction-id-1",
+                TransactionType = "expense",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
+            };
+            _mockTransactionHelperService.Setup(service => service.GetTransactionById("id123"))
+                .ReturnsAsync(expectedTransaction);
+
+            var response = await controller.GetById("id123");
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(expectedTransaction, objectResponse.Value as Transaction);
+        }
+
+        [Fact]
         public async Task GivenValidQueryParams_WhenGetIsInvoked_ThenReturns200Ok()
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);

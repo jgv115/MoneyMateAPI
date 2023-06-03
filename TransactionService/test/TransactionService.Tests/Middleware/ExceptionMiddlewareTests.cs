@@ -17,6 +17,34 @@ namespace TransactionService.Tests.Middleware;
 public class ExceptionMiddlewareTests
 {
     [Fact]
+    public async Task GivenRepositoryItemDoesNotExistExceptionThrown_ThenCorrectProblemDetailsReturned()
+    {
+        var expectedMessage = "message 123";
+        var middleware = new ExceptionMiddleware(_ =>
+            throw new RepositoryItemDoesNotExist(expectedMessage));
+
+        var context = new DefaultHttpContext();
+        context.Response.Body = new MemoryStream();
+        var logger = new Mock<ILogger<ExceptionMiddleware>>();
+
+        await middleware.Invoke(context, logger.Object);
+
+        Assert.Equal(404, context.Response.StatusCode);
+
+        context.Response.Body.Seek(0, SeekOrigin.Begin);
+        var reader = new StreamReader(context.Response.Body);
+        var responseBodyString = reader.ReadToEnd();
+
+        var expectedResponseBody = new ProblemDetails
+        {
+            Status = 404,
+            Title = "Could not find item",
+            Detail = expectedMessage
+        };
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+    }
+
+    [Fact]
     public async Task GivenRepositoryItemExistsExceptionThrown_ThenCorrectProblemDetailsReturned()
     {
         var expectedMessage = "message 123";
@@ -43,7 +71,7 @@ public class ExceptionMiddlewareTests
         };
         Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
     }
-    
+
     [Fact]
     public async Task GivenUpdateCategoryOperationExceptionThrown_ThenCorrectProblemDetailsReturned()
     {
@@ -77,7 +105,7 @@ public class ExceptionMiddlewareTests
     {
         const string expectedMessage = "invalid query parameter!";
         var middleware = new ExceptionMiddleware(_ => throw new QueryParameterInvalidException(expectedMessage));
-        
+
         var httpContext = new DefaultHttpContext();
         httpContext.Response.Body = new MemoryStream();
         var mockLogger = new Mock<ILogger<ExceptionMiddleware>>();
@@ -94,11 +122,11 @@ public class ExceptionMiddlewareTests
             Title = "Invalid query parameter",
             Detail = expectedMessage
         };
-        
+
         Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
     }
-    
-    
+
+
     [Fact]
     public async Task GivenUnknownExceptionThrown_ThenCorrectProblemDetailsReturned()
     {

@@ -47,6 +47,36 @@ namespace TransactionService.Tests.Domain.Services
             }
         }
 
+        public class GetTransactionById
+        {
+            private readonly Mock<ITransactionRepository> _mockTransactionRepository = new();
+            private readonly Mock<IMapper> _mockMapper = new();
+
+            [Fact]
+            public async Task GivenTransactionId_ThenTransactionFromRepositoryReturned()
+            {
+                var service = new TransactionHelperService(_mockTransactionRepository.Object, _mockMapper.Object);
+
+                var expectedTransaction = new Transaction
+                {
+                    Amount = (decimal) 1.0,
+                    Category = "category-1",
+                    TransactionTimestamp = DateTime.Now.ToString("O"),
+                    Subcategory = "subcategory-1",
+                    TransactionId = "transaction-id-1",
+                    TransactionType = "expense",
+                    PayerPayeeId = Guid.NewGuid().ToString(),
+                    PayerPayeeName = "name1",
+                };
+                _mockTransactionRepository.Setup(repository => repository.GetTransactionById("id123"))
+                    .ReturnsAsync(expectedTransaction);
+
+                var returnedTransaction = await service.GetTransactionById("id123");
+
+                Assert.Equal(expectedTransaction, returnedTransaction);
+            }
+        }
+
         public class GetTransactionsAsync
         {
             private readonly Mock<ITransactionRepository> _mockTransactionRepository;
@@ -180,7 +210,7 @@ namespace TransactionService.Tests.Domain.Services
             public async Task GivenPutTransactionDto_ThenCorrectTransactionShouldBeUpdated()
             {
                 var expectedTransactionId = Guid.NewGuid().ToString();
-                
+
                 var expectedTransaction = new Transaction()
                 {
                     TransactionId = expectedTransactionId,

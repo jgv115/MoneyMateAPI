@@ -24,6 +24,11 @@ namespace TransactionService.Domain.Services.Transactions
             _specificationFactory = new TransactionSpecificationFactory();
         }
 
+        public Task<Transaction> GetTransactionById(string transactionId)
+        {
+            return _repository.GetTransactionById(transactionId);
+        }
+
         public async Task<List<Transaction>> GetTransactionsAsync(GetTransactionsQuery queryParams)
         {
             var dateRange = new DateRange(queryParams.Start.GetValueOrDefault(DateTime.MinValue),

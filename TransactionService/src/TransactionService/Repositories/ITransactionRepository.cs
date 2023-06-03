@@ -8,6 +8,7 @@ namespace TransactionService.Repositories
 {
     public interface ITransactionRepository
     {
+        public Task<Transaction> GetTransactionById(string transactionId);
         public Task<List<Transaction>> GetTransactions(DateRange dateRange,
             ITransactionSpecification spec);
 

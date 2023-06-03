@@ -11,6 +11,7 @@ using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories.DynamoDb.Models;
+using TransactionService.Repositories.Exceptions;
 
 namespace TransactionService.Repositories.DynamoDb
 {
@@ -23,7 +24,8 @@ namespace TransactionService.Repositories.DynamoDb
 
         private const string HashKeySuffix = "#Transaction";
 
-        public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient, CurrentUserContext currentUserContext, IMapper mapper)
+        public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient, CurrentUserContext currentUserContext,
+            IMapper mapper)
         {
             if (dbClient == null)
             {
@@ -36,7 +38,18 @@ namespace TransactionService.Repositories.DynamoDb
             _dbContext = new DynamoDBContext(dbClient);
             _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
         }
-        
+
+        public async Task<Transaction> GetTransactionById(string transactionId)
+        {
+            var transaction =
+                await _dbContext.LoadAsync<DynamoDbTransaction>($"{_userId}{HashKeySuffix}", transactionId);
+
+            if (transaction == null)
+                throw new RepositoryItemDoesNotExist($"Transaction with ID: {transactionId} could not be found");
+
+            return _mapper.Map<DynamoDbTransaction, Transaction>(transaction);
+        }
+
         public async Task<List<Transaction>> GetTransactions(DateRange dateRange, ITransactionSpecification spec)
         {
             var start = dateRange.Start;

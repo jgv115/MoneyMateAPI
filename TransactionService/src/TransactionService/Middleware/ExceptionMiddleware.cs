@@ -32,6 +32,16 @@ namespace TransactionService.Middleware
                 ProblemDetails problemDetails;
                 switch (ex)
                 {
+                    case RepositoryItemDoesNotExist:
+                        returnedStatusCode = (int) HttpStatusCode.NotFound;
+                        problemDetails = new ProblemDetails
+                        {
+                            Status = returnedStatusCode,
+                            Title = "Could not find item",
+                            Detail = ex.Message
+                        };
+                        break;
+                    
                     case RepositoryItemExistsException:
                         returnedStatusCode = (int) HttpStatusCode.Conflict;
                         problemDetails = new ProblemDetails

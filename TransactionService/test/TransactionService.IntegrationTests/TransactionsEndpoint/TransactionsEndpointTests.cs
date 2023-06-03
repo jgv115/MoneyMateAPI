@@ -41,18 +41,51 @@ namespace TransactionService.IntegrationTests.TransactionsEndpoint
 
         private List<Transaction> ConvertToDomainTransaction(List<DynamoDbTransaction> dynamoDbTransactions)
         {
-            return dynamoDbTransactions.Select(transaction => new Transaction
+            return dynamoDbTransactions.Select(ConvertToDomainTransaction).ToList();
+        }
+
+        private Transaction ConvertToDomainTransaction(DynamoDbTransaction transaction) => new Transaction
+        {
+            Amount = transaction.Amount,
+            Category = transaction.Category,
+            Note = transaction.Note,
+            Subcategory = transaction.Subcategory,
+            TransactionId = transaction.TransactionId,
+            TransactionTimestamp = transaction.TransactionTimestamp,
+            TransactionType = transaction.TransactionType,
+            PayerPayeeId = transaction.PayerPayeeId,
+            PayerPayeeName = transaction.PayerPayeeName
+        };
+
+        [Fact]
+        public async Task GivenTransactionIdInput_WhenGetTransactionByIdIsCalled_ThenCorrectTransactionIsReturned()
+        {
+            var transaction = new DynamoDbTransaction
             {
-                Amount = transaction.Amount,
-                Category = transaction.Category,
-                Note = transaction.Note,
-                Subcategory = transaction.Subcategory,
-                TransactionId = transaction.TransactionId,
-                TransactionTimestamp = transaction.TransactionTimestamp,
-                TransactionType = transaction.TransactionType,
-                PayerPayeeId = transaction.PayerPayeeId,
-                PayerPayeeName = transaction.PayerPayeeName
-            }).ToList();
+                UserId = UserId,
+                TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
+                TransactionTimestamp = new DateTime(2020, 02, 01).ToString("o"),
+                TransactionType = "income",
+                Amount = 1223.45M,
+                Category = "Test Category",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2",
+                Subcategory = "Salary"
+            };
+
+            await DynamoDbHelper.WriteTransactionsIntoTable(new List<DynamoDbTransaction>() {transaction});
+
+            var response = await HttpClient.GetAsync($"/api/transactions/{transaction.TransactionId}");
+            response.EnsureSuccessStatusCode();
+
+            var returnedString = await response.Content.ReadAsStringAsync();
+            var returnedTransaction = JsonSerializer.Deserialize<Transaction>(returnedString,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            Assert.Equal(ConvertToDomainTransaction(transaction), returnedTransaction);
         }
 
         [Fact]

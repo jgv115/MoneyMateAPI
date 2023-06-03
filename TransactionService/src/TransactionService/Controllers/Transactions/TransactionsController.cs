@@ -18,6 +18,13 @@ namespace TransactionService.Controllers.Transactions
             _transactionHelperService = transactionHelperService;
         }
 
+        [HttpGet("{transactionId}")]
+        public async Task<IActionResult> GetById(string transactionId)
+        {
+            var transaction = await _transactionHelperService.GetTransactionById(transactionId);
+            return Ok(transaction);
+        }
+
         // GET api/transactions
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] GetTransactionsQuery queryParams
