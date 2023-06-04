@@ -42,7 +42,11 @@ namespace TransactionService.Repositories.DynamoDb
         public async Task<Transaction> GetTransactionById(string transactionId)
         {
             var transaction =
-                await _dbContext.LoadAsync<DynamoDbTransaction>($"{_userId}{HashKeySuffix}", transactionId);
+                await _dbContext.LoadAsync<DynamoDbTransaction>($"{_userId}{HashKeySuffix}", transactionId,
+                    new DynamoDBOperationConfig
+                    {
+                        OverrideTableName = _tableName
+                    });
 
             if (transaction == null)
                 throw new RepositoryItemDoesNotExist($"Transaction with ID: {transactionId} could not be found");
