@@ -15,11 +15,12 @@ namespace TransactionService.IntegrationTests.Helpers
         private readonly AmazonDynamoDBClient _dynamoDbClient;
         private readonly DynamoDBContext _dynamoDbContext;
 
-        private string TableName { get; } =
-            $"MoneyMate_TransactionDB_dev";
+        public string TableName { get; }
 
         public DynamoDbHelper()
         {
+            TableName = $"MoneyMate_TransactionDB_{Guid.NewGuid().ToString()}";
+
             var config = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.dev.json", false, true)
@@ -27,7 +28,7 @@ namespace TransactionService.IntegrationTests.Helpers
                 .Build();
 
             var awsSettings = config.GetSection("AWS");
-            
+
             var awsKey = awsSettings.GetValue<string>("AccessKey") ??
                          throw new ArgumentException("Could not find AWS access key for DynamoDb helper");
             var awsSecret = awsSettings.GetValue<string>("SecretKey") ??
@@ -36,7 +37,7 @@ namespace TransactionService.IntegrationTests.Helpers
                             throw new ArgumentException("Could not find AWS region for DynamoDb helper");
             var awsUrl = awsSettings.GetValue<string>("ServiceUrl") ??
                          throw new ArgumentException("Could not find AWS URL for DynamoDb helper");
-            
+
             var clientConfig = new AmazonDynamoDBConfig
             {
                 ServiceURL = awsUrl,
@@ -45,22 +46,31 @@ namespace TransactionService.IntegrationTests.Helpers
 
             _dynamoDbClient = new AmazonDynamoDBClient(awsKey, awsSecret, clientConfig);
             _dynamoDbContext = new DynamoDBContext(_dynamoDbClient,
-                new DynamoDBOperationConfig { OverrideTableName = TableName });
+                new DynamoDBOperationConfig {OverrideTableName = TableName});
         }
 
         public async Task<List<T>> ScanTable<T>()
         {
-            return await _dynamoDbContext.ScanAsync<T>(new List<ScanCondition>()).GetRemainingAsync();
+            return await _dynamoDbContext.ScanAsync<T>(new List<ScanCondition>(), new DynamoDBOperationConfig
+            {
+                OverrideTableName = TableName
+            }).GetRemainingAsync();
         }
 
         public async Task<T> QueryTable<T>(string hashKey, string rangeKey)
         {
-            return await _dynamoDbContext.LoadAsync<T>(hashKey, rangeKey);
+            return await _dynamoDbContext.LoadAsync<T>(hashKey, rangeKey, new DynamoDBOperationConfig
+            {
+                OverrideTableName = TableName
+            });
         }
-        
+
         public async Task<List<T>> QueryTable<T>(string hashKey)
         {
-            return await _dynamoDbContext.QueryAsync<T>(hashKey).GetRemainingAsync();
+            return await _dynamoDbContext.QueryAsync<T>(hashKey, new DynamoDBOperationConfig
+            {
+                OverrideTableName = TableName
+            }).GetRemainingAsync();
         }
 
         public async Task CreateTable()
@@ -108,7 +118,7 @@ namespace TransactionService.IntegrationTests.Helpers
                 {
                     new()
                     {
-                        Projection = new Projection { ProjectionType = ProjectionType.ALL },
+                        Projection = new Projection {ProjectionType = ProjectionType.ALL},
                         IndexName = "TransactionTimestampIndex",
                         KeySchema = new List<KeySchemaElement>
                         {
@@ -132,7 +142,7 @@ namespace TransactionService.IntegrationTests.Helpers
                         Projection = new Projection()
                         {
                             ProjectionType = ProjectionType.INCLUDE,
-                            NonKeyAttributes = new List<string> { "ExternalId" }
+                            NonKeyAttributes = new List<string> {"ExternalId"}
                         },
                         IndexName = "PayerPayeeNameIndex",
                         KeySchema = new List<KeySchemaElement>
@@ -209,7 +219,10 @@ namespace TransactionService.IntegrationTests.Helpers
         {
             foreach (var item in items)
             {
-                await _dynamoDbContext.SaveAsync(item);
+                await _dynamoDbContext.SaveAsync(item, new DynamoDBOperationConfig
+                {
+                    OverrideTableName = TableName
+                });
             }
         }
 
@@ -217,7 +230,10 @@ namespace TransactionService.IntegrationTests.Helpers
         {
             foreach (var item in items)
             {
-                await _dynamoDbContext.SaveAsync(item);
+                await _dynamoDbContext.SaveAsync(item, new DynamoDBOperationConfig
+                {
+                    OverrideTableName = TableName
+                });
             }
         }
     }

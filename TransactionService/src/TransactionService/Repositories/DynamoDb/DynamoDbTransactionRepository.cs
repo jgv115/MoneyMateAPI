@@ -25,7 +25,7 @@ namespace TransactionService.Repositories.DynamoDb
         private const string HashKeySuffix = "#Transaction";
 
         public DynamoDbTransactionRepository(IAmazonDynamoDB dbClient, CurrentUserContext currentUserContext,
-            IMapper mapper)
+            IMapper mapper, DynamoDbRepositoryConfig config)
         {
             if (dbClient == null)
             {
@@ -36,7 +36,7 @@ namespace TransactionService.Repositories.DynamoDb
 
             _userId = currentUserContext.UserId;
             _dbContext = new DynamoDBContext(dbClient);
-            _tableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}";
+            _tableName = config.TableName;
         }
 
         public async Task<Transaction> GetTransactionById(string transactionId)

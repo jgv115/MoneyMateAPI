@@ -12,7 +12,7 @@ namespace TransactionService.Tests.Repositories
         public void GivenNullIAmazonDynamoDB_WhenConstructorInvoked_ThenArgumentNullExceptionIsThrown()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                new DynamoDbTransactionRepository(null, null, null));
+                new DynamoDbTransactionRepository(null, null, null, null));
         }
     }
 }

@@ -28,7 +28,7 @@ public class CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationF
     public CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
         _httpClient = factory.CreateDefaultClient();
-        _dynamoDbHelper = new DynamoDbHelper();
+        _dynamoDbHelper = factory.DynamoDbHelper;
     }
 
     public async Task InitializeAsync()

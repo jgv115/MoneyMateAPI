@@ -22,7 +22,7 @@ public class AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicatio
     public AutocompleteEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
         _httpClient = factory.CreateDefaultClient();
-        _dynamoDbHelper = new DynamoDbHelper();
+        _dynamoDbHelper = factory.DynamoDbHelper;
     }
 
     public async Task InitializeAsync()

@@ -27,7 +27,7 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint
         public PostEndpointTests(MoneyMateApiWebApplicationFactory factory)
         {
             _httpClient = factory.CreateDefaultClient();
-            _dynamoDbHelper = new DynamoDbHelper();
+            _dynamoDbHelper = factory.DynamoDbHelper;
         }
 
         public async Task InitializeAsync()

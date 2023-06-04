@@ -2,17 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using TransactionService.IntegrationTests.Helpers;
+using TransactionService.Repositories.DynamoDb;
 
 namespace TransactionService.IntegrationTests.WebApplicationFactories
 {
     public class MoneyMateApiWebApplicationFactory : WebApplicationFactory<Startup>
     {
         private string _accessToken;
+        public readonly DynamoDbHelper DynamoDbHelper;
 
         public MoneyMateApiWebApplicationFactory()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "dev");
+            DynamoDbHelper = new DynamoDbHelper();
         }
 
         private string RequestAccessToken()
@@ -42,6 +48,17 @@ namespace TransactionService.IntegrationTests.WebApplicationFactories
 
             _accessToken = deserializedObject["access_token"].ToString();
             return _accessToken;
+        }
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.ConfigureServices(collection =>
+            {
+                collection.AddSingleton(new DynamoDbRepositoryConfig
+                {
+                    TableName = DynamoDbHelper.TableName
+                });
+            });
         }
 
         protected override void ConfigureClient(HttpClient client)

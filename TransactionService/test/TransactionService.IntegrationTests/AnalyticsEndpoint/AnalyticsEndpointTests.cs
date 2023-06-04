@@ -25,7 +25,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
     public AnalyticsEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
         HttpClient = factory.CreateDefaultClient();
-        DynamoDbHelper = new DynamoDbHelper();
+        DynamoDbHelper = factory.DynamoDbHelper;
     }
 
     public async Task InitializeAsync()
