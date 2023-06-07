@@ -12,6 +12,7 @@ project_name: moneymate_api
   AWS__LocalMode: "true"
   AWS__ServiceUrl: "http://localstack:4566"
   GooglePlaceApi__PlaceDetailsBaseUri: "http://google_api_mock:5000"
+  CockroachDb__ConnectionString: "Host=cockroachdb;Port=26257;SSL Mode=Disable;Username=root;Database=moneymate_db_local;Server Compatibility Mode=NoTypeLoading;"
 
 containers:
   dotnet_build_env:
@@ -125,13 +126,15 @@ containers:
       retries: 5
     command: start-single-node --insecure
         
-  flyway:
+  cockroachdb_migrated:
     image: flyway/flyway:9.16
+    dependencies:
+      - cockroachdb
     volumes:
       - local: ./sql
         container: /flyway/sql
-    entrypoint: sh
-  
+    command: -url=jdbc:postgresql://cockroachdb:26257/moneymate_db_local -user=root -connectRetries=60 migrate
+
   google_api_mock:
     build_directory: .batect/google_api_mock
     environment: 
@@ -139,6 +142,10 @@ containers:
     ports:
       - local: 6001
         container: 5000
+  
+  wait:
+    image: alpine:latest
+    
 
 tasks:
   build:
@@ -147,6 +154,25 @@ tasks:
       container: dotnet_build_env
       command: dotnet build src/TransactionService/TransactionService.csproj -o .batect/dotnet_run_env/app
 
+  start_clean_dependencies:
+    dependencies:
+      - localstack_clean
+      - cockroachdb_migrated
+      - google_api_mock
+    run:
+      container: wait
+      command: tail -f /dev/null
+  
+  start_dependencies:
+    dependencies:
+      - localstack
+      - cockroachdb_migrated
+      - google_api_mock
+    run:
+      container: wait
+      command: tail -f /dev/null
+  
+  
   unit_tests:
     description: Runs the unit tests
     run:
@@ -157,6 +183,7 @@ tasks:
     description: Runs integration tests
     dependencies:
       - localstack_clean
+      - cockroachdb_migrated
       - google_api_mock
     run:
       container: dotnet_build_env
@@ -165,28 +192,6 @@ tasks:
   start_clean_db:
     run:
       container: cockroachdb
-      
-  
-  start_db:
-    dependencies:
-      - cockroachdb
-    run:
-      container: flyway
-      command: -c "flyway -url=jdbc:postgresql://cockroachdb:26257/moneymate_db_local -user=root -connectRetries=60 migrate && tail -f /dev/null"
-  
-  start_localstack:
-    description: Starts localstack only
-    dependencies:
-      - google_api_mock
-    run:
-      container: localstack_clean
-      
-  start_localstack_with_data:
-    description: Starts localstack only
-    dependencies:
-      - google_api_mock
-    run:
-      container: localstack
 
   run:
     description: Runs the Transaction Service

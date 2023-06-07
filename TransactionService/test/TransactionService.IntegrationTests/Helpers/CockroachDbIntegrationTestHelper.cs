@@ -1,0 +1,169 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using TransactionService.Constants;
+using TransactionService.Domain.Models;
+using TransactionService.Repositories.CockroachDb;
+using TransactionService.Repositories.CockroachDb.Profiles;
+
+namespace TransactionService.IntegrationTests.Helpers;
+
+internal class TransactionTypeIds
+{
+    public Guid Expense { get; init; }
+    public Guid Income { get; init; }
+
+    public TransactionTypeIds(Guid expenseId, Guid incomeId)
+    {
+        Expense = expenseId;
+        Income = incomeId;
+    }
+}
+
+public class CockroachDbIntegrationTestHelper
+{
+    public DapperContext DapperContext { get; init; }
+    private Guid TestUserId { get; set; }
+    private TransactionTypeIds TransactionTypeIds { get; set; }
+
+    private IMapper _mapper { get; init; }
+
+    public CockroachDbIntegrationTestHelper()
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.dev.json", false, true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        var cockroachDbConnectionString = config.GetSection("CockroachDb").GetValue<string>("ConnectionString") ??
+                                          throw new ArgumentException(
+                                              "Could not find CockroachDb connection string for CockroachDb helper");
+
+        Console.WriteLine(">>>>");
+        Console.WriteLine(cockroachDbConnectionString);
+        
+        DapperContext = new DapperContext(cockroachDbConnectionString);
+        _mapper = new MapperConfiguration(cfg => { cfg.AddProfile<CategoryEntityProfile>(); })
+            .CreateMapper();
+    }
+
+    public async Task SeedRequiredData()
+    {
+        using (var connection = DapperContext.CreateConnection())
+
+        {
+            // Create a test user
+            var insertUserQuery = @"INSERT INTO users (user_identifier) VALUES (@test_user_identifier) RETURNING id";
+            TestUserId =
+                await connection.QuerySingleAsync<Guid>(insertUserQuery,
+                    new {test_user_identifier = "auth0|moneymatetest"});
+
+            // Get transaction type ids
+            var transactionTypeQuery = @"SELECT id from transactiontype WHERE name = 'Expense';
+                                        SELECT id from transactiontype WHERE name = 'Income';";
+
+            using (var transactionTypeIdsReader = connection.QueryMultiple(transactionTypeQuery))
+            {
+                var expenseId = transactionTypeIdsReader.ReadFirst<Guid>();
+                var incomeId = transactionTypeIdsReader.ReadFirst<Guid>();
+                if (expenseId == Guid.Empty || incomeId == Guid.Empty)
+                    throw new ArgumentException(
+                        "Transaction Type Ids are not valid when trying to seed CockroachDb data");
+                TransactionTypeIds = new TransactionTypeIds(expenseId, incomeId);
+            }
+        }
+    }
+
+    public async Task ClearDbData()
+    {
+        using (var connection = DapperContext.CreateConnection())
+        {
+            var query = @"TRUNCATE users, category, subcategory CASCADE";
+
+            await connection.ExecuteAsync(query);
+        }
+    }
+
+    public async Task WriteTransactionsIntoDb(List<Transaction> transactions)
+    {
+        using (var connection = DapperContext.CreateConnection())
+        {
+            var createTransactionQuery = @"
+                INSERT INTO transaction (user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerpayee_id, notes)
+                VALUES (@user_id, @timestamp, @transaction_type_id, @amount, @subcategory_id, @payerpayee_id, @notes)
+            ";
+
+            foreach (var transaction in transactions)
+            {
+                await connection.ExecuteAsync(createTransactionQuery, new
+                {
+                    user_id = TestUserId,
+                    timestamp = transaction.TransactionTimestamp,
+                    // TODO: this might not work
+                    transaction_type_id = transaction.TransactionType == TransactionType.Expense.ToString()
+                        ? TransactionTypeIds.Expense
+                        : TransactionTypeIds.Income,
+                    amount = transaction.Amount,
+                    // TODO: add subcategoryId + payerPayeeId,
+                    notes = transaction.Note
+                });
+            }
+        }
+    }
+
+    public async Task WriteCategoriesIntoDb(List<Category> categories)
+    {
+        using (var connection = DapperContext.CreateConnection())
+        {
+            foreach (var category in categories)
+            {
+                // TODO: possibility here to check for duplicates
+                var createCategoryQuery =
+                    @"
+                        INSERT INTO category (name, user_id, transaction_type_id) 
+                        VALUES (@category_name, @user_id, @transaction_type_id)
+                        RETURNING id
+                    ";
+
+                var categoryId = await connection.QuerySingleAsync<Guid>(createCategoryQuery,
+                    new
+                    {
+                        category_name = category.CategoryName, user_id = TestUserId,
+                        transaction_type_id = category.TransactionType == TransactionType.Expense
+                            ? TransactionTypeIds.Expense
+                            : TransactionTypeIds.Income
+                    });
+
+
+                var subcategoryQuery =
+                    @"INSERT INTO subcategory (name, category_id) VALUES (@subcategory_name, @category_id)";
+                await connection.ExecuteAsync(subcategoryQuery,
+                    category.Subcategories.Select(s => new {subcategory_name = s, category_id = categoryId}));
+            }
+        }
+    }
+
+    public async Task<List<Category>> RetrieveAllCategories()
+    {
+        using (var connection = DapperContext.CreateConnection())
+        {
+            var categoryQuery =
+                @"SELECT * FROM category
+                    LEFT JOIN subcategory s on category.id = s.category_id
+                    WHERE category.user_id = @user_id
+                    ORDER BY category.name, s.name";
+
+            var categories =
+                await CategoryDapperHelpers.QueryAndBuildCategories(connection, categoryQuery,
+                    new {user_id = TestUserId});
+
+            return _mapper.Map<List<TransactionService.Repositories.CockroachDb.Entities.Category>, List<Category>>(
+                categories.ToList());
+        }
+    }
+}

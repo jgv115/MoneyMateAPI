@@ -32,7 +32,7 @@ CREATE TABLE Subcategory
     id          UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
     name        VARCHAR(255) NOT NULL,
     category_id UUID         NOT NULL,
-    FOREIGN KEY (category_id) REFERENCES Category (id),
+    FOREIGN KEY (category_id) REFERENCES Category (id) ON DELETE CASCADE,
     UNIQUE (name, category_id)
 );
 

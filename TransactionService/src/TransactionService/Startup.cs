@@ -24,6 +24,7 @@ using TransactionService.Middleware;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
 using TransactionService.Repositories.CockroachDb;
+using TransactionService.Repositories.CockroachDb.Profiles;
 using TransactionService.Repositories.DynamoDb;
 using TransactionService.Services;
 using TransactionService.Services.PayerPayeeEnricher;
@@ -85,7 +86,7 @@ namespace TransactionService
             services.AddScoped<IPayerPayeeService, PayerPayeeService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
 
-            services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile));
+            services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile), typeof(CategoryEntityProfile));
 
             var awsSettings = Configuration.GetSection("AWS");
             var awsLocalMode = awsSettings.GetValue<bool>("LocalMode");
@@ -122,25 +123,25 @@ namespace TransactionService
                 TableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}"
             });
 
-            var cockroachDbConnectionString =
-                Configuration.GetSection("CockroachDb").GetValue<string>("ConnectionString");
+            var cockroachDbConfigSection = Configuration.GetSection("CockroachDb");
+            var cockroachDbFeatureEnabled = cockroachDbConfigSection.GetValue<string>("Enabled");
 
-            services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
-            services.AddSingleton<CockroachDbCategoriesRepository>();
+            if (bool.Parse(cockroachDbFeatureEnabled))
+            {
+                var cockroachDbConnectionString =
+                    cockroachDbConfigSection.GetValue<string>("ConnectionString");
+
+                services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
+                services.AddSingleton<CockroachDbCategoriesRepository>();
+
+                services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
+            }
+            else
+            {
+                services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
+            }
 
             services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
-
-            // if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "dev")
-            // {
-            //     services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
-            // }
-            // else
-            // {
-            //     services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
-            // }
-            services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
-
-
             services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
 
             services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();

@@ -8,11 +8,12 @@ namespace TransactionService.Repositories.CockroachDb.Profiles
     {
         public CategoryEntityProfile()
         {
-            CreateMap<Category, DynamoDb.Models.DynamoDbCategory>()
+            CreateMap<Category, Domain.Models.Category>()
                 .ForMember(category => category.Subcategories, opt =>
                     opt.MapFrom(
                         category => category.Subcategories.Select(subcategory => subcategory.Name)))
                 .ForMember(category => category.CategoryName, opt => opt.MapFrom(category => category.Name));
         }
     }
+    
 }

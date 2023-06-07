@@ -5,13 +5,13 @@ namespace TransactionService.Repositories.CockroachDb
 {
     public class DapperContext
     {
-        private string _connectionString { get; init; }
+        private string ConnectionString { get; init; }
 
         public DapperContext(string connectionString)
         {
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
         }
 
-        public IDbConnection CreateConnection() => new NpgsqlConnection(_connectionString);
+        public IDbConnection CreateConnection() => new NpgsqlConnection(ConnectionString);
     }
 }
