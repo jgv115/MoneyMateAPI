@@ -126,7 +126,7 @@ namespace TransactionService
             var cockroachDbConfigSection = Configuration.GetSection("CockroachDb");
             var cockroachDbFeatureEnabled = cockroachDbConfigSection.GetValue<string>("Enabled");
 
-            if (bool.Parse(cockroachDbFeatureEnabled))
+            if (!string.IsNullOrEmpty(cockroachDbFeatureEnabled) && bool.Parse(cockroachDbFeatureEnabled))
             {
                 var cockroachDbConnectionString =
                     cockroachDbConfigSection.GetValue<string>("ConnectionString");
