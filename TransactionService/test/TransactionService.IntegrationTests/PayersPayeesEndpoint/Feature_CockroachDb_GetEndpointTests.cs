@@ -1,0 +1,165 @@
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using TransactionService.Controllers.PayersPayees.ViewModels;
+using TransactionService.Domain.Models;
+using TransactionService.IntegrationTests.Helpers;
+using TransactionService.IntegrationTests.WebApplicationFactories;
+using Xunit;
+
+namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
+
+[Collection("Integration Tests")]
+public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
+{
+    private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
+    private readonly HttpClient _httpClient;
+    private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
+
+    public Feature_CockroachDb_GetEndpointTests(MoneyMateApiWebApplicationFactory factory)
+    {
+        _httpClient = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
+            (_, configurationBuilder) =>
+                configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>()
+                {
+                    ["CockroachDb:Enabled"] = "true"
+                }))).CreateClient();
+        _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _cockroachDbIntegrationTestHelper.SeedRequiredData();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _cockroachDbIntegrationTestHelper.ClearDbData();
+    }
+
+
+    [Fact]
+    public async Task GivenValidRequest_WhenGetPayersEndpointCalled_ThenAllCorrectPayersReturned()
+    {
+        var payer1 = new PayerPayee
+        {
+            PayerPayeeId = "50f5b2d0-b8ce-41ee-a17b-d97d466063cb",
+            PayerPayeeName = "payer1",
+            ExternalId = Guid.NewGuid().ToString()
+        };
+        var expectedPayer1 = new PayerPayeeViewModel
+        {
+            PayerPayeeId = Guid.Parse(payer1.PayerPayeeId),
+            PayerPayeeName = "payer1",
+            ExternalId = payer1.ExternalId,
+            Address = ExpectedAddress
+        };
+        var payer2 = new PayerPayee
+        {
+            PayerPayeeId = "cadb756c-b6e2-42be-aaaa-9a70db22f308",
+            PayerPayeeName = "payer2",
+            ExternalId = Guid.NewGuid().ToString()
+        };
+        var expectedPayer2 = new PayerPayeeViewModel
+        {
+            PayerPayeeId = Guid.Parse(payer2.PayerPayeeId),
+            PayerPayeeName = "payer2",
+            ExternalId = payer2.ExternalId,
+            Address = ExpectedAddress
+        };
+
+        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee>
+        {
+            payer1,
+            payer2,
+        });
+        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee>
+        {
+            new()
+            {
+                PayerPayeeId = "a540cf4a-f21b-4cac-9e8b-168d12dcecff",
+                PayerPayeeName = "payee1",
+                ExternalId = Guid.NewGuid().ToString()
+            }
+        });
+
+        var response = await _httpClient.GetAsync($"api/payerspayees/payers");
+        response.EnsureSuccessStatusCode();
+
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var returnedPayers = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        //
+        Assert.Equal(new List<PayerPayeeViewModel>
+        {
+            expectedPayer1, expectedPayer2
+        }, returnedPayers);
+    }
+
+
+    [Fact]
+    public async Task GivenValidRequest_WhenGetPayeesEndpointCalled_ThenCorrectPayeesReturned()
+    {
+        var payee1 = new PayerPayee
+        {
+            PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfb",
+            PayerPayeeName = "payee1",
+            ExternalId = Guid.NewGuid().ToString()
+        };
+        var expectedPayee1 = new PayerPayeeViewModel
+        {
+            PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfb"),
+            PayerPayeeName = "payee1",
+            ExternalId = payee1.ExternalId,
+            Address = ExpectedAddress
+        };
+        var payee2 = new PayerPayee
+        {
+            PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfc",
+            PayerPayeeName = "payee2",
+            ExternalId = Guid.NewGuid().ToString()
+        };
+        var expectedPayee2 = new PayerPayeeViewModel
+        {
+            PayerPayeeId = Guid.Parse("9540cf4a-f21b-4cac-9e8b-168d12dcecfc"),
+            PayerPayeeName = "payee2",
+            ExternalId = payee2.ExternalId,
+            Address = ExpectedAddress
+        };
+
+        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee> {payee1, payee2});
+        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee>
+        {
+            new()
+            {
+                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfd",
+                PayerPayeeName = "payer1",
+                ExternalId = Guid.NewGuid().ToString()
+            },
+            new()
+            {
+                PayerPayeeId = "9540cf4a-f21b-4cac-9e8b-168d12dcecfe",
+                PayerPayeeName = "payer2",
+                ExternalId = Guid.NewGuid().ToString()
+            },
+        });
+
+        var response = await _httpClient.GetAsync($"api/payerspayees/payees");
+        response.EnsureSuccessStatusCode();
+
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var returnedPayees = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        Assert.Equal(new List<PayerPayeeViewModel> {expectedPayee1, expectedPayee2}, returnedPayees);
+    }
+}

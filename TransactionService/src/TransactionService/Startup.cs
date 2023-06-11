@@ -132,17 +132,17 @@ namespace TransactionService
                     cockroachDbConfigSection.GetValue<string>("ConnectionString");
 
                 services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
-                services.AddSingleton<CockroachDbCategoriesRepository>();
 
                 services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
+                services.AddScoped<IPayerPayeeRepository, CockroachDbPayerPayeeRepository>();
             }
             else
             {
                 services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
+                services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
             }
 
             services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
-            services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
 
             services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
             services.Configure<GooglePlaceApiOptions>(options =>

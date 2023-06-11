@@ -29,7 +29,6 @@ public class CockroachDbIntegrationTestHelper
     public DapperContext DapperContext { get; init; }
     private Guid TestUserId { get; set; }
     private TransactionTypeIds TransactionTypeIds { get; set; }
-
     private IMapper _mapper { get; init; }
 
     public CockroachDbIntegrationTestHelper()
@@ -46,7 +45,7 @@ public class CockroachDbIntegrationTestHelper
 
         Console.WriteLine(">>>>");
         Console.WriteLine(cockroachDbConnectionString);
-        
+
         DapperContext = new DapperContext(cockroachDbConnectionString);
         _mapper = new MapperConfiguration(cfg => { cfg.AddProfile<CategoryEntityProfile>(); })
             .CreateMapper();
@@ -55,7 +54,6 @@ public class CockroachDbIntegrationTestHelper
     public async Task SeedRequiredData()
     {
         using (var connection = DapperContext.CreateConnection())
-
         {
             // Create a test user
             var insertUserQuery = @"INSERT INTO users (user_identifier) VALUES (@test_user_identifier) RETURNING id";
@@ -83,7 +81,7 @@ public class CockroachDbIntegrationTestHelper
     {
         using (var connection = DapperContext.CreateConnection())
         {
-            var query = @"TRUNCATE users, category, subcategory CASCADE";
+            var query = @"TRUNCATE users, category, subcategory, payerpayee CASCADE";
 
             await connection.ExecuteAsync(query);
         }
@@ -115,6 +113,45 @@ public class CockroachDbIntegrationTestHelper
             }
         }
     }
+
+    private async Task WritePayerPayeesIntoDb(List<PayerPayee> payerPayees, string payerPayeeType)
+    {
+        using (var connection = DapperContext.CreateConnection())
+        {
+            var createPayerPayeeQuery =
+                @"
+                        WITH ins (payerPayeeId, userId, payerPayeeName, payerPayeeType, externalLinkType, externalId)
+                                 AS (VALUES (@payerPayeeId, @userId, @payerPayeeName, @payerPayeeType, @externalLinkId, @externalId))
+                        INSERT
+                        INTO payerpayee (id, user_id, name, payerPayeeType_id, external_link_type_id, external_link_id)
+                        SELECT ins.payerPayeeId,
+                               ins.userId,
+                               ins.payerPayeeName,
+                               p.id,
+                               p2.id,
+                               ins.externalId
+                        FROM ins
+                                 JOIN payerpayeetype p ON p.name = ins.payerPayeeType
+                                 JOIN payerpayeeexternallinktype p2 on p2.name = ins.externalLinkType;                     
+                    ";
+            foreach (var payerPayee in payerPayees)
+            {
+                await connection.ExecuteAsync(createPayerPayeeQuery, new
+                {
+                    payerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+                    userId = TestUserId,
+                    payerPayeeName = payerPayee.PayerPayeeName,
+                    payerPayeeType,
+                    externalLinkId = string.IsNullOrEmpty(payerPayee.ExternalId) ? "Custom" : "Google",
+                    externalId = payerPayee.ExternalId
+                });
+            }
+        }
+    }
+
+    public Task WritePayersIntoDb(List<PayerPayee> payers) => WritePayerPayeesIntoDb(payers, "Payer");
+    public Task WritePayeesIntoDb(List<PayerPayee> payers) => WritePayerPayeesIntoDb(payers, "Payee");
+
 
     public async Task WriteCategoriesIntoDb(List<Category> categories)
     {

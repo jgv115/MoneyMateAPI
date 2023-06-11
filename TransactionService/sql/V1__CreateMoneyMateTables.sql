@@ -56,7 +56,7 @@ VALUES ('Payer'),
 
 CREATE TABLE PayerPayeeExternalLinkType
 (
-    payerpayeeexternallinktype_id UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
+    id UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
     name                          STRING NOT NULL UNIQUE
 );
 
@@ -72,7 +72,7 @@ CREATE TABLE PayerPayee
     payerPayeeType_id     UUID         NOT NULL REFERENCES PayerPayeeType (id),
     INDEX index_payerPayeeType (payerPayeeType_id),
     external_link_type_id UUID         NOT NULL,
-    FOREIGN KEY (external_link_type_id) REFERENCES PayerPayeeExternalLinkType (payerpayeeexternallinktype_id),
+    FOREIGN KEY (external_link_type_id) REFERENCES PayerPayeeExternalLinkType (id),
     external_link_id      STRING       NOT NULL,
     UNIQUE (user_id, name, payerPayeeType_id)
 );
@@ -82,7 +82,7 @@ SELECT pp.id, pp.user_id, u.user_identifier, pp.name, ppelt.name, pp.external_li
 FROM PayerPayee pp
          JOIN Users u ON pp.user_id = u.id
          JOIN payerpayeetype ppt ON ppt.id = pp.payerPayeeType_id
-         JOIN PayerPayeeExternalLinkType ppelt on pp.external_link_type_id = ppelt.payerpayeeexternallinktype_id
+         JOIN PayerPayeeExternalLinkType ppelt on pp.external_link_type_id = ppelt.id
 WHERE ppt.name = 'Payer';
 
 CREATE VIEW Payees (payerPayeeId, user_id, user_identifier, name, external_link_type, external_link_id) AS
@@ -90,7 +90,7 @@ SELECT pp.id, pp.user_id, u.user_identifier, pp.name, ppelt.name, pp.external_li
 FROM PayerPayee pp
          JOIN Users u ON pp.user_id = u.id
          JOIN payerpayeetype ppt ON ppt.id = pp.payerPayeeType_id
-         JOIN PayerPayeeExternalLinkType ppelt on pp.external_link_type_id = ppelt.payerpayeeexternallinktype_id
+         JOIN PayerPayeeExternalLinkType ppelt on pp.external_link_type_id = ppelt.id
 WHERE ppt.name = 'Payee';
 
 CREATE VIEW PayersAndPayees
@@ -105,7 +105,7 @@ SELECT pp.id,
 FROM PayerPayee pp
          JOIN Users u ON pp.user_id = u.id
          JOIN payerpayeetype ppt ON ppt.id = pp.payerPayeeType_id
-         JOIN PayerPayeeExternalLinkType ppelt on pp.external_link_type_id = ppelt.payerpayeeexternallinktype_id;
+         JOIN PayerPayeeExternalLinkType ppelt on pp.external_link_type_id = ppelt.id;
 
 CREATE TABLE Transaction
 (

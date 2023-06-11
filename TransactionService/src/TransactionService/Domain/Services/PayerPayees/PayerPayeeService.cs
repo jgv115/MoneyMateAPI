@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
-using TransactionService.Middleware;
 using TransactionService.Repositories;
 using TransactionService.Repositories.DynamoDb;
 using TransactionService.Repositories.DynamoDb.Models;
@@ -15,14 +14,12 @@ namespace TransactionService.Domain.Services.PayerPayees
 {
     public class PayerPayeeService : IPayerPayeeService
     {
-        private readonly CurrentUserContext _userContext;
         private readonly IPayerPayeeRepository _repository;
         private readonly IPayerPayeeEnricher _payerPayeeEnricher;
 
-        public PayerPayeeService(CurrentUserContext userContext, IPayerPayeeRepository repo,
+        public PayerPayeeService(IPayerPayeeRepository repo,
             IPayerPayeeEnricher payerPayeeEnricher)
         {
-            _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _repository = repo ?? throw new ArgumentNullException(nameof(repo));
             _payerPayeeEnricher = payerPayeeEnricher;
         }
@@ -57,7 +54,7 @@ namespace TransactionService.Domain.Services.PayerPayees
 
         public async Task<IEnumerable<PayerPayeeViewModel>> GetPayers(int offset, int limit)
         {
-            var payers = await _repository.GetPayers(_userContext.UserId, new PaginationSpec
+            var payers = await _repository.GetPayers(new PaginationSpec
             {
                 Limit = limit,
                 Offset = offset
@@ -67,7 +64,7 @@ namespace TransactionService.Domain.Services.PayerPayees
 
         public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees(int offset, int limit)
         {
-            var payees = await _repository.GetPayees(_userContext.UserId, new PaginationSpec
+            var payees = await _repository.GetPayees(new PaginationSpec
             {
                 Limit = limit,
                 Offset = offset
@@ -77,25 +74,25 @@ namespace TransactionService.Domain.Services.PayerPayees
 
         public async Task<PayerPayeeViewModel> GetPayer(Guid payerPayeeId)
         {
-            var payer = await _repository.GetPayer(_userContext.UserId, payerPayeeId);
+            var payer = await _repository.GetPayer(payerPayeeId);
             return await EnrichAndMapPayerPayeeToViewModel(payer);
         }
 
         public async Task<PayerPayeeViewModel> GetPayee(Guid payerPayeeId)
         {
-            var payee = await _repository.GetPayee(_userContext.UserId, payerPayeeId);
+            var payee = await _repository.GetPayee(payerPayeeId);
             return await EnrichAndMapPayerPayeeToViewModel(payee);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName)
         {
-            var payers = await _repository.AutocompletePayer(_userContext.UserId, payerName);
+            var payers = await _repository.AutocompletePayer(payerName);
             return await EnrichAndMapPayerPayeesToViewModels(payers);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayee(string payeeName)
         {
-            var payees = await _repository.AutocompletePayee(_userContext.UserId, payeeName);
+            var payees = await _repository.AutocompletePayee(payeeName);
             return await EnrichAndMapPayerPayeesToViewModels(payees);
         }
 

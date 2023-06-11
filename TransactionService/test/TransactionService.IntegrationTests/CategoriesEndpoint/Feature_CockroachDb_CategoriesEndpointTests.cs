@@ -14,20 +14,18 @@ using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace TransactionService.IntegrationTests.CategoriesEndpoint;
 
+[Collection("Integration Tests")]
 public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>,
     IAsyncLifetime
 {
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
     private readonly WebApplicationFactory<Startup> _factory;
-    private readonly ITestOutputHelper _testOutputHelper;
     private readonly DynamoDbHelper _dynamoDbHelper;
 
-    public Feature_CockroachDb_CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory,
-        ITestOutputHelper testOutputHelper)
+    public Feature_CockroachDb_CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
         _factory = factory.WithWebHostBuilder(builder =>
             builder.ConfigureAppConfiguration((context, configurationBuilder) =>
@@ -35,7 +33,6 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
                 {
                     ["CockroachDb:Enabled"] = "true"
                 })));
-        _testOutputHelper = testOutputHelper;
         _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
         _dynamoDbHelper = factory.DynamoDbHelper;
     }
@@ -178,7 +175,6 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
 
         var response = await _factory.CreateDefaultClient().GetAsync("/api/categories/category1");
         var returnedString = await response.Content.ReadAsStringAsync();
-        _testOutputHelper.WriteLine(returnedString);
 
         response.EnsureSuccessStatusCode();
 

@@ -226,7 +226,7 @@ public class DynamoDbPayerPayeeRepositoryTests
                 config => config.OverrideTableName == TableName))).Returns(mockAsyncSearch.Object);
 
         var returnedPayees = await repository.GetPayees(
-            UserId, new PaginationSpec
+             new PaginationSpec
             {
                 Limit = limit,
                 Offset = offset
@@ -425,7 +425,7 @@ public class DynamoDbPayerPayeeRepositoryTests
                 config => config.OverrideTableName == TableName))).Returns(mockAsyncSearch.Object);
 
         var returnedPayees = await repository.GetPayers(
-            UserId, new PaginationSpec
+            new PaginationSpec
             {
                 Limit = limit,
                 Offset = offset
