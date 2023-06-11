@@ -162,4 +162,66 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
 
         Assert.Equal(new List<PayerPayeeViewModel> {expectedPayee1, expectedPayee2}, returnedPayees);
     }
+
+    [Fact]
+    public async Task GivenValidRequest_WhenGetPayerEndpointCalled_ThenCorrectPayerReturned()
+    {
+        var payerPayeeId = Guid.NewGuid();
+        var payer = new PayerPayee()
+        {
+            PayerPayeeId = payerPayeeId.ToString(),
+            PayerPayeeName = "payer1",
+            ExternalId = Guid.NewGuid().ToString()
+        };
+        var expectedPayer = new PayerPayeeViewModel
+        {
+            PayerPayeeId = payerPayeeId,
+            PayerPayeeName = payer.PayerPayeeName,
+            ExternalId = payer.ExternalId,
+            Address = "1 Hello Street Vic Australia 3123"
+        };
+        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee> {payer});
+
+        var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
+        response.EnsureSuccessStatusCode();
+
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var actualPayer = JsonSerializer.Deserialize<PayerPayeeViewModel>(returnedString, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        Assert.Equal(expectedPayer, actualPayer);
+    }
+    
+    [Fact]
+    public async Task GivenValidRequest_WhenGetPayeeEndpointCalled_ThenCorrectPayeeReturned()
+    {
+        var payerPayeeId = Guid.NewGuid();
+        var payee = new PayerPayee()
+        {
+            PayerPayeeId = payerPayeeId.ToString(),
+            PayerPayeeName = "payee1",
+            ExternalId = Guid.NewGuid().ToString()
+        };
+        var expectedPayee = new PayerPayeeViewModel
+        {
+            PayerPayeeId = payerPayeeId,
+            PayerPayeeName = payee.PayerPayeeName,
+            ExternalId = payee.ExternalId,
+            Address = "1 Hello Street Vic Australia 3123"
+        };
+        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee> {payee});
+
+        var response = await _httpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
+        response.EnsureSuccessStatusCode();
+
+        var returnedString = await response.Content.ReadAsStringAsync();
+        var actualPayer = JsonSerializer.Deserialize<PayerPayeeViewModel>(returnedString, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        Assert.Equal(expectedPayee, actualPayer);
+    }
 }
