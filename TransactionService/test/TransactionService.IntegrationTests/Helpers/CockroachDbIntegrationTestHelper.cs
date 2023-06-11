@@ -47,7 +47,11 @@ public class CockroachDbIntegrationTestHelper
         Console.WriteLine(cockroachDbConnectionString);
 
         DapperContext = new DapperContext(cockroachDbConnectionString);
-        _mapper = new MapperConfiguration(cfg => { cfg.AddProfile<CategoryEntityProfile>(); })
+        _mapper = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<CategoryEntityProfile>();
+                cfg.AddProfile<PayerPayeeEntityProfile>();
+            })
             .CreateMapper();
     }
 
@@ -152,6 +156,38 @@ public class CockroachDbIntegrationTestHelper
     public Task WritePayersIntoDb(List<PayerPayee> payers) => WritePayerPayeesIntoDb(payers, "Payer");
     public Task WritePayeesIntoDb(List<PayerPayee> payers) => WritePayerPayeesIntoDb(payers, "Payee");
 
+    public async Task<List<PayerPayee>> RetrieveAllPayersPayees(string payerPayeeType)
+    {
+        using (var connection = DapperContext.CreateConnection())
+        {
+            var query =
+                @"
+                SELECT payerpayee.id,
+                       u.id           as userId,
+                       payerpayee.name             as name,
+                       payerpayee.external_link_id as externalLinkId,
+                       ppt.id,
+                       ppt.name                    as name,
+                       pext.id,
+                       pext.name                   as name
+                FROM payerpayee
+                         JOIN users u on payerpayee.user_id = u.id
+                         LEFT JOIN payerpayeetype ppt on payerpayee.payerpayeetype_id = ppt.id
+                         LEFT JOIN payerpayeeexternallinktype pext
+                                   on payerpayee.external_link_type_id = pext.id
+                WHERE 
+                    u.id = @user_id 
+                    AND ppt.name = @payerPayeeType
+                ";
+
+            var payersPayees =
+                await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
+                    new {user_id = TestUserId, payerPayeeType = payerPayeeType});
+
+            return _mapper.Map<List<TransactionService.Repositories.CockroachDb.Entities.PayerPayee>, List<PayerPayee>>(
+                payersPayees.ToList());
+        }
+    }
 
     public async Task WriteCategoriesIntoDb(List<Category> categories)
     {

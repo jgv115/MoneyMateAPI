@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
+using Npgsql;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb.Entities;
+using TransactionService.Repositories.Exceptions;
 
 namespace TransactionService.Repositories.CockroachDb
 {
@@ -137,16 +139,59 @@ namespace TransactionService.Repositories.CockroachDb
         public Task<Domain.Models.PayerPayee> GetPayee(Guid payerPayeeId)
             => GetPayerPayee(payerPayeeId.ToString(), "Payee");
 
+        private async Task CreatePayerPayee(Domain.Models.PayerPayee newPayerPayee, string payerPayeeType)
+        {
+            using (var connection = _context.CreateConnection())
+            {
+                var createPayerPayeeQuery =
+                    @"
+                        WITH ins (payerPayeeId, user_identifier, payerPayeeName, payerPayeeType, externalLinkType, externalId)
+                                 AS (VALUES (@payerPayeeId, @user_identifier, @payerPayeeName, @payerPayeeType, @externalLinkId, @externalId))
+                        INSERT
+                        INTO payerpayee (id, user_id, name, payerPayeeType_id, external_link_type_id, external_link_id)
+                        SELECT ins.payerPayeeId,
+                               u.id,
+                               ins.payerPayeeName,
+                               p.id,
+                               p2.id,
+                               ins.externalId
+                        FROM ins
+                                 JOIN payerpayeetype p ON p.name = ins.payerPayeeType
+                                 JOIN payerpayeeexternallinktype p2 on p2.name = ins.externalLinkType
+                                 JOIN users u ON u.user_identifier = ins.user_identifier                  
+                    ";
+
+                try
+                {
+                    await connection.ExecuteAsync(createPayerPayeeQuery, new
+                    {
+                        payerPayeeId = Guid.Parse(newPayerPayee.PayerPayeeId),
+                        user_identifier = _userContext.UserId,
+                        payerPayeeName = newPayerPayee.PayerPayeeName,
+                        payerPayeeType,
+                        externalLinkId = string.IsNullOrEmpty(newPayerPayee.ExternalId) ? "Custom" : "Google",
+                        externalId = newPayerPayee.ExternalId ?? ""
+                    });
+                }
+                catch (PostgresException ex)
+                {
+                    if (ex.SqlState == "23505")
+                    {
+                        throw new RepositoryItemExistsException("Exists");
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
 
         public Task CreatePayer(Domain.Models.PayerPayee newPayerPayee)
-        {
-            throw new NotImplementedException();
-        }
+            => CreatePayerPayee(newPayerPayee, "Payer");
 
         public Task CreatePayee(Domain.Models.PayerPayee newPayerPayee)
-        {
-            throw new NotImplementedException();
-        }
+            => CreatePayerPayee(newPayerPayee, "Payee");
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> FindPayer(string searchQuery)
         {
