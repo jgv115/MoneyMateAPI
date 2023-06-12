@@ -9,24 +9,28 @@ using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
 
 [Collection("Integration Tests")]
 public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
 {
+    private readonly ITestOutputHelper _testOutputHelper;
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
     private readonly HttpClient _httpClient;
     private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
 
-    public Feature_CockroachDb_GetEndpointTests(MoneyMateApiWebApplicationFactory factory)
+    public Feature_CockroachDb_GetEndpointTests(MoneyMateApiWebApplicationFactory factory, ITestOutputHelper testOutputHelper)
     {
-        _httpClient = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
+        _testOutputHelper = testOutputHelper;
+        var factory2 = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
             (_, configurationBuilder) =>
                 configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>()
                 {
                     ["CockroachDb:Enabled"] = "true"
-                }))).CreateClient();
+                })));
+        _httpClient = factory2.CreateDefaultClient();
         _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
     }
 
@@ -183,6 +187,8 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
         await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee> {payer});
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
+        _testOutputHelper.WriteLine(">>>");
+        _testOutputHelper.WriteLine(await response.Content.ReadAsStringAsync());
         response.EnsureSuccessStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();

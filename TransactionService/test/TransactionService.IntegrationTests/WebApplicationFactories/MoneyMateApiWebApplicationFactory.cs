@@ -43,7 +43,6 @@ namespace TransactionService.IntegrationTests.WebApplicationFactories
             };
             var responseString = accessTokenClient.SendAsync(request).Result.Content.ReadAsStringAsync().Result;
 
-            Console.WriteLine($">>> responseString! {responseString}");
             var deserializedObject = JsonSerializer.Deserialize<Dictionary<string, object>>(responseString);
 
             _accessToken = deserializedObject["access_token"].ToString();

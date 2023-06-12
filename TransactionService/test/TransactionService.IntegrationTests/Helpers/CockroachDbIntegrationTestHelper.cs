@@ -43,9 +43,6 @@ public class CockroachDbIntegrationTestHelper
                                           throw new ArgumentException(
                                               "Could not find CockroachDb connection string for CockroachDb helper");
 
-        Console.WriteLine(">>>>");
-        Console.WriteLine(cockroachDbConnectionString);
-
         DapperContext = new DapperContext(cockroachDbConnectionString);
         _mapper = new MapperConfiguration(cfg =>
             {

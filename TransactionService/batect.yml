@@ -187,7 +187,7 @@ tasks:
       - google_api_mock
     run:
       container: dotnet_build_env
-      command: dotnet test test/TransactionService.IntegrationTests
+      command: dotnet test test/TransactionService.IntegrationTests -l "console;verbosity=normal"
      
   start_clean_db:
     run:

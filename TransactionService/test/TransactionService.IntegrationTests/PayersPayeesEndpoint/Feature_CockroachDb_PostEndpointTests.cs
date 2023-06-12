@@ -13,7 +13,6 @@ using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
-using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
