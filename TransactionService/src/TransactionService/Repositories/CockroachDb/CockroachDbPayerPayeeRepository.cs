@@ -57,24 +57,7 @@ namespace TransactionService.Repositories.CockroachDb
             _userContext = userContext;
         }
 
-        private async Task<IEnumerable<Domain.Models.PayerPayee>> QueryPayerPayees(string query, string payerPayeeType,
-            string payerPayeeId)
-        {
-            using (var connection = _context.CreateConnection())
-            {
-                var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
-                    new {user_identifier = _userContext.UserId, payerPayeeType, payerPayeeId});
-
-                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.Models.PayerPayee>>(payerPayees);
-            }
-        }
-
-        private Task<IEnumerable<Domain.Models.PayerPayee>> QueryPayerPayees(string query, string payerPayeeType)
-        {
-            return QueryPayerPayees(query, payerPayeeType, "");
-        }
-
-        private Task<IEnumerable<Domain.Models.PayerPayee>> GetPayersPayees(string payerPayeeType,
+        private async Task<IEnumerable<Domain.Models.PayerPayee>> GetPayersPayees(string payerPayeeType,
             PaginationSpec paginationSpec)
         {
             var query =
@@ -95,7 +78,13 @@ namespace TransactionService.Repositories.CockroachDb
                 WHERE u.user_identifier = @user_identifier and ppt.name = @payerPayeeType
                 ";
 
-            return QueryPayerPayees(query, payerPayeeType);
+            using (var connection = _context.CreateConnection())
+            {
+                var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
+                    new {user_identifier = _userContext.UserId, payerPayeeType});
+
+                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.Models.PayerPayee>>(payerPayees);
+            }
         }
 
         private async Task<Domain.Models.PayerPayee> GetPayerPayee(string payerPayeeId, string payerPayeeType)
@@ -121,8 +110,14 @@ namespace TransactionService.Repositories.CockroachDb
                     AND payerpayee.id = @payerPayeeId
                 ";
 
-            var payerPayees = await QueryPayerPayees(query, payerPayeeType, payerPayeeId);
-            return payerPayees.FirstOrDefault((Domain.Models.PayerPayee) null);
+            using (var connection = _context.CreateConnection())
+            {
+                var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
+                    new {user_identifier = _userContext.UserId, payerPayeeType, payerPayeeId});
+
+                return _mapper.Map<PayerPayee, Domain.Models.PayerPayee>(
+                    payerPayees.FirstOrDefault((PayerPayee) null));
+            }
         }
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> GetPayers(PaginationSpec paginationSpec)
@@ -203,15 +198,50 @@ namespace TransactionService.Repositories.CockroachDb
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayer(string autocompleteQuery)
+
+        private async Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayerPayee(string autocompleteQuery,
+            string payerPayeeType)
         {
-            throw new NotImplementedException();
+            var query =
+                @"
+                SELECT payerpayee.id,
+                       u.id           as userId,
+                       payerpayee.name             as name,
+                       payerpayee.external_link_id as externalLinkId,
+                       ppt.id,
+                       ppt.name                    as name,
+                       pext.id,
+                       pext.name                   as name
+                FROM payerpayee
+                         JOIN users u on payerpayee.user_id = u.id
+                         LEFT JOIN payerpayeetype ppt on payerpayee.payerpayeetype_id = ppt.id
+                         LEFT JOIN payerpayeeexternallinktype pext
+                                   on payerpayee.external_link_type_id = pext.id
+                WHERE 
+                    u.user_identifier = @user_identifier 
+                    AND ppt.name LIKE  @payerPayeeType
+                    AND payerpayee.name ILIKE '%' || @payerPayeeName || '%'
+                ";
+
+            using (var connection = _context.CreateConnection())
+            {
+                var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
+                    new
+                    {
+                        user_identifier = _userContext.UserId,
+                        payerPayeeType,
+                        payerPayeeName = autocompleteQuery
+                    });
+
+                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.Models.PayerPayee>>(payerPayees);
+            }
         }
 
+        public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayer(string autocompleteQuery)
+            => AutocompletePayerPayee(autocompleteQuery, "Payer");
+
         public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayee(string autocompleteQuery)
-        {
-            throw new NotImplementedException();
-        }
+            => AutocompletePayerPayee(autocompleteQuery, "Payee");
 
         public Task PutPayer(string userId)
         {

@@ -23,7 +23,7 @@ CREATE TABLE Category
 
     user_id             UUID         NOT NULL REFERENCES Users (id),
     transaction_type_id UUID         NOT NULL REFERENCES TransactionType (id),
-    
+
     UNIQUE (name, user_id, transaction_type_id)
 );
 
@@ -56,8 +56,8 @@ VALUES ('Payer'),
 
 CREATE TABLE PayerPayeeExternalLinkType
 (
-    id UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
-    name                          STRING NOT NULL UNIQUE
+    id   UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
+    name STRING NOT NULL UNIQUE
 );
 
 INSERT INTO PayerPayeeExternalLinkType (name)
@@ -74,7 +74,8 @@ CREATE TABLE PayerPayee
     external_link_type_id UUID         NOT NULL,
     FOREIGN KEY (external_link_type_id) REFERENCES PayerPayeeExternalLinkType (id),
     external_link_id      STRING       NOT NULL,
-    UNIQUE (user_id, name, payerPayeeType_id)
+    UNIQUE (user_id, payerPayeeType_id, external_link_id) where external_link_id != '',
+    UNIQUE (user_id, payerPayeeType_id, name) where external_link_id = ''
 );
 
 CREATE VIEW Payers (payerPayeeId, user_id, user_identifier, name, external_link_type, external_link_id) AS
