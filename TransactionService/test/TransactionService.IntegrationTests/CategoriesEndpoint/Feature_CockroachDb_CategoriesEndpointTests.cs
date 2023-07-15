@@ -17,7 +17,7 @@ using Xunit;
 
 namespace TransactionService.IntegrationTests.CategoriesEndpoint;
 
-[Collection("Integration Tests")]
+[Collection("IntegrationTests")]
 public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>,
     IAsyncLifetime
 {

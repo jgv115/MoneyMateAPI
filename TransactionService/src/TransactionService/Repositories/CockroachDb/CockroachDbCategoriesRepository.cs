@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
+using TransactionService.Constants;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb.Entities;
 using TransactionService.Repositories.Exceptions;
@@ -63,6 +64,7 @@ namespace TransactionService.Repositories.CockroachDb
                             JOIN transactiontype tt on c.transaction_type_id = tt.id
                             WHERE c.name = @categoryName and u.user_identifier = @user_identifier
                             ORDER BY s.name ASC";
+            
             using (var connection = _context.CreateConnection())
             {
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
@@ -102,7 +104,7 @@ namespace TransactionService.Repositories.CockroachDb
             using (var connection = _context.CreateConnection())
             {
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
-                    new {user_identifier = _userContext.UserId, transaction_type = transactionType.ToString()});
+                    new {user_identifier = _userContext.UserId, transaction_type = transactionType.ToProperString()});
 
                 return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories);
             }
@@ -141,7 +143,7 @@ namespace TransactionService.Repositories.CockroachDb
                         DbType.String);
                     categoryParameters.Add(name: "@user_identifier", value: _userContext.UserId, DbType.String);
                     categoryParameters.Add(name: "@transaction_type",
-                        value: newCategory.TransactionType.ToString(), DbType.String);
+                        value: newCategory.TransactionType.ToProperString(), DbType.String);
 
                     var returnedId =
                         await connection.QuerySingleAsync<Guid>(insertCategoryQuery, categoryParameters, transaction);

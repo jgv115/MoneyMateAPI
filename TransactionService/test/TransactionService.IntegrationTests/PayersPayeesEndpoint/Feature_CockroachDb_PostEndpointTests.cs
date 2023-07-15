@@ -17,7 +17,7 @@ using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
 
-[Collection("Integration Tests")]
+[Collection("IntegrationTests")]
 public class Feature_CockroachDb_PostEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
 {
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
@@ -60,7 +60,7 @@ public class Feature_CockroachDb_PostEndpointTests : IClassFixture<MoneyMateApiW
         var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
         response.EnsureSuccessStatusCode();
 
-        var scanOutput = await _cockroachDbIntegrationTestHelper.RetrieveAllPayersPayees("Payer");
+        var scanOutput = await _cockroachDbIntegrationTestHelper.RetrieveAllPayersPayees("payer");
         Assert.Collection(scanOutput,
             payerPayee =>
             {
@@ -97,7 +97,7 @@ public class Feature_CockroachDb_PostEndpointTests : IClassFixture<MoneyMateApiW
         var response = await _httpClient.PostAsync("api/payerspayees/payees", httpContent);
         response.EnsureSuccessStatusCode();
 
-        var scanOutput = await _cockroachDbIntegrationTestHelper.RetrieveAllPayersPayees("Payee");
+        var scanOutput = await _cockroachDbIntegrationTestHelper.RetrieveAllPayersPayees("payee");
 
         Assert.Collection(scanOutput,
             payerPayee =>

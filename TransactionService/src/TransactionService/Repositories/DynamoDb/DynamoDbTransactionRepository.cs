@@ -69,9 +69,9 @@ namespace TransactionService.Repositories.DynamoDb
                     IndexName = "TransactionTimestampIndex"
                 }).GetRemainingAsync();
 
-            var filteredTransactions = transactions.Where(transaction => spec.IsSatisfied(transaction)).ToList();
 
-            return _mapper.Map<List<DynamoDbTransaction>, List<Transaction>>(filteredTransactions);
+            var mappedTransactions = _mapper.Map<List<DynamoDbTransaction>, List<Transaction>>(transactions);
+            return mappedTransactions.Where(transaction => spec.IsSatisfied(transaction)).ToList();
         }
 
         public async Task StoreTransaction(Transaction newTransaction)
@@ -85,9 +85,9 @@ namespace TransactionService.Repositories.DynamoDb
             });
         }
 
-        public async Task PutTransaction(Transaction newDynamoDbTransaction)
+        public async Task PutTransaction(Transaction newTransaction)
         {
-            await StoreTransaction(newDynamoDbTransaction);
+            await StoreTransaction(newTransaction);
         }
 
         public async Task DeleteTransaction(string transactionId)

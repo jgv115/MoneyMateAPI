@@ -134,11 +134,11 @@ namespace TransactionService.Tests.Domain.Services
                 });
 
                 Assert.IsType<AndSpec>(calledWithSpecification);
-                Assert.True(calledWithSpecification.IsSatisfied(new DynamoDbTransaction
+                Assert.True(calledWithSpecification.IsSatisfied(new Transaction()
                 {
                     TransactionType = "expense"
                 }));
-                Assert.False(calledWithSpecification.IsSatisfied(new DynamoDbTransaction
+                Assert.False(calledWithSpecification.IsSatisfied(new Transaction()
                 {
                     TransactionType = "invalid type"
                 }));

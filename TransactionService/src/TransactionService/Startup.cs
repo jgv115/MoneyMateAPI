@@ -135,20 +135,19 @@ namespace TransactionService
 
                 services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
                 services.AddScoped<IPayerPayeeRepository, CockroachDbPayerPayeeRepository>();
+                services.AddScoped<ITransactionRepository, CockroachDbTransactionRepository>();
             }
             else
             {
                 services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
                 services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
+                services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
             }
 
-            services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
 
             services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
             services.Configure<GooglePlaceApiOptions>(options =>
                 Configuration.GetSection("GooglePlaceApi").Bind(options));
-
-            Console.WriteLine(((IConfigurationRoot) Configuration).GetDebugView());
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
 
-[Collection("Integration Tests")]
+[Collection("IntegrationTests")]
 public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
 {
     private readonly ITestOutputHelper _testOutputHelper;

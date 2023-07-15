@@ -1,9 +1,9 @@
-using TransactionService.Repositories.DynamoDb.Models;
+using TransactionService.Domain.Models;
 
 namespace TransactionService.Domain.Services.Transactions.Specifications
 {
     public interface ITransactionSpecification
     {
-        public bool IsSatisfied(DynamoDbTransaction item);
+        public bool IsSatisfied(Transaction item);
     }
 }

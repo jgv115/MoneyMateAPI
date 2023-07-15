@@ -5,6 +5,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Serilog;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.Repositories.DynamoDb;
 
@@ -60,6 +62,18 @@ namespace TransactionService.IntegrationTests.WebApplicationFactories
             });
         }
 
+        protected override IHostBuilder CreateHostBuilder()
+        {
+            var builder = base.CreateHostBuilder();
+
+            builder.UseSerilog((context, configuration) =>
+            {
+                configuration.MinimumLevel.Fatal().WriteTo.Console();
+            });
+
+            return builder;
+        }
+        
         protected override void ConfigureClient(HttpClient client)
         {
             base.ConfigureClient(client);

@@ -12,8 +12,8 @@ CREATE TABLE TransactionType
 );
 
 INSERT INTO TransactionType (name)
-VALUES ('Expense'),
-       ('Income');
+VALUES ('expense'),
+       ('income');
 
 CREATE TABLE Category
 (
@@ -51,8 +51,8 @@ CREATE TABLE PayerPayeeType
 );
 
 INSERT INTO PayerPayeeType (name)
-VALUES ('Payer'),
-       ('Payee');
+VALUES ('payer'),
+       ('payee');
 
 CREATE TABLE PayerPayeeExternalLinkType
 (
@@ -84,7 +84,7 @@ FROM PayerPayee pp
          JOIN Users u ON pp.user_id = u.id
          JOIN payerpayeetype ppt ON ppt.id = pp.payerPayeeType_id
          JOIN PayerPayeeExternalLinkType ppelt on pp.external_link_type_id = ppelt.id
-WHERE ppt.name = 'Payer';
+WHERE ppt.name = 'payer';
 
 CREATE VIEW Payees (payerPayeeId, user_id, user_identifier, name, external_link_type, external_link_id) AS
 SELECT pp.id, pp.user_id, u.user_identifier, pp.name, ppelt.name, pp.external_link_id
@@ -92,7 +92,7 @@ FROM PayerPayee pp
          JOIN Users u ON pp.user_id = u.id
          JOIN payerpayeetype ppt ON ppt.id = pp.payerPayeeType_id
          JOIN PayerPayeeExternalLinkType ppelt on pp.external_link_type_id = ppelt.id
-WHERE ppt.name = 'Payee';
+WHERE ppt.name = 'payee';
 
 CREATE VIEW PayersAndPayees
             (payerPayeeId, user_id, user_identifier, name, payerPayeeType, external_link_type, external_link_id) AS

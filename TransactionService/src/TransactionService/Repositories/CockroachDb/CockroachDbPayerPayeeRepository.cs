@@ -121,18 +121,18 @@ namespace TransactionService.Repositories.CockroachDb
         }
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> GetPayers(PaginationSpec paginationSpec)
-            => GetPayersPayees("Payer", paginationSpec);
+            => GetPayersPayees("payer", paginationSpec);
 
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> GetPayees(PaginationSpec paginationSpec)
-            => GetPayersPayees("Payee", paginationSpec);
+            => GetPayersPayees("payee", paginationSpec);
 
 
         public Task<Domain.Models.PayerPayee> GetPayer(Guid payerPayeeId)
-            => GetPayerPayee(payerPayeeId.ToString(), "Payer");
+            => GetPayerPayee(payerPayeeId.ToString(), "payer");
 
         public Task<Domain.Models.PayerPayee> GetPayee(Guid payerPayeeId)
-            => GetPayerPayee(payerPayeeId.ToString(), "Payee");
+            => GetPayerPayee(payerPayeeId.ToString(), "payee");
 
         private async Task CreatePayerPayee(Domain.Models.PayerPayee newPayerPayee, string payerPayeeType)
         {
@@ -183,10 +183,10 @@ namespace TransactionService.Repositories.CockroachDb
         }
 
         public Task CreatePayer(Domain.Models.PayerPayee newPayerPayee)
-            => CreatePayerPayee(newPayerPayee, "Payer");
+            => CreatePayerPayee(newPayerPayee, "payer");
 
         public Task CreatePayee(Domain.Models.PayerPayee newPayerPayee)
-            => CreatePayerPayee(newPayerPayee, "Payee");
+            => CreatePayerPayee(newPayerPayee, "payee");
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> FindPayer(string searchQuery)
         {
@@ -238,10 +238,10 @@ namespace TransactionService.Repositories.CockroachDb
         }
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayer(string autocompleteQuery)
-            => AutocompletePayerPayee(autocompleteQuery, "Payer");
+            => AutocompletePayerPayee(autocompleteQuery, "payer");
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayee(string autocompleteQuery)
-            => AutocompletePayerPayee(autocompleteQuery, "Payee");
+            => AutocompletePayerPayee(autocompleteQuery, "payee");
 
         public Task PutPayer(string userId)
         {

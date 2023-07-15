@@ -12,8 +12,8 @@ namespace TransactionService.Repositories
         public Task<List<Transaction>> GetTransactions(DateRange dateRange,
             ITransactionSpecification spec);
 
-        public Task StoreTransaction(Transaction newDynamoDbTransaction);
-        public Task PutTransaction(Transaction newDynamoDbTransaction);
+        public Task StoreTransaction(Transaction newTransaction);
+        public Task PutTransaction(Transaction newTransaction);
         public Task DeleteTransaction(string transactionId);
     }
 }

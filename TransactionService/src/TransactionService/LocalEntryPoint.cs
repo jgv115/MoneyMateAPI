@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Formatting.Json;
 
 namespace TransactionService
 {
@@ -18,7 +19,7 @@ namespace TransactionService
             Host.CreateDefaultBuilder(args)
                 .UseSerilog((context, configuration) =>
                 {
-                    configuration.MinimumLevel.Debug().WriteTo.Console();
+                    configuration.MinimumLevel.Information().WriteTo.Console(new JsonFormatter());
                 })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }

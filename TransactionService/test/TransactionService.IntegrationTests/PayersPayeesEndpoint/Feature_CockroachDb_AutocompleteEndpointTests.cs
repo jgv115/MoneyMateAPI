@@ -12,6 +12,7 @@ using Xunit;
 
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
 
+[Collection("IntegrationTests")]
 public class Feature_CockroachDb_AutocompleteEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>,
     IAsyncLifetime
 {
