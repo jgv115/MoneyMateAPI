@@ -550,5 +550,151 @@ public class Feature_CockroachDb_TransactionsEndpointTests : IClassFixture<Money
         Assert.Equal(expectedNote, returnedTransactions[0].Note);
     }
 
-    // TODO: finish put and delete tests
+    [Fact]
+    public async Task GivenValidPutTransactionDto_WhenPutTransactionsIsCalled_ThenCorrectTransactionsArePersisted()
+    {
+        var expectedTransactionId = Guid.NewGuid().ToString();
+
+        var transaction1 = new Transaction()
+        {
+            TransactionId = expectedTransactionId,
+            TransactionTimestamp = DateTime.Now.ToString("o"),
+            TransactionType = "expense",
+            Amount = 123.45M,
+            Category = "Groceries",
+            Subcategory = "Meat",
+            Note = "this is a note123"
+        };
+        var transaction2 = new Transaction
+        {
+            TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+            TransactionTimestamp = DateTime.Now.ToString("o"),
+            TransactionType = "expense",
+            Amount = 123.45M,
+            Category = "Groceries",
+            Subcategory = "Meat"
+        };
+
+        var transactionList = new List<Transaction>
+        {
+            transaction1,
+            transaction2
+        };
+
+        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(new List<Category>
+        {
+            new()
+            {
+                TransactionType = TransactionTypeExtensions.ConvertToTransactionType("expense"),
+                Subcategories = new List<string> {"Meat"},
+                CategoryName = "Groceries"
+            }
+        });
+
+        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+
+        const decimal expectedAmount = 123M;
+        const string expectedCategory = "Food";
+        const string expectedSubcategory = "Dinner";
+        var expectedTransactionTimestamp =
+            new DateTime(2021, 4, 2, 0, 0, 0, DateTimeKind.Utc).ToString("o");
+        const string expectedTransactionType = "expense";
+        const string expectedPayerPayeeId = "cc00567c-468e-4ccf-af4c-fca1c731915b";
+        const string expectedPayerPayeeName = "name123";
+        const string expectedNote = "This is a new note";
+
+        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(new List<Category>
+        {
+            new()
+            {
+                TransactionType = TransactionTypeExtensions.ConvertToTransactionType("expense"),
+                Subcategories = new List<string> {expectedSubcategory},
+                CategoryName = expectedCategory
+            }
+        });
+
+        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee>
+        {
+            new()
+            {
+                PayerPayeeId = expectedPayerPayeeId,
+                PayerPayeeName = expectedPayerPayeeName,
+            }
+        });
+
+        var inputDto = new PutTransactionDto
+        {
+            Amount = expectedAmount,
+            Category = expectedCategory,
+            Subcategory = expectedSubcategory,
+            TransactionTimestamp = expectedTransactionTimestamp,
+            TransactionType = expectedTransactionType,
+            PayerPayeeId = expectedPayerPayeeId,
+            PayerPayeeName = expectedPayerPayeeName,
+            Note = expectedNote
+        };
+
+        string inputDtoString = JsonSerializer.Serialize(inputDto);
+        StringContent httpContent = new StringContent(inputDtoString, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PutAsync($"/api/transactions/{expectedTransactionId}", httpContent);
+        response.EnsureSuccessStatusCode();
+
+
+        var returned = await _cockroachDbIntegrationTestHelper.GetAllTransactions();
+
+        var returnedTransaction = returned.Find(transaction => transaction.TransactionId == expectedTransactionId);
+
+        var expectedTransaction = new Transaction()
+        {
+            TransactionId = expectedTransactionId,
+            Amount = expectedAmount,
+            Category = expectedCategory,
+            Subcategory = expectedSubcategory,
+            TransactionTimestamp = expectedTransactionTimestamp,
+            TransactionType = expectedTransactionType,
+            PayerPayeeId = expectedPayerPayeeId,
+            PayerPayeeName = expectedPayerPayeeName,
+            Note = expectedNote
+        };
+        Assert.Equal(expectedTransaction, returnedTransaction);
+    }
+
+    [Fact]
+    public async Task GivenValidTransactionId_WhenDeleteTransactionIsCalled_ThenCorrectTransactionIsDeleted()
+    {
+        var expectedTransactionId = Guid.NewGuid().ToString();
+
+        var transaction1 = new Transaction()
+        {
+            TransactionId = expectedTransactionId,
+            TransactionTimestamp = DateTime.Now.ToString("o"),
+            TransactionType = "expense",
+            Amount = 123.45M,
+            Category = "Groceries",
+            Subcategory = "Meat"
+        };
+        var transaction2 = new Transaction()
+        {
+            TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
+            TransactionTimestamp = DateTime.Now.ToString("o"),
+            TransactionType = "expense",
+            Amount = 123.45M,
+            Category = "Groceries",
+            Subcategory = "Meat"
+        };
+
+        var transactionList = new List<Transaction>
+        {
+            transaction1,
+            transaction2
+        };
+
+        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        var response = await _httpClient.DeleteAsync($"/api/transactions/{expectedTransactionId}");
+        response.EnsureSuccessStatusCode();
+
+        var returnedTransaction = await _cockroachDbIntegrationTestHelper.GetTransactionById(expectedTransactionId);
+        Assert.Null(returnedTransaction);
+    }
 }

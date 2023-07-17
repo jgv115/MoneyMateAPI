@@ -164,18 +164,17 @@ namespace TransactionService.Repositories.CockroachDb
 
         public async Task StoreTransaction(Domain.Models.Transaction newTransaction)
         {
-            // TODO: verify transaction type
-
             var query = @"
-                WITH ins (user_identifier, timestamp, transaction_type, amount, subcategory, payerpayeeid, notes) AS
-                         (VALUES (@user_identifier, @transaction_timestamp, @transaction_type, @amount, @subcategory,
+                WITH ins (transaction_id, user_identifier, timestamp, transaction_type, amount, subcategory, payerpayeeid, notes) AS
+                         (VALUES (@transaction_id, @user_identifier, @transaction_timestamp, @transaction_type, @amount, @subcategory,
                                   @payerpayeeid, @notes)),
                      userRow as (SELECT id
                                  FROM users
                                  where user_identifier = (SELECT ins.user_identifier from ins))
-                INSERT
-                INTO transaction (user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerPayee_id, notes)
-                SELECT u.id,
+                UPSERT
+                INTO transaction (id, user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerPayee_id, notes)
+                SELECT ins.transaction_id,
+                       u.id,
                        ins.timestamp,
                        tt.id,
                        ins.amount,
@@ -193,6 +192,7 @@ namespace TransactionService.Repositories.CockroachDb
             {
                 await connection.ExecuteAsync(query, new
                 {
+                    transaction_id = Guid.Parse(newTransaction.TransactionId),
                     user_identifier = _userContext.UserId,
                     transaction_timestamp = DateTimeOffset.Parse(newTransaction.TransactionTimestamp),
                     transaction_type = newTransaction.TransactionType,
@@ -206,12 +206,20 @@ namespace TransactionService.Repositories.CockroachDb
 
         public Task PutTransaction(Domain.Models.Transaction newTransaction)
         {
-            throw new System.NotImplementedException();
+            return StoreTransaction(newTransaction);
         }
 
-        public Task DeleteTransaction(string transactionId)
+        public async Task DeleteTransaction(string transactionId)
         {
-            throw new System.NotImplementedException();
+            var query = @"DELETE FROM transaction WHERE id = @transaction_id";
+
+            using (var connection = _context.CreateConnection())
+            {
+                await connection.ExecuteAsync(query, new
+                {
+                    transaction_id = transactionId
+                });
+            }
         }
     }
 }

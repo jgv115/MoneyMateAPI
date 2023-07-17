@@ -157,39 +157,13 @@ public class CockroachDbIntegrationTestHelper
 
     public async Task<List<Transaction>> GetAllTransactions()
     {
-//         using (var connection = DapperContext.CreateConnection())
-//         {
-//             var query =
-//                 @"SELECT transaction.id,
-//                         u.id           as userId,
-//                         transaction.transaction_timestamp as transactionTimestamp,
-//                         transaction.amount,
-//                         transaction.notes as note,
-//
-//                         tt.id,
-//                         tt.name as name,
-//                         
-//                         c.id,
-//                         c.name as name,
-//                         
-//                         sc.id,
-//                         sc.name as name,
-//                         
-//                         pp.id,
-//                         pp.name             as name,
-//                         pp.external_link_id as externalLinkId
-//                  FROM transaction
-//                          JOIN users u on transaction.user_id = u.id
-//                          LEFT JOIN transactiontype tt on transaction.transaction_type_id = tt.id
-//                          LEFT JOIN subcategory sc on transaction.subcategory_id = sc.id 
-//                          LEFT JOIN category c on sc.category_id = c.id
-//                          LEFT JOIN payerpayee pp on transaction.payerpayee_id = pp.id
-//                  WHERE u.user_identifier = @user_identifier
-//                 ORDER BY transaction.transaction_timestamp
-//                  ";
-//         }
         return await _transactionRepository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
             new AndSpec(new List<ITransactionSpecification>()));
+    }
+    
+    public async Task<Transaction> GetTransactionById(string transactionId)
+    {
+        return await _transactionRepository.GetTransactionById(transactionId);
     }
 
     private async Task<Guid> WritePayerPayeeIntoDb(PayerPayee payerPayee, string payerPayeeType)
@@ -235,7 +209,7 @@ public class CockroachDbIntegrationTestHelper
                 payerPayeeName = payerPayee.PayerPayeeName,
                 payerPayeeType,
                 externalLinkId = string.IsNullOrEmpty(payerPayee.ExternalId) ? "Custom" : "Google",
-                externalId = payerPayee.ExternalId
+                externalId = string.IsNullOrEmpty(payerPayee.ExternalId) ? "": payerPayee.ExternalId
             });
         }
     }

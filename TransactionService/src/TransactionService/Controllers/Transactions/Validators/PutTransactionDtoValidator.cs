@@ -18,6 +18,8 @@ namespace TransactionService.Controllers.Transactions.Validators
                     "yyyy-MM-ddTHH:mm:ss.FZ",
                     "yyyy-MM-ddTHH:mm:ss.FFZ",
                     "yyyy-MM-ddTHH:mm:ss.FFFZ",
+                    "yyyy-MM-ddTHH:mm:ss.FFFFFFZ",
+                    "yyyy-MM-ddTHH:mm:ss.FFFFFFFZ",
                     "yyyy-MM-ddTHH:mm:ssz",
                     "yyyy-MM-ddTHH:mm:ss.FFFz",
                     "yyyy-MM-ddTHH:mm:sszz",

@@ -29,6 +29,8 @@ namespace TransactionService.Tests.Controllers.Transactions.Validators
         [InlineData("2021-10-09T09:23:39Z")]
         [InlineData("2021-10-09T01:23:39.000Z")]
         [InlineData("2022-02-13T13:41:00.000Z")]
+        [InlineData("2022-02-13T13:41:00.000000Z")]
+        [InlineData("2022-02-13T13:41:00.0000000Z")]
         [InlineData("2021-10-09T09:23:39+01")]
         [InlineData("2021-10-09T15:23:39.123+01")]
         [InlineData("2021-10-09T16:23:39+1")]

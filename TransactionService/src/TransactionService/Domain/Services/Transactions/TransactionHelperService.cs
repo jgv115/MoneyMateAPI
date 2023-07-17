@@ -41,6 +41,7 @@ namespace TransactionService.Domain.Services.Transactions
 
         public Task StoreTransaction(StoreTransactionDto transactionDto)
         {
+            // TODO: do we need to convert timestamp to UTC?
             var transaction = _mapper.Map<Transaction>(transactionDto);
             transaction.TransactionId = Guid.NewGuid().ToString();
             return _repository.StoreTransaction(transaction);
