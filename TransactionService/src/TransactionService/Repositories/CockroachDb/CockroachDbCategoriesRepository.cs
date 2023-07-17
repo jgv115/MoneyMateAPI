@@ -64,7 +64,7 @@ namespace TransactionService.Repositories.CockroachDb
                             JOIN transactiontype tt on c.transaction_type_id = tt.id
                             WHERE c.name = @categoryName and u.user_identifier = @user_identifier
                             ORDER BY s.name ASC";
-            
+
             using (var connection = _context.CreateConnection())
             {
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
@@ -167,9 +167,24 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        public Task UpdateCategoryName(Domain.Models.Category category, string newCategoryName)
+        public async Task UpdateCategoryName(Domain.Models.Category category, string newCategoryName)
         {
-            throw new NotImplementedException();
+            using (var connection = _context.CreateConnection())
+            {
+                var query = @"
+                    UPDATE category SET name = @new_category_name
+                    FROM users u 
+                    WHERE u.user_identifier = @user_identifier
+                        AND name = @category_name
+                    ";
+
+                await connection.ExecuteAsync(query,
+                    new
+                    {
+                        new_category_name = newCategoryName, user_identifier = _userContext.UserId,
+                        category_name = category.CategoryName
+                    });
+            }
         }
 
         public async Task DeleteCategory(string categoryName)
@@ -221,7 +236,6 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        // TODO: this needs to be manually tested
         public async Task UpdateSubcategoryName(string categoryName, string subcategoryName, string newSubcategoryName)
         {
             using (var connection = _context.CreateConnection())
@@ -239,7 +253,7 @@ namespace TransactionService.Repositories.CockroachDb
                     new
                     {
                         new_subcategory_name = newSubcategoryName, user_identifier = _userContext.UserId,
-                        category_name = categoryName, subcategoryName = subcategoryName
+                        category_name = categoryName, subcategory_name = subcategoryName
                     });
             }
         }

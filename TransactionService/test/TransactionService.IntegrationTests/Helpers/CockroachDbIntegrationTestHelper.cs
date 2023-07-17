@@ -38,7 +38,8 @@ public class CockroachDbIntegrationTestHelper
     private string TestUserIdentifier { get; } = "auth0|moneymatetest";
     private TransactionTypeIds TransactionTypeIds { get; set; }
     private IMapper Mapper { get; init; }
-    private CockroachDbTransactionRepository _transactionRepository { get; init; }
+    private CockroachDbTransactionRepository TransactionRepository { get; init; }
+    private CockroachDbCategoriesRepository CategoriesRepository { get; init; }
 
     public CockroachDbIntegrationTestHelper()
     {
@@ -61,7 +62,12 @@ public class CockroachDbIntegrationTestHelper
             })
             .CreateMapper();
 
-        _transactionRepository = new CockroachDbTransactionRepository(DapperContext, Mapper, new CurrentUserContext
+        TransactionRepository = new CockroachDbTransactionRepository(DapperContext, Mapper, new CurrentUserContext
+        {
+            UserId = TestUserIdentifier
+        });
+
+        CategoriesRepository = new CockroachDbCategoriesRepository(DapperContext, Mapper, new CurrentUserContext
         {
             UserId = TestUserIdentifier
         });
@@ -157,13 +163,13 @@ public class CockroachDbIntegrationTestHelper
 
     public async Task<List<Transaction>> GetAllTransactions()
     {
-        return await _transactionRepository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
+        return await TransactionRepository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
             new AndSpec(new List<ITransactionSpecification>()));
     }
-    
+
     public async Task<Transaction> GetTransactionById(string transactionId)
     {
-        return await _transactionRepository.GetTransactionById(transactionId);
+        return await TransactionRepository.GetTransactionById(transactionId);
     }
 
     private async Task<Guid> WritePayerPayeeIntoDb(PayerPayee payerPayee, string payerPayeeType)
@@ -209,7 +215,7 @@ public class CockroachDbIntegrationTestHelper
                 payerPayeeName = payerPayee.PayerPayeeName,
                 payerPayeeType,
                 externalLinkId = string.IsNullOrEmpty(payerPayee.ExternalId) ? "Custom" : "Google",
-                externalId = string.IsNullOrEmpty(payerPayee.ExternalId) ? "": payerPayee.ExternalId
+                externalId = string.IsNullOrEmpty(payerPayee.ExternalId) ? "" : payerPayee.ExternalId
             });
         }
     }
@@ -330,20 +336,12 @@ public class CockroachDbIntegrationTestHelper
 
     public async Task<List<Category>> RetrieveAllCategories()
     {
-        using (var connection = DapperContext.CreateConnection())
-        {
-            var categoryQuery =
-                @"SELECT * FROM category
-                    LEFT JOIN subcategory s on category.id = s.category_id
-                    WHERE category.user_id = @user_id
-                    ORDER BY category.name, s.name";
+        return (await CategoriesRepository.GetAllCategories()).ToList();
+    }
 
-            var categories =
-                await CategoryDapperHelpers.QueryAndBuildCategories(connection, categoryQuery,
-                    new {user_id = TestUserId});
-
-            return Mapper.Map<List<TransactionService.Repositories.CockroachDb.Entities.Category>, List<Category>>(
-                categories.ToList());
-        }
+    public async Task<Category> RetrieveCategory(string categoryName)
+    {
+        return (await CategoriesRepository.GetAllCategories()).FirstOrDefault(category =>
+            category.CategoryName == categoryName);
     }
 }

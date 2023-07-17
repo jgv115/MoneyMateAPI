@@ -6,7 +6,6 @@ using TransactionService.Controllers.Transactions.Dtos;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
-using TransactionService.Middleware;
 using TransactionService.Repositories;
 
 namespace TransactionService.Domain.Services.Transactions

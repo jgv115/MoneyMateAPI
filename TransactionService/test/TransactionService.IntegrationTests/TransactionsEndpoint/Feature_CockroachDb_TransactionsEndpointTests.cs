@@ -581,16 +581,6 @@ public class Feature_CockroachDb_TransactionsEndpointTests : IClassFixture<Money
             transaction2
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(new List<Category>
-        {
-            new()
-            {
-                TransactionType = TransactionTypeExtensions.ConvertToTransactionType("expense"),
-                Subcategories = new List<string> {"Meat"},
-                CategoryName = "Groceries"
-            }
-        });
-
         await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
 
         const decimal expectedAmount = 123M;
