@@ -4,7 +4,9 @@ resource "cockroach_cluster" "moneymate_cluster" {
   serverless = {
     spend_limit = 0
   }
-  regions = ["ap-southeast-1"]
+  regions = [{
+    name = "ap-southeast-1"
+  }]
 }
 
 resource cockroach_database moneymate_database {
