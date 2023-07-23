@@ -8,6 +8,10 @@ terraform {
       source = "cloudflare/cloudflare"
       version = "~> 2.0"
     }
+    cockroach = {
+      source = "cockroachdb/cockroach"
+      version = "0.7.0"
+    }
   }
 
   backend "s3" {
@@ -26,4 +30,7 @@ provider "aws" {
 provider "cloudflare" {
   email   = var.CLOUDFLARE_EMAIL
   api_key = var.CLOUDFLARE_API_KEY
+}
+
+provider "cockroach" {
 }
