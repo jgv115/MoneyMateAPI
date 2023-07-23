@@ -51,7 +51,7 @@ containers:
         options: cached
     working_directory: /app
     entrypoint: dotnet TransactionService.dll
-        
+  
   terraform_env:
     image: hashicorp/terraform:latest
     environment:
@@ -87,7 +87,7 @@ containers:
       retries: 5
       start_period: 10s
       timeout: 10s
-      
+  
   localstack_clean:
     additional_hostnames:
       - localstack
@@ -109,7 +109,7 @@ containers:
       retries: 5
       start_period: 10s
       timeout: 10s
-      
+  
   cockroachdb:
     image: cockroachdb/cockroach:v22.2.6
     ports:
@@ -119,13 +119,13 @@ containers:
         container: 8080
     environment:
       COCKROACH_DATABASE: moneymate_db_local
-    health_check: 
+    health_check:
       command: curl -f http://localhost:8080/health?ready=1
       interval: 1s
       timeout: 3s
       retries: 5
     command: start-single-node --insecure
-        
+  
   cockroachdb_migrated:
     image: flyway/flyway:9.16
     dependencies:
@@ -133,11 +133,22 @@ containers:
     volumes:
       - local: ./sql
         container: /flyway/sql
-    command: -url=jdbc:postgresql://cockroachdb:26257/moneymate_db_local -user=root -connectRetries=60 migrate
+    command: -url=jdbc:postgresql://cockroachdb:26257/moneymate_db_local -user=root -connectRetries=3 migrate
 
+  flyway:
+    image: flyway/flyway:9.21
+    volumes:
+      - local: ./sql
+        container: /flyway/sql
+    environment:
+      FLYWAY_URL: ${COCKROACH_DB_URL:-jdbc:postgresql://host.docker.internal:26257/moneymate_db_local}
+      FLYWAY_USER: ${COCKROACH_DB_USER:-root}
+      FLYWAY_PASSWORD: ${COCKROACH_DB_PASSWORD:-}
+    command: -connectRetries=60 migrate
+  
   google_api_mock:
     build_directory: .batect/google_api_mock
-    environment: 
+    environment:
       FLASK_DEBUG: 1
     ports:
       - local: 6001
@@ -145,16 +156,24 @@ containers:
   
   wait:
     image: alpine:latest
-    
 
 tasks:
-  build:
-    description: Builds the Transaction Service
+  run_flyway_migration:
     run:
-      container: dotnet_build_env
-      command: dotnet build src/TransactionService/TransactionService.csproj -o .batect/dotnet_run_env/app
+      container: flyway
+  
+  start_clean_environment:
+    description: Spins up all of the dependencies without performing any initialising actions
+    dependencies:
+      - localstack_clean
+      - cockroachdb
+      - google_api_mock
+    run:
+      container: wait
+      command: tail -f /dev/null
 
-  start_clean_dependencies:
+  start_debug_environment:
+    description: Spins up all of the dependencies and perform any initialising actions
     dependencies:
       - localstack_clean
       - cockroachdb_migrated
@@ -164,6 +183,7 @@ tasks:
       command: tail -f /dev/null
   
   start_dependencies:
+    description: WIP - Spins up all of the dependencies, perform initialising actions and inject data to run service locally
     dependencies:
       - localstack
       - cockroachdb_migrated
@@ -171,7 +191,6 @@ tasks:
     run:
       container: wait
       command: tail -f /dev/null
-  
   
   unit_tests:
     description: Runs the unit tests
@@ -188,11 +207,13 @@ tasks:
     run:
       container: dotnet_build_env
       command: dotnet test test/TransactionService.IntegrationTests -l "console;verbosity=normal"
-     
-  start_clean_db:
-    run:
-      container: cockroachdb
 
+  build:
+    description: Builds the Transaction Service
+    run:
+      container: dotnet_build_env
+      command: dotnet build src/TransactionService/TransactionService.csproj -o .batect/dotnet_run_env/app
+      
   run:
     description: Runs the Transaction Service
     prerequisites:

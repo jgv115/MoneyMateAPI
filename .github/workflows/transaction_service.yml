@@ -20,8 +20,6 @@ jobs:
 
   integration_tests:
     name: Integration Tests
-    needs:
-      - unit_tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,8 +29,7 @@ jobs:
 
   build_and_push_to_ecr:
     name: Build image and push to ECR
-    needs: 
-      - integration_tests
+    needs: [unit_tests, integration_tests]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
@@ -54,29 +51,26 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG TransactionService/src/TransactionService
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-  # plan_infra_test:
-  #   name: Plan Infra for Test
-  #   needs:
-  #     - build_and_push_to_ecr
-  #   runs-on: ubuntu-latest
-  #   env: 
-  #     ENVIRONMENT: test
-  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #     IMAGE_TAG: ${{ github.sha }}
-  #     CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
-  #     CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Run terraform plan
-  #       run: ./batect -f TransactionService/batect.yml terraform_plan
+       
+  deploy_database_test:
+    name: Deploy Database for Test
+    needs:
+      - build_and_push_to_ecr
+    runs-on: ubuntu-latest
+    env:
+      COCKROACH_DB_URL: ${{secrets.COCKROACH_DB_URL_TEST}}
+      COCKROACH_DB_USER: ${{secrets.COCKROACH_DB_USER}}
+      COCKROACH_DB_PASSWORD: ${{secrets.COCKROACH_DB_PASSWORD}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run flyway migrate
+        run: ./batect -f TransactionService/batect.yml run_flyway_migration
         
   provision_infra_test:
     name: Provision Infra for Test
     needs: 
-      - build_and_push_to_ecr
+      - deploy_database_test
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: test
@@ -91,28 +85,25 @@ jobs:
       - name: Run terraform apply
         run: ./batect -f TransactionService/batect.yml terraform_apply
         
-  # plan_infra_prod:
-  #   name: Plan Infra for Prod
-  #   needs:
-  #     - provision_infra_test
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     ENVIRONMENT: prod
-  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #     IMAGE_TAG: ${{ github.sha }}
-  #     CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
-  #     CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Run terraform plan
-  #       run: ./batect -f TransactionService/batect.yml terraform_plan
-
+  deploy_database_prod:
+    name: Deploy Database for Prod
+    needs:
+      - provision_infra_test
+    runs-on: ubuntu-latest
+    env:
+      COCKROACH_DB_URL: ${{secrets.COCKROACH_DB_URL_PROD}}
+      COCKROACH_DB_USER: ${{secrets.COCKROACH_DB_USER}}
+      COCKROACH_DB_PASSWORD: ${{secrets.COCKROACH_DB_PASSWORD}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run flyway migrate
+        run: ./batect -f TransactionService/batect.yml run_flyway_migration
+        
   provision_infra_prod:
     name: Provision Infra for Prod
     needs:
-      - provision_infra_test
+      - deploy_database_prod
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: prod
