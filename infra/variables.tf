@@ -13,6 +13,7 @@ variable CLOUDFLARE_API_KEY {
   description = "Cloudflare master API key"
 }
 
-variable cockroach_db_cluster_name {
-  default = "moneymate-cluster"
+variable cockroach_db_cluster_id {
+  description = "Hard coded cluster Id from Cockroach DB console"
+  default = "c879b140-a509-49fd-ac61-ee5a5c381026"
 }
