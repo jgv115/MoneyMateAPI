@@ -1,0 +1,1 @@
+This utlity is designed to run on migration version V1 of MoneyMateDB

@@ -6,20 +6,14 @@ import {
 } from "./repository/cockroachdb/cockroachdb_user_repository";
 import { Pool } from 'pg';
 import { getCockroachDbConfig } from './config/cockroachdb_config_provider';
-import winston from 'winston';
 import { DynamoDbSourceUserRepository } from './repository/dynamodb/dynamodb_user_repository';
 import { MigrationHandler } from './migration_handler/migration_handler';
 import { UserMigrationHandler } from './migration_handler/user_migration_handler';
+import { createLogger } from './utils/logger';
 
 
 const setupDependencies = async (migrationType: MigrationType, sourceEnvironment: Environment, targetEnvironment: Environment) => {
-    const logger = winston.createLogger({
-        level: "info",
-        format: winston.format.combine(winston.format.align(), winston.format.colorize(), winston.format.simple()),
-        transports: [
-            new winston.transports.Console
-        ]
-    })
+    const logger = createLogger();
 
     logger.info("setting up dependencies")
 
