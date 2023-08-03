@@ -1,7 +1,6 @@
 export interface Category {
-    userIdentifier: string,
-    id: string,
     name: string,
+    userId: string,
     transactionType: string,
     subcategories: string[]
 }

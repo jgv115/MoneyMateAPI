@@ -2,6 +2,7 @@ import { Pool } from "pg";
 import { getCockroachDbConfig } from "../config/cockroachdb_config_provider";
 import { Environment } from "../constants";
 import { CockroachDbUser } from "../repository/cockroachdb/model";
+import { CockroachDbCategory } from "../repository/cockroachdb/model/category";
 
 export const CockroachDbTestHelper = () => {
     const cockroachDbConfig = getCockroachDbConfig(Environment.local);
@@ -21,18 +22,32 @@ export const CockroachDbTestHelper = () => {
         await cockroachDbConnection.end();
     }
 
+    const performAdhocQuery = async <T>(query: string, values: string[]): Promise<T[]> => {
+        const result = await cockroachDbConnection.query(query, values);
+        return result.rows;
+    }
+
+    const getTransactionTypeIds = async (): Promise<{ [transactionTypeName: string]: string }> => {
+        const result = await cockroachDbConnection.query(`SELECT * FROM transactiontype`);
+        return result.rows.reduce((a, v) => ({ ...a, [v.name]: v.id }), {})
+    }
+
     const getUserByUserIdentifier = async (userIdentifier: string): Promise<CockroachDbUser> => {
         const result = await cockroachDbConnection.query(`SELECT * FROM users WHERE user_identifier = $1`, [userIdentifier]);
+        return result.rows[0];
+    }
 
-        if (result.rows.length !== 1)
-            throw Error(`Found more than one userId with the user_identifier ${userIdentifier}`)
-
+    const getCategoryByCategoryId = async (categoryId: string): Promise<CockroachDbCategory> => {
+        const result = await cockroachDbConnection.query(`SELECT * FROM category WHERE id = $1`, [categoryId]);
         return result.rows[0];
     }
 
     return {
         cockroachDbConnection,
         cleanUp,
-        getUserByUserIdentifier
+        performAdhocQuery,
+        getTransactionTypeIds,
+        getUserByUserIdentifier,
+        getCategoryByCategoryId
     }
 }
