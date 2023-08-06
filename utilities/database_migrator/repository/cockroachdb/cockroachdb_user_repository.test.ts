@@ -14,9 +14,12 @@ const setupTest = () => {
 
 
 describe("CockroachDB Target User Repository", () => {
-    afterAll(async () => {
+    afterEach(async () => {
         await cockroachDbTestHelper.cleanUp();
+    });
 
+    afterAll(async () => {
+        await cockroachDbTestHelper.terminateConnection();
     });
 
     describe("saveUsers", () => {

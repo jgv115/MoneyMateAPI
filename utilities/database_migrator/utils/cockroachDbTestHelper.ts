@@ -19,6 +19,9 @@ export const CockroachDbTestHelper = () => {
 
     const cleanUp = async () => {
         await cockroachDbConnection.query('TRUNCATE users CASCADE');
+    }
+
+    const terminateConnection = async () => {
         await cockroachDbConnection.end();
     }
 
@@ -45,6 +48,7 @@ export const CockroachDbTestHelper = () => {
     return {
         cockroachDbConnection,
         cleanUp,
+        terminateConnection,
         performAdhocQuery,
         getTransactionTypeIds,
         getUserByUserIdentifier,
