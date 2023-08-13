@@ -101,37 +101,56 @@ describe("CockroachDbTransactionRepository", () => {
 
     describe("saveTransactions", () => {
         test("given transactions then transactions written to db correctly", async () => {
-
             const { sut, savedUserId, transactionTypeIds, transactionTestHelpers } = await setupTest();
 
-            const payerPayeeId = await transactionTestHelpers.savePayeePayee({ name: "payee1", payerPayee: "payee" });
-            const subcategoryId = (await transactionTestHelpers.saveCategoryAndSubcategory({
+            const payerPayeeId1 = await transactionTestHelpers.savePayeePayee({ name: "payee1", payerPayee: "payee" });
+            const subcategoryId1 = (await transactionTestHelpers.saveCategoryAndSubcategory({
                 categoryName: "test category1",
                 subcategoryName: "sub1",
                 transactionType: "expense"
             })).subcategoryId
 
-            const savedTransaction = {
+            const savedTransaction1 = {
                 id: randomUUID(),
                 amount: 123.23,
-                payerpayee_id: payerPayeeId,
-                subcategory_id: subcategoryId,
+                payerpayee_id: payerPayeeId1,
+                subcategory_id: subcategoryId1,
                 transaction_timestamp: "2023-08-12T15:30:00.000Z",
                 transaction_type_id: transactionTypeIds.expense,
                 user_id: savedUserId,
                 notes: "hello note"
             };
 
-            const savedTransactionIds = await sut.saveTransactions([savedTransaction]);
-            expect(savedTransactionIds).toEqual([savedTransaction.id])
+            const payerPayeeId2 = await transactionTestHelpers.savePayeePayee({ name: "payer10", payerPayee: "payer" });
+            const subcategoryId2 = (await transactionTestHelpers.saveCategoryAndSubcategory({
+                categoryName: "income category",
+                subcategoryName: "salary",
+                transactionType: "income"
+            })).subcategoryId
+
+            const savedTransaction2 = {
+                id: randomUUID(),
+                amount: 1232.23,
+                payerpayee_id: payerPayeeId2,
+                subcategory_id: subcategoryId2,
+                transaction_timestamp: "2024-08-12T01:30:00.000Z",
+                transaction_type_id: transactionTypeIds.income,
+                user_id: savedUserId,
+                notes: "salary!"
+            };
+
+            const savedTransactionIds = await sut.saveTransactions([savedTransaction1, savedTransaction2]);
+            expect(savedTransactionIds).toEqual([savedTransaction1.id, savedTransaction2.id])
 
             const retrievedTransactions = await cockroachDbTestHelper.performAdhocQuery<Transaction>(`SELECT * FROM transaction`, []);
-            const expectedTransaction = {
-                ...savedTransaction,
-                transaction_timestamp: new Date(savedTransaction.transaction_timestamp),
-                amount: savedTransaction.amount.toString()
-            }
-            expect(retrievedTransactions).toEqual([expectedTransaction]);
+
+            const expectedTransactions = [savedTransaction1, savedTransaction2].map(transaction => ({
+                ...transaction,
+                transaction_timestamp: new Date(transaction.transaction_timestamp),
+                amount: transaction.amount.toString()
+            }))
+
+            expect(retrievedTransactions.sort()).toEqual(expectedTransactions.sort());
         });
     });
 })

@@ -41,7 +41,7 @@ describe("CockroachDb PayerPayee Repository tests", () => {
             id: randomUUID(),
             name: "payer1",
             user_id: testUserId,
-            payerpayeetype_id: payerPayeeTypeIds["payer"],
+            payerpayeetype_id: payerPayeeTypeIds.payer,
             external_link_id: "",
             external_link_type_id: externalLinkTypeIds["Custom"]
 
@@ -49,7 +49,7 @@ describe("CockroachDb PayerPayee Repository tests", () => {
             id: randomUUID(),
             name: "payee1",
             user_id: testUserId,
-            payerpayeetype_id: payerPayeeTypeIds["payee"],
+            payerpayeetype_id: payerPayeeTypeIds.payee,
             external_link_id: "1234",
             external_link_type_id: externalLinkTypeIds["Google"]
 
@@ -75,7 +75,7 @@ describe("CockroachDb PayerPayee Repository tests", () => {
             id: payerPayeeId,
             name: "payer1",
             user_id: testUserId,
-            payerpayeetype_id: payerPayeeTypeIds["payer"],
+            payerpayeetype_id: payerPayeeTypeIds.payer,
             external_link_id: "",
             external_link_type_id: externalLinkTypeIds["Custom"]
 
@@ -83,7 +83,7 @@ describe("CockroachDb PayerPayee Repository tests", () => {
             id: payerPayeeId,
             name: "payee1",
             user_id: testUserId,
-            payerpayeetype_id: payerPayeeTypeIds["payee"],
+            payerpayeetype_id: payerPayeeTypeIds.payee,
             external_link_id: "1234",
             external_link_type_id: externalLinkTypeIds["Google"]
 

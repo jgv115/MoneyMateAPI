@@ -1,14 +1,13 @@
 import { Pool } from "pg";
 import { Logger } from "winston";
 import { PayerPayee } from "./model/payerpayee";
+import { PayerOrPayee } from "./constants";
 
 
 export const CockroachDbTargetPayerPayeeRepository = (logger: Logger, client: Pool) => {
 
     const getPayerPayeeTypeIds = async (): Promise<{
-        payee: string;
-    } | {
-        payer: string
+        [key in PayerOrPayee]: string;
     }> => {
         const response = await client.query(`SELECT * FROM payerpayeetype`)
         return response.rows.reduce((a, v) => ({ ...a, [v.name]: v.id }), {});
