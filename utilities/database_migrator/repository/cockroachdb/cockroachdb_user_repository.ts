@@ -1,8 +1,7 @@
 import { Pool } from 'pg';
 import { Logger } from 'winston';
-import { TargetUserRepository } from '../target_user_repository';
 
-export const CockroachDbTargetUserRepository = (logger: Logger, client: Pool): TargetUserRepository => {
+export const CockroachDbTargetUserRepository = (logger: Logger, client: Pool) => {
 
     const saveUsers = async (userIdentifiers: string[]): Promise<string[]> => {
         logger.info("Writing user identifiers into CockroachDb", { numberOfUsers: userIdentifiers.length })

@@ -1,9 +1,8 @@
 import { Pool } from "pg";
 import { Logger } from "winston";
-import { TargetCategoryRepository } from "../target_category_repository";
 import { Category } from "../../model";
 
-export const CockroachDbTargetCategoryRepository = (logger: Logger, client: Pool): TargetCategoryRepository => {
+export const CockroachDbTargetCategoryRepository = (logger: Logger, client: Pool) => {
 
     const saveCategories = async (categories: Category[]): Promise<string[]> => {
         const savedCategoryIds = [];
@@ -33,17 +32,18 @@ export const CockroachDbTargetCategoryRepository = (logger: Logger, client: Pool
         return savedCategoryIds;
     }
 
-    const getSubcategoryIdFromSubcategoryName = async (userId: string, subcategoryName: string): Promise<string> => {
+
+    const getSubcategoryId = async (userId: string, categoryId: string, subcategoryName: string): Promise<string> => {
         const response = await client.query(
             `SELECT subcategory.id from subcategory
             LEFT JOIN category on category.id = subcategory.category_id
-            WHERE subcategory.name = $1 and category.user_id = $2`, [subcategoryName, userId]);
+            WHERE subcategory.name = $1 and category.user_id = $2 and category.id = $3`, [subcategoryName, userId, categoryId]);
 
         return response.rows[0].id;
     }
 
     return {
         saveCategories,
-        getSubcategoryIdFromSubcategoryName
+        getSubcategoryId
     }
 }

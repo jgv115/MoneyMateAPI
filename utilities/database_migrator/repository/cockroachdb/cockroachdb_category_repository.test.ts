@@ -103,7 +103,7 @@ describe("CockroachDB Target Category Repository", () => {
         });
     });
 
-    describe("getSubcategoryidFromSubcategoryName", () => {
+    describe("getSubcategoryId", () => {
         test("given userId and subcategoryName, then correct id returned", async () => {
             const { sut, transactionTypeIds, testUserId } = await setupTest()
 
@@ -119,7 +119,7 @@ describe("CockroachDB Target Category Repository", () => {
             INSERT INTO subcategory (id, name, category_id) VALUES ($1, $2, $3)`, [subcategoryid, "sub name", categoryId]);
 
             // assert
-            const returnedSubcategoryId = await sut.getSubcategoryIdFromSubcategoryName(testUserId, "sub name");
+            const returnedSubcategoryId = await sut.getSubcategoryId(testUserId, categoryId, "sub name");
             expect(returnedSubcategoryId).toEqual(subcategoryid);
         });
     })
