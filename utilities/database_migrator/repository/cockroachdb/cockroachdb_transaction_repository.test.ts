@@ -4,7 +4,7 @@ import { CockroachDbTargetPayerPayeeRepository } from "./cockroachdb_payerpayee_
 import { CockroachDbTargetCategoryRepository } from "./cockroachdb_category_repository";
 import { CockroachDbTargetUserRepository } from "./cockroachdb_user_repository";
 import { randomUUID } from "crypto";
-import { PayerOrPayee, TransactionTypes } from "./constants";
+import { PayerOrPayee, TransactionTypes } from "../constants";
 import { Transaction } from "./model";
 import { createLogger } from "../../utils/logger";
 

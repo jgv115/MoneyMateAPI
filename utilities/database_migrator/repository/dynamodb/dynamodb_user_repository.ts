@@ -1,10 +1,36 @@
 import { Logger } from "winston"
-import { SourceUserRepository } from "../source_user_repository"
+import { DynamoDBClient, ScanCommandInput, ScanCommand } from "@aws-sdk/client-dynamodb";
 
-export const DynamoDbSourceUserRepository = (logger: Logger): SourceUserRepository => {
+import { DynamoDbConfig } from "./config";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+
+export const DynamoDbSourceUserRepository = (logger: Logger, client: DynamoDBClient, config: DynamoDbConfig) => {
 
     const getAllUserIdentifiers = async (): Promise<string[]> => {
-        return ["auth0|jgv115", "auth0|jgv551"];
+
+        const docClient = DynamoDBDocumentClient.from(client);
+        const scanCommandInput = {
+            TableName: config.tableName,
+            ProjectionExpression: "UserIdQuery"
+        } satisfies ScanCommandInput
+
+        const userIdentifiers = new Set<string>();
+
+        let response = await docClient.send(new ScanCommand(scanCommandInput));
+        for (const item of response.Items)
+            userIdentifiers.add(item.UserIdQuery.S.split("#")[0])
+
+        while (response.LastEvaluatedKey) {
+            response = await docClient.send(new ScanCommand({
+                ...scanCommandInput,
+                ExclusiveStartKey: response.LastEvaluatedKey
+            }));
+
+            for (const item of response.Items)
+                userIdentifiers.add(item.UserIdQuery.S.split("#")[0])
+        };
+
+        return Array.from(userIdentifiers);
     }
 
     return {

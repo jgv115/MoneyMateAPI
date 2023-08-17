@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { Logger } from "winston";
 import { PayerPayee } from "./model/payerpayee";
-import { PayerOrPayee } from "./constants";
+import { PayerOrPayee } from "../constants";
 
 
 export const CockroachDbTargetPayerPayeeRepository = (logger: Logger, client: Pool) => {

@@ -1,1 +1,3 @@
-This utlity is designed to run on migration version V1 of MoneyMateDB
+- This utlity is designed to run on migration version V1 of MoneyMateDB
+- This utlity assumes that CockroachDB and DynamoDB are running
+    - Run it using the batect file in `TransactionService`

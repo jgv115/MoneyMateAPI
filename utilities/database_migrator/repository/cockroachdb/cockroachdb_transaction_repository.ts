@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { Logger } from "winston";
 import { Transaction } from "./model";
-import { TransactionTypes } from "./constants";
+import { TransactionTypes } from "../constants";
 
 export const CockroachDbTransactionRepository = (logger: Logger, client: Pool) => {
 
