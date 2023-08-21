@@ -19,7 +19,7 @@ const setupTest = () => {
     }
 }
 
-describe("DynamoDbUserRepository", () => {
+describe("DynamoDbSourceUserRepository", () => {
     beforeEach(async () => {
         await createMoneyMateDbTable();
     });
