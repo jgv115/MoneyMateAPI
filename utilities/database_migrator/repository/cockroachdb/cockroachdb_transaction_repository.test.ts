@@ -1,8 +1,8 @@
-import { CockroachDbTransactionRepository } from "./cockroachdb_transaction_repository";
+import { CockroachDbTargetTransactionRepositoryBuilder } from "./cockroachdb_transaction_repository";
 import { CockroachDbTestHelper } from "../../utils/cockroachDbTestHelper";
-import { CockroachDbTargetPayerPayeeRepository } from "./cockroachdb_payerpayee_repository";
-import { CockroachDbTargetCategoryRepository } from "./cockroachdb_category_repository";
-import { CockroachDbTargetUserRepository } from "./cockroachdb_user_repository";
+import { CockroachDbTargetPayerPayeeRepositoryBuilder } from "./cockroachdb_payerpayee_repository";
+import { CockroachDbTargetCategoryRepositoryBuilder } from "./cockroachdb_category_repository";
+import { CockroachDbTargetUserRepositoryBuilder } from "./cockroachdb_user_repository";
 import { randomUUID } from "crypto";
 import { PayerOrPayee, TransactionTypes } from "../constants";
 import { Transaction } from "./model";
@@ -12,10 +12,10 @@ const cockroachDbTestHelper = CockroachDbTestHelper();
 
 const setupTest = async () => {
     const stubLogger = createLogger();
-    const sut = CockroachDbTransactionRepository(stubLogger, cockroachDbTestHelper.cockroachDbConnection);
-    const payerPayeeRepo = CockroachDbTargetPayerPayeeRepository(stubLogger, cockroachDbTestHelper.cockroachDbConnection);
-    const categoryRepo = CockroachDbTargetCategoryRepository(stubLogger, cockroachDbTestHelper.cockroachDbConnection);
-    const userRepo = CockroachDbTargetUserRepository(stubLogger, cockroachDbTestHelper.cockroachDbConnection);
+    const sut = CockroachDbTargetTransactionRepositoryBuilder(stubLogger, cockroachDbTestHelper.cockroachDbConnection);
+    const payerPayeeRepo = CockroachDbTargetPayerPayeeRepositoryBuilder(stubLogger, cockroachDbTestHelper.cockroachDbConnection);
+    const categoryRepo = CockroachDbTargetCategoryRepositoryBuilder(stubLogger, cockroachDbTestHelper.cockroachDbConnection);
+    const userRepo = CockroachDbTargetUserRepositoryBuilder(stubLogger, cockroachDbTestHelper.cockroachDbConnection);
 
     const transactionTypeIds = await sut.retrieveTransactionTypeIds();
     const externalLinkTypeIds = await payerPayeeRepo.getExternalLinkTypeIds();
@@ -48,8 +48,8 @@ const setupTest = async () => {
         const savedCategoryId = (await categoryRepo.saveCategories([{
             name: categoryName,
             subcategories: [subcategoryName],
-            transactionType: transactionType,
-            userId: savedUserId
+            transaction_type_id: transactionTypeIds[transactionType],
+            user_id: savedUserId
         }]))[0];
 
         const savedSubcategoryId = await categoryRepo.getSubcategoryId(savedUserId, savedCategoryId, subcategoryName);

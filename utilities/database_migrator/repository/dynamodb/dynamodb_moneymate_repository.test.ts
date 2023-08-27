@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { createLogger } from "../../utils/logger";
-import { DynamoDbMoneyMateDbRepository } from "./dynamodb_moneymate_repository";
+import { DynamoDbMoneyMateDbRepositoryBuilder } from "./dynamodb_moneymate_repository";
 import { DynamoDbHelpers } from "./helpers";
 import { DynamoDbCategoriesMapper, DynamoDbPayersPayeesMapper, DynamoDbTransactionMapper } from "./mappers";
 import { DynamoDbCategory, DynamoDbPayerPayee, DynamoDbTransaction } from "./model";
@@ -14,7 +14,7 @@ const {
 } = DynamoDbHelpers();
 
 const setupTest = () => {
-    const sut = DynamoDbMoneyMateDbRepository(createLogger(), dynamoDbClient, { tableName })
+    const sut = DynamoDbMoneyMateDbRepositoryBuilder(createLogger(), dynamoDbClient, { tableName })
     return {
         sut
     }
@@ -36,31 +36,31 @@ describe("DynamoDbSourceCategoryRepository", () => {
                 {
                     UserIdQuery: "auth0|jgv115#Categories",
                     Subquery: "Category name",
-                    TransactionType: "expense",
+                    TransactionType: 0,
                     Subcategories: ["sub1", "sub2", "sub3", "sub4", "sub5"]
                 },
                 {
                     UserIdQuery: "auth0|jgv115#Categories",
                     Subquery: "Eating Out",
-                    TransactionType: "expense",
+                    TransactionType: 0,
                     Subcategories: []
                 },
                 {
                     UserIdQuery: "auth0|jgv115#Categories",
                     Subquery: "income category1",
-                    TransactionType: "income",
+                    TransactionType: 1,
                     Subcategories: ["sub6", "sub7"]
                 },
                 {
                     UserIdQuery: "fgdshjkghwejhkj#Categories",
                     Subquery: "Eating Out",
-                    TransactionType: "expense",
+                    TransactionType: 0,
                     Subcategories: ["sub1", "sub2"]
                 },
                 {
                     UserIdQuery: "fgdshjkghwejhkj#Categories",
                     Subquery: "income category1",
-                    TransactionType: "income",
+                    TransactionType: 1,
                     Subcategories: ["sub6", "sub7"]
                 },
             ] satisfies DynamoDbCategory[];

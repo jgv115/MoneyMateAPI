@@ -1,19 +1,19 @@
 import { randomUUID } from "crypto";
 import { CockroachDbTestHelper } from "../../utils/cockroachDbTestHelper";
 import { createLogger } from "../../utils/logger";
-import { CockroachDbTargetPayerPayeeRepository } from "./cockroachdb_payerpayee_repository";
+import { CockroachDbTargetPayerPayeeRepositoryBuilder } from "./cockroachdb_payerpayee_repository";
 import { PayerPayee } from "./model";
-import { CockroachDbTargetUserRepository } from "./cockroachdb_user_repository";
+import { CockroachDbTargetUserRepositoryBuilder } from "./cockroachdb_user_repository";
 
 const cockroachDbTestHelper = CockroachDbTestHelper();
 
 const setupTest = async () => {
-    const sut = CockroachDbTargetPayerPayeeRepository(createLogger(), cockroachDbTestHelper.cockroachDbConnection);
+    const sut = CockroachDbTargetPayerPayeeRepositoryBuilder(createLogger(), cockroachDbTestHelper.cockroachDbConnection);
 
     const payerPayeeTypeIds = await sut.getPayerPayeeTypeIds();
     const externalLinkTypeIds = await sut.getExternalLinkTypeIds();
 
-    const userRepository = CockroachDbTargetUserRepository(createLogger(), cockroachDbTestHelper.cockroachDbConnection);
+    const userRepository = CockroachDbTargetUserRepositoryBuilder(createLogger(), cockroachDbTestHelper.cockroachDbConnection);
     const savedUserIds = await userRepository.saveUsers(["testUser123"]);
 
     return {

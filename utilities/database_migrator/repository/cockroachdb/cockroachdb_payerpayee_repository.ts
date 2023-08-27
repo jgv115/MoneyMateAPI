@@ -4,7 +4,9 @@ import { PayerPayee } from "./model/payerpayee";
 import { PayerOrPayee } from "../constants";
 
 
-export const CockroachDbTargetPayerPayeeRepository = (logger: Logger, client: Pool) => {
+export type CockroachDbTargetPayerPayeeRepository = ReturnType<typeof CockroachDbTargetPayerPayeeRepositoryBuilder>;
+
+export const CockroachDbTargetPayerPayeeRepositoryBuilder = (logger: Logger, client: Pool) => {
 
     const getPayerPayeeTypeIds = async (): Promise<{
         [key in PayerOrPayee]: string;

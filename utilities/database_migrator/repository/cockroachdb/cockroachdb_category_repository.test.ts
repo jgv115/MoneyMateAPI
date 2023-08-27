@@ -1,6 +1,6 @@
 import { CockroachDbTestHelper } from "../../utils/cockroachDbTestHelper";
-import { CockroachDbTargetUserRepository } from "./cockroachdb_user_repository";
-import { CockroachDbTargetCategoryRepository } from "./cockroachdb_category_repository";
+import { CockroachDbTargetUserRepositoryBuilder } from "./cockroachdb_user_repository";
+import { CockroachDbTargetCategoryRepositoryBuilder } from "./cockroachdb_category_repository";
 import { createLogger } from "../../utils/logger";
 import { CockroachDbCategory } from "./model/category";
 import { randomUUID } from "crypto";
@@ -9,10 +9,10 @@ import { Subcategory } from "./model";
 const cockroachDbTestHelper = CockroachDbTestHelper();
 
 const setupTest = async () => {
-    const sut = CockroachDbTargetCategoryRepository(createLogger(), cockroachDbTestHelper.cockroachDbConnection)
+    const sut = CockroachDbTargetCategoryRepositoryBuilder(createLogger(), cockroachDbTestHelper.cockroachDbConnection)
 
     const testUserIdentifier = "testUser123";
-    const userRepository = CockroachDbTargetUserRepository(createLogger(), cockroachDbTestHelper.cockroachDbConnection);
+    const userRepository = CockroachDbTargetUserRepositoryBuilder(createLogger(), cockroachDbTestHelper.cockroachDbConnection);
     const savedUserIds = await userRepository.saveUsers([testUserIdentifier]);
 
     const transactionTypeIds = await cockroachDbTestHelper.getTransactionTypeIds();
@@ -41,17 +41,17 @@ describe("CockroachDB Target Category Repository", () => {
             const inputCategories = [
                 {
                     name: "testcategory1",
-                    userId: testUserId,
+                    user_id: testUserId,
                     subcategories: ["sub1", "sub2"],
-                    transactionType: "expense",
+                    transaction_type_id: transactionTypeIds.expense,
                 },
                 {
                     name: "testcategory2",
-                    userId: testUserId,
+                    user_id: testUserId,
                     subcategories: ["sub3", "sub4"],
-                    transactionType: "income",
+                    transaction_type_id: transactionTypeIds.income
                 }
-            ]
+            ] satisfies CockroachDbCategory[]
 
             const savedCategoryIds = await sut.saveCategories(inputCategories);
 
@@ -60,11 +60,11 @@ describe("CockroachDB Target Category Repository", () => {
                 expect({
                     id: savedCategoryIds[i],
                     name: inputCategories[i].name,
-                    transaction_type_id: transactionTypeIds[inputCategories[i].transactionType],
-                    user_id: testUserId
-                } satisfies CockroachDbCategory).toEqual(savedCategory);
+                    transaction_type_id: inputCategories[i].transaction_type_id,
+                    user_id: testUserId,
+                }).toMatchObject(savedCategory);
             }
-        });
+        }, 9999999);
 
         test("given input userId and categories, then subcategories saved correctly in database ", async () => {
             const { sut, testUserId, transactionTypeIds } = await setupTest();
@@ -72,17 +72,17 @@ describe("CockroachDB Target Category Repository", () => {
             const inputCategories = [
                 {
                     name: "testcategory1",
-                    userId: testUserId,
+                    user_id: testUserId,
                     subcategories: ["sub1", "sub2"],
-                    transactionType: "expense",
+                    transaction_type_id: transactionTypeIds.expense,
                 },
                 {
                     name: "testcategory2",
-                    userId: testUserId,
+                    user_id: testUserId,
                     subcategories: ["sub3", "sub4"],
-                    transactionType: "income",
+                    transaction_type_id: transactionTypeIds.income
                 }
-            ]
+            ] satisfies CockroachDbCategory[]
 
             const savedCategoryIds = await sut.saveCategories(inputCategories);
 

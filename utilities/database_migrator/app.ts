@@ -2,17 +2,17 @@ import * as readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { Environment, MigrationType } from './constants';
 import {
-    CockroachDbTargetUserRepository,
+    CockroachDbTargetUserRepository, CockroachDbTargetUserRepositoryBuilder,
 } from "./repository/cockroachdb/cockroachdb_user_repository";
 import { Pool } from 'pg';
 import { getCockroachDbConfig } from './config/cockroachdb_config_provider';
-import { DynamoDbSourceUserRepository } from './repository/dynamodb/dynamodb_user_repository';
+import { DynamoDbSourceUserRepositoryBuilder } from './repository/dynamodb/dynamodb_user_repository';
 import { MigrationHandler } from './migration_handler/migration_handler';
 import { UserMigrationHandler } from './migration_handler/user_migration_handler';
 import { createLogger } from './utils/logger';
-import { CockroachDbTargetCategoryRepository } from './repository/cockroachdb/cockroachdb_category_repository';
-import { CockroachDbTargetPayerPayeeRepository } from './repository/cockroachdb/cockroachdb_payerpayee_repository';
-import { CockroachDbTransactionRepository } from './repository/cockroachdb/cockroachdb_transaction_repository';
+import { CockroachDbTargetCategoryRepositoryBuilder } from './repository/cockroachdb/cockroachdb_category_repository';
+import { CockroachDbTargetPayerPayeeRepositoryBuilder } from './repository/cockroachdb/cockroachdb_payerpayee_repository';
+import { CockroachDbTargetTransactionRepositoryBuilder } from './repository/cockroachdb/cockroachdb_transaction_repository';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 
@@ -36,12 +36,12 @@ const setupDependencies = async (migrationType: MigrationType, sourceEnvironment
 
     const dynamoDbClient = new DynamoDBClient();
 
-    const sourceUserRepository = DynamoDbSourceUserRepository(logger, dynamoDbClient, { tableName: "gfjkdgfdjk" });
+    const sourceUserRepository = DynamoDbSourceUserRepositoryBuilder(logger, dynamoDbClient, { tableName: "gfjkdgfdjk" });
 
-    const targetUserRepository = CockroachDbTargetUserRepository(logger, cockroachDbConnection)
-    const targetCategoryRepository = CockroachDbTargetCategoryRepository(logger, cockroachDbConnection);
-    const targetPayerPayeeRepository = CockroachDbTargetPayerPayeeRepository(logger, cockroachDbConnection);
-    const targetTransactionRepository = CockroachDbTransactionRepository(logger, cockroachDbConnection);
+    const targetUserRepository = CockroachDbTargetUserRepositoryBuilder(logger, cockroachDbConnection)
+    const targetCategoryRepository = CockroachDbTargetCategoryRepositoryBuilder(logger, cockroachDbConnection);
+    const targetPayerPayeeRepository = CockroachDbTargetPayerPayeeRepositoryBuilder(logger, cockroachDbConnection);
+    const targetTransactionRepository = CockroachDbTargetTransactionRepositoryBuilder(logger, cockroachDbConnection);
 
     var migrationHandler: MigrationHandler;
 

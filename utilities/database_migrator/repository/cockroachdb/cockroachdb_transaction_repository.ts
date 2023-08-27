@@ -3,7 +3,9 @@ import { Logger } from "winston";
 import { Transaction } from "./model";
 import { TransactionTypes } from "../constants";
 
-export const CockroachDbTransactionRepository = (logger: Logger, client: Pool) => {
+export type CockroachDbTargetTransactionRepository = ReturnType<typeof CockroachDbTargetTransactionRepositoryBuilder>;
+
+export const CockroachDbTargetTransactionRepositoryBuilder = (logger: Logger, client: Pool) => {
 
     const saveTransactions = async (transactions: Transaction[]): Promise<string[]> => {
         const savedTransactionIds: string[] = [];

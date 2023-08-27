@@ -1,12 +1,13 @@
 import { Logger } from "winston";
-import { SourceUserRepository } from "../repository/source_user_repository";
-import { TargetUserRepository } from "../repository/target_user_repository";
 import { MigrationHandler } from "./migration_handler";
+import { DynamoDbSourceUserRepository } from "../repository/dynamodb/dynamodb_user_repository";
+import { CockroachDbTargetUserRepository } from "../repository/cockroachdb/cockroachdb_user_repository";
+
 
 export const UserMigrationHandler = (
     logger: Logger,
-    sourceUserRepository: SourceUserRepository,
-    targetUserRepository: TargetUserRepository
+    sourceUserRepository: DynamoDbSourceUserRepository,
+    targetUserRepository: CockroachDbTargetUserRepository
 ): MigrationHandler => {
 
     const handleMigration = async () => {
@@ -14,9 +15,9 @@ export const UserMigrationHandler = (
 
         const sourceUserIdentifiers = await sourceUserRepository.getAllUserIdentifiers();
 
-        await targetUserRepository.saveUsers(sourceUserIdentifiers);
+        const migratedUsers = await targetUserRepository.saveUsers(sourceUserIdentifiers);
 
-        logger.info("user migration completed")
+        logger.info("user migration completed", { numberOfMigratedUsers: migratedUsers.length });
     }
 
     return {

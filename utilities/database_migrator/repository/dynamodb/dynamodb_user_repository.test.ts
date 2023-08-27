@@ -1,5 +1,5 @@
 import { DynamoDbHelpers } from "./helpers";
-import { DynamoDbSourceUserRepository } from "./dynamodb_user_repository";
+import { DynamoDbSourceUserRepositoryBuilder } from "./dynamodb_user_repository";
 import { createLogger } from "../../utils/logger";
 import { DynamoDbCategory, DynamoDbPayerPayee, DynamoDbTransaction } from "./model";
 import { randomUUID } from "crypto";
@@ -13,7 +13,7 @@ const {
 } = DynamoDbHelpers();
 
 const setupTest = () => {
-    const sut = DynamoDbSourceUserRepository(createLogger(), dynamoDbClient, { tableName })
+    const sut = DynamoDbSourceUserRepositoryBuilder(createLogger(), dynamoDbClient, { tableName })
     return {
         sut
     }
@@ -35,14 +35,14 @@ describe("DynamoDbSourceUserRepository", () => {
             await saveItemToDynamoDbTable({
                 UserIdQuery: "auth0|jgv115#Categories",
                 Subquery: "Eating Out",
-                TransactionType: "expense",
+                TransactionType: 0,
                 Subcategories: ["sub1", "sub2"]
             } satisfies DynamoDbCategory);
 
             await saveItemToDynamoDbTable({
                 UserIdQuery: "auth0|jgv115#Categories",
                 Subquery: "Entertainment",
-                TransactionType: "expense",
+                TransactionType: 0,
                 Subcategories: ["sub3", "sub4"]
             } satisfies DynamoDbCategory);
 

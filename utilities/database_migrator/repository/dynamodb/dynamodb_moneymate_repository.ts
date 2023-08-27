@@ -11,7 +11,9 @@ type SupportedDynamoDbModel<T> =
     T extends "Transaction" ? DynamoDbTransaction :
     never;
 
-export const DynamoDbMoneyMateDbRepository = (logger: Logger, client: DynamoDBClient, config: DynamoDbConfig) => {
+export type DynamoDbMoneyMateDbRepository = ReturnType<typeof DynamoDbMoneyMateDbRepositoryBuilder>;
+
+export const DynamoDbMoneyMateDbRepositoryBuilder = (logger: Logger, client: DynamoDBClient, config: DynamoDbConfig) => {
     const query = async <T extends SupportedDynamoDbItemNames>(
         itemType: T,
         userIdentifiers: string[],

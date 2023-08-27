@@ -6,7 +6,7 @@ export const DynamoDbCategoriesMapper = (items: Record<string, NativeAttributeVa
     items.map(item => ({
         UserIdQuery: item.UserIdQuery,
         Subquery: item.Subquery,
-        TransactionType: item.TransactionType as TransactionTypes,
+        TransactionType: item.TransactionType,
         Subcategories: item.Subcategories
     }));
 

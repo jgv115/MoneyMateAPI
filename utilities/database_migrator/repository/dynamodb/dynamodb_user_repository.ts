@@ -4,7 +4,10 @@ import { DynamoDBClient, ScanCommandInput, ScanCommand } from "@aws-sdk/client-d
 import { DynamoDbConfig } from "./config";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-export const DynamoDbSourceUserRepository = (logger: Logger, client: DynamoDBClient, config: DynamoDbConfig) => {
+
+export type DynamoDbSourceUserRepository = ReturnType<typeof DynamoDbSourceUserRepositoryBuilder>
+
+export const DynamoDbSourceUserRepositoryBuilder = (logger: Logger, client: DynamoDBClient, config: DynamoDbConfig) => {
 
     const getAllUserIdentifiers = async (): Promise<string[]> => {
 

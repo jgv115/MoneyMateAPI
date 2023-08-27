@@ -1,10 +1,13 @@
 import { Pool } from "pg";
 import { Logger } from "winston";
-import { Category } from "../../model";
+import { CockroachDbCategory } from "./model";
 
-export const CockroachDbTargetCategoryRepository = (logger: Logger, client: Pool) => {
 
-    const saveCategories = async (categories: Category[]): Promise<string[]> => {
+export type CockroachDbTargetCategoryRepository = ReturnType<typeof CockroachDbTargetCategoryRepositoryBuilder>
+
+export const CockroachDbTargetCategoryRepositoryBuilder = (logger: Logger, client: Pool) => {
+
+    const saveCategories = async (categories: CockroachDbCategory[]): Promise<string[]> => {
         const savedCategoryIds = [];
 
         for (const category of categories) {
@@ -12,10 +15,9 @@ export const CockroachDbTargetCategoryRepository = (logger: Logger, client: Pool
             const response = await client.query(`
             INSERT
             INTO CATEGORY (name, user_id, transaction_type_id) 
-            SELECT $1, $2, tt.id
-            FROM transactiontype tt WHERE tt.name = $3
+            SELECT $1, $2, $3
             RETURNING id
-            `, [category.name, category.userId, category.transactionType]);
+            `, [category.name, category.user_id, category.transaction_type_id]);
 
             const categoryId = response.rows[0].id;
 

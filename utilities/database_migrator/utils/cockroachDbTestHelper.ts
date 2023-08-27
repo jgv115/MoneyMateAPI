@@ -3,6 +3,7 @@ import { getCockroachDbConfig } from "../config/cockroachdb_config_provider";
 import { Environment } from "../constants";
 import { CockroachDbUser } from "../repository/cockroachdb/model";
 import { CockroachDbCategory } from "../repository/cockroachdb/model/category";
+import { TransactionTypes } from "../repository/constants";
 
 export const CockroachDbTestHelper = () => {
     const cockroachDbConfig = getCockroachDbConfig(Environment.local);
@@ -30,7 +31,7 @@ export const CockroachDbTestHelper = () => {
         return result.rows;
     }
 
-    const getTransactionTypeIds = async (): Promise<{ [transactionTypeName: string]: string }> => {
+    const getTransactionTypeIds = async (): Promise<{ [key in TransactionTypes]: string }> => {
         const result = await cockroachDbConnection.query(`SELECT * FROM transactiontype`);
         return result.rows.reduce((a, v) => ({ ...a, [v.name]: v.id }), {})
     }
