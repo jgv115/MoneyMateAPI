@@ -1,3 +1,5 @@
-export interface MigrationHandler {
-    handleMigration: () => Promise<void>;
+import { MigrationResult } from "./migration_result";
+
+export interface MigrationHandler<T> {
+    handleMigration: () => Promise<MigrationResult<T>>;
 }

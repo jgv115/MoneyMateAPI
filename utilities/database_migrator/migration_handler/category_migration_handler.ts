@@ -7,30 +7,51 @@ import { CockroachDbTargetUserRepository } from "../repository/cockroachdb/cockr
 import { CockroachDbCategory } from "../repository/cockroachdb/model";
 import { DynamoDbCategory } from "../repository/dynamodb/model";
 import { CockroachDbTargetTransactionRepository } from "../repository/cockroachdb/cockroachdb_transaction_repository";
+import { DynamoDbSourceUserRepository } from "../repository/dynamodb/dynamodb_user_repository";
+import { MigrationResult } from "./migration_result";
 
 
 export const CategoryMigrationHandler = (
     logger: Logger,
     sourceCategoryRepository: DynamoDbMoneyMateDbRepository,
     targetCategoryRepository: CockroachDbTargetCategoryRepository,
+    sourceUserRepository: DynamoDbSourceUserRepository,
     targetUserRepository: CockroachDbTargetUserRepository,
     targetTransactionRepository: CockroachDbTargetTransactionRepository
-): MigrationHandler => {
+): MigrationHandler<DynamoDbCategory> => {
 
-    const handleMigration = async () => {
+    const handleMigration = async (): Promise<MigrationResult<DynamoDbCategory>> => {
         logger.info("starting category migration")
 
         const transactionTypeIds = await targetTransactionRepository.retrieveTransactionTypeIds();
         const userIdentifierMap = await targetUserRepository.getUserIdentifierToUserIdMap();
 
+        const userIdentifiers = await sourceUserRepository.getAllUserIdentifiers();
+        const categories = await sourceCategoryRepository.query("Categories", userIdentifiers, DynamoDbCategoriesMapper);
 
-        const categories = await sourceCategoryRepository.query("Categories", [], DynamoDbCategoriesMapper);
+        logger.info("attempting to migrate categories", { numCategories: categories.length });
 
         const failedCategories: DynamoDbCategory[] = []
         const categoriesToBeSaved: CockroachDbCategory[] = []
+        let numSavedCategories = 0;
 
         for (const category of categories) {
-            const transactionTypeId = transactionTypeIds[category.TransactionType === 0 ? "expense" : "income"];
+            let transactionTypeId: string;
+            switch (category.TransactionType) {
+                case 0: {
+                    transactionTypeId = transactionTypeIds.expense;
+                    break;
+                }
+                case 1: {
+                    transactionTypeId = transactionTypeIds.income;
+                    break;
+                }
+                default: {
+                    logger.warn(`category could not be saved because transaction type id was not found`, { attemptedPayload: JSON.stringify(category) })
+                    failedCategories.push(category);
+                    continue;
+                }
+            }
 
             if (!transactionTypeId) {
                 logger.warn(`category could not be saved because transaction type id was not found`, { attemptedPayload: JSON.stringify(category) })
@@ -41,6 +62,7 @@ export const CategoryMigrationHandler = (
             // UserIdQuery: "auth0|jgv115#Transaction"
             const userId = userIdentifierMap[category.UserIdQuery.split("#")[0]]
             if (!userId) {
+                logger.warn(`category could not be saved because user identifier was not found`, { attemptedPayload: JSON.stringify(category) })
                 failedCategories.push(category);
                 continue;
             }
@@ -50,12 +72,20 @@ export const CategoryMigrationHandler = (
                 transaction_type_id: transactionTypeId,
                 user_id: userId,
                 subcategories: category.Subcategories
-            })
+            });
+
+            numSavedCategories++;
         }
 
         await targetCategoryRepository.saveCategories(categoriesToBeSaved);
 
-        logger.info("category migration completed")
+        logger.info("category migration completed", { numFailedRecords: failedCategories.length, numSuccessfulRecords: numSavedCategories })
+
+        return {
+            failedRecords: failedCategories,
+            numberOfSuccessfullyMigratedRecords: numSavedCategories
+
+        }
     }
 
     return {

@@ -2,7 +2,7 @@ import * as readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { Environment, MigrationType } from './constants';
 import {
-    CockroachDbTargetUserRepository, CockroachDbTargetUserRepositoryBuilder,
+    CockroachDbTargetUserRepositoryBuilder,
 } from "./repository/cockroachdb/cockroachdb_user_repository";
 import { Pool } from 'pg';
 import { getCockroachDbConfig } from './config/cockroachdb_config_provider';
@@ -14,6 +14,8 @@ import { CockroachDbTargetCategoryRepositoryBuilder } from './repository/cockroa
 import { CockroachDbTargetPayerPayeeRepositoryBuilder } from './repository/cockroachdb/cockroachdb_payerpayee_repository';
 import { CockroachDbTargetTransactionRepositoryBuilder } from './repository/cockroachdb/cockroachdb_transaction_repository';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { CategoryMigrationHandler } from './migration_handler/category_migration_handler';
+import { DynamoDbMoneyMateDbRepositoryBuilder } from './repository/dynamodb/dynamodb_moneymate_repository';
 
 
 const setupDependencies = async (migrationType: MigrationType, sourceEnvironment: Environment, targetEnvironment: Environment) => {
@@ -37,18 +39,25 @@ const setupDependencies = async (migrationType: MigrationType, sourceEnvironment
     const dynamoDbClient = new DynamoDBClient();
 
     const sourceUserRepository = DynamoDbSourceUserRepositoryBuilder(logger, dynamoDbClient, { tableName: "gfjkdgfdjk" });
+    const sourceMoneyMateDbRepository = DynamoDbMoneyMateDbRepositoryBuilder(logger, dynamoDbClient, { tableName: "gfdjk" });
 
     const targetUserRepository = CockroachDbTargetUserRepositoryBuilder(logger, cockroachDbConnection)
     const targetCategoryRepository = CockroachDbTargetCategoryRepositoryBuilder(logger, cockroachDbConnection);
     const targetPayerPayeeRepository = CockroachDbTargetPayerPayeeRepositoryBuilder(logger, cockroachDbConnection);
     const targetTransactionRepository = CockroachDbTargetTransactionRepositoryBuilder(logger, cockroachDbConnection);
 
-    var migrationHandler: MigrationHandler;
+    let migrationHandler: any;
 
     switch (migrationType) {
         case MigrationType.user: {
             migrationHandler = UserMigrationHandler(logger, sourceUserRepository, targetUserRepository)
             break;
+        }
+        case MigrationType.category: {
+            migrationHandler = CategoryMigrationHandler(logger, sourceMoneyMateDbRepository, targetCategoryRepository, sourceUserRepository, targetUserRepository, targetTransactionRepository);
+        }
+        case MigrationType.payerpayee: {
+
         }
         default:
             throw Error("unsupported migration type")
