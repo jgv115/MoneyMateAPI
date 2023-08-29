@@ -1,7 +1,8 @@
 import { Pool } from "pg";
 import { Logger } from "winston";
-import { PayerPayee } from "./model/payerpayee";
+import { CockroachDbPayerPayee } from "./model/payerpayee";
 import { PayerOrPayee } from "../constants";
+import { ExternalLinkTypes } from "../constants/externalLinkType";
 
 
 export type CockroachDbTargetPayerPayeeRepository = ReturnType<typeof CockroachDbTargetPayerPayeeRepositoryBuilder>;
@@ -15,12 +16,12 @@ export const CockroachDbTargetPayerPayeeRepositoryBuilder = (logger: Logger, cli
         return response.rows.reduce((a, v) => ({ ...a, [v.name]: v.id }), {});
     };
 
-    const getExternalLinkTypeIds = async (): Promise<{ string: string }> => {
+    const getExternalLinkTypeIds = async (): Promise<{ [key in ExternalLinkTypes]: string }> => {
         const response = await client.query(`SELECT * FROM payerpayeeexternallinktype`);
         return response.rows.reduce((a, v) => ({ ...a, [v.name]: v.id }), {});
     }
 
-    const savePayerPayees = async (payerPayees: PayerPayee[]): Promise<string[]> => {
+    const savePayerPayees = async (payerPayees: CockroachDbPayerPayee[]): Promise<string[]> => {
         const savedPayerPayeeIds = new Set<string>();
 
         for (const payerPayee of payerPayees) {

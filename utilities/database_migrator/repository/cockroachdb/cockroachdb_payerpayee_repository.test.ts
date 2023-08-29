@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { CockroachDbTestHelper } from "../../utils/cockroachDbTestHelper";
 import { createLogger } from "../../utils/logger";
 import { CockroachDbTargetPayerPayeeRepositoryBuilder } from "./cockroachdb_payerpayee_repository";
-import { PayerPayee } from "./model";
+import { CockroachDbPayerPayee } from "./model";
 import { CockroachDbTargetUserRepositoryBuilder } from "./cockroachdb_user_repository";
 
 const cockroachDbTestHelper = CockroachDbTestHelper();
@@ -37,13 +37,13 @@ describe("CockroachDb PayerPayee Repository tests", () => {
     test("given input payerpayees then payerpayees saved correctly in db", async () => {
         const { sut, testUserId, payerPayeeTypeIds, externalLinkTypeIds } = await setupTest();
 
-        const inputPayerPayees: PayerPayee[] = [{
+        const inputPayerPayees: CockroachDbPayerPayee[] = [{
             id: randomUUID(),
             name: "payer1",
             user_id: testUserId,
             payerpayeetype_id: payerPayeeTypeIds.payer,
             external_link_id: "",
-            external_link_type_id: externalLinkTypeIds["Custom"]
+            external_link_type_id: externalLinkTypeIds.Custom
 
         }, {
             id: randomUUID(),
@@ -51,7 +51,7 @@ describe("CockroachDb PayerPayee Repository tests", () => {
             user_id: testUserId,
             payerpayeetype_id: payerPayeeTypeIds.payee,
             external_link_id: "1234",
-            external_link_type_id: externalLinkTypeIds["Google"]
+            external_link_type_id: externalLinkTypeIds.Google
 
         }]
         const savedPayerPayeeIds = await sut.savePayerPayees(inputPayerPayees);
@@ -59,7 +59,7 @@ describe("CockroachDb PayerPayee Repository tests", () => {
         expect(savedPayerPayeeIds.sort()).toEqual(inputPayerPayees.map(input => input.id).sort());
 
         for (const inputPayerPayee of inputPayerPayees) {
-            const savedPayerPayee = (await cockroachDbTestHelper.performAdhocQuery<PayerPayee>(
+            const savedPayerPayee = (await cockroachDbTestHelper.performAdhocQuery<CockroachDbPayerPayee>(
                 `SELECT * FROM payerpayee 
                 WHERE user_id = $1 AND id = $2`, [testUserId, inputPayerPayee.id]))[0];
 
@@ -71,7 +71,7 @@ describe("CockroachDb PayerPayee Repository tests", () => {
         const { sut, testUserId, payerPayeeTypeIds, externalLinkTypeIds } = await setupTest();
 
         const payerPayeeId = randomUUID();
-        const inputPayerPayees: PayerPayee[] = [{
+        const inputPayerPayees: CockroachDbPayerPayee[] = [{
             id: payerPayeeId,
             name: "payer1",
             user_id: testUserId,
@@ -92,7 +92,7 @@ describe("CockroachDb PayerPayee Repository tests", () => {
 
         expect(savedPayerPayeeIds).toEqual([payerPayeeId]);
 
-        const savedPayerPayee = (await cockroachDbTestHelper.performAdhocQuery<PayerPayee>(
+        const savedPayerPayee = (await cockroachDbTestHelper.performAdhocQuery<CockroachDbPayerPayee>(
             `SELECT * FROM payerpayee 
                 WHERE user_id = $1 AND id = $2`, [testUserId, payerPayeeId]))[0];
 

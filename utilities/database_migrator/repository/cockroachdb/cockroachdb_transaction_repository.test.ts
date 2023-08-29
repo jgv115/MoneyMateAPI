@@ -150,7 +150,7 @@ describe("CockroachDbTransactionRepository", () => {
                 amount: transaction.amount.toString()
             }))
 
-            expect(retrievedTransactions.sort()).toEqual(expectedTransactions.sort());
+            expect(retrievedTransactions.sort((a, b) => a.id.localeCompare(b.id))).toEqual(expectedTransactions.sort((a, b) => a.id.localeCompare(b.id)));
         });
     });
 })

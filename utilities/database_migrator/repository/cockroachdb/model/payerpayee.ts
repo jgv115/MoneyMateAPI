@@ -1,4 +1,4 @@
-export interface PayerPayee {
+export interface CockroachDbPayerPayee {
     id: string
     user_id: string
     name: string

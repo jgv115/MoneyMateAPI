@@ -20,6 +20,8 @@ export const DynamoDbMoneyMateDbRepositoryBuilder = (logger: Logger, client: Dyn
         mapper: (items: Record<string, any>[]
         ) => SupportedDynamoDbModel<T>[]): Promise<SupportedDynamoDbModel<T>[]> => {
 
+        // TODO: bring mapper factory into builder
+
         const docClient = DynamoDBDocumentClient.from(client);
         const returnedModels: SupportedDynamoDbModel<T>[] = []
 
