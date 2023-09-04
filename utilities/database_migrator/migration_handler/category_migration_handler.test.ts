@@ -16,7 +16,8 @@ describe("CategoryMigrationHandler", () => {
         };
         const mockTargetCategoryRepository: CockroachDbTargetCategoryRepository = {
             saveCategories: jest.fn(),
-            getSubcategoryId: jest.fn()
+            getSubcategoryIdWithCategoryId: jest.fn(),
+            getSubcategoryIdByCategoryAndSubcategoryName: undefined
         };
         const mockSourceUserRepository: DynamoDbSourceUserRepository = {
             getAllUserIdentifiers: jest.fn()

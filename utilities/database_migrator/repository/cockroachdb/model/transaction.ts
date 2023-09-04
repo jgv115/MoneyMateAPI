@@ -1,4 +1,4 @@
-export interface Transaction {
+export interface CockroachDbTransaction {
     id: string;
     user_id: string;
     transaction_timestamp: string;

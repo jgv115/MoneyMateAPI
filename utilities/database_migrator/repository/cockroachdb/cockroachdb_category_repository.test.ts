@@ -103,7 +103,7 @@ describe("CockroachDB Target Category Repository", () => {
         });
     });
 
-    describe("getSubcategoryId", () => {
+    describe("getSubcategoryIdWithCategoryId", () => {
         test("given userId and subcategoryName, then correct id returned", async () => {
             const { sut, transactionTypeIds, testUserId } = await setupTest()
 
@@ -119,8 +119,30 @@ describe("CockroachDB Target Category Repository", () => {
             INSERT INTO subcategory (id, name, category_id) VALUES ($1, $2, $3)`, [subcategoryid, "sub name", categoryId]);
 
             // assert
-            const returnedSubcategoryId = await sut.getSubcategoryId(testUserId, categoryId, "sub name");
+            const returnedSubcategoryId = await sut.getSubcategoryIdWithCategoryId(testUserId, categoryId, "sub name");
             expect(returnedSubcategoryId).toEqual(subcategoryid);
+        });
+    });
+
+    describe("getSubcategoryIdByCategoryAndSubcategoryName", () => {
+        test("given inputs then correct subcategoryId returned", async () => {
+            const { sut, transactionTypeIds, testUserId } = await setupTest()
+
+            // Insert category
+            const categoryId = randomUUID();
+            await cockroachDbTestHelper.performAdhocQuery(`
+                INSERT INTO category (id, name, user_id, transaction_type_id) VALUES ($1, $2, $3, $4)`,
+                [categoryId, "category1", testUserId, transactionTypeIds["expense"]]);
+
+            // Insert subcategory
+            const subcategoryid = randomUUID();
+            await cockroachDbTestHelper.performAdhocQuery(`
+            INSERT INTO subcategory (id, name, category_id) VALUES ($1, $2, $3)`, [subcategoryid, "sub name", categoryId]);
+
+            const retrievedSubcategoryId = await sut.getSubcategoryIdByCategoryAndSubcategoryName(testUserId, "category1", "sub name", transactionTypeIds.expense);
+
+            expect(retrievedSubcategoryId).toEqual(subcategoryid);
+
         });
     })
 })

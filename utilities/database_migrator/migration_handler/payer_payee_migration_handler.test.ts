@@ -15,7 +15,8 @@ describe("PayerPayeeMigrationHandler", () => {
         const mockTargetPayerPayeeRepository: CockroachDbTargetPayerPayeeRepository = {
             getPayerPayeeTypeIds: jest.fn(),
             getExternalLinkTypeIds: jest.fn(),
-            savePayerPayees: jest.fn()
+            savePayerPayees: jest.fn(),
+            retrievePayerPayeeId: undefined
         };
         const mockSourceUserRepository: DynamoDbSourceUserRepository = {
             getAllUserIdentifiers: jest.fn()

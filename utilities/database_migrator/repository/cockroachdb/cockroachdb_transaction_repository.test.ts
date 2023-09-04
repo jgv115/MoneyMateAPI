@@ -5,7 +5,7 @@ import { CockroachDbTargetCategoryRepositoryBuilder } from "./cockroachdb_catego
 import { CockroachDbTargetUserRepositoryBuilder } from "./cockroachdb_user_repository";
 import { randomUUID } from "crypto";
 import { PayerOrPayee, TransactionTypes } from "../constants";
-import { Transaction } from "./model";
+import { CockroachDbTransaction } from "./model";
 import { createLogger } from "../../utils/logger";
 
 const cockroachDbTestHelper = CockroachDbTestHelper();
@@ -52,7 +52,7 @@ const setupTest = async () => {
             user_id: savedUserId
         }]))[0];
 
-        const savedSubcategoryId = await categoryRepo.getSubcategoryId(savedUserId, savedCategoryId, subcategoryName);
+        const savedSubcategoryId = await categoryRepo.getSubcategoryIdWithCategoryId(savedUserId, savedCategoryId, subcategoryName);
 
         return {
             categoryId: savedCategoryId,
@@ -142,7 +142,7 @@ describe("CockroachDbTransactionRepository", () => {
             const savedTransactionIds = await sut.saveTransactions([savedTransaction1, savedTransaction2]);
             expect(savedTransactionIds).toEqual([savedTransaction1.id, savedTransaction2.id])
 
-            const retrievedTransactions = await cockroachDbTestHelper.performAdhocQuery<Transaction>(`SELECT * FROM transaction`, []);
+            const retrievedTransactions = await cockroachDbTestHelper.performAdhocQuery<CockroachDbTransaction>(`SELECT * FROM transaction`, []);
 
             const expectedTransactions = [savedTransaction1, savedTransaction2].map(transaction => ({
                 ...transaction,
