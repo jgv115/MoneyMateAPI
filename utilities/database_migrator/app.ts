@@ -16,6 +16,8 @@ import { CockroachDbTargetTransactionRepositoryBuilder } from './repository/cock
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { CategoryMigrationHandler } from './migration_handler/category_migration_handler';
 import { DynamoDbMoneyMateDbRepositoryBuilder } from './repository/dynamodb/dynamodb_moneymate_repository';
+import { PayerPayeeMigrationHandler } from './migration_handler/payer_payee_migration_handler';
+import { TransactionMigrationHandler } from './migration_handler/transaction_migration_handler';
 
 
 const setupDependencies = async (migrationType: MigrationType, sourceEnvironment: Environment, targetEnvironment: Environment) => {
@@ -55,9 +57,15 @@ const setupDependencies = async (migrationType: MigrationType, sourceEnvironment
         }
         case MigrationType.category: {
             migrationHandler = CategoryMigrationHandler(logger, sourceMoneyMateDbRepository, targetCategoryRepository, sourceUserRepository, targetUserRepository, targetTransactionRepository);
+            break;
         }
         case MigrationType.payerpayee: {
-
+            migrationHandler = PayerPayeeMigrationHandler(logger, sourceMoneyMateDbRepository, targetPayerPayeeRepository, sourceUserRepository, targetUserRepository);
+            break;
+        }
+        case MigrationType.transaction: {
+            migrationHandler = TransactionMigrationHandler(logger, sourceMoneyMateDbRepository, targetTransactionRepository, sourceUserRepository, targetUserRepository, targetCategoryRepository);
+            break;
         }
         default:
             throw Error("unsupported migration type")
