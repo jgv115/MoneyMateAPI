@@ -47,11 +47,23 @@ export const CockroachDbTargetPayerPayeeRepositoryBuilder = (logger: Logger, cli
         }
 
         return Array.from(savedPayerPayeeIds) as string[];
+    };
+
+    const retrievePayerPayeeId = async (userId: string, payerPayeeName: string, payerPayeeTypeId: string): Promise<CockroachDbPayerPayee> => {
+
+        const response = await client.query(`SELECT * FROM payerpayee 
+                                                WHERE name = $1 
+                                                and user_id = $2 
+                                                and payerpayeetype_id = $3`,
+            [payerPayeeName, userId, payerPayeeTypeId]);
+
+        return response.rows[0].id;
     }
 
     return {
         getPayerPayeeTypeIds,
         getExternalLinkTypeIds,
-        savePayerPayees
+        savePayerPayees,
+        retrievePayerPayeeId
     }
 }
