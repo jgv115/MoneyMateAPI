@@ -32,7 +32,6 @@ export const CategoryMigrationHandler = (
         logger.info("attempting to migrate categories", { numCategories: categories.length });
 
         const failedCategories: DynamoDbCategory[] = []
-        const categoriesToBeSaved: CockroachDbCategory[] = []
         let numSavedCategories = 0;
 
         for (const category of categories) {
