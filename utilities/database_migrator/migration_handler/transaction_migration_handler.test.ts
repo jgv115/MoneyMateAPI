@@ -17,10 +17,12 @@ describe("TransactionMigrationHandler", () => {
             query: jest.fn()
         };
         const mockTargetTransactionRepository: CockroachDbTargetTransactionRepository = {
+            saveTransaction: jest.fn(),
             saveTransactions: jest.fn(),
             retrieveTransactionTypeIds: jest.fn()
         }
         const mockTargetCategoryRepository: CockroachDbTargetCategoryRepository = {
+            saveCategory: jest.fn(),
             saveCategories: jest.fn(),
             getSubcategoryIdWithCategoryId: jest.fn(),
             getSubcategoryIdByCategoryAndSubcategoryName: jest.fn()
@@ -124,38 +126,38 @@ describe("TransactionMigrationHandler", () => {
                 numberOfSuccessfullyMigratedRecords: 3
             } satisfies MigrationResult<DynamoDbTransaction>);
 
-            expect(mocks.mockTargetTransactionRepository.saveTransactions).toHaveBeenCalledWith([
-                {
-                    id: transaction1.Subquery,
-                    user_id: "user-id1",
-                    transaction_timestamp: transaction1.TransactionTimestamp,
-                    transaction_type_id: "income-id",
-                    amount: transaction1.Amount,
-                    subcategory_id: "subcategory-id",
-                    payerpayee_id: transaction1.PayerPayeeId,
-                    notes: transaction1.Note
-                },
-                {
-                    id: transaction2.Subquery,
-                    user_id: "user-id1",
-                    transaction_timestamp: transaction2.TransactionTimestamp,
-                    transaction_type_id: "expense-id",
-                    amount: transaction2.Amount,
-                    subcategory_id: "subcategory-id",
-                    payerpayee_id: transaction2.PayerPayeeId,
-                    notes: transaction2.Note
-                },
-                {
-                    id: transaction3.Subquery,
-                    user_id: "user-id3",
-                    transaction_timestamp: transaction3.TransactionTimestamp,
-                    transaction_type_id: "expense-id",
-                    amount: transaction3.Amount,
-                    subcategory_id: "subcategory-id",
-                    payerpayee_id: transaction3.PayerPayeeId,
-                    notes: transaction3.Note
-                }
-            ] satisfies CockroachDbTransaction[]);
+
+            expect(mocks.mockTargetTransactionRepository.saveTransaction).toHaveBeenNthCalledWith(1, {
+                id: transaction1.Subquery,
+                user_id: "user-id1",
+                transaction_timestamp: transaction1.TransactionTimestamp,
+                transaction_type_id: "income-id",
+                amount: transaction1.Amount,
+                subcategory_id: "subcategory-id",
+                payerpayee_id: transaction1.PayerPayeeId,
+                notes: transaction1.Note
+            });
+            expect(mocks.mockTargetTransactionRepository.saveTransaction).toHaveBeenNthCalledWith(2, {
+                id: transaction2.Subquery,
+                user_id: "user-id1",
+                transaction_timestamp: transaction2.TransactionTimestamp,
+                transaction_type_id: "expense-id",
+                amount: transaction2.Amount,
+                subcategory_id: "subcategory-id",
+                payerpayee_id: transaction2.PayerPayeeId,
+                notes: transaction2.Note
+            });
+            expect(mocks.mockTargetTransactionRepository.saveTransaction).toHaveBeenNthCalledWith(3, {
+                id: transaction3.Subquery,
+                user_id: "user-id3",
+                transaction_timestamp: transaction3.TransactionTimestamp,
+                transaction_type_id: "expense-id",
+                amount: transaction3.Amount,
+                subcategory_id: "subcategory-id",
+                payerpayee_id: transaction3.PayerPayeeId,
+                notes: transaction3.Note
+            });
+
         })
     })
 })

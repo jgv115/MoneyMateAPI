@@ -7,7 +7,6 @@ import { DynamoDbPayerPayee } from "../repository/dynamodb/model";
 import { MigrationResult } from "./migration_result";
 import { DynamoDbPayersPayeesMapper } from "../repository/dynamodb/mappers";
 import { DynamoDbSourceUserRepository } from "../repository/dynamodb/dynamodb_user_repository";
-import { CockroachDbPayerPayee } from "../repository/cockroachdb/model";
 
 export const PayerPayeeMigrationHandler = (
     logger: Logger,

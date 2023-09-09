@@ -7,8 +7,6 @@ import { DynamoDbTransaction } from "../repository/dynamodb/model";
 import { MigrationResult } from "./migration_result";
 import { MigrationHandler } from "./migration_handler";
 import { DynamoDbTransactionMapper } from "../repository/dynamodb/mappers";
-import { CockroachDbTransaction } from "../repository/cockroachdb/model";
-import { CockroachDbTargetPayerPayeeRepository } from "../repository/cockroachdb/cockroachdb_payerpayee_repository";
 import { CockroachDbTargetCategoryRepository } from "../repository/cockroachdb/cockroachdb_category_repository";
 
 export const TransactionMigrationHandler = (
@@ -31,7 +29,6 @@ export const TransactionMigrationHandler = (
         const sourceTransactions = await sourceTransactionRepository.query("Transaction", userIdentifiers, DynamoDbTransactionMapper);
 
         const failedTransactions: DynamoDbTransaction[] = [];
-        const transactionsToBeSaved: CockroachDbTransaction[] = [];
         let numSavedTransactions = 0;
 
         for (const transaction of sourceTransactions) {
@@ -54,23 +51,24 @@ export const TransactionMigrationHandler = (
                 continue;
             }
 
+            try {
+                await targetTransactionRepository.saveTransaction({
+                    id: transaction.Subquery,
+                    amount: transaction.Amount,
+                    notes: transaction.Note,
+                    payerpayee_id: transaction.PayerPayeeId,
+                    subcategory_id: subcategoryId,
+                    transaction_timestamp: transaction.TransactionTimestamp,
+                    transaction_type_id: transactionTypeId,
+                    user_id: userIdentifierMap[transaction.UserIdQuery.split("#")[0]]
+                });
+                numSavedTransactions++;
 
-            transactionsToBeSaved.push({
-                id: transaction.Subquery,
-                amount: transaction.Amount,
-                notes: transaction.Note,
-                payerpayee_id: transaction.PayerPayeeId,
-                subcategory_id: subcategoryId,
-                transaction_timestamp: transaction.TransactionTimestamp,
-                transaction_type_id: transactionTypeId,
-                user_id: userIdentifierMap[transaction.UserIdQuery.split("#")[0]]
-            });
-
-            numSavedTransactions++;
+            } catch (ex) {
+                logger.error('transaction could not be saved because an error was thrown when attempting to persist', { ex, attemptedPayload: JSON.stringify(transaction) });
+                failedTransactions.push(transaction);
+            }
         }
-
-        await targetTransactionRepository.saveTransactions(transactionsToBeSaved);
-
 
         return {
             failedRecords: failedTransactions,

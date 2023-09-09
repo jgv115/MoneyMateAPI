@@ -73,13 +73,13 @@ export const CategoryMigrationHandler = (
                     user_id: userId,
                     subcategories: category.Subcategories
                 });
+                numSavedCategories++;
             }
             catch (ex) {
                 logger.error("category could be not be saved because an error was encountered when attempting to persist", { ex, attemptedPayload: JSON.stringify(category) })
                 failedCategories.push(category);
             }
 
-            numSavedCategories++;
         }
 
         logger.info("category migration completed", { numFailedRecords: failedCategories.length, numSuccessfulRecords: numSavedCategories })

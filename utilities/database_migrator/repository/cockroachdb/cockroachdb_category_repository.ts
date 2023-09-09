@@ -64,7 +64,7 @@ export const CockroachDbTargetCategoryRepositoryBuilder = (logger: Logger, clien
             [subcategoryName, categoryName, transactionTypeId, userId]
         );
 
-        if (!response.rows[0].id) {
+        if (!response.rows[0]?.id) {
             logger.error("unable to find subcategoryId given the inputs", { userId, categoryName, subcategoryName, transactionTypeId });
             return undefined;
         }

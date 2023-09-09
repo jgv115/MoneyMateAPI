@@ -1,7 +1,6 @@
 import { CockroachDbTargetCategoryRepository } from "../repository/cockroachdb/cockroachdb_category_repository";
 import { CockroachDbTargetTransactionRepository } from "../repository/cockroachdb/cockroachdb_transaction_repository";
 import { CockroachDbTargetUserRepository } from "../repository/cockroachdb/cockroachdb_user_repository";
-import { CockroachDbCategory } from "../repository/cockroachdb/model";
 import { DynamoDbMoneyMateDbRepository } from "../repository/dynamodb/dynamodb_moneymate_repository";
 import { DynamoDbSourceUserRepository } from "../repository/dynamodb/dynamodb_user_repository";
 import { DynamoDbCategory } from "../repository/dynamodb/model";
@@ -29,6 +28,7 @@ describe("CategoryMigrationHandler", () => {
             getUserIdentifierToUserIdMap: jest.fn()
         };
         const mockTargetTransactionRepository: CockroachDbTargetTransactionRepository = {
+            saveTransaction: jest.fn(),
             saveTransactions: jest.fn(),
             retrieveTransactionTypeIds: jest.fn()
         }
