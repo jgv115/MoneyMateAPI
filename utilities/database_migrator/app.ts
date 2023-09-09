@@ -18,6 +18,7 @@ import { CategoryMigrationHandler } from './migration_handler/category_migration
 import { DynamoDbMoneyMateDbRepositoryBuilder } from './repository/dynamodb/dynamodb_moneymate_repository';
 import { PayerPayeeMigrationHandler } from './migration_handler/payer_payee_migration_handler';
 import { TransactionMigrationHandler } from './migration_handler/transaction_migration_handler';
+import ObjectsToCsv from "objects-to-csv";
 
 
 const setupDependencies = async (migrationType: MigrationType, sourceEnvironment: Environment, targetEnvironment: Environment) => {
@@ -35,13 +36,15 @@ const setupDependencies = async (migrationType: MigrationType, sourceEnvironment
         password: cockroachDbConfig.password,
         max: 20,
         idleTimeoutMillis: 10000,
-        connectionTimeoutMillis: 2000
+        connectionTimeoutMillis: 2000,
+        ssl: true
     });
 
     const dynamoDbClient = new DynamoDBClient();
+    const dynamoDbTableName = `MoneyMate_TransactionDB_${sourceEnvironment}`
 
-    const sourceUserRepository = DynamoDbSourceUserRepositoryBuilder(logger, dynamoDbClient, { tableName: "gfjkdgfdjk" });
-    const sourceMoneyMateDbRepository = DynamoDbMoneyMateDbRepositoryBuilder(logger, dynamoDbClient, { tableName: "gfdjk" });
+    const sourceUserRepository = DynamoDbSourceUserRepositoryBuilder(logger, dynamoDbClient, { tableName: dynamoDbTableName });
+    const sourceMoneyMateDbRepository = DynamoDbMoneyMateDbRepositoryBuilder(logger, dynamoDbClient, { tableName: dynamoDbTableName });
 
     const targetUserRepository = CockroachDbTargetUserRepositoryBuilder(logger, cockroachDbConnection)
     const targetCategoryRepository = CockroachDbTargetCategoryRepositoryBuilder(logger, cockroachDbConnection);
@@ -79,7 +82,14 @@ const setupDependencies = async (migrationType: MigrationType, sourceEnvironment
 const startDbMigration = async (migrationType: MigrationType, sourceEnvironment: Environment, targetEnvironment: Environment) => {
     const { migrationHandler } = await setupDependencies(migrationType, sourceEnvironment, targetEnvironment);
 
-    await migrationHandler.handleMigration();
+    const migrationResponse = await migrationHandler.handleMigration();
+
+    if (migrationResponse.failedRecords) {
+        console.warn("received failed records from migration handler, writing them to a file now");
+
+        const csv = new ObjectsToCsv(migrationResponse.failedRecords);
+        await csv.toDisk(`failedMigrationRecords.csv`);
+    }
 
 }
 
@@ -107,5 +117,5 @@ const main = async () => {
     await startDbMigration(migrationType, sourceEnvironment, targetEnvironment)
 }
 
-startDbMigration(MigrationType.user, Environment.local, Environment.test);
+startDbMigration(MigrationType.payerpayee, Environment.test, Environment.test);
 // main();

@@ -1,4 +1,5 @@
 import { Environment } from "../constants";
+import 'dotenv/config';
 
 export interface CockroachDbConfig {
     host: string
@@ -20,12 +21,17 @@ export const getCockroachDbConfig = (environment: Environment): CockroachDbConfi
             }
         }
         default: {
+            const cockroachDbPassword = process.env.COCKROACH_DB_PASSWORD;
+
+            if (!cockroachDbPassword)
+                throw new Error("CockroachDb password not found. Please set the cockroachDbPassword environment variable")
+
             return {
                 host: "moneymate-cluster-5098.6xw.cockroachlabs.cloud",
                 port: 26257,
-                database: "moneymate_db_local",
-                user: "root",
-                password: "",
+                database: `moneymate_db_${environment}`,
+                user: "jgv115",
+                password: cockroachDbPassword,
             }
         }
     }

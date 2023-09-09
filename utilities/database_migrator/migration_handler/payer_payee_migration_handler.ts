@@ -29,14 +29,13 @@ export const PayerPayeeMigrationHandler = (
         const payerPayees = await sourcePayerPayeeRepository.query("PayersPayees", userIdentifiers, DynamoDbPayersPayeesMapper);
 
         const failedPayerPayees: DynamoDbPayerPayee[] = [];
-        const newPayerPayeeRecords: CockroachDbPayerPayee[] = []
         let numSavedPayerPayees = 0;
 
         for (const payerPayee of payerPayees) {
 
             const userId = userIdentifierMap[payerPayee.UserIdQuery.split("#")[0]];
             if (!userId) {
-                logger.warn("payerpayee could not be saved because user identifier was not found", { attemptedPayload: JSON.stringify(payerPayee) });
+                logger.error("payerpayee could not be saved because user identifier was not found", { attemptedPayload: JSON.stringify(payerPayee) });
                 failedPayerPayees.push(payerPayee);
                 continue;
             }
@@ -44,25 +43,28 @@ export const PayerPayeeMigrationHandler = (
             const payerPayeeType = payerPayee.Subquery.split("#")[0];
             const payerPayeeTypeId = payerPayeeTypeMap[payerPayeeType];
             if (!payerPayeeTypeId) {
-                logger.warn("payerpayee could not be saved because payerPayeeId was not found", { attemptedPayload: JSON.stringify(payerPayee) });
+                logger.error("payerpayee could not be saved because payerPayeeId was not found", { attemptedPayload: JSON.stringify(payerPayee) });
                 failedPayerPayees.push(payerPayee);
                 continue;
             }
 
-            newPayerPayeeRecords.push({
-                // payee#004fe4d2-5f30-4329-b84a-ce786bd367ab
-                id: payerPayee.Subquery.split("#")[1],
-                user_id: userId,
-                name: payerPayee.PayerPayeeName,
-                payerpayeetype_id: payerPayeeTypeId,
-                external_link_type_id: payerPayee.ExternalId ? externalLinkTypeIdMap.Google : externalLinkTypeIdMap.Custom,
-                external_link_id: payerPayee.ExternalId
-            });
+            try {
+                await targetPayerPayeeRepository.savePayerPayee({
+                    // payee#004fe4d2-5f30-4329-b84a-ce786bd367ab
+                    id: payerPayee.Subquery.split("#")[1],
+                    user_id: userId,
+                    name: payerPayee.PayerPayeeName,
+                    payerpayeetype_id: payerPayeeTypeId,
+                    external_link_type_id: payerPayee.ExternalId ? externalLinkTypeIdMap.Google : externalLinkTypeIdMap.Custom,
+                    external_link_id: payerPayee.ExternalId ?? ""
+                })
+                numSavedPayerPayees++;
 
-            numSavedPayerPayees++;
+            } catch (ex) {
+                logger.error("payerpayee could not be saved because error returned when trying to persist", ex)
+                failedPayerPayees.push(payerPayee);
+            }
         }
-
-        await targetPayerPayeeRepository.savePayerPayees(newPayerPayeeRecords);
 
         logger.info("payerpayee migration completed", { numFailedRecords: failedPayerPayees.length, numSuccessfulRecords: numSavedPayerPayees })
 

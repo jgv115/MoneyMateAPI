@@ -12,7 +12,7 @@ export const CockroachDbTargetCategoryRepositoryBuilder = (logger: Logger, clien
         const savedCategoryIds = [];
 
         for (const category of categories) {
-            logger.info(`Saving category ${category.name} with subcategories: ${category.subcategories}`);
+            logger.info(`Saving category ${category.name} with subcategories: ${JSON.stringify(category.subcategories)}`);
             const response = await client.query(`
             INSERT
             INTO CATEGORY (name, user_id, transaction_type_id) 

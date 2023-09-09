@@ -1,3 +1,3 @@
 export enum Environment {
-    local, test, prod
+    local = "local", test = "test", prod = "prod"
 }
