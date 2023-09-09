@@ -1,35 +1,41 @@
 import { Pool } from "pg";
 import { Logger } from "winston";
 import { CockroachDbCategory } from "./model";
-import { TransactionTypes } from "../constants";
 
 
 export type CockroachDbTargetCategoryRepository = ReturnType<typeof CockroachDbTargetCategoryRepositoryBuilder>
 
 export const CockroachDbTargetCategoryRepositoryBuilder = (logger: Logger, client: Pool) => {
 
-    const saveCategories = async (categories: CockroachDbCategory[]): Promise<string[]> => {
-        const savedCategoryIds = [];
+    const saveCategory = async (category: CockroachDbCategory): Promise<string> => {
 
-        for (const category of categories) {
-            logger.info(`Saving category ${category.name} with subcategories: ${JSON.stringify(category.subcategories)}`);
-            const response = await client.query(`
+        logger.info(`Saving category ${category.name} with subcategories: ${JSON.stringify(category.subcategories)}`);
+        const response = await client.query(`
             INSERT
             INTO CATEGORY (name, user_id, transaction_type_id) 
             SELECT $1, $2, $3
             RETURNING id
             `, [category.name, category.user_id, category.transaction_type_id]);
 
-            const categoryId = response.rows[0].id;
+        const categoryId = response.rows[0].id;
 
-            savedCategoryIds.push(categoryId);
 
-            for (const subcategory of category.subcategories) {
-                await client.query(`
+        for (const subcategory of category.subcategories) {
+            await client.query(`
                 INSERT
                 INTO subcategory (name, category_id)
                 VALUES ($1, $2)`, [subcategory, categoryId])
-            }
+        }
+
+        return categoryId;
+    }
+
+    const saveCategories = async (categories: CockroachDbCategory[]): Promise<string[]> => {
+        const savedCategoryIds = [];
+
+        for (const category of categories) {
+            const savedCategoryId = await saveCategory(category);
+            savedCategoryIds.push(savedCategoryId);
         }
 
         return savedCategoryIds;
@@ -67,6 +73,7 @@ export const CockroachDbTargetCategoryRepositoryBuilder = (logger: Logger, clien
     }
 
     return {
+        saveCategory,
         saveCategories,
         getSubcategoryIdWithCategoryId,
         getSubcategoryIdByCategoryAndSubcategoryName

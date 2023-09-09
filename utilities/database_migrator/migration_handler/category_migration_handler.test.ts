@@ -15,6 +15,7 @@ describe("CategoryMigrationHandler", () => {
             query: jest.fn()
         };
         const mockTargetCategoryRepository: CockroachDbTargetCategoryRepository = {
+            saveCategory: jest.fn(),
             saveCategories: jest.fn(),
             getSubcategoryIdWithCategoryId: jest.fn(),
             getSubcategoryIdByCategoryAndSubcategoryName: undefined
@@ -91,26 +92,24 @@ describe("CategoryMigrationHandler", () => {
 
             const migrationResult = await sut.handleMigration();
 
-            expect(mocks.mockTargetCategoryRepository.saveCategories).toHaveBeenCalledWith([
-                {
-                    name: "Category name",
-                    subcategories: ["sub1", "sub2", "sub3", "sub4", "sub5"],
-                    transaction_type_id: "expense-id",
-                    user_id: "user-id1"
-                },
-                {
-                    name: "Eating Out",
-                    subcategories: [],
-                    transaction_type_id: "expense-id",
-                    user_id: "user-id1"
-                },
-                {
-                    name: "Eating Out",
-                    subcategories: ["sub5", "sub6"],
-                    transaction_type_id: "expense-id",
-                    user_id: "user-id2"
-                }
-            ] satisfies CockroachDbCategory[])
+            expect(mocks.mockTargetCategoryRepository.saveCategory).toHaveBeenNthCalledWith(1, {
+                name: "Category name",
+                subcategories: ["sub1", "sub2", "sub3", "sub4", "sub5"],
+                transaction_type_id: "expense-id",
+                user_id: "user-id1"
+            });
+            expect(mocks.mockTargetCategoryRepository.saveCategory).toHaveBeenNthCalledWith(2, {
+                name: "Eating Out",
+                subcategories: [],
+                transaction_type_id: "expense-id",
+                user_id: "user-id1"
+            });
+            expect(mocks.mockTargetCategoryRepository.saveCategory).toHaveBeenNthCalledWith(3, {
+                name: "Eating Out",
+                subcategories: ["sub5", "sub6"],
+                transaction_type_id: "expense-id",
+                user_id: "user-id2"
+            });
 
             expect(migrationResult).toEqual({
                 failedRecords: [],

@@ -47,14 +47,14 @@ export const CategoryMigrationHandler = (
                     break;
                 }
                 default: {
-                    logger.warn(`category could not be saved because transaction type id was not found`, { attemptedPayload: JSON.stringify(category) })
+                    logger.error(`category could not be saved because transaction type id was not found`, { attemptedPayload: JSON.stringify(category) })
                     failedCategories.push(category);
                     continue;
                 }
             }
 
             if (!transactionTypeId) {
-                logger.warn(`category could not be saved because transaction type id was not found`, { attemptedPayload: JSON.stringify(category) })
+                logger.error(`category could not be saved because transaction type id was not found`, { attemptedPayload: JSON.stringify(category) })
                 failedCategories.push(category);
                 continue;
             }
@@ -62,22 +62,26 @@ export const CategoryMigrationHandler = (
             // UserIdQuery: "auth0|jgv115#Transaction"
             const userId = userIdentifierMap[category.UserIdQuery.split("#")[0]]
             if (!userId) {
-                logger.warn(`category could not be saved because user identifier was not found`, { attemptedPayload: JSON.stringify(category) })
+                logger.error(`category could not be saved because user identifier was not found`, { attemptedPayload: JSON.stringify(category) })
                 failedCategories.push(category);
                 continue;
             }
 
-            categoriesToBeSaved.push({
-                name: category.Subquery,
-                transaction_type_id: transactionTypeId,
-                user_id: userId,
-                subcategories: category.Subcategories
-            });
+            try {
+                await targetCategoryRepository.saveCategory({
+                    name: category.Subquery,
+                    transaction_type_id: transactionTypeId,
+                    user_id: userId,
+                    subcategories: category.Subcategories
+                });
+            }
+            catch (ex) {
+                logger.error("category could be not be saved because an error was encountered when attempting to persist", { ex, attemptedPayload: JSON.stringify(category) })
+                failedCategories.push(category);
+            }
 
             numSavedCategories++;
         }
-
-        await targetCategoryRepository.saveCategories(categoriesToBeSaved);
 
         logger.info("category migration completed", { numFailedRecords: failedCategories.length, numSuccessfulRecords: numSavedCategories })
 

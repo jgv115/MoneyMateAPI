@@ -84,7 +84,7 @@ const startDbMigration = async (migrationType: MigrationType, sourceEnvironment:
 
     const migrationResponse = await migrationHandler.handleMigration();
 
-    if (migrationResponse.failedRecords) {
+    if (migrationResponse.failedRecords.length > 0) {
         console.warn("received failed records from migration handler, writing them to a file now");
 
         const csv = new ObjectsToCsv(migrationResponse.failedRecords);
@@ -117,5 +117,5 @@ const main = async () => {
     await startDbMigration(migrationType, sourceEnvironment, targetEnvironment)
 }
 
-startDbMigration(MigrationType.payerpayee, Environment.test, Environment.test);
+startDbMigration(MigrationType.category, Environment.test, Environment.test);
 // main();
