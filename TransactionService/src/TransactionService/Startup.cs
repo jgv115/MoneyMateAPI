@@ -131,6 +131,7 @@ namespace TransactionService
                 var cockroachDbConnectionString =
                     cockroachDbConfigSection.GetValue<string>("ConnectionString");
 
+                Console.WriteLine($"Connection string is: {cockroachDbConnectionString}");
                 services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
 
                 services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
