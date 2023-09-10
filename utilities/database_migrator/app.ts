@@ -117,5 +117,5 @@ const main = async () => {
     await startDbMigration(migrationType, sourceEnvironment, targetEnvironment)
 }
 
-startDbMigration(MigrationType.transaction, Environment.test, Environment.test);
+startDbMigration(MigrationType.transaction, Environment.prod, Environment.prod);
 // main();

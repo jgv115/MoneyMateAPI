@@ -1,4 +1,4 @@
-using Amazon.Extensions.NETCore.Setup;
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -27,6 +27,8 @@ namespace TransactionService
                 {
                     // Add local AWS Systems Manager to inject secrets
                     configurationBuilder.AddSystemsManager("/");
+                    configurationBuilder.AddSystemsManager(
+                        $"/{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}/CockroachDb/ConnectionString");
                 })
                 .UseStartup<Startup>();
         }
