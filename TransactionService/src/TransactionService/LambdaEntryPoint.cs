@@ -28,7 +28,7 @@ namespace TransactionService
                     // Add local AWS Systems Manager to inject secrets
                     configurationBuilder.AddSystemsManager("/");
                     configurationBuilder.AddSystemsManager(
-                        $"/{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}/CockroachDb/ConnectionString");
+                        $"/{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
                 })
                 .UseStartup<Startup>();
         }
