@@ -198,7 +198,9 @@ namespace TransactionService.Repositories.CockroachDb
                     transaction_type = newTransaction.TransactionType,
                     amount = newTransaction.Amount,
                     subcategory = newTransaction.Subcategory,
-                    payerpayeeid = Guid.Parse(newTransaction.PayerPayeeId),
+                    payerpayeeid = Guid.TryParse(newTransaction.PayerPayeeId, out var payerPayeeId)
+                        ? payerPayeeId
+                        : (Guid?) null,
                     notes = newTransaction.Note
                 });
             }
