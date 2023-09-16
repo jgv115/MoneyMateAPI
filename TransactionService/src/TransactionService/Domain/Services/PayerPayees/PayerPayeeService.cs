@@ -32,22 +32,22 @@ namespace TransactionService.Domain.Services.PayerPayees
             return results.ToList();
         }
 
-        private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee dynamoDbPayerPayee)
+        private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee payerPayee)
         {
-            if (string.IsNullOrEmpty(dynamoDbPayerPayee.ExternalId))
+            if (string.IsNullOrEmpty(payerPayee.ExternalId))
                 return new PayerPayeeViewModel
                 {
-                    ExternalId = dynamoDbPayerPayee.ExternalId,
-                    PayerPayeeId = Guid.Parse(dynamoDbPayerPayee.PayerPayeeId),
-                    PayerPayeeName = dynamoDbPayerPayee.PayerPayeeName
+                    ExternalId = payerPayee.ExternalId,
+                    PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+                    PayerPayeeName = payerPayee.PayerPayeeName
                 };
 
-            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(dynamoDbPayerPayee.ExternalId);
+            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payerPayee.ExternalId);
             return new PayerPayeeViewModel
             {
-                ExternalId = dynamoDbPayerPayee.ExternalId,
-                PayerPayeeId = Guid.Parse(dynamoDbPayerPayee.PayerPayeeId),
-                PayerPayeeName = dynamoDbPayerPayee.PayerPayeeName,
+                ExternalId = payerPayee.ExternalId,
+                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+                PayerPayeeName = payerPayee.PayerPayeeName,
                 Address = details.Address
             };
         }
