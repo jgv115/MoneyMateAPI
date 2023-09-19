@@ -76,6 +76,7 @@ namespace TransactionService.Repositories.CockroachDb
                          LEFT JOIN payerpayeeexternallinktype pext
                                    on payerpayee.external_link_type_id = pext.id
                 WHERE u.user_identifier = @user_identifier and ppt.name = @payerPayeeType
+                LIMIT 20
                 ";
 
             using (var connection = _context.CreateConnection())

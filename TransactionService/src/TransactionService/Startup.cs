@@ -149,8 +149,6 @@ namespace TransactionService
             services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
             services.Configure<GooglePlaceApiOptions>(options =>
                 Configuration.GetSection("GooglePlaceApi").Bind(options));
-            
-            Console.WriteLine(((IConfigurationRoot) Configuration).GetDebugView());
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
