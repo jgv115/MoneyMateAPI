@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
@@ -28,7 +29,7 @@ public class Feature_CockroachDb_AutocompleteEndpointTests : IClassFixture<Money
                 {
                     ["CockroachDb:Enabled"] = "true"
                 }))).CreateClient();
-        _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
+        _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 
     public async Task InitializeAsync()

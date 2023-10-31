@@ -44,7 +44,6 @@ public class CategoriesServiceTests
 {
     public class GetAllCategoryNames
     {
-        private readonly Mock<CurrentUserContext> _mockCurrentUserContext = new();
         private readonly Mock<ICategoriesRepository> _mockRepository = new();
         private readonly Mock<IMapper> _mockMapper = new();
 
@@ -52,10 +51,8 @@ public class CategoriesServiceTests
         public async Task
             GivenValidUserContext_ThenRepositoryGetAllCategoriesCalledWithCorrectArguments()
         {
-            const string expectedUserId = "userId-123";
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(expectedUserId);
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
 
             await service.GetAllCategoryNames();
@@ -83,7 +80,7 @@ public class CategoriesServiceTests
             _mockRepository.Setup(repository => repository.GetAllCategories())
                 .ReturnsAsync(expectedReturnedCategoryList);
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
             var response = await service.GetAllCategoryNames();
 
@@ -93,13 +90,11 @@ public class CategoriesServiceTests
 
     public class GetSubcategories
     {
-        private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
         private readonly Mock<ICategoriesRepository> _mockRepository;
         private readonly Mock<IMapper> _mockMapper;
 
         public GetSubcategories()
         {
-            _mockCurrentUserContext = new Mock<CurrentUserContext>();
             _mockRepository = new Mock<ICategoriesRepository>();
             _mockMapper = new Mock<IMapper>();
         }
@@ -108,11 +103,9 @@ public class CategoriesServiceTests
         public void
             GivenValidCategoryAndUserContext_ThenRepositoryGetSubcategoriesCalledWithCorrectArguments()
         {
-            const string expectedUserId = "testUser123";
             const string expectedCategory = "Category1";
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(expectedUserId);
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
             service.GetSubcategories(expectedCategory);
 
@@ -122,13 +115,11 @@ public class CategoriesServiceTests
 
     public class GetAllCategories
     {
-        private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
         private readonly Mock<ICategoriesRepository> _mockRepository;
         private readonly Mock<IMapper> _mockMapper;
 
         public GetAllCategories()
         {
-            _mockCurrentUserContext = new Mock<CurrentUserContext>();
             _mockRepository = new Mock<ICategoriesRepository>();
             _mockMapper = new Mock<IMapper>();
         }
@@ -138,10 +129,8 @@ public class CategoriesServiceTests
         public async Task
             GivenValidUserContextAndNullTransactionType_ThenRepositoryGetAllCategoriesCalledWithTheCorrectArguments()
         {
-            const string expectedUserId = "userId-123";
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(expectedUserId);
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
 
             await service.GetAllCategories();
@@ -157,10 +146,8 @@ public class CategoriesServiceTests
                 TransactionType
                     transactionType)
         {
-            const string expectedUserId = "userId-123";
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(expectedUserId);
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
 
             await service.GetAllCategories(transactionType);
@@ -192,7 +179,7 @@ public class CategoriesServiceTests
             _mockRepository.Setup(repository => repository.GetAllCategories())
                 .ReturnsAsync(expectedReturnedCategoryList);
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
             var response = await service.GetAllCategories();
 
@@ -222,7 +209,7 @@ public class CategoriesServiceTests
                     repository.GetAllCategoriesForTransactionType(It.IsAny<TransactionType>()))
                 .ReturnsAsync(expectedReturnedCategoryList);
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
             var response = await service.GetAllCategories(TransactionType.Expense);
 
@@ -252,7 +239,7 @@ public class CategoriesServiceTests
                     repository.GetAllCategoriesForTransactionType(It.IsAny<TransactionType>()))
                 .ReturnsAsync(returnedCategoryList);
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
             var response = await service.GetAllCategories(TransactionType.Expense);
 
@@ -277,13 +264,13 @@ public class CategoriesServiceTests
 
     public class CreateCategory
     {
-        private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
+        private readonly CurrentUserContext _mockCurrentUserContext;
         private readonly Mock<ICategoriesRepository> _mockRepository;
         private readonly IMapper _stubMapper;
 
         public CreateCategory()
         {
-            _mockCurrentUserContext = new Mock<CurrentUserContext>();
+            _mockCurrentUserContext = new CurrentUserContext();
             _mockRepository = new Mock<ICategoriesRepository>();
             _stubMapper = new MapperConfiguration(cfg => { cfg.AddProfile<CategoryProfile>(); }).CreateMapper();
         }
@@ -292,8 +279,6 @@ public class CategoriesServiceTests
         public async Task
             GivenCategoryDto_ThenRepositoryCreateCategoryInvokedWithCorrectArgument()
         {
-            const string expectedUserId = "userId-123";
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(expectedUserId);
 
             const string expectedCategoryName = "categoryName";
             var expectedTransactionType = TransactionType.Expense;
@@ -313,7 +298,7 @@ public class CategoriesServiceTests
                 Subcategories = expectedSubcategories,
             };
 
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(_mockCurrentUserContext, _mockRepository.Object,
                 _stubMapper, new FakeUpdateCategoryOperationFactory());
 
             await service.CreateCategory(inputDto);
@@ -324,7 +309,7 @@ public class CategoriesServiceTests
 
     public class DeleteCategory
     {
-        private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
+        private readonly CurrentUserContext _mockCurrentUserContext;
         private readonly Mock<ICategoriesRepository> _mockRepository;
 
         private readonly Mock<IMapper> _mockMapper;
@@ -333,18 +318,19 @@ public class CategoriesServiceTests
 
         public DeleteCategory()
         {
-            _mockCurrentUserContext = new Mock<CurrentUserContext>();
+            _mockCurrentUserContext = new CurrentUserContext
+            {
+                UserId = UserId
+            };
             _mockRepository = new Mock<ICategoriesRepository>();
             _mockMapper = new Mock<IMapper>();
-
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(UserId);
         }
 
         [Fact]
         public async Task GivenCategoryName_ThenRepositoryDeleteCategoryCalledWithCorrectArguments()
         {
             const string categoryName = "category Name 123";
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(_mockCurrentUserContext, _mockRepository.Object,
                 _mockMapper.Object, new FakeUpdateCategoryOperationFactory());
 
             _mockRepository.Setup(repository => repository.DeleteCategory(It.IsAny<string>()));
@@ -357,28 +343,24 @@ public class CategoriesServiceTests
 
     public class UpdateCategory
     {
-        private readonly Mock<CurrentUserContext> _mockCurrentUserContext;
         private readonly Mock<ICategoriesRepository> _mockRepository;
 
         private readonly IMapper _mapper;
 
-        private const string UserId = "userId-123";
 
         public UpdateCategory()
         {
-            _mockCurrentUserContext = new Mock<CurrentUserContext>();
             _mockRepository = new Mock<ICategoriesRepository>();
 
             _mapper = new MapperConfiguration(cfg => { cfg.AddProfile<CategoryProfile>(); }).CreateMapper();
 
-            _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(UserId);
         }
 
         [Fact]
         public async Task GivenJsonPatchDocuments_ThenCorrectUpdateCategoryOperationsAreExecuted()
         {
             var mockUpdateCategoryOperation = new Mock<IUpdateCategoryOperation>();
-            var service = new CategoriesService(_mockCurrentUserContext.Object, _mockRepository.Object,
+            var service = new CategoriesService(new CurrentUserContext(), _mockRepository.Object,
                 _mapper, new FakeUpdateCategoryOperationFactory(mockUpdateCategoryOperation.Object));
 
             const string expectedCategoryName = "category123";

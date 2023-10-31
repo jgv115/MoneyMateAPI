@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
@@ -32,7 +33,7 @@ public class Feature_CockroachDb_PostEndpointTests : IClassFixture<MoneyMateApiW
                 {
                     ["CockroachDb:Enabled"] = "true"
                 }))).CreateClient();
-        _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
+        _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 
     public async Task InitializeAsync()

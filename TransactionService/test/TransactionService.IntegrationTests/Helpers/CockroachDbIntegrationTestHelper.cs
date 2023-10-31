@@ -41,7 +41,7 @@ public class CockroachDbIntegrationTestHelper
     private CockroachDbTransactionRepository TransactionRepository { get; init; }
     private CockroachDbCategoriesRepository CategoriesRepository { get; init; }
 
-    public CockroachDbIntegrationTestHelper()
+    public CockroachDbIntegrationTestHelper(Guid testUserId)
     {
         var config = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
@@ -62,6 +62,7 @@ public class CockroachDbIntegrationTestHelper
             })
             .CreateMapper();
 
+        TestUserId = testUserId;
         TransactionRepository = new CockroachDbTransactionRepository(DapperContext, Mapper, new CurrentUserContext
         {
             UserId = TestUserIdentifier
@@ -78,10 +79,24 @@ public class CockroachDbIntegrationTestHelper
         using (var connection = DapperContext.CreateConnection())
         {
             // Create a test user
-            var insertUserQuery = @"INSERT INTO users (user_identifier) VALUES (@test_user_identifier) RETURNING id";
-            TestUserId =
-                await connection.QuerySingleAsync<Guid>(insertUserQuery,
-                    new {test_user_identifier = "auth0|moneymatetest"});
+            var insertUserQuery =
+                @"INSERT INTO users (id, user_identifier) VALUES (@test_user_id, @test_user_identifier)";
+            await connection.ExecuteAsync(insertUserQuery,
+                new
+                {
+                    test_user_id = TestUserId,
+                    test_user_identifier = "auth0|moneymatetest"
+                });
+
+            // Create a profile for the test user
+            var insertProfileQuery =
+                @"INSERT INTO profile (id, display_name) VALUES (@profile_id, 'Default Profile')";
+            await connection.ExecuteAsync(insertProfileQuery, new {profile_id = TestUserId});
+
+            var insertProfileLookupQuery =
+                @"INSERT INTO userprofile (user_id, profile_id) VALUES (@test_user_id, @test_profile_id)";
+            await connection.ExecuteAsync(insertProfileLookupQuery,
+                new {test_user_id = TestUserId, test_profile_id = TestUserId});
 
             // Get transaction type ids
             var transactionTypeQuery = @"SELECT id from transactiontype WHERE name = 'expense';
@@ -103,7 +118,7 @@ public class CockroachDbIntegrationTestHelper
     {
         using (var connection = DapperContext.CreateConnection())
         {
-            var query = @"TRUNCATE users, category, subcategory, payerpayee CASCADE";
+            var query = @"TRUNCATE users, profile, category, subcategory, payerpayee CASCADE";
 
             await connection.ExecuteAsync(query);
         }
@@ -114,8 +129,8 @@ public class CockroachDbIntegrationTestHelper
         using (var connection = DapperContext.CreateConnection())
         {
             var createTransactionQuery = @"
-                INSERT INTO transaction (id, user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerpayee_id, notes)
-                VALUES (@transactionId, @userId, @timestamp, @transactionTypeId, @amount, @subcategoryId, @payerpayeeId, @notes)
+                INSERT INTO transaction (id, user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerpayee_id, notes, profile_id)
+                VALUES (@transactionId, @userId, @timestamp, @transactionTypeId, @amount, @subcategoryId, @payerpayeeId, @notes, @profileId)
             ";
 
             foreach (var transaction in transactions)
@@ -123,6 +138,7 @@ public class CockroachDbIntegrationTestHelper
                 var parameters = new DynamicParameters();
                 parameters.Add("transactionId", transaction.TransactionId);
                 parameters.Add("userId", TestUserId);
+                parameters.Add("profileId", TestUserId);
                 parameters.Add("timestamp", transaction.TransactionTimestamp);
                 parameters.Add("transactionTypeId",
                     transaction.TransactionType == TransactionType.Expense.ToProperString()
@@ -178,17 +194,18 @@ public class CockroachDbIntegrationTestHelper
         {
             var createPayerPayeeQuery =
                 @"
-                    WITH ins (payerPayeeId, userId, payerPayeeName, payerPayeeType, externalLinkType, externalId)
-                             AS (VALUES (@payerPayeeId, @userId, @payerPayeeName, @payerPayeeType, @externalLinkId, @externalId)),
+                    WITH ins (payerPayeeId, userId, payerPayeeName, payerPayeeType, externalLinkType, externalId, profileId)
+                             AS (VALUES (@payerPayeeId, @userId, @payerPayeeName, @payerPayeeType, @externalLinkId, @externalId, @profileId)),
                          e AS (
                              INSERT
-                                 INTO payerpayee (id, user_id, name, payerPayeeType_id, external_link_type_id, external_link_id)
+                                 INTO payerpayee (id, user_id, name, payerPayeeType_id, external_link_type_id, external_link_id, profile_id)
                                     SELECT ins.payerPayeeId,
                                            ins.userId,
                                            ins.payerPayeeName,
                                            p.id,
                                            p2.id,
-                                           ins.externalId
+                                           ins.externalId,
+                                           ins.profileId
                                      FROM ins
                                               JOIN payerpayeetype p ON p.name = ins.payerPayeeType
                                               JOIN payerpayeeexternallinktype p2 on p2.name = ins.externalLinkType
@@ -212,6 +229,7 @@ public class CockroachDbIntegrationTestHelper
             {
                 payerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
                 userId = TestUserId,
+                profileId = TestUserId,
                 payerPayeeName = payerPayee.PayerPayeeName,
                 payerPayeeType,
                 externalLinkId = string.IsNullOrEmpty(payerPayee.ExternalId) ? "Custom" : "Google",
@@ -269,9 +287,9 @@ public class CockroachDbIntegrationTestHelper
         var createCategoryQuery =
             @"
                 WITH e AS (
-                    INSERT INTO category (name, user_id, transaction_type_id) 
-                        VALUES (@category_name, @user_id, @transaction_type_id)
-                        ON CONFLICT (name, user_id, transaction_type_id) DO NOTHING
+                    INSERT INTO category (name, user_id, transaction_type_id, profile_id) 
+                        VALUES (@category_name, @user_id, @transaction_type_id, @profile_id)
+                        ON CONFLICT (name, profile_id, transaction_type_id) DO NOTHING
                         RETURNING id
                 )
                 SELECT * FROM e
@@ -287,7 +305,8 @@ public class CockroachDbIntegrationTestHelper
                 category_name = category.CategoryName, user_id = TestUserId,
                 transaction_type_id = category.TransactionType == TransactionType.Expense
                     ? TransactionTypeIds.Expense
-                    : TransactionTypeIds.Income
+                    : TransactionTypeIds.Income,
+                profile_id = TestUserId
             });
 
         return categoryId;

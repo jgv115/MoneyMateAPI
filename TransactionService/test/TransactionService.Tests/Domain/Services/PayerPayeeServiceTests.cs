@@ -487,9 +487,6 @@ public class PayerPayeeServiceCreatePayerTests
         const string expectedExternalId = "externalId123";
         const string expectedAddress = "address123";
 
-        var userId = Guid.NewGuid().ToString();
-        _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
-
         _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails(expectedExternalId))
             .ReturnsAsync(() => new ExtraPayerPayeeDetails
             {

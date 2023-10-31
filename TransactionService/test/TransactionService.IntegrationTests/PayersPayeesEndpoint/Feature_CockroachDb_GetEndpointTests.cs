@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
@@ -21,7 +22,8 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
     private readonly HttpClient _httpClient;
     private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
 
-    public Feature_CockroachDb_GetEndpointTests(MoneyMateApiWebApplicationFactory factory, ITestOutputHelper testOutputHelper)
+    public Feature_CockroachDb_GetEndpointTests(MoneyMateApiWebApplicationFactory factory,
+        ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
         var factory2 = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
@@ -31,7 +33,7 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
                     ["CockroachDb:Enabled"] = "true"
                 })));
         _httpClient = factory2.CreateDefaultClient();
-        _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
+        _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 
     public async Task InitializeAsync()
@@ -199,7 +201,7 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
 
         Assert.Equal(expectedPayer, actualPayer);
     }
-    
+
     [Fact]
     public async Task GivenValidRequest_WhenGetPayeeEndpointCalled_ThenCorrectPayeeReturned()
     {
@@ -220,7 +222,12 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
         await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee> {payee});
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseBody = await response.Content.ReadAsStringAsync();
+            Assert.Fail(
+                $"Received a non successful status code: {(int) response.StatusCode} with body: {responseBody}");
+        }
 
         var returnedString = await response.Content.ReadAsStringAsync();
         var actualPayer = JsonSerializer.Deserialize<PayerPayeeViewModel>(returnedString, new JsonSerializerOptions

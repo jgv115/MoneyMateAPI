@@ -1,7 +1,10 @@
+using System;
+
 namespace TransactionService.Middleware
 {
     public class CurrentUserContext
     {
-        public virtual string UserId { get; set; }
+        public string UserId { get; set; }
+        public Guid ProfileId { get; set; }
     }
 }

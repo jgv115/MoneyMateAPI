@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
 using TransactionService.Domain.Models;
+using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
@@ -32,7 +33,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
                 {
                     ["CockroachDb:Enabled"] = "true"
                 }))).CreateClient();
-        _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
+        _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 
     public async Task InitializeAsync()
@@ -139,7 +140,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
         var response = await _httpClient.GetAsync($"/api/categories{queryString}");
         var returnedString = await response.Content.ReadAsStringAsync();
 
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedCategoriesList = JsonSerializer.Deserialize<List<Category>>(returnedString,
             new JsonSerializerOptions
@@ -166,7 +167,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
         var response = await _httpClient.GetAsync("/api/categories/category1");
         var returnedString = await response.Content.ReadAsStringAsync();
 
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedSubcategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
 
@@ -192,7 +193,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
         var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync("/api/categories", httpContent);
 
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedCategories = await _cockroachDbIntegrationTestHelper.RetrieveAllCategories();
 
