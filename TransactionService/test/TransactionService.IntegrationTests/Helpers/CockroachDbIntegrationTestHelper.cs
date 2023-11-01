@@ -15,7 +15,7 @@ using TransactionService.Repositories.CockroachDb.Entities;
 using TransactionService.Repositories.CockroachDb.Profiles;
 using Category = TransactionService.Domain.Models.Category;
 using PayerPayee = TransactionService.Domain.Models.PayerPayee;
-using Profile = TransactionService.Repositories.CockroachDb.Entities.Profile;
+using Profile = TransactionService.Domain.Models.Profile;
 using Transaction = TransactionService.Domain.Models.Transaction;
 using TransactionType = TransactionService.Constants.TransactionType;
 

@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using TransactionService.Domain.Models;
 using TransactionService.Middleware;
-using TransactionService.Repositories.CockroachDb.Entities;
 using TransactionService.Repositories.Exceptions;
 
 namespace TransactionService.Repositories.CockroachDb
@@ -29,6 +29,7 @@ namespace TransactionService.Repositories.CockroachDb
             
             using (var connection = _context.CreateConnection())
             {
+                // TODO: we are using the domain model directly here - entity model is not needed
                 var userProfiles = (await connection.QueryAsync<Profile>(query, new
                     {
                         user_identifier = _userContext.UserId

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TransactionService.Repositories.CockroachDb.Entities;
+using TransactionService.Domain.Models;
 
 namespace TransactionService.Repositories
 {

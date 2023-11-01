@@ -1,8 +1,8 @@
 using System;
 
-namespace TransactionService.Repositories.CockroachDb.Entities
+namespace TransactionService.Domain.Models
 {
-    public record Profile
+    public class Profile
     {
         public Guid Id { get; init; }
         public string DisplayName { get; init; }

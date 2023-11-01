@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb;
 using TransactionService.Repositories.CockroachDb.Entities;
 using TransactionService.Repositories.Exceptions;
 using Xunit;
-using Profile = TransactionService.Repositories.CockroachDb.Entities.Profile;
 
 namespace TransactionService.IntegrationTests.Repositories.CockroachDb;
 
@@ -83,7 +83,16 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
 
         var returnedProfiles = await repository.GetProfiles();
 
-        Assert.Equal(expectedProfiles, returnedProfiles);
+        Assert.Collection(returnedProfiles.OrderBy(profile => profile.DisplayName), profile =>
+            {
+                Assert.Equal(expectedProfiles[0].DisplayName, profile.DisplayName);
+                Assert.Equal(expectedProfiles[0].Id, profile.Id);
+            },
+            profile =>
+            {
+                Assert.Equal(expectedProfiles[1].DisplayName, profile.DisplayName);
+                Assert.Equal(expectedProfiles[1].Id, profile.Id);
+            });
     }
 
 

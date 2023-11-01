@@ -1,6 +1,6 @@
-using AutoMapper;
 using TransactionService.Controllers.Transactions.Dtos;
 using TransactionService.Domain.Models;
+using Profile = AutoMapper.Profile;
 
 namespace TransactionService.Profiles
 {

@@ -4,15 +4,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers.Profiles;
+using TransactionService.Domain.Models;
 using TransactionService.Repositories;
-using TransactionService.Repositories.CockroachDb.Entities;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers.Profiles;
 
 public class ProfilesControllerTests
 {
-    private readonly Mock<IProfilesRepository> _mockProfilesRepository = new Mock<IProfilesRepository>();
+    private readonly Mock<IProfilesRepository> _mockProfilesRepository = new();
 
     [Fact]
     public async Task GivenRepositoryReturnsProfiles_WhenGetInvoked_ThenOkReturnedWithProfiles()
