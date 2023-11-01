@@ -2,9 +2,9 @@ using System;
 
 namespace TransactionService.Repositories.CockroachDb.Entities
 {
-    public class User
+    public record Profile
     {
         public Guid Id { get; init; }
-        public string UserIdentifier { get; init; }
+        public string DisplayName { get; init; }
     }
 }

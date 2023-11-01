@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
@@ -381,7 +380,6 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
         }, modifiedCategory);
     }
 
-    // TODO: the rest of these tests need to be completed when we are able to insert transactions
     [Fact]
     public async Task
         GivenUpdateSubcategoryNamePatchRequest_ThenSubcategoryIsRenamedAndTransactionsAreModified()

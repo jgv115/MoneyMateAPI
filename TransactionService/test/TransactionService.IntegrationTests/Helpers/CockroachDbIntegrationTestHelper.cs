@@ -7,12 +7,17 @@ using AutoMapper;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using TransactionService.Constants;
-using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb;
+using TransactionService.Repositories.CockroachDb.Entities;
 using TransactionService.Repositories.CockroachDb.Profiles;
+using Category = TransactionService.Domain.Models.Category;
+using PayerPayee = TransactionService.Domain.Models.PayerPayee;
+using Profile = TransactionService.Repositories.CockroachDb.Entities.Profile;
+using Transaction = TransactionService.Domain.Models.Transaction;
+using TransactionType = TransactionService.Constants.TransactionType;
 
 namespace TransactionService.IntegrationTests.Helpers;
 
@@ -43,6 +48,8 @@ public class CockroachDbIntegrationTestHelper
 
     public CockroachDbIntegrationTestHelper(Guid testUserId)
     {
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "dev");
+
         var config = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.dev.json", false, true)
@@ -79,24 +86,24 @@ public class CockroachDbIntegrationTestHelper
         using (var connection = DapperContext.CreateConnection())
         {
             // Create a test user
-            var insertUserQuery =
-                @"INSERT INTO users (id, user_identifier) VALUES (@test_user_id, @test_user_identifier)";
-            await connection.ExecuteAsync(insertUserQuery,
-                new
+            await WriteUsersIntoDb(new List<User>
+            {
+                new()
                 {
-                    test_user_id = TestUserId,
-                    test_user_identifier = "auth0|moneymatetest"
-                });
+                    Id = TestUserId,
+                    UserIdentifier = "auth0|moneymatetest"
+                }
+            });
 
             // Create a profile for the test user
-            var insertProfileQuery =
-                @"INSERT INTO profile (id, display_name) VALUES (@profile_id, 'Default Profile')";
-            await connection.ExecuteAsync(insertProfileQuery, new {profile_id = TestUserId});
-
-            var insertProfileLookupQuery =
-                @"INSERT INTO userprofile (user_id, profile_id) VALUES (@test_user_id, @test_profile_id)";
-            await connection.ExecuteAsync(insertProfileLookupQuery,
-                new {test_user_id = TestUserId, test_profile_id = TestUserId});
+            await WriteProfilesIntoDbForUser(new List<Profile>
+            {
+                new()
+                {
+                    Id = TestUserId,
+                    DisplayName = "Default Profile"
+                }
+            }, TestUserId);
 
             // Get transaction type ids
             var transactionTypeQuery = @"SELECT id from transactiontype WHERE name = 'expense';
@@ -121,6 +128,34 @@ public class CockroachDbIntegrationTestHelper
             var query = @"TRUNCATE users, profile, category, subcategory, payerpayee CASCADE";
 
             await connection.ExecuteAsync(query);
+        }
+    }
+
+    public async Task WriteUsersIntoDb(List<User> users)
+    {
+        using (var connection = DapperContext.CreateConnection())
+        {
+            var insertUsersQuery =
+                @"INSERT INTO users (id, user_identifier) VALUES (@id, @userIdentifier)";
+
+            await connection.ExecuteAsync(insertUsersQuery, users);
+        }
+    }
+
+    public async Task WriteProfilesIntoDbForUser(List<Profile> profiles, Guid userId)
+    {
+        using (var connection = DapperContext.CreateConnection())
+        {
+            var insertProfilesQuery = @"INSERT INTO profile (id, display_name) VALUES (@id, @displayName)";
+            await connection.ExecuteAsync(insertProfilesQuery, profiles);
+
+            var insertUserProfileQuery = @"INSERT INTO userprofile (user_id, profile_id) VALUES (@userId, @profileId)";
+            await connection.ExecuteAsync(insertUserProfileQuery,
+                profiles.Select(profile => new
+                {
+                    userId,
+                    profileId = profile.Id
+                }));
         }
     }
 

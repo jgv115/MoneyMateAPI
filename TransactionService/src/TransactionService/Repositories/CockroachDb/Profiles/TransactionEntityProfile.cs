@@ -1,10 +1,9 @@
 using System;
-using AutoMapper;
 using TransactionService.Repositories.CockroachDb.Entities;
 
 namespace TransactionService.Repositories.CockroachDb.Profiles
 {
-    public class TransactionEntityProfile : Profile
+    public class TransactionEntityProfile : AutoMapper.Profile
     {
         public TransactionEntityProfile()
         {

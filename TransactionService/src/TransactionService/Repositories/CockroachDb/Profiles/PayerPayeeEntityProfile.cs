@@ -1,9 +1,8 @@
-using AutoMapper;
 using TransactionService.Repositories.CockroachDb.Entities;
 
 namespace TransactionService.Repositories.CockroachDb.Profiles
 {
-    public class PayerPayeeEntityProfile : Profile
+    public class PayerPayeeEntityProfile : AutoMapper.Profile
     {
         public PayerPayeeEntityProfile()
         {
