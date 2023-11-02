@@ -1,6 +1,5 @@
 ﻿using TransactionService.Constants;
 using TransactionService.Domain.Models;
-using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Tests.Common;
 

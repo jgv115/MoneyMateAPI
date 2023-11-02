@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using TransactionService.Controllers.Analytics.ViewModels;
-using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
-using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Tests.Common;
 using Xunit;
 
@@ -18,42 +15,23 @@ namespace TransactionService.IntegrationTests.AnalyticsEndpoint;
 [Collection("IntegrationTests")]
 public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
 {
-    private readonly HttpClient HttpClient;
-    private readonly DynamoDbHelper DynamoDbHelper;
-    private const string UserId = "auth0|moneymatetest#Transaction";
+    private readonly HttpClient _httpClient;
+    private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
 
     public AnalyticsEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
-        HttpClient = factory.CreateDefaultClient();
-        DynamoDbHelper = factory.DynamoDbHelper;
+        _httpClient = factory.CreateDefaultClient();
+        _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 
     public async Task InitializeAsync()
     {
-        await DynamoDbHelper.CreateTable();
+        await _cockroachDbIntegrationTestHelper.SeedRequiredData();
     }
 
     public async Task DisposeAsync()
     {
-        await DynamoDbHelper.DeleteTable();
-    }
-
-    private List<DynamoDbTransaction> MapTransactionToDynamoDbTransaction(List<Transaction> transactions)
-    {
-        return transactions.Select(
-            transaction => new DynamoDbTransaction
-            {
-                TransactionType = transaction.TransactionType,
-                PayerPayeeId = transaction.PayerPayeeId,
-                PayerPayeeName = transaction.PayerPayeeName,
-                TransactionTimestamp = transaction.TransactionTimestamp,
-                Subcategory = transaction.Subcategory,
-                TransactionId = transaction.TransactionId,
-                Category = transaction.Category,
-                Note = transaction.Note,
-                Amount = transaction.Amount,
-                UserId = UserId
-            }).ToList();
+        await _cockroachDbIntegrationTestHelper.ClearDbData();
     }
 
     [Fact]
@@ -81,7 +59,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
                 category3TransactionsAmount)
             .Build();
 
-        await DynamoDbHelper.WriteTransactionsIntoTable(MapTransactionToDynamoDbTransaction(transactionList));
+        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";
@@ -89,7 +67,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
         var queryString = query.ToString();
 
-        var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");
+        var response = await _httpClient.GetAsync($"/api/analytics/categories?{queryString}");
         response.EnsureSuccessStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
@@ -145,7 +123,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
                 category3TransactionsAmount)
             .Build();
 
-        await DynamoDbHelper.WriteTransactionsIntoTable(MapTransactionToDynamoDbTransaction(transactionList));
+        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";
@@ -153,7 +131,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         query["periods"] = "0";
         var queryString = query.ToString();
 
-        var response = await HttpClient.GetAsync($"/api/analytics/categories?{queryString}");
+        var response = await _httpClient.GetAsync($"/api/analytics/categories?{queryString}");
         response.EnsureSuccessStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
@@ -218,8 +196,8 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
             .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory4Transactions,
                 expectedCategory3, expectedSubcategory4, subcategory4TransactionsAmount)
             .Build();
-
-        await DynamoDbHelper.WriteTransactionsIntoTable(MapTransactionToDynamoDbTransaction(transactionList));
+        
+        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["category"] = expectedCategory3;
@@ -227,7 +205,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
         var queryString = query.ToString();
 
-        var response = await HttpClient.GetAsync($"/api/analytics/subcategories?{queryString}");
+        var response = await _httpClient.GetAsync($"/api/analytics/subcategories?{queryString}");
         response.EnsureSuccessStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
@@ -283,7 +261,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
                 expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
             .Build();
 
-        await DynamoDbHelper.WriteTransactionsIntoTable(MapTransactionToDynamoDbTransaction(transactionList));
+        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";
@@ -291,7 +269,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
         query["end"] = new DateTime(2099, 4, 1).ToString("yyyy-MM-dd");
         var queryString = query.ToString();
 
-        var response = await HttpClient.GetAsync($"/api/analytics/payerpayees?{queryString}");
+        var response = await _httpClient.GetAsync($"/api/analytics/payerpayees?{queryString}");
         response.EnsureSuccessStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();

@@ -15,7 +15,6 @@ using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Middleware;
 using TransactionService.Profiles;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Domain.Services.Categories;

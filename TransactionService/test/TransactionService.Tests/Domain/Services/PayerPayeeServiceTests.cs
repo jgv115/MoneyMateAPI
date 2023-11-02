@@ -9,8 +9,6 @@ using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
-using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Models;
 using Xunit;

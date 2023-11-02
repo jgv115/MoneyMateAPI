@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
-using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Domain.Services.Transactions.Specifications
 {

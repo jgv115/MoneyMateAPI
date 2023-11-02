@@ -25,7 +25,6 @@ using TransactionService.Profiles;
 using TransactionService.Repositories;
 using TransactionService.Repositories.CockroachDb;
 using TransactionService.Repositories.CockroachDb.Profiles;
-using TransactionService.Repositories.DynamoDb;
 using TransactionService.Services;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Options;
@@ -118,32 +117,19 @@ namespace TransactionService
             }
 
             services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
-            services.AddSingleton(new DynamoDbRepositoryConfig
-            {
-                TableName = $"MoneyMate_TransactionDB_{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}"
-            });
 
             var cockroachDbConfigSection = Configuration.GetSection("CockroachDb");
-            var cockroachDbFeatureEnabled = cockroachDbConfigSection.GetValue<string>("Enabled");
 
-            if (!string.IsNullOrEmpty(cockroachDbFeatureEnabled) && bool.Parse(cockroachDbFeatureEnabled))
-            {
-                var cockroachDbConnectionString =
-                    cockroachDbConfigSection.GetValue<string>("ConnectionString");
+            var cockroachDbConnectionString =
+                cockroachDbConfigSection.GetValue<string>("ConnectionString");
 
-                Console.WriteLine($"Connection string is: {cockroachDbConnectionString}");
-                services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
+            Console.WriteLine($"Connection string is: {cockroachDbConnectionString}");
+            services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
 
-                services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
-                services.AddScoped<IPayerPayeeRepository, CockroachDbPayerPayeeRepository>();
-                services.AddScoped<ITransactionRepository, CockroachDbTransactionRepository>();
-            }
-            else
-            {
-                services.AddScoped<ICategoriesRepository, DynamoDbCategoriesRepository>();
-                services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
-                services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
-            }
+            services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
+            services.AddScoped<IPayerPayeeRepository, CockroachDbPayerPayeeRepository>();
+            services.AddScoped<ITransactionRepository, CockroachDbTransactionRepository>();
+
             services.AddScoped<IProfilesRepository, CockroachDbProfilesRepository>();
 
             services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();

@@ -5,7 +5,6 @@ using TransactionService.Controllers.Transactions.Dtos;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Domain.Services.Transactions;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
 
 namespace TransactionService.Domain.Services.Categories.UpdateCategoryOperations
 {

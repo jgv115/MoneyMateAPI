@@ -6,14 +6,10 @@ using Moq;
 using TransactionService.Constants;
 using TransactionService.Controllers.Transactions.Dtos;
 using TransactionService.Domain.Models;
-using TransactionService.Domain.Services;
 using TransactionService.Domain.Services.Transactions;
 using TransactionService.Domain.Services.Transactions.Specifications;
 using TransactionService.Helpers.TimePeriodHelpers;
-using TransactionService.Middleware;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
-using TransactionService.Repositories.DynamoDb.Models;
 using Xunit;
 
 namespace TransactionService.Tests.Domain.Services
