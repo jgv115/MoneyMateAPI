@@ -144,7 +144,7 @@ namespace TransactionService
                 services.AddScoped<IPayerPayeeRepository, DynamoDbPayerPayeeRepository>();
                 services.AddScoped<ITransactionRepository, DynamoDbTransactionRepository>();
             }
-
+            services.AddScoped<IProfilesRepository, CockroachDbProfilesRepository>();
 
             services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
             services.Configure<GooglePlaceApiOptions>(options =>

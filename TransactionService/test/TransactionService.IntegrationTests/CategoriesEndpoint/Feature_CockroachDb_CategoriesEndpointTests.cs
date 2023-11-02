@@ -309,6 +309,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
             Encoding.UTF8, "application/json-patch+json");
         var response = await _httpClient.PatchAsync($"/api/categories/{categoryName}", httpContent);
 
+        await response.AssertSuccessfulStatusCode();
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var returnedCategories = await _cockroachDbIntegrationTestHelper.RetrieveAllCategories();
