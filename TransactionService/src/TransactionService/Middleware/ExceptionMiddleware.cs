@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TransactionService.Controllers.Exceptions;
 using TransactionService.Domain.Services.Categories.Exceptions;
+using TransactionService.Middleware.Exceptions;
 using TransactionService.Repositories.Exceptions;
 
 namespace TransactionService.Middleware
@@ -41,7 +42,7 @@ namespace TransactionService.Middleware
                             Detail = ex.Message
                         };
                         break;
-                    
+
                     case RepositoryItemExistsException:
                         returnedStatusCode = (int) HttpStatusCode.Conflict;
                         problemDetails = new ProblemDetails
@@ -68,6 +69,16 @@ namespace TransactionService.Middleware
                         {
                             Status = returnedStatusCode,
                             Title = "Invalid query parameter",
+                            Detail = ex.Message
+                        };
+                        break;
+
+                    case InvalidProfileIdException:
+                        returnedStatusCode = (int) HttpStatusCode.BadRequest;
+                        problemDetails = new ProblemDetails
+                        {
+                            Status = returnedStatusCode,
+                            Title = "Invalid profileId",
                             Detail = ex.Message
                         };
                         break;

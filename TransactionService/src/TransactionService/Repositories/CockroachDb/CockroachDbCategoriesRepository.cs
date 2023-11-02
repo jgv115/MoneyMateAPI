@@ -130,9 +130,9 @@ namespace TransactionService.Repositories.CockroachDb
                 using (var transaction = connection.BeginTransaction())
                 {
                     var insertCategoryQuery =
-                        @"WITH input (category_name, user_identifier, transaction_type_name) as (VALUES(@new_category_name, @user_identifier, @transaction_type))
-                    INSERT INTO category (name, user_id, transaction_type_id)
-                    SELECT input.category_name, u.id, tt.id
+                        @"WITH input (category_name, user_identifier, transaction_type_name, profile_id) as (VALUES(@new_category_name, @user_identifier, @transaction_type, @profile_id))
+                    INSERT INTO category (name, user_id, transaction_type_id, profile_id)
+                    SELECT input.category_name, u.id, tt.id, input.profile_id
                     FROM users u
                         JOIN input ON input.user_identifier = u.user_identifier
                         JOIN transactiontype tt ON tt.name = input.transaction_type_name
@@ -144,6 +144,7 @@ namespace TransactionService.Repositories.CockroachDb
                     categoryParameters.Add(name: "@user_identifier", value: _userContext.UserId, DbType.String);
                     categoryParameters.Add(name: "@transaction_type",
                         value: newCategory.TransactionType.ToProperString(), DbType.String);
+                    categoryParameters.Add(name: "@profile_id", value: _userContext.ProfileId);
 
                     var returnedId =
                         await connection.QuerySingleAsync<Guid>(insertCategoryQuery, categoryParameters, transaction);

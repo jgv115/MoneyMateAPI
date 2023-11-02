@@ -2,25 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using TransactionService.Constants;
 using TransactionService.IntegrationTests.Helpers;
-using TransactionService.Repositories.DynamoDb;
 
 namespace TransactionService.IntegrationTests.WebApplicationFactories
 {
     public class MoneyMateApiWebApplicationFactory : WebApplicationFactory<Startup>
     {
         private string _accessToken;
-        public readonly DynamoDbHelper DynamoDbHelper;
+        public readonly CockroachDbIntegrationTestHelper CockroachDbIntegrationTestHelper;
+        public Guid TestUserId = Guid.NewGuid();
 
         public MoneyMateApiWebApplicationFactory()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "dev");
-            DynamoDbHelper = new DynamoDbHelper();
+            CockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper(TestUserId);
         }
 
         private string RequestAccessToken()
@@ -51,33 +50,20 @@ namespace TransactionService.IntegrationTests.WebApplicationFactories
             return _accessToken;
         }
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder.ConfigureServices(collection =>
-            {
-                collection.AddSingleton(new DynamoDbRepositoryConfig
-                {
-                    TableName = DynamoDbHelper.TableName
-                });
-            });
-        }
-
         protected override IHostBuilder CreateHostBuilder()
         {
             var builder = base.CreateHostBuilder();
 
-            builder.UseSerilog((context, configuration) =>
-            {
-                configuration.MinimumLevel.Fatal().WriteTo.Console();
-            });
+            builder.UseSerilog((context, configuration) => { configuration.MinimumLevel.Fatal().WriteTo.Console(); });
 
             return builder;
         }
-        
+
         protected override void ConfigureClient(HttpClient client)
         {
             base.ConfigureClient(client);
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_accessToken ?? RequestAccessToken()}");
+            // client.DefaultRequestHeaders.Add(Headers.ProfileId, TestUserId.ToString());
         }
     }
 }

@@ -9,8 +9,6 @@ using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Middleware;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
-using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Models;
 using Xunit;
@@ -486,9 +484,6 @@ public class PayerPayeeServiceCreatePayerTests
         const string expectedPayerName = "payer name 123";
         const string expectedExternalId = "externalId123";
         const string expectedAddress = "address123";
-
-        var userId = Guid.NewGuid().ToString();
-        _mockCurrentUserContext.SetupGet(context => context.UserId).Returns(userId);
 
         _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails(expectedExternalId))
             .ReturnsAsync(() => new ExtraPayerPayeeDetails

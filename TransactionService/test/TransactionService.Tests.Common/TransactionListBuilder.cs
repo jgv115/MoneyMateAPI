@@ -1,6 +1,5 @@
 ﻿using TransactionService.Constants;
 using TransactionService.Domain.Models;
-using TransactionService.Repositories.DynamoDb.Models;
 
 namespace TransactionService.Tests.Common;
 
@@ -27,7 +26,7 @@ public class TransactionListBuilder
             {
                 Amount = amount,
                 Category = category,
-                TransactionTimestamp = DateTime.Now.ToString("O"),
+                TransactionTimestamp = DateTime.UtcNow.ToString("O"),
                 Subcategory = "subcategory-1",
                 TransactionId = Guid.NewGuid().ToString(),
                 TransactionType = "expense",
@@ -47,7 +46,7 @@ public class TransactionListBuilder
             {
                 Amount = amount,
                 Category = category,
-                TransactionTimestamp = DateTime.Now.ToString("O"),
+                TransactionTimestamp = DateTime.UtcNow.ToString("O"),
                 Subcategory = subcategory,
                 TransactionId = Guid.NewGuid().ToString(),
                 TransactionType = "expense",
@@ -66,7 +65,7 @@ public class TransactionListBuilder
             {
                 Amount = amount,
                 Category = "category123",
-                TransactionTimestamp = DateTime.Now.ToString("O"),
+                TransactionTimestamp = DateTime.UtcNow.ToString("O"),
                 Subcategory = "subcategory123",
                 TransactionId = Guid.NewGuid().ToString(),
                 TransactionType = "expense",

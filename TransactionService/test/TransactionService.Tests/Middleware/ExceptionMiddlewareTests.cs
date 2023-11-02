@@ -9,6 +9,7 @@ using Moq;
 using TransactionService.Controllers.Exceptions;
 using TransactionService.Domain.Services.Categories.Exceptions;
 using TransactionService.Middleware;
+using TransactionService.Middleware.Exceptions;
 using TransactionService.Repositories.Exceptions;
 using Xunit;
 
@@ -125,7 +126,32 @@ public class ExceptionMiddlewareTests
 
         Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
     }
+    
+    [Fact]
+    public async Task GivenInvalidProfileIdExceptionThrown_ThenCorrectProblemDetailsReturned()
+    {
+        const string expectedMessage = "invalid profile id!";
+        var middleware = new ExceptionMiddleware(_ => throw new InvalidProfileIdException(expectedMessage));
 
+        var httpContext = new DefaultHttpContext();
+        httpContext.Response.Body = new MemoryStream();
+        var mockLogger = new Mock<ILogger<ExceptionMiddleware>>();
+
+        await middleware.Invoke(httpContext, mockLogger.Object);
+
+        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
+        var reader = new StreamReader(httpContext.Response.Body);
+        var responseBodyString = reader.ReadToEnd();
+
+        var expectedResponseBody = new ProblemDetails
+        {
+            Status = 400,
+            Title = "Invalid profileId",
+            Detail = expectedMessage
+        };
+
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+    }
 
     [Fact]
     public async Task GivenUnknownExceptionThrown_ThenCorrectProblemDetailsReturned()

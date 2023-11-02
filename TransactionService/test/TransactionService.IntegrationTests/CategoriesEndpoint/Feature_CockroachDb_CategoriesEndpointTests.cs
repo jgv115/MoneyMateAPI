@@ -6,11 +6,11 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
 using TransactionService.Domain.Models;
+using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
@@ -32,7 +32,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
                 {
                     ["CockroachDb:Enabled"] = "true"
                 }))).CreateClient();
-        _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
+        _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 
     public async Task InitializeAsync()
@@ -139,7 +139,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
         var response = await _httpClient.GetAsync($"/api/categories{queryString}");
         var returnedString = await response.Content.ReadAsStringAsync();
 
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedCategoriesList = JsonSerializer.Deserialize<List<Category>>(returnedString,
             new JsonSerializerOptions
@@ -166,7 +166,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
         var response = await _httpClient.GetAsync("/api/categories/category1");
         var returnedString = await response.Content.ReadAsStringAsync();
 
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedSubcategoriesList = JsonSerializer.Deserialize<List<string>>(returnedString);
 
@@ -192,7 +192,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
         var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync("/api/categories", httpContent);
 
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedCategories = await _cockroachDbIntegrationTestHelper.RetrieveAllCategories();
 
@@ -309,6 +309,7 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
             Encoding.UTF8, "application/json-patch+json");
         var response = await _httpClient.PatchAsync($"/api/categories/{categoryName}", httpContent);
 
+        await response.AssertSuccessfulStatusCode();
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var returnedCategories = await _cockroachDbIntegrationTestHelper.RetrieveAllCategories();
@@ -380,7 +381,6 @@ public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMa
         }, modifiedCategory);
     }
 
-    // TODO: the rest of these tests need to be completed when we are able to insert transactions
     [Fact]
     public async Task
         GivenUpdateSubcategoryNamePatchRequest_ThenSubcategoryIsRenamedAndTransactionsAreModified()

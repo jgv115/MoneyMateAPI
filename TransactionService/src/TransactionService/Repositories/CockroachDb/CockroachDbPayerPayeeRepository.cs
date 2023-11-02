@@ -141,16 +141,17 @@ namespace TransactionService.Repositories.CockroachDb
             {
                 var createPayerPayeeQuery =
                     @"
-                        WITH ins (payerPayeeId, user_identifier, payerPayeeName, payerPayeeType, externalLinkType, externalId)
-                                 AS (VALUES (@payerPayeeId, @user_identifier, @payerPayeeName, @payerPayeeType, @externalLinkId, @externalId))
+                        WITH ins (payerPayeeId, user_identifier, payerPayeeName, payerPayeeType, externalLinkType, externalId, profileId)
+                                 AS (VALUES (@payerPayeeId, @user_identifier, @payerPayeeName, @payerPayeeType, @externalLinkId, @externalId, @profileId))
                         INSERT
-                        INTO payerpayee (id, user_id, name, payerPayeeType_id, external_link_type_id, external_link_id)
+                        INTO payerpayee (id, user_id, name, payerPayeeType_id, external_link_type_id, external_link_id, profile_id)
                         SELECT ins.payerPayeeId,
                                u.id,
                                ins.payerPayeeName,
                                p.id,
                                p2.id,
-                               ins.externalId
+                               ins.externalId,
+                               ins.profileId
                         FROM ins
                                  JOIN payerpayeetype p ON p.name = ins.payerPayeeType
                                  JOIN payerpayeeexternallinktype p2 on p2.name = ins.externalLinkType
@@ -166,7 +167,8 @@ namespace TransactionService.Repositories.CockroachDb
                         payerPayeeName = newPayerPayee.PayerPayeeName,
                         payerPayeeType,
                         externalLinkId = string.IsNullOrEmpty(newPayerPayee.ExternalId) ? "Custom" : "Google",
-                        externalId = newPayerPayee.ExternalId ?? ""
+                        externalId = newPayerPayee.ExternalId ?? "",
+                        profileId = _userContext.ProfileId
                     });
                 }
                 catch (PostgresException ex)

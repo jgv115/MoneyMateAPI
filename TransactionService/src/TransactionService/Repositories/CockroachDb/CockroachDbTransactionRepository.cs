@@ -165,14 +165,14 @@ namespace TransactionService.Repositories.CockroachDb
         public async Task StoreTransaction(Domain.Models.Transaction newTransaction)
         {
             var query = @"
-                WITH ins (transaction_id, user_identifier, timestamp, transaction_type, amount, subcategory, payerpayeeid, notes) AS
+                WITH ins (transaction_id, user_identifier, timestamp, transaction_type, amount, subcategory, payerpayeeid, notes, profile_id) AS
                          (VALUES (@transaction_id, @user_identifier, @transaction_timestamp, @transaction_type, @amount, @subcategory,
-                                  @payerpayeeid, @notes)),
+                                  @payerpayeeid, @notes, @profile_id)),
                      userRow as (SELECT id
                                  FROM users
                                  where user_identifier = (SELECT ins.user_identifier from ins))
                 UPSERT
-                INTO transaction (id, user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerPayee_id, notes)
+                INTO transaction (id, user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerPayee_id, notes, profile_id)
                 SELECT ins.transaction_id,
                        u.id,
                        ins.timestamp,
@@ -180,7 +180,8 @@ namespace TransactionService.Repositories.CockroachDb
                        ins.amount,
                        cs.SUBCATEGORYID,
                        ins.payerpayeeid,
-                       ins.notes
+                       ins.notes,
+                       ins.profile_id
                 FROM ins
                          JOIN users u ON u.user_identifier = ins.user_identifier
                          JOIN transactiontype tt ON tt.name = ins.transaction_type
@@ -201,7 +202,8 @@ namespace TransactionService.Repositories.CockroachDb
                     payerpayeeid = Guid.TryParse(newTransaction.PayerPayeeId, out var payerPayeeId)
                         ? payerPayeeId
                         : (Guid?) null,
-                    notes = newTransaction.Note
+                    notes = newTransaction.Note,
+                    profile_id = _userContext.ProfileId
                 });
             }
         }

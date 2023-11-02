@@ -6,8 +6,6 @@ using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
 using TransactionService.Repositories;
-using TransactionService.Repositories.DynamoDb;
-using TransactionService.Repositories.DynamoDb.Models;
 using TransactionService.Services.PayerPayeeEnricher;
 
 namespace TransactionService.Domain.Services.PayerPayees

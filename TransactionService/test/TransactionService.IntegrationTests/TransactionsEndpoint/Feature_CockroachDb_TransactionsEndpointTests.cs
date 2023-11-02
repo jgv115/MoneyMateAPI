@@ -31,7 +31,7 @@ public class Feature_CockroachDb_TransactionsEndpointTests : IClassFixture<Money
                 {
                     ["CockroachDb:Enabled"] = "true"
                 }))).CreateClient();
-        _cockroachDbIntegrationTestHelper = new CockroachDbIntegrationTestHelper();
+        _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 
     public async Task InitializeAsync()

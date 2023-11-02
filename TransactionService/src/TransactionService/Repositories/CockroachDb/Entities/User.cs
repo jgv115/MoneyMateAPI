@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace TransactionService.Repositories.CockroachDb.Entities
 {
@@ -7,6 +6,5 @@ namespace TransactionService.Repositories.CockroachDb.Entities
     {
         public Guid Id { get; init; }
         public string UserIdentifier { get; init; }
-        public List<Category> Categories { get; init; }
     }
 }
