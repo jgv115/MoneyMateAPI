@@ -1,6 +1,6 @@
-FROM public.ecr.aws/lambda/dotnet:6 AS base
+FROM public.ecr.aws/lambda/dotnet:7 AS base
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0.101-bullseye-slim as build
+FROM mcr.microsoft.com/dotnet/sdk:7.0.403-bullseye-slim as build
 WORKDIR /src
 COPY ["TransactionService.csproj", "TransactionService/"]
 RUN dotnet restore "TransactionService/TransactionService.csproj"
