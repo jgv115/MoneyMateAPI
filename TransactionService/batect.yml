@@ -16,7 +16,7 @@ project_name: moneymate_api
 
 containers:
   dotnet_build_env:
-    image: mcr.microsoft.com/dotnet/sdk:6.0.101
+    image: mcr.microsoft.com/dotnet/sdk:7.0.403
     environment:
       ASPNETCORE_URLS: http://*:5000
       ASPNETCORE_ENVIRONMENT: dev
