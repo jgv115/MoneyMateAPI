@@ -111,7 +111,7 @@ containers:
       timeout: 10s
   
   cockroachdb:
-    image: cockroachdb/cockroach:v22.2.6
+    image: cockroachdb/cockroach:v23.1.11
     ports:
       - local: 26257
         container: 26257

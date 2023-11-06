@@ -165,12 +165,9 @@ namespace TransactionService.Repositories.CockroachDb
         public async Task StoreTransaction(Domain.Models.Transaction newTransaction)
         {
             var query = @"
-                WITH ins (transaction_id, user_identifier, timestamp, transaction_type, amount, subcategory, payerpayeeid, notes, profile_id) AS
-                         (VALUES (@transaction_id, @user_identifier, @transaction_timestamp, @transaction_type, @amount, @subcategory,
-                                  @payerpayeeid, @notes, @profile_id)),
-                     userRow as (SELECT id
-                                 FROM users
-                                 where user_identifier = (SELECT ins.user_identifier from ins))
+                WITH ins (transaction_id, user_identifier, timestamp, transaction_type, amount, category, subcategory, payerpayeeid, notes, profile_id) AS
+                         (VALUES (@transaction_id, @user_identifier, @transaction_timestamp, @transaction_type, @amount, @category, @subcategory,
+                                  @payerpayeeid, @notes, @profile_id))
                 UPSERT
                 INTO transaction (id, user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerPayee_id, notes, profile_id)
                 SELECT ins.transaction_id,
@@ -186,7 +183,7 @@ namespace TransactionService.Repositories.CockroachDb
                          JOIN users u ON u.user_identifier = ins.user_identifier
                          JOIN transactiontype tt ON tt.name = ins.transaction_type
                          JOIN categories_and_subcategories cs
-                              on u.user_identifier = cs.user_identifier AND SUBCATEGORYNAME = ins.subcategory;
+                              on u.user_identifier = cs.user_identifier AND SUBCATEGORYNAME = ins.subcategory AND categoryname = ins.category;
             ";
 
             using (var connection = _context.CreateConnection())
@@ -198,6 +195,7 @@ namespace TransactionService.Repositories.CockroachDb
                     transaction_timestamp = DateTimeOffset.Parse(newTransaction.TransactionTimestamp),
                     transaction_type = newTransaction.TransactionType,
                     amount = newTransaction.Amount,
+                    category = newTransaction.Category,
                     subcategory = newTransaction.Subcategory,
                     payerpayeeid = Guid.TryParse(newTransaction.PayerPayeeId, out var payerPayeeId)
                         ? payerPayeeId
