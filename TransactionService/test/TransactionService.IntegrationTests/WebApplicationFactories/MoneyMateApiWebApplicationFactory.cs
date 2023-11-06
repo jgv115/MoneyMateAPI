@@ -5,7 +5,6 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using TransactionService.Constants;
 using TransactionService.IntegrationTests.Helpers;
 
 namespace TransactionService.IntegrationTests.WebApplicationFactories

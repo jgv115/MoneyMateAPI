@@ -156,6 +156,10 @@ namespace TransactionService
             app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/health"),
                 builder => builder.UseMiddleware<UserContextMiddleware>());
 
+            app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/health") &&
+                                   !context.Request.Path.StartsWithSegments("/api/profiles"),
+                builder => builder.UseMiddleware<UserProfileMiddleware>());
+
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
