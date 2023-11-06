@@ -40,11 +40,12 @@ public class CockroachDbIntegrationTestHelper
     private Guid TestUserId { get; set; }
 
     // TODO: need to make this a bit easier to understand
-    private string TestUserIdentifier { get; } = "auth0|moneymatetest";
+    public string TestUserIdentifier { get; } = "auth0|moneymatetest";
     private TransactionTypeIds TransactionTypeIds { get; set; }
     private IMapper Mapper { get; init; }
     private CockroachDbTransactionRepository TransactionRepository { get; init; }
     private CockroachDbCategoriesRepository CategoriesRepository { get; init; }
+    private CockroachDbProfilesRepository ProfilesRepository { get; init; }
 
     public CockroachDbIntegrationTestHelper(Guid testUserId)
     {
@@ -79,6 +80,11 @@ public class CockroachDbIntegrationTestHelper
         {
             UserId = TestUserIdentifier
         });
+
+        ProfilesRepository = new CockroachDbProfilesRepository(DapperContext, new CurrentUserContext
+        {
+            UserId = TestUserIdentifier
+        });
     }
 
     public async Task SeedRequiredData()
@@ -91,7 +97,7 @@ public class CockroachDbIntegrationTestHelper
                 new()
                 {
                     Id = TestUserId,
-                    UserIdentifier = "auth0|moneymatetest"
+                    UserIdentifier = TestUserIdentifier
                 }
             });
 
@@ -158,6 +164,8 @@ public class CockroachDbIntegrationTestHelper
                 }));
         }
     }
+
+    public Task<List<Profile>> RetrieveProfiles() => ProfilesRepository.GetProfiles();
 
     public async Task WriteTransactionsIntoDb(List<Transaction> transactions)
     {

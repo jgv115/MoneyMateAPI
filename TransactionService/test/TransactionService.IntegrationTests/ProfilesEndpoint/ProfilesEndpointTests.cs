@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Mime;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TransactionService.Controllers.Profiles.Dtos;
 using TransactionService.Domain.Models;
 using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
@@ -42,10 +45,11 @@ public class ProfilesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFac
         await response.AssertSuccessfulStatusCode();
 
         var returnedProfilesString = await response.Content.ReadAsStringAsync();
-        var returnedProfiles = JsonSerializer.Deserialize<List<Profile>>(returnedProfilesString, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var returnedProfiles = JsonSerializer.Deserialize<List<Profile>>(returnedProfilesString,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
         Assert.Equal(new List<Profile>
         {
@@ -55,5 +59,29 @@ public class ProfilesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFac
                 DisplayName = "Default Profile"
             }
         }, returnedProfiles);
+    }
+
+    [Fact]
+    public async Task GivenCreateProfileRequest_ThenProfileIsFoundInDb()
+    {
+        const string expectedProfileName = "new profile 123";
+
+        var inputDto = new CreateProfileDto
+        {
+            DisplayName = expectedProfileName
+        };
+        var response =
+            await _httpClient.PostAsync("/api/profiles",
+                new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, MediaTypeNames.Application.Json));
+
+        await response.AssertSuccessfulStatusCode();
+
+        var storedProfiles = await _cockroachDbIntegrationTestHelper.RetrieveProfiles();
+
+        storedProfiles.Sort((profile, profile1) =>
+            String.Compare(profile.DisplayName, profile1.DisplayName, StringComparison.Ordinal));
+
+        Assert.Collection(storedProfiles, profile => Assert.Equal("Default Profile", profile.DisplayName),
+            profile => Assert.Equal(expectedProfileName, profile.DisplayName));
     }
 }

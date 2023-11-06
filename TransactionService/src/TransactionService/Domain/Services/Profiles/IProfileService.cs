@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TransactionService.Domain.Models;
 
-namespace TransactionService.Repositories;
+namespace TransactionService.Domain.Services.Profiles;
 
-public interface IProfilesRepository
+public interface IProfileService
 {
     public Task<List<Profile>> GetProfiles();
-    public Task CreateProfile(string displayName);
+    public Task CreateProfile(string profileDisplayName);
 }

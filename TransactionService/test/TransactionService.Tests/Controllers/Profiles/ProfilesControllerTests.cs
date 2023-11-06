@@ -4,20 +4,21 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TransactionService.Controllers.Profiles;
+using TransactionService.Controllers.Profiles.Dtos;
 using TransactionService.Domain.Models;
-using TransactionService.Repositories;
+using TransactionService.Domain.Services.Profiles;
 using Xunit;
 
 namespace TransactionService.Tests.Controllers.Profiles;
 
 public class ProfilesControllerTests
 {
-    private readonly Mock<IProfilesRepository> _mockProfilesRepository = new();
+    private readonly Mock<IProfileService> _mockProfileService = new();
 
     [Fact]
-    public async Task GivenRepositoryReturnsProfiles_WhenGetInvoked_ThenOkReturnedWithProfiles()
+    public async Task GivenServiceReturnsProfiles_WhenGetInvoked_ThenOkReturnedWithProfiles()
     {
-        var controller = new ProfilesController(_mockProfilesRepository.Object);
+        var controller = new ProfilesController(_mockProfileService.Object);
 
         var expectedProfiles = new List<Profile>
         {
@@ -33,13 +34,31 @@ public class ProfilesControllerTests
             }
         };
 
-        _mockProfilesRepository.Setup(repository => repository.GetProfiles()).ReturnsAsync(expectedProfiles);
+        _mockProfileService.Setup(service => service.GetProfiles()).ReturnsAsync(expectedProfiles);
         var response = await controller.Get();
 
         var responseObject = Assert.IsType<OkObjectResult>(response);
 
         var returnedProfiles = responseObject.Value as List<Profile>;
-        
+
         Assert.Equal(expectedProfiles, returnedProfiles);
+    }
+
+    [Fact]
+    public async Task GivenServiceSuccessful_WhenCreateInvoked_ThenNoContentReturned()
+    {
+        var controller = new ProfilesController(_mockProfileService.Object);
+
+        const string expectedNewProfileName = "new Profile 123";
+        _mockProfileService.Setup(service => service.CreateProfile(expectedNewProfileName)).Verifiable();
+
+        var response = await controller.Create(new CreateProfileDto
+        {
+            DisplayName = expectedNewProfileName
+        });
+
+        Assert.IsType<NoContentResult>(response);
+
+        _mockProfileService.Verify(service => service.CreateProfile(expectedNewProfileName), Times.Once);
     }
 }

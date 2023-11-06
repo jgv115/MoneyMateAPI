@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using TransactionService.Controllers.Profiles.Dtos;
+using TransactionService.Domain.Services.Profiles;
 using TransactionService.Repositories;
 
 namespace TransactionService.Controllers.Profiles
@@ -8,18 +10,26 @@ namespace TransactionService.Controllers.Profiles
     [Route("api/[controller]")]
     public class ProfilesController : ControllerBase
     {
-        private readonly IProfilesRepository _profilesRepository;
+        private readonly IProfileService _profileService;
 
-        public ProfilesController(IProfilesRepository profilesRepository)
+        public ProfilesController(IProfileService profileService)
         {
-            _profilesRepository = profilesRepository;
+            _profileService = profileService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var profiles = await _profilesRepository.GetProfiles();
+            var profiles = await _profileService.GetProfiles();
             return Ok(profiles);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateProfileDto createProfileDto)
+        {
+            await _profileService.CreateProfile(createProfileDto.DisplayName);
+
+            return NoContent();
         }
     }
 }

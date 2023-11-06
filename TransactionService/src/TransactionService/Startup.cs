@@ -18,6 +18,7 @@ using Microsoft.Extensions.Options;
 using TransactionService.Domain.Services.Categories;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Domain.Services.PayerPayees;
+using TransactionService.Domain.Services.Profiles;
 using TransactionService.Domain.Services.Transactions;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
@@ -79,6 +80,7 @@ namespace TransactionService
             services.AddSingleton<ITimePeriodHelper, TimePeriodHelper>();
 
             services.AddScoped<CurrentUserContext>();
+            services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<ITransactionHelperService, TransactionHelperService>();
             services.AddScoped<ICategoriesService, CategoriesService>();
             services.AddScoped<IUpdateCategoryOperationFactory, UpdateCategoryOperationFactory>();
@@ -123,7 +125,6 @@ namespace TransactionService
             var cockroachDbConnectionString =
                 cockroachDbConfigSection.GetValue<string>("ConnectionString");
 
-            Console.WriteLine($"Connection string is: {cockroachDbConnectionString}");
             services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
 
             services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
