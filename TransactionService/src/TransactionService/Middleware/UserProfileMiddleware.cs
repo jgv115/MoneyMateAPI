@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TransactionService.Constants;
+using TransactionService.Domain.Services.Profiles;
 using TransactionService.Middleware.Exceptions;
-using TransactionService.Repositories;
 
 namespace TransactionService.Middleware
 {
@@ -18,14 +18,15 @@ namespace TransactionService.Middleware
         }
 
         public async Task Invoke(HttpContext httpContext, CurrentUserContext userContext,
-            IProfilesRepository profilesRepository)
+            IProfileService profileService)
         {
             var profileIdHeaderFound =
                 httpContext.Request.Headers.TryGetValue(Headers.ProfileId, out var profileId);
 
+            // TODO: this will be here temporarily
             if (!profileIdHeaderFound)
             {
-                var profiles = await profilesRepository.GetProfiles();
+                var profiles = await profileService.GetProfiles();
                 userContext.ProfileId = profiles.First().Id;
             }
             else
@@ -34,6 +35,10 @@ namespace TransactionService.Middleware
 
                 if (!profileIdIsValidGuid)
                     throw new InvalidProfileIdException($"{Headers.ProfileId} is not a valid guid");
+
+                if (!await profileService.VerifyProfileBelongsToCurrentUser(profileIdGuid))
+                    throw new ProfileIdForbiddenException(
+                        $"User: {userContext.UserId} does not have permissions to access Profile: {profileIdGuid}");
 
                 userContext.ProfileId = profileIdGuid;
             }

@@ -1,59 +1,74 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Moq;
-using TransactionService.Constants;
 using TransactionService.Domain.Models;
+using TransactionService.Domain.Services.Profiles;
 using TransactionService.Middleware;
 using TransactionService.Middleware.Exceptions;
-using TransactionService.Repositories;
+using TransactionService.Tests.Middleware.Helpers;
 using Xunit;
 
 namespace TransactionService.Tests.Middleware;
 
 public class UserProfileMiddlewareTests
 {
-    private readonly Mock<IProfilesRepository> _profilesRepository = new();
-    
+    private readonly Mock<IProfileService> _mockProfileService = new();
 
     [Fact]
-    public async void GivenMoneyMateProfileHeader_ThenProfileIdSetInCurrentUserContext()
+    public async void GivenMoneyMateProfileHeaderAndProfileBelongsToUser_ThenProfileIdSetInCurrentUserContext()
     {
         var userId = "userId123";
         var profileId = Guid.NewGuid();
         var currentUserContext = new CurrentUserContext();
 
-        var httpContext = new DefaultHttpContext();
-        var identity = new ClaimsIdentity("ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
-            ClaimsIdentity.DefaultRoleClaimType);
-        identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
-        httpContext.User = new ClaimsPrincipal(identity);
-        httpContext.Request.Headers["MoneyMate-Profile-Id"] = profileId.ToString();
+        var httpContext = new TestHttpContextBuilder()
+            .WithUserId(userId)
+            .WithMoneyMateProfileHeader(profileId.ToString())
+            .Build();
 
         var sut = new UserProfileMiddleware(async _ => await Task.Delay(0));
-        await sut.Invoke(httpContext, currentUserContext, _profilesRepository.Object);
+
+        _mockProfileService.Setup(service => service.VerifyProfileBelongsToCurrentUser(profileId)).ReturnsAsync(true);
+
+        await sut.Invoke(httpContext, currentUserContext, _mockProfileService.Object);
 
         Assert.Equal(profileId, currentUserContext.ProfileId);
     }
 
     [Fact]
-    public async void GivenMissingMoneyMateProfileHeader_ThenProfileIdSetToFirstProfileReturnedFromRepository()
+    public async void GivenMoneyMateProfileHeaderAndProfileDoesNotBelongToUser_ThenProfileIdForbiddenExceptionThrown()
+    {
+        var userId = "userId123";
+        var profileId = Guid.NewGuid();
+        var currentUserContext = new CurrentUserContext();
+
+        var httpContext = new TestHttpContextBuilder()
+            .WithUserId(userId)
+            .WithMoneyMateProfileHeader(profileId.ToString())
+            .Build();
+
+        var sut = new UserProfileMiddleware(async _ => await Task.Delay(0));
+
+        _mockProfileService.Setup(service => service.VerifyProfileBelongsToCurrentUser(profileId)).ReturnsAsync(false);
+
+        await Assert.ThrowsAsync<ProfileIdForbiddenException>(() =>
+            sut.Invoke(httpContext, currentUserContext, _mockProfileService.Object));
+    }
+
+    [Fact]
+    public async void GivenMissingMoneyMateProfileHeader_ThenProfileIdSetToFirstProfileReturnedFromService()
     {
         var userId = "userId123";
         var currentUserContext = new CurrentUserContext();
 
-        var httpContext = new DefaultHttpContext();
-        var identity = new ClaimsIdentity("ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
-            ClaimsIdentity.DefaultRoleClaimType);
-        identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
-        httpContext.User = new ClaimsPrincipal(identity);
+        var httpContext = new TestHttpContextBuilder().WithUserId(userId).Build();
 
         var sut = new UserProfileMiddleware(async _ => await Task.Delay(0));
 
         var profileId = Guid.NewGuid();
-        _profilesRepository.Setup(repository => repository.GetProfiles()).ReturnsAsync(new List<Profile>
+        _mockProfileService.Setup(service => service.GetProfiles()).ReturnsAsync(new List<Profile>
         {
             new()
             {
@@ -62,7 +77,7 @@ public class UserProfileMiddlewareTests
             }
         });
 
-        await sut.Invoke(httpContext, currentUserContext, _profilesRepository.Object);
+        await sut.Invoke(httpContext, currentUserContext, _mockProfileService.Object);
 
         Assert.Equal(profileId, currentUserContext.ProfileId);
     }
@@ -73,17 +88,15 @@ public class UserProfileMiddlewareTests
         var userId = "userId123";
         var currentUserContext = new CurrentUserContext();
 
-        var httpContext = new DefaultHttpContext();
-        var identity = new ClaimsIdentity("ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
-            ClaimsIdentity.DefaultRoleClaimType);
-        identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
-        httpContext.User = new ClaimsPrincipal(identity);
-        httpContext.Request.Headers[Headers.ProfileId] = "invalid";
+        var httpContext = new TestHttpContextBuilder()
+            .WithUserId(userId)
+            .WithMoneyMateProfileHeader("invalid")
+            .Build();
 
         var sut = new UserProfileMiddleware(async _ => await Task.Delay(0));
 
         await Assert.ThrowsAsync<InvalidProfileIdException>(() =>
-            sut.Invoke(httpContext, currentUserContext, _profilesRepository.Object));
+            sut.Invoke(httpContext, currentUserContext, _mockProfileService.Object));
     }
 
     [Fact]
@@ -91,6 +104,6 @@ public class UserProfileMiddlewareTests
     {
         var sut = new UserProfileMiddleware(async _ => await Task.Delay(0));
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            sut.Invoke(new DefaultHttpContext(), new CurrentUserContext(), _profilesRepository.Object));
+            sut.Invoke(new DefaultHttpContext(), new CurrentUserContext(), _mockProfileService.Object));
     }
 }

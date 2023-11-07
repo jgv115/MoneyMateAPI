@@ -20,6 +20,29 @@ public class CockroachDbProfilesRepository : IProfilesRepository
         _userContext = userContext;
     }
 
+    public async Task<Profile> GetProfile(Guid profileId)
+    {
+        var query = @"SELECT p.id, p.display_name as displayName from userprofile up
+                        LEFT JOIN users u on up.user_id = u.id
+                        LEFT JOIN profile p on up.profile_id = p.id
+                        WHERE p.id = @profile_id and u.user_identifier = @user_identifier";
+
+        using (var connection = _context.CreateConnection())
+        {
+            try
+            {
+                var profile = await connection.QuerySingleAsync<Profile>(query,
+                    new {profile_id = profileId, user_identifier = _userContext.UserId});
+                return profile;
+            }
+            catch (InvalidOperationException)
+            {
+                throw new RepositoryItemDoesNotExist(
+                    $"ProfileId: {profileId} does not exist for user: {_userContext.UserId}");
+            }
+        }
+    }
+
     public async Task<List<Profile>> GetProfiles()
     {
         var query =

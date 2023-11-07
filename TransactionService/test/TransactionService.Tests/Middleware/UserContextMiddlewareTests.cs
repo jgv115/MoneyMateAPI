@@ -1,8 +1,8 @@
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TransactionService.Middleware;
+using TransactionService.Tests.Middleware.Helpers;
 using Xunit;
 
 namespace TransactionService.Tests.Middleware
@@ -16,12 +16,8 @@ namespace TransactionService.Tests.Middleware
             var profileId = Guid.NewGuid();
             var currentUserContext = new CurrentUserContext();
 
-            var httpContext = new DefaultHttpContext();
-            var identity = new ClaimsIdentity("ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
-                ClaimsIdentity.DefaultRoleClaimType);
-            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
-            httpContext.User = new ClaimsPrincipal(identity);
-            httpContext.Request.Headers["MoneyMate-Profile-Id"] = profileId.ToString();
+            var httpContext = new TestHttpContextBuilder().WithUserId(userId)
+                .WithMoneyMateProfileHeader(profileId.ToString()).Build();
 
             var sut = new UserContextMiddleware(async _ => await Task.Delay(0));
             await sut.Invoke(httpContext, currentUserContext);

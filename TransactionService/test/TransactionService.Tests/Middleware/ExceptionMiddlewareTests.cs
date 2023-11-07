@@ -154,6 +154,32 @@ public class ExceptionMiddlewareTests
     }
 
     [Fact]
+    public async Task GivenProfileIdForbiddenExceptionThrown_ThenCorrectProblemDetailsReturned()
+    {
+        const string expectedMessage = "profileId forbidden";
+        var middleware = new ExceptionMiddleware(_ => throw new ProfileIdForbiddenException(expectedMessage));
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Response.Body = new MemoryStream();
+        var mockLogger = new Mock<ILogger<ExceptionMiddleware>>();
+
+        await middleware.Invoke(httpContext, mockLogger.Object);
+
+        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
+        var reader = new StreamReader(httpContext.Response.Body);
+        var responseBodyString = reader.ReadToEnd();
+
+        var expectedResponseBody = new ProblemDetails
+        {
+            Status = 403,
+            Title = "User does not have access to this profile",
+            Detail = expectedMessage
+        };
+
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+    }
+    
+    [Fact]
     public async Task GivenUnknownExceptionThrown_ThenCorrectProblemDetailsReturned()
     {
         var middleware = new ExceptionMiddleware(_ =>

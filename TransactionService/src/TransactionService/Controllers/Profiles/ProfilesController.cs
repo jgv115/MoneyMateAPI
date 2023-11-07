@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TransactionService.Controllers.Profiles.Dtos;
 using TransactionService.Domain.Services.Profiles;
-using TransactionService.Repositories;
 
 namespace TransactionService.Controllers.Profiles
 {

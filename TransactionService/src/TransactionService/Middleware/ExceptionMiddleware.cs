@@ -82,6 +82,16 @@ namespace TransactionService.Middleware
                             Detail = ex.Message
                         };
                         break;
+                    
+                    case ProfileIdForbiddenException:
+                        returnedStatusCode = (int) HttpStatusCode.Forbidden;
+                        problemDetails = new ProblemDetails
+                        {
+                            Status = returnedStatusCode,
+                            Title = "User does not have access to this profile",
+                            Detail = ex.Message
+                        };
+                        break;
 
                     default:
                         returnedStatusCode = (int) HttpStatusCode.InternalServerError;
