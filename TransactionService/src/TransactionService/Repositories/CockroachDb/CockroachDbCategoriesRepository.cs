@@ -58,17 +58,16 @@ namespace TransactionService.Repositories.CockroachDb
         public async Task<Domain.Models.Category> GetCategory(string categoryName)
         {
             var query =
-                @"SELECT c.Id, u.Id as UserId, c.name as Name, tt.name as TransactionType, s.Id, s.Name as Name FROM category c
-                            JOIN users u on c.user_id = u.id
+                @"SELECT c.Id, c.name as Name, tt.name as TransactionType, s.Id, s.Name as Name FROM category c
                             LEFT JOIN subcategory s on c.id = s.category_id
                             JOIN transactiontype tt on c.transaction_type_id = tt.id
-                            WHERE c.name = @categoryName and u.user_identifier = @user_identifier
+                            WHERE c.name = @categoryName and c.profile_id = @profile_id
                             ORDER BY s.name ASC";
 
             using (var connection = _context.CreateConnection())
             {
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
-                    new {user_identifier = _userContext.UserId, categoryName});
+                    new {profile_id = _userContext.ProfileId, categoryName});
                 return _mapper.Map<Category, Domain.Models.Category>(categories.FirstOrDefault((Category) null));
             }
         }
@@ -76,16 +75,16 @@ namespace TransactionService.Repositories.CockroachDb
         public async Task<IEnumerable<Domain.Models.Category>> GetAllCategories()
         {
             var query =
-                @"SELECT c.id, u.id as UserId, c.name as Name, tt.name as TransactionType, s.Id, s.name as Name FROM category c
-                    JOIN users u ON c.user_id = u.id and u.user_identifier = @user_identifier
+                @"SELECT c.id, c.name as Name, tt.name as TransactionType, s.Id, s.name as Name FROM category c
                     LEFT JOIN subcategory s on c.id = s.category_id
                     JOIN transactiontype tt on c.transaction_type_id = tt.id
+                    WHERE c.profile_id = @profile_id
                     ORDER BY c.name, s.name ASC";
 
             using (var connection = _context.CreateConnection())
             {
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
-                    new {user_identifier = _userContext.UserId});
+                    new {profile_id = _userContext.ProfileId});
                 return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories);
             }
         }
@@ -94,17 +93,16 @@ namespace TransactionService.Repositories.CockroachDb
             TransactionType transactionType)
         {
             var query =
-                @"SELECT c.id, u.id as UserId, c.name as Name, tt.name as TransactionType, s.Id, s.name as Name FROM category c
-                    JOIN users u on c.user_id = u.id
+                @"SELECT c.id, c.name as Name, tt.name as TransactionType, s.Id, s.name as Name FROM category c
                     LEFT JOIN subcategory s on c.id = s.category_id
                     JOIN transactiontype tt on c.transaction_type_id = tt.id
-                    WHERE tt.name = @transaction_type and u.user_identifier = @user_identifier
+                    WHERE tt.name = @transaction_type and c.profile_id = @profile_id
                     ORDER BY s.name ASC";
 
             using (var connection = _context.CreateConnection())
             {
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
-                    new {user_identifier = _userContext.UserId, transaction_type = transactionType.ToProperString()});
+                    new {profile_id = _userContext.ProfileId, transaction_type = transactionType.ToProperString()});
 
                 return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories);
             }
@@ -174,15 +172,15 @@ namespace TransactionService.Repositories.CockroachDb
             {
                 var query = @"
                     UPDATE category SET name = @new_category_name
-                    FROM users u 
-                    WHERE u.user_identifier = @user_identifier
+                    WHERE profile_id = @profile_id
                         AND name = @category_name
                     ";
 
                 await connection.ExecuteAsync(query,
                     new
                     {
-                        new_category_name = newCategoryName, user_identifier = _userContext.UserId,
+                        new_category_name = newCategoryName, 
+                        profile_id = _userContext.ProfileId,
                         category_name = category.CategoryName
                     });
             }
@@ -193,14 +191,13 @@ namespace TransactionService.Repositories.CockroachDb
             // TODO: query transactions to see if there are any with category attached
             // TODO: throw an error if there are
             // TODO: if not, then delete the category
-            var deleteCategoryQuery = @"WITH user_row AS (SELECT id FROM users where user_identifier = @user_identifier)
-                                        DELETE FROM category WHERE user_id = (SELECT * FROM user_row)
+            var deleteCategoryQuery = @"DELETE FROM category WHERE profile_id = @profile_id
                                         AND category.name = @category_name";
 
             using (var connection = _context.CreateConnection())
             {
                 await connection.ExecuteAsync(deleteCategoryQuery,
-                    new {user_identifier = _userContext.UserId, category_name = categoryName});
+                    new {profile_id = _userContext.ProfileId, category_name = categoryName});
             }
         }
 
@@ -209,13 +206,12 @@ namespace TransactionService.Repositories.CockroachDb
             var query =
                 @"SELECT subcategory.name FROM subcategory 
                     JOIN category c ON c.id = subcategory.category_id
-                    JOIN users u ON u.id = c.user_id and u.user_identifier = @user_identifier
-                    WHERE c.name = @category_name";
+                    WHERE c.name = @category_name and c.profile_id = @profile_id";
 
             using (var connection = _context.CreateConnection())
             {
                 var subcategory = await connection.QueryAsync<string>(query,
-                    new {user_identifier = _userContext.UserId, category_name = category});
+                    new {profile_id = _userContext.ProfileId, category_name = category});
 
                 return subcategory;
             }
@@ -243,9 +239,8 @@ namespace TransactionService.Repositories.CockroachDb
             {
                 var query = @"
                     UPDATE subcategory SET name = @new_subcategory_name
-                    FROM users u 
-                    JOIN category c ON u.id = c.user_id
-                    WHERE u.user_identifier = @user_identifier
+                    FROM category c
+                    WHERE c.profile_id = @profile_id
                         AND c.name = @category_name 
                         AND subcategory.name = @subcategory_name
                     ";
@@ -253,7 +248,7 @@ namespace TransactionService.Repositories.CockroachDb
                 await connection.ExecuteAsync(query,
                     new
                     {
-                        new_subcategory_name = newSubcategoryName, user_identifier = _userContext.UserId,
+                        new_subcategory_name = newSubcategoryName, profile_id = _userContext.ProfileId,
                         category_name = categoryName, subcategory_name = subcategoryName
                     });
             }

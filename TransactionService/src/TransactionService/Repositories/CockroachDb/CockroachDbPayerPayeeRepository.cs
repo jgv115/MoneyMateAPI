@@ -63,7 +63,6 @@ namespace TransactionService.Repositories.CockroachDb
             var query =
                 @"
                 SELECT payerpayee.id,
-                       u.id           as userId,
                        payerpayee.name             as name,
                        payerpayee.external_link_id as externalLinkId,
                        ppt.id,
@@ -71,18 +70,17 @@ namespace TransactionService.Repositories.CockroachDb
                        pext.id,
                        pext.name                   as name
                 FROM payerpayee
-                         JOIN users u on payerpayee.user_id = u.id
                          LEFT JOIN payerpayeetype ppt on payerpayee.payerpayeetype_id = ppt.id
                          LEFT JOIN payerpayeeexternallinktype pext
                                    on payerpayee.external_link_type_id = pext.id
-                WHERE u.user_identifier = @user_identifier and ppt.name = @payerPayeeType
+                WHERE payerpayee.profile_id = @profile_id and ppt.name = @payerPayeeType
                 LIMIT 20
                 ";
 
             using (var connection = _context.CreateConnection())
             {
                 var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
-                    new {user_identifier = _userContext.UserId, payerPayeeType});
+                    new {profile_id = _userContext.ProfileId, payerPayeeType});
 
                 return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.Models.PayerPayee>>(payerPayees);
             }
@@ -93,7 +91,6 @@ namespace TransactionService.Repositories.CockroachDb
             var query =
                 @"
                 SELECT payerpayee.id,
-                       u.id           as userId,
                        payerpayee.name             as name,
                        payerpayee.external_link_id as externalLinkId,
                        ppt.id,
@@ -101,12 +98,11 @@ namespace TransactionService.Repositories.CockroachDb
                        pext.id,
                        pext.name                   as name
                 FROM payerpayee
-                         JOIN users u on payerpayee.user_id = u.id
                          LEFT JOIN payerpayeetype ppt on payerpayee.payerpayeetype_id = ppt.id
                          LEFT JOIN payerpayeeexternallinktype pext
                                    on payerpayee.external_link_type_id = pext.id
                 WHERE 
-                    u.user_identifier = @user_identifier 
+                    payerpayee.profile_id = @profile_id 
                     AND ppt.name = @payerPayeeType
                     AND payerpayee.id = @payerPayeeId
                 ";
@@ -114,7 +110,7 @@ namespace TransactionService.Repositories.CockroachDb
             using (var connection = _context.CreateConnection())
             {
                 var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
-                    new {user_identifier = _userContext.UserId, payerPayeeType, payerPayeeId});
+                    new {profile_id = _userContext.ProfileId, payerPayeeType, payerPayeeId});
 
                 return _mapper.Map<PayerPayee, Domain.Models.PayerPayee>(
                     payerPayees.FirstOrDefault((PayerPayee) null));
@@ -208,7 +204,6 @@ namespace TransactionService.Repositories.CockroachDb
             var query =
                 @"
                 SELECT payerpayee.id,
-                       u.id           as userId,
                        payerpayee.name             as name,
                        payerpayee.external_link_id as externalLinkId,
                        ppt.id,
@@ -216,12 +211,11 @@ namespace TransactionService.Repositories.CockroachDb
                        pext.id,
                        pext.name                   as name
                 FROM payerpayee
-                         JOIN users u on payerpayee.user_id = u.id
                          LEFT JOIN payerpayeetype ppt on payerpayee.payerpayeetype_id = ppt.id
                          LEFT JOIN payerpayeeexternallinktype pext
                                    on payerpayee.external_link_type_id = pext.id
                 WHERE 
-                    u.user_identifier = @user_identifier 
+                    payerpayee.profile_id = @profile_id 
                     AND ppt.name LIKE  @payerPayeeType
                     AND payerpayee.name ILIKE '%' || @payerPayeeName || '%'
                 ";
@@ -231,7 +225,7 @@ namespace TransactionService.Repositories.CockroachDb
                 var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
                     new
                     {
-                        user_identifier = _userContext.UserId,
+                        profile_id = _userContext.ProfileId,
                         payerPayeeType,
                         payerPayeeName = autocompleteQuery
                     });

@@ -73,7 +73,6 @@ namespace TransactionService.Repositories.CockroachDb
         {
             var query =
                 @"SELECT transaction.id,
-                        u.id           as userId,
                         transaction.transaction_timestamp as transactionTimestamp,
                         transaction.amount,
                         transaction.notes as note,
@@ -91,18 +90,17 @@ namespace TransactionService.Repositories.CockroachDb
                         pp.name             as name,
                         pp.external_link_id as externalLinkId
                  FROM transaction
-                         JOIN users u on transaction.user_id = u.id
                          LEFT JOIN transactiontype tt on transaction.transaction_type_id = tt.id
                          LEFT JOIN subcategory sc on transaction.subcategory_id = sc.id 
                          LEFT JOIN category c on sc.category_id = c.id
                          LEFT JOIN payerpayee pp on transaction.payerpayee_id = pp.id
-                 WHERE u.user_identifier = @user_identifier and transaction.id = @transactionId
+                 WHERE transaction.profile_id = @profile_id and transaction.id = @transactionId
                  ";
 
             using (var connection = _context.CreateConnection())
             {
                 var transactions = await TransactionDapperHelpers.QueryAndBuildTransactions(connection, query,
-                    new {user_identifier = _userContext.UserId, transactionId});
+                    new {profile_id = _userContext.ProfileId, transactionId});
 
                 return _mapper.Map<Transaction, Domain.Models.Transaction>(
                     transactions.FirstOrDefault((Transaction) null));
@@ -114,7 +112,6 @@ namespace TransactionService.Repositories.CockroachDb
         {
             var query =
                 @"SELECT transaction.id,
-                        u.id           as userId,
                         transaction.transaction_timestamp as transactionTimestamp,
                         transaction.amount,
                         transaction.notes as note,
@@ -132,12 +129,11 @@ namespace TransactionService.Repositories.CockroachDb
                         pp.name             as name,
                         pp.external_link_id as externalLinkId
                  FROM transaction
-                         JOIN users u on transaction.user_id = u.id
                          LEFT JOIN transactiontype tt on transaction.transaction_type_id = tt.id
                          LEFT JOIN subcategory sc on transaction.subcategory_id = sc.id 
                          LEFT JOIN category c on sc.category_id = c.id
                          LEFT JOIN payerpayee pp on transaction.payerpayee_id = pp.id
-                 WHERE u.user_identifier = @user_identifier
+                 WHERE transaction.profile_id = @profile_id
                    AND transaction_timestamp > @start_timestamp AND transaction_timestamp < @end_timestamp
                 ORDER BY transaction.transaction_timestamp
                  ";
@@ -147,7 +143,7 @@ namespace TransactionService.Repositories.CockroachDb
                 var transactions = await TransactionDapperHelpers.QueryAndBuildTransactions(connection, query,
                     new
                     {
-                        user_identifier = _userContext.UserId,
+                        profile_id = _userContext.ProfileId,
                         start_timestamp = dateRange.Start,
                         end_timestamp =
                             DateTime.MaxValue == dateRange.End

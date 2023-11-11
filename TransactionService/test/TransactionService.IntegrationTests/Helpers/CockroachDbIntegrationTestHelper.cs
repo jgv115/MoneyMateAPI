@@ -73,17 +73,20 @@ public class CockroachDbIntegrationTestHelper
         TestUserId = testUserId;
         TransactionRepository = new CockroachDbTransactionRepository(DapperContext, Mapper, new CurrentUserContext
         {
-            UserId = TestUserIdentifier
+            UserId = TestUserIdentifier,
+            ProfileId = TestUserId
         });
 
         CategoriesRepository = new CockroachDbCategoriesRepository(DapperContext, Mapper, new CurrentUserContext
         {
-            UserId = TestUserIdentifier
+            UserId = TestUserIdentifier,
+            ProfileId = TestUserId
         });
 
         ProfilesRepository = new CockroachDbProfilesRepository(DapperContext, new CurrentUserContext
         {
-            UserId = TestUserIdentifier
+            UserId = TestUserIdentifier,
+            ProfileId = TestUserId
         });
     }
 
