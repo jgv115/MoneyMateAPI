@@ -20,6 +20,9 @@ jobs:
         
   deploy_database_prod:
     name: Deploy Database for Prod
+    environment: production
+    needs:
+      - deploy_database_test
     runs-on: ubuntu-latest
     env:
       COCKROACH_DB_URL: ${{secrets.COCKROACH_DB_URL_PROD}}
