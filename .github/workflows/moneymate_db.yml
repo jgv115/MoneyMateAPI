@@ -1,0 +1,33 @@
+name: "MoneyMate_Db"
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  deploy_database_test:
+    name: Deploy Database for Test
+    runs-on: ubuntu-latest
+    env:
+      COCKROACH_DB_URL: ${{secrets.COCKROACH_DB_URL_TEST}}
+      COCKROACH_DB_USER: ${{secrets.COCKROACH_DB_USER}}
+      COCKROACH_DB_PASSWORD: ${{secrets.COCKROACH_DB_PASSWORD}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run flyway migrate
+        run: make run_db_migration
+        working-directory: ./MoneyMateDb
+        
+  deploy_database_prod:
+    name: Deploy Database for Prod
+    runs-on: ubuntu-latest
+    env:
+      COCKROACH_DB_URL: ${{secrets.COCKROACH_DB_URL_PROD}}
+      COCKROACH_DB_USER: ${{secrets.COCKROACH_DB_USER}}
+      COCKROACH_DB_PASSWORD: ${{secrets.COCKROACH_DB_PASSWORD}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run flyway migrate
+        run: make run_db_migration
+        working-directory: ./MoneyMateDb
