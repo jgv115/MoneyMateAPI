@@ -51,26 +51,11 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG TransactionService/src/TransactionService
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-       
-  deploy_database_test:
-    name: Deploy Database for Test
-    needs:
-      - build_and_push_to_ecr
-    runs-on: ubuntu-latest
-    env:
-      COCKROACH_DB_URL: ${{secrets.COCKROACH_DB_URL_TEST}}
-      COCKROACH_DB_USER: ${{secrets.COCKROACH_DB_USER}}
-      COCKROACH_DB_PASSWORD: ${{secrets.COCKROACH_DB_PASSWORD}}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Run flyway migrate
-        run: ./batect -f TransactionService/batect.yml run_flyway_migration
         
   provision_infra_test:
     name: Provision Infra for Test
     needs: 
-      - deploy_database_test
+      - build_and_push_to_ecr
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: test
@@ -85,25 +70,10 @@ jobs:
       - name: Run terraform apply
         run: ./batect -f TransactionService/batect.yml terraform_apply
         
-  deploy_database_prod:
-    name: Deploy Database for Prod
-    needs:
-      - provision_infra_test
-    runs-on: ubuntu-latest
-    env:
-      COCKROACH_DB_URL: ${{secrets.COCKROACH_DB_URL_PROD}}
-      COCKROACH_DB_USER: ${{secrets.COCKROACH_DB_USER}}
-      COCKROACH_DB_PASSWORD: ${{secrets.COCKROACH_DB_PASSWORD}}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Run flyway migrate
-        run: ./batect -f TransactionService/batect.yml run_flyway_migration
-        
   provision_infra_prod:
     name: Provision Infra for Prod
     needs:
-      - deploy_database_prod
+      - provision_infra_test
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: prod
