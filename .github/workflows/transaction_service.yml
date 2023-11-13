@@ -37,7 +37,7 @@ jobs:
         run: make start_db
         working-directory: ./MoneyMateDb
       - name: Run dependencies
-        run: make start_debug_dependencies
+        run: make start_debug_environment
         working-directory: ./TransactionService
       - name: Run integration tests
         run: dotnet test test/TransactionService.IntegrationTests -l "console;verbosity=normal"
