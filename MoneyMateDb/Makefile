@@ -2,7 +2,7 @@ start_db_alone:
 	docker compose up -d db
 
 start_db:
-	docker compose up -d --wait
+	docker compose up --build --wait
 
 run_standalone_db_migration:
 	docker compose up dbmigration --no-deps
