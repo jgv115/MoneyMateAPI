@@ -39,11 +39,8 @@ jobs:
       - name: Run dependencies
         run: make start_debug_environment
         working-directory: ./TransactionService
-      - name: Debug log
-        run: docker version && docker compose logs
-        working-directory: ./MoneyMateDb
       - name: Run integration tests
-        run: docker ps -a && dotnet test test/TransactionService.IntegrationTests -l "console;verbosity=normal"
+        run: dotnet test test/TransactionService.IntegrationTests -l "console;verbosity=normal"
         working-directory: ./TransactionService
 
   build_and_push_to_ecr:
