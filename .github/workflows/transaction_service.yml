@@ -40,7 +40,7 @@ jobs:
         run: make start_debug_environment
         working-directory: ./TransactionService
       - name: Run integration tests
-        run: dotnet test test/TransactionService.IntegrationTests -l "console;verbosity=normal"
+        run: docker ps -a && dotnet test test/TransactionService.IntegrationTests -l "console;verbosity=normal"
         working-directory: ./TransactionService
 
   build_and_push_to_ecr:
