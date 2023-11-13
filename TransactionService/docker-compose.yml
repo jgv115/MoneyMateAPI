@@ -1,0 +1,30 @@
+version: '3'
+services:
+  localstack:
+    image: localstack/localstack:1.3.0
+    environment:
+      SERVICES: ssm
+      AWS_ACCESS_KEY_ID: fake
+      AWS_SECRET_ACCESS_KEY: fake
+    volumes:
+      - type: bind
+        source: ./.batect/localstack/localstack-bootstrap.sh
+        target: /docker-entrypoint-initaws.d/localstack-bootstrap.sh
+      - type: bind
+        source: ./.batect/localstack/healthcheck.sh
+        target: /app/healthcheck.sh
+    ports:
+      - "4566:4566"
+    healthcheck:
+      test: [ "CMD", "/app/healthcheck.sh" ]
+      interval: 3s
+      retries: 5
+      timeout: 10s
+  
+  google_api_mock:
+    build:
+      context: ./.batect/google_api_mock
+    environment:
+      FLASK_DEBUG: 1
+    ports:
+      - "6001:5000"

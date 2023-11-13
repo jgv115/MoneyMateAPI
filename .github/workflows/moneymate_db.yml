@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run flyway migrate
-        run: make run_db_migration
+        run: make run_standalone_db_migration
         working-directory: ./MoneyMateDb
         
   deploy_database_prod:
@@ -32,5 +32,5 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run flyway migrate
-        run: make run_db_migration
+        run: make run_standalone_db_migration
         working-directory: ./MoneyMateDb
