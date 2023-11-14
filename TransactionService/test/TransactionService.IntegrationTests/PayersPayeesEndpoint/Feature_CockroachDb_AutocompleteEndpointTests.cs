@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
+using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
@@ -292,7 +293,7 @@ public class Feature_CockroachDb_AutocompleteEndpointTests : IClassFixture<Money
         await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(initialData);
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/autocomplete?name={searchQuery}");
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
         var returnedPayees = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString,

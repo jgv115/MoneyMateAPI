@@ -115,11 +115,10 @@ namespace TransactionService.Repositories.CockroachDb
                 connection.Open();
 
                 var getExistingCategoryQuery = @"SELECT COUNT(1) FROM category 
-                                                    JOIN users u ON u.id = category.user_id
-                                                    WHERE u.user_identifier = @user_identifier AND category.name = @category_name";
+                                                WHERE category.profile_id = @profile_id AND category.name = @category_name";
 
                 var categoryFound = await connection.QuerySingleAsync<int>(getExistingCategoryQuery,
-                    new {user_identifier = _userContext.UserId, category_name = newCategory.CategoryName});
+                    new {profile_id = _userContext.ProfileId, category_name = newCategory.CategoryName});
 
                 if (Convert.ToBoolean(categoryFound))
                     throw new RepositoryItemExistsException(
@@ -179,7 +178,7 @@ namespace TransactionService.Repositories.CockroachDb
                 await connection.ExecuteAsync(query,
                     new
                     {
-                        new_category_name = newCategoryName, 
+                        new_category_name = newCategoryName,
                         profile_id = _userContext.ProfileId,
                         category_name = category.CategoryName
                     });
