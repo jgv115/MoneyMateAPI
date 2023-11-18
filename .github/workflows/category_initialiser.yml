@@ -8,26 +8,39 @@ on:
       - 'utilities/categoryInitialiser/**'
       - '.github/workflows/category_initialiser.yml'
 
-jobs: 
-  # unit_tests:
-  #   name: Unit Tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #     - name: Run unit tests
-  #       run: ./batect -f TransactionService/batect.yml unit_tests
-
-  # integration_tests:
-  #   name: Integration Tests
-  #   needs:
-  #     - unit_tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #     - name: Run integration tests
-  #       run: ./batect -f TransactionService/batect.yml integration_tests
+jobs:
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup golang
+        uses: actions/setup-go@4
+        with:
+          go-version: 1.21.4
+      - name: Run unit tests
+        run: go test -v ./...
+        working-directory: ./utilities/categoryInitialiser
+  
+  integration_tests:
+    name: Integration Tests
+    needs:
+      - unit_tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup golang
+        uses: actions/setup-go@4
+        with:
+          go-version: 1.21.4
+      - name: Run MoneyMateDB
+        run: make start_db
+        working-directory: ./MoneyMateDb
+      - name: Run integration tests
+        run: go test -v -count=1 -tags integrationTest ./...
+        working-directory: ./utilities/categoryInitialiser
 
   build_and_push_to_ecr:
     name: Build image and push to ECR
@@ -54,30 +67,11 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG utilities/categoryInitialiser
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-  plan_infra_test:
-    name: Plan Infra for Test
-    needs:
-      - build_and_push_to_ecr
-    runs-on: ubuntu-latest
-    env: 
-      ENVIRONMENT: test
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_TEST }}
-      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_TEST }}
-      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_TEST }}
-      IMAGE_TAG: ${{ github.sha }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run terraform plan
-        run: ./batect -f utilities/categoryInitialiser/batect.yml terraform_plan
-        
+  
   provision_infra_test:
     name: Provision Infra for Test
-    needs: 
-      - plan_infra_test
+    needs:
+      - build_and_push_to_ecr
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: test
@@ -92,30 +86,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Run terraform apply
         run: ./batect -f utilities/categoryInitialiser/batect.yml terraform_apply
-        
-  plan_infra_prod:
-    name: Plan Infra for Prod
-    needs:
-      - provision_infra_test
-    runs-on: ubuntu-latest
-    env:
-      ENVIRONMENT: prod
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AUTH0_MANAGEMENT_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_ID_PROD }}
-      AUTH0_MANAGEMENT_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_CLIENT_SECRET_PROD }}
-      AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN_PROD }}
-      IMAGE_TAG: ${{ github.sha }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run terraform plan
-        run: ./batect -f utilities/categoryInitialiser/batect.yml terraform_plan
 
   provision_infra_prod:
     name: Provision Infra for Prod
     needs:
-      - plan_infra_prod
+      - provision_infra_test
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: prod

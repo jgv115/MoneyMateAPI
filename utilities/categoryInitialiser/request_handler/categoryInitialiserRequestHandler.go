@@ -4,10 +4,10 @@ import (
 	"categoryInitialiser/category_provider"
 	"categoryInitialiser/models"
 	"categoryInitialiser/store"
-	"fmt"
+	"strings"
 )
 
-func HandleRequest(userId string, categoryProvider category_provider.CategoryProvider, categoriesRepository store.CategoriesRepository) error {
+func HandleRequest(categoryProvider category_provider.CategoryProvider, categoriesRepository store.CategoriesRepository) error {
 	categoryDtos, err := categoryProvider.GetCategories()
 	if err != nil {
 		return err
@@ -18,10 +18,9 @@ func HandleRequest(userId string, categoryProvider category_provider.CategoryPro
 	for _, categoryDto := range categoryDtos {
 
 		categories = append(categories, models.Category{
-			UserIdQuery:     fmt.Sprintf("auth0|%v#Categories", userId),
-			Subquery:        categoryDto.CategoryName,
+			CategoryName:    categoryDto.CategoryName,
 			Subcategories:   categoryDto.Subcategories,
-			TransactionType: mapTransactionTypeStringToInt(categoryDto.CategoryType),
+			TransactionType: strings.ToLower(categoryDto.CategoryType),
 		})
 	}
 
@@ -30,12 +29,4 @@ func HandleRequest(userId string, categoryProvider category_provider.CategoryPro
 		return err
 	}
 	return nil
-}
-
-func mapTransactionTypeStringToInt(transactionType string) int {
-	if transactionType == "expense" {
-		return 0
-	} else {
-		return 1
-	}
 }

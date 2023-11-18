@@ -1,5 +1,4 @@
 //go:build !integrationTest
-// +build !integrationTest
 
 package request_handler
 
@@ -35,9 +34,8 @@ func TestHandleRequest(t *testing.T) {
 
 		mockCategoryProvider.On("GetCategories").Return([]models.CategoryDto{}, nil)
 		mockCategoriesRepository.On("SaveCategories", mock.Anything).Return(nil)
-		const userId = "testUserId123"
 
-		err := HandleRequest(userId, mockCategoryProvider, mockCategoriesRepository)
+		err := HandleRequest(mockCategoryProvider, mockCategoriesRepository)
 		if err != nil {
 			t.Errorf("HandleRequest returned error %+v when not expecting error", err)
 		}
@@ -49,7 +47,6 @@ func TestHandleRequest(t *testing.T) {
 		var mockCategoryProvider = new(MockCategoryProvider)
 		var mockCategoriesRepository = new(MockCategoryRepository)
 
-		const userId = "testUserId123"
 		const expectedCategoryName1 = "Category1"
 		var expectedSubcategories1 = []string{"Subcategory1"}
 		const expectedCategoryName2 = "Category2"
@@ -57,7 +54,7 @@ func TestHandleRequest(t *testing.T) {
 		var categoryDtos = []models.CategoryDto{
 			{
 				CategoryName:  expectedCategoryName1,
-				CategoryType:  "expense",
+				CategoryType:  "Expense",
 				Subcategories: expectedSubcategories1,
 			},
 			{
@@ -70,23 +67,21 @@ func TestHandleRequest(t *testing.T) {
 		mockCategoryProvider.On("GetCategories").Return(categoryDtos, nil)
 		mockCategoriesRepository.On("SaveCategories", mock.Anything).Return(nil)
 
-		err := HandleRequest(userId, mockCategoryProvider, mockCategoriesRepository)
+		err := HandleRequest( mockCategoryProvider, mockCategoriesRepository)
 		if err != nil {
 			t.Errorf("HandleRequest returned error %+v when not expecting error", err)
 		}
 
 		var expectedCategories = []models.Category{
 			{
-				UserIdQuery:     "auth0|" + userId + "#Categories",
-				Subquery:        expectedCategoryName1,
+				CategoryName:    expectedCategoryName1,
 				Subcategories:   expectedSubcategories1,
-				TransactionType: 0,
+				TransactionType: "expense",
 			},
 			{
-				UserIdQuery:     "auth0|" + userId + "#Categories",
-				Subquery:        expectedCategoryName2,
+				CategoryName:    expectedCategoryName2,
 				Subcategories:   expectedSubcategories2,
-				TransactionType: 1,
+				TransactionType: "income",
 			},
 		}
 
