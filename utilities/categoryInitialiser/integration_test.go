@@ -1,4 +1,4 @@
-
+//go:build integrationTest
 
 package main
 
