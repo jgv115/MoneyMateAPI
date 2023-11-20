@@ -12,6 +12,7 @@ using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
+using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
@@ -59,7 +60,7 @@ public class Feature_CockroachDb_PostEndpointTests : IClassFixture<MoneyMateApiW
             new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var scanOutput = await _cockroachDbIntegrationTestHelper.RetrieveAllPayersPayees("payer");
         Assert.Collection(scanOutput,
@@ -96,7 +97,7 @@ public class Feature_CockroachDb_PostEndpointTests : IClassFixture<MoneyMateApiW
             new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync("api/payerspayees/payees", httpContent);
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var scanOutput = await _cockroachDbIntegrationTestHelper.RetrieveAllPayersPayees("payee");
 

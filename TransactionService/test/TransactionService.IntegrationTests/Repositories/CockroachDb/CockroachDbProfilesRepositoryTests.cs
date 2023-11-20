@@ -12,6 +12,7 @@ using Xunit;
 
 namespace TransactionService.IntegrationTests.Repositories.CockroachDb;
 
+[Collection("IntegrationTests")]
 public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
 {
     private readonly DapperContext _dapperContext;
@@ -80,7 +81,7 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
         });
 
         var profile = await repository.GetProfile(expectedProfiles[0].Id);
-        
+
         Assert.Equal(expectedProfiles[0], profile);
     }
 
@@ -121,7 +122,7 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
 
         await Assert.ThrowsAsync<RepositoryItemDoesNotExist>(() => repository.GetProfile(Guid.NewGuid()));
     }
-    
+
     [Fact]
     public async Task GivenUsersAndProfilesInDb_WhenGetUserProfilesInvoked_ThenCorrectProfileObjectsReturned()
     {
@@ -205,7 +206,8 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GivenNewDisplayName_WhenCreateProfileInvoked_ThenDbContainsCorrectRecordsForNewProfileAndProfileIdReturned()
+    public async Task
+        GivenNewDisplayName_WhenCreateProfileInvoked_ThenDbContainsCorrectRecordsForNewProfileAndProfileIdReturned()
     {
         var testUser = new User
         {
@@ -241,13 +243,13 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
         });
     }
 
-    public async Task InitializeAsync()
-    {
-        await _cockroachDbIntegrationTestHelper.ClearDbData();
-    }
-
-    public Task DisposeAsync()
+    public Task InitializeAsync()
     {
         return Task.CompletedTask;
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _cockroachDbIntegrationTestHelper.ClearDbData();
     }
 }
