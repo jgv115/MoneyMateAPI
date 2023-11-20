@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
+﻿using System.Linq;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using FluentValidation.AspNetCore;
@@ -98,16 +95,7 @@ namespace TransactionService
                 var awsRegion = awsSettings.GetValue<string>("Region");
                 var awsKey = awsSettings.GetValue<string>("AccessKey");
                 var awsSecret = awsSettings.GetValue<string>("SecretKey");
-
-                services.AddSingleton<IAmazonDynamoDB>(_ =>
-                {
-                    var clientConfig = new AmazonDynamoDBConfig
-                    {
-                        ServiceURL = awsServiceUrl,
-                        AuthenticationRegion = awsRegion
-                    };
-                    return new AmazonDynamoDBClient(awsKey, awsSecret, clientConfig);
-                });
+                
             }
             else
             {
@@ -115,11 +103,8 @@ namespace TransactionService
                 AWSOptions awsOptions = configuration.GetAWSOptions();
                 awsOptions.Credentials = new EnvironmentVariablesAWSCredentials();
                 services.AddDefaultAWSOptions(awsOptions);
-                services.AddAWSService<IAmazonDynamoDB>();
             }
-
-            services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
-
+            
             var cockroachDbConfigSection = Configuration.GetSection("CockroachDb");
 
             var cockroachDbConnectionString =
