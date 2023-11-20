@@ -154,7 +154,9 @@ namespace TransactionService
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/health"),
+            app.UseWhen(
+                context => !context.Request.Path.StartsWithSegments("/api/health") &&
+                           !context.Request.Path.StartsWithSegments("api/initialisation"),
                 builder => builder.UseMiddleware<UserContextMiddleware>());
 
             app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/health") &&
