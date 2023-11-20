@@ -67,7 +67,7 @@ public class CockroachDbProfilesRepository : IProfilesRepository
         }
     }
 
-    public async Task CreateProfile(string displayName)
+    public async Task<Guid> CreateProfile(string displayName)
     {
         using (var connection = _context.CreateConnection())
         {
@@ -84,6 +84,8 @@ public class CockroachDbProfilesRepository : IProfilesRepository
                     new {profileId, user_identifier = _userContext.UserId});
 
                 transaction.Commit();
+
+                return profileId;
             }
         }
     }
