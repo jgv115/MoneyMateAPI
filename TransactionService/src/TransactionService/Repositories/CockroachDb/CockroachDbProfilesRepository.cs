@@ -89,4 +89,27 @@ public class CockroachDbProfilesRepository : IProfilesRepository
             }
         }
     }
+
+    public async Task<Guid> CreateProfile(string displayName, Guid profileId)
+    {
+        using (var connection = _context.CreateConnection())
+        {
+            connection.Open();
+            using (var transaction = connection.BeginTransaction())
+            {
+                var createProfileQuery = @"INSERT INTO profile (id, display_name) VALUES (@profileId, @displayName)";
+                await connection.ExecuteAsync(createProfileQuery, new {profileId, displayName});
+
+                var createUserProfilesQuery = @"INSERT INTO userprofile (user_id, profile_id) 
+                                                    SELECT u.id,  @profileId FROM users u where u.user_identifier = @user_identifier;";
+
+                await connection.ExecuteAsync(createUserProfilesQuery,
+                    new {profileId, user_identifier = _userContext.UserId});
+
+                transaction.Commit();
+
+                return profileId;
+            }
+        }
+    }
 }

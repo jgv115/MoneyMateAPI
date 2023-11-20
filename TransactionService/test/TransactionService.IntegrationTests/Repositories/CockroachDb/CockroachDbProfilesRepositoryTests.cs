@@ -243,6 +243,46 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
         });
     }
 
+    [Fact]
+    public async Task
+        GivenNewDisplayNameAndProfileId_WhenCreateProfileInvoked_ThenDbContainsCorrectRecordsForNewProfileAndProfileIdReturned()
+    {
+        var testUser = new User
+        {
+            UserIdentifier = _cockroachDbIntegrationTestHelper.TestUserIdentifier,
+            Id = Guid.NewGuid()
+        };
+        var otherUser = new User
+        {
+            UserIdentifier = "test-user-456",
+            Id = Guid.NewGuid()
+        };
+
+        await _cockroachDbIntegrationTestHelper.WriteUsersIntoDb(new List<User>
+        {
+            testUser,
+            otherUser
+        });
+
+        var repository = new CockroachDbProfilesRepository(_dapperContext, new CurrentUserContext
+        {
+            UserId = testUser.UserIdentifier
+        });
+
+        const string expectedNewProfileName = "new profile name";
+        var expectedProfileId = Guid.NewGuid();
+        var returnedProfileId = await repository.CreateProfile(expectedNewProfileName, expectedProfileId);
+
+        var returnedProfiles = await _cockroachDbIntegrationTestHelper.RetrieveProfiles();
+
+        Assert.Equal(expectedProfileId, returnedProfileId);
+        Assert.Collection(returnedProfiles, profile =>
+        {
+            Assert.Equal(expectedNewProfileName, profile.DisplayName);
+            Assert.Equal(returnedProfileId, profile.Id);
+        });
+    }
+
     public Task InitializeAsync()
     {
         return Task.CompletedTask;
