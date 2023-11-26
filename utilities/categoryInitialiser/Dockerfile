@@ -46,8 +46,8 @@ RUN go mod download
 
 COPY . .
 
-RUN GOOS=linux go build -o /main .
+RUN GOOS=linux CGO_ENABLED=0 go build -o /main .
 
-FROM public.ecr.aws/lambda/provided:al2
+FROM public.ecr.aws/lambda/provided:al2023
 COPY --from=build /main /main
 ENTRYPOINT [ "/main" ]
