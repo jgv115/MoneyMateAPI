@@ -10,9 +10,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -43,11 +45,29 @@ func setupDependencies(request models.IntialiseCategoriesRequest) (categoryProvi
 		return
 	}
 
-	var envVar = fmt.Sprintf("CATEGORY_INITIALISER_COCKROACHDB_CONNECTION_STRING_%s", strings.ToUpper(environment))
-	cockroachDbConnectionString, ok := os.LookupEnv(envVar)
-	if !ok {
-		err = errors.New("no CockroachDb connection string environment variable found")
-		return
+	var cockroachDbConnectionString string
+	if environment == "dev" {
+		var envVar = "CATEGORY_INITIALISER_COCKROACHDB_CONNECTION_STRING"
+		cockroachDbConnectionString, ok = os.LookupEnv(envVar)
+		if !ok {
+			err = errors.New("no CockroachDb connection string environment variable found")
+			return
+		}
+	} else {
+		cfg, err := config.LoadDefaultConfig(context.TODO())
+		if err != nil {
+			panic("configuration error, " + err.Error())
+		}
+		client := ssm.NewFromConfig(cfg)
+
+		parameterResults, err := client.GetParameter(context.Background(), &ssm.GetParameterInput{
+			Name: aws.String(fmt.Sprintf("%s/categoryInitialiser/cockroachDbConnectionString", environment)),
+		})
+
+		if err != nil {
+			panic("failed to retrieve cockroachDb connection string from SSM")
+		}
+		cockroachDbConnectionString = *parameterResults.Parameter.Value
 	}
 
 	cockroachDbConnection, err := pgx.Connect(context.Background(), cockroachDbConnectionString)
