@@ -9,12 +9,13 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -61,11 +62,12 @@ func setupDependencies(request models.IntialiseCategoriesRequest) (categoryProvi
 		client := ssm.NewFromConfig(cfg)
 
 		parameterResults, err := client.GetParameter(context.Background(), &ssm.GetParameterInput{
-			Name: aws.String(fmt.Sprintf("%s/categoryInitialiser/cockroachDbConnectionString", environment)),
+			Name:           aws.String(fmt.Sprintf("/%s/categoryInitialiser/cockroachDbConnectionString", environment)),
+			WithDecryption: aws.Bool(true),
 		})
 
 		if err != nil {
-			panic("failed to retrieve cockroachDb connection string from SSM")
+			log.Fatal(err)
 		}
 		cockroachDbConnectionString = *parameterResults.Parameter.Value
 	}
