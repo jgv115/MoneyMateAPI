@@ -59,7 +59,7 @@ resource "aws_iam_policy" "category_initialiser_lambda_ssm" {
   policy = data.aws_iam_policy_document.ssm_access.json
 }
 
-resource "aws_iam_policy_attachment" "category_initialiser_lambda_cloudwatch" {
+resource "aws_iam_policy_attachment" "category_initialiser_lambda_ssm" {
 
   name = "${local.category_initialiser_lambda_name}_ssm_access_attachment_${terraform.workspace}"
   roles = [
