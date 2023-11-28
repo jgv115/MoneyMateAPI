@@ -15,9 +15,6 @@ type CockroachDbCategoriesRepository struct {
 }
 
 func (c *CockroachDbCategoriesRepository) SaveCategories(categories []models.Category) error {
-
-	c.Connection.Exec(context.Background(), "TRUNCATE category CASCADE")
-
 	for _, category := range categories {
 
 		var createdCategoryId string
