@@ -1,7 +1,7 @@
-data "aws_iam_policy_document" lambda_assume_role {
+data "aws_iam_policy_document" "lambda_assume_role" {
   statement {
     actions = [
-      "sts:AssumeRole"]
+    "sts:AssumeRole"]
     principals {
       type = "Service"
       identifiers = [
@@ -12,7 +12,7 @@ data "aws_iam_policy_document" lambda_assume_role {
 }
 
 # Cloudwatch
-data "aws_iam_policy_document" cloudwatch_access {
+data "aws_iam_policy_document" "cloudwatch_access" {
   statement {
     effect = "Allow"
     actions = [
@@ -21,29 +21,58 @@ data "aws_iam_policy_document" cloudwatch_access {
       "logs:PutLogEvents"
     ]
     resources = [
-      "*"]
+    "*"]
   }
 }
 
-resource "aws_iam_policy" category_initialiser_lambda_cloudwatch {
-  name = "${local.category_initialiser_lambda_name}_cloudwatch_acesss_policy_${terraform.workspace}"
+resource "aws_iam_policy" "category_initialiser_lambda_cloudwatch" {
+  name   = "${local.category_initialiser_lambda_name}_cloudwatch_acesss_policy_${terraform.workspace}"
   policy = data.aws_iam_policy_document.cloudwatch_access.json
 }
 
-resource "aws_iam_policy_attachment" category_initialiser_lambda_cloudwatch {
+resource "aws_iam_policy_attachment" "category_initialiser_lambda_cloudwatch" {
 
   name = "${local.category_initialiser_lambda_name}_cloudwatch_access_attachment_${terraform.workspace}"
   roles = [
-    aws_iam_role.category_initialiser_lambda.name]
+  aws_iam_role.category_initialiser_lambda.name]
   policy_arn = aws_iam_policy.category_initialiser_lambda_cloudwatch.arn
 }
 
+# SSM
+data "aws_ssm_parameter" "cockroach_db_connection_string" {
+  name = "/${terraform.workspace}/categoryInitialiser/cockroachDbConnectionString"
+}
+
+data "aws_iam_policy_document" "ssm_access" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameters",
+    ]
+    resources = [
+    data.data.aws_ssm_parameter.cockroach_db_connection_string.arn]
+  }
+}
+
+resource "aws_iam_policy" "category_initialiser_lambda_ssm" {
+  name   = "${local.category_initialiser_lambda_name}_ssm_acesss_policy_${terraform.workspace}"
+  policy = data.aws_iam_policy_document.ssm_access.json
+}
+
+resource "aws_iam_policy_attachment" "category_initialiser_lambda_cloudwatch" {
+
+  name = "${local.category_initialiser_lambda_name}_ssm_access_attachment_${terraform.workspace}"
+  roles = [
+  aws_iam_role.category_initialiser_lambda.name]
+  policy_arn = aws_iam_policy.category_initialiser_lambda_ssm.arn
+}
+
 # DynamoDB
-data "aws_dynamodb_table" transaction_db {
+data "aws_dynamodb_table" "transaction_db" {
   name = "MoneyMate_TransactionDB_${terraform.workspace}"
 }
 
-data "aws_iam_policy_document" dynamodb_access {
+data "aws_iam_policy_document" "dynamodb_access" {
   statement {
     effect = "Allow"
     actions = [
@@ -65,15 +94,15 @@ data "aws_iam_policy_document" dynamodb_access {
   }
 }
 
-resource "aws_iam_policy" category_initialiser_lambda_dynamodb {
-  name = "${local.category_initialiser_lambda_name}_dynamodb_acesss_policy_${terraform.workspace}"
+resource "aws_iam_policy" "category_initialiser_lambda_dynamodb" {
+  name   = "${local.category_initialiser_lambda_name}_dynamodb_acesss_policy_${terraform.workspace}"
   policy = data.aws_iam_policy_document.dynamodb_access.json
 }
 
-resource "aws_iam_policy_attachment" category_initialiser_lambda_dynamodb {
+resource "aws_iam_policy_attachment" "category_initialiser_lambda_dynamodb" {
 
   name = "${local.category_initialiser_lambda_name}_dynamodb_access_attachment_${terraform.workspace}"
   roles = [
-    aws_iam_role.category_initialiser_lambda.name]
+  aws_iam_role.category_initialiser_lambda.name]
   policy_arn = aws_iam_policy.category_initialiser_lambda_dynamodb.arn
 }
