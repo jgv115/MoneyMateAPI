@@ -1,0 +1,4 @@
+DROP INDEX category_name_user_id_transaction_type_id_key CASCADE;
+
+DROP INDEX payerpayee_user_id_payerpayeetype_id_external_link_id_key CASCADE;
+DROP INDEX payerpayee_user_id_payerpayeetype_id_name_key CASCADE;
