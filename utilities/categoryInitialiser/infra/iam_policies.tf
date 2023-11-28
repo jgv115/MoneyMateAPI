@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "ssm_access" {
       "ssm:GetParameters",
     ]
     resources = [
-    data.data.aws_ssm_parameter.cockroach_db_connection_string.arn]
+    data.aws_ssm_parameter.cockroach_db_connection_string.arn]
   }
 }
 
