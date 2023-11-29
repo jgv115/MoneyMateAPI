@@ -179,7 +179,8 @@ namespace TransactionService.Repositories.CockroachDb
                          JOIN users u ON u.user_identifier = ins.user_identifier
                          JOIN transactiontype tt ON tt.name = ins.transaction_type
                          JOIN categories_and_subcategories cs
-                              on u.user_identifier = cs.user_identifier AND SUBCATEGORYNAME = ins.subcategory AND categoryname = ins.category;
+                              on cs.profileid = ins.profile_id AND SUBCATEGORYNAME = ins.subcategory AND
+                                 categoryname = ins.category;
             ";
 
             using (var connection = _context.CreateConnection())
