@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
+using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using Xunit;
@@ -17,7 +18,6 @@ namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
 [Collection("IntegrationTests")]
 public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
 {
-    private readonly ITestOutputHelper _testOutputHelper;
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
     private readonly HttpClient _httpClient;
     private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
@@ -25,7 +25,6 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
     public Feature_CockroachDb_GetEndpointTests(MoneyMateApiWebApplicationFactory factory,
         ITestOutputHelper testOutputHelper)
     {
-        _testOutputHelper = testOutputHelper;
         var factory2 = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
             (_, configurationBuilder) =>
                 configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>()
@@ -93,7 +92,7 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
         });
 
         var response = await _httpClient.GetAsync($"api/payerspayees/payers");
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
         var returnedPayers = JsonSerializer.Deserialize<List<PayerPayeeViewModel>>(returnedString,
@@ -189,10 +188,8 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
         await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee> {payer});
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
-        _testOutputHelper.WriteLine(">>>");
-        _testOutputHelper.WriteLine(await response.Content.ReadAsStringAsync());
-        response.EnsureSuccessStatusCode();
-
+        await response.AssertSuccessfulStatusCode();
+        
         var returnedString = await response.Content.ReadAsStringAsync();
         var actualPayer = JsonSerializer.Deserialize<PayerPayeeViewModel>(returnedString, new JsonSerializerOptions
         {

@@ -225,10 +225,17 @@ namespace TransactionService.Repositories.CockroachDb
                 var query = @"
                         INSERT INTO subcategory(name, category_id)
                         SELECT @subcategory_name, id 
-                        FROM category WHERE name = @category_name";
+                        FROM category
+                        WHERE name = @category_name
+                            AND profile_id = @profile_id";
 
                 await connection.ExecuteAsync(query,
-                    new {subcategory_name = newSubcategory, category_name = categoryName});
+                    new
+                    {
+                        subcategory_name = newSubcategory,
+                        category_name = categoryName,
+                        profile_id = _userContext.ProfileId
+                    });
             }
         }
 

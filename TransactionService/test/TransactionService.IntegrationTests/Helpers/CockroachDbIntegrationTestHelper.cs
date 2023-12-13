@@ -40,14 +40,18 @@ public class CockroachDbIntegrationTestHelper
     private Guid TestUserId { get; set; }
 
     // TODO: need to make this a bit easier to understand
-    public string TestUserIdentifier { get; } = "auth0|moneymatetest";
+    public string TestUserIdentifier { get; }
     private TransactionTypeIds TransactionTypeIds { get; set; }
     private IMapper Mapper { get; init; }
     private CockroachDbTransactionRepository TransactionRepository { get; init; }
     private CockroachDbCategoriesRepository CategoriesRepository { get; init; }
     private CockroachDbProfilesRepository ProfilesRepository { get; init; }
 
-    public CockroachDbIntegrationTestHelper(Guid testUserId)
+    public CockroachDbIntegrationTestHelper(Guid testUserId) : this(testUserId, "auth0|moneymatetest")
+    {
+    }
+
+    public CockroachDbIntegrationTestHelper(Guid testUserId, string testUserIdentifier)
     {
         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "dev");
 
@@ -70,6 +74,7 @@ public class CockroachDbIntegrationTestHelper
             })
             .CreateMapper();
 
+        TestUserIdentifier = testUserIdentifier;
         TestUserId = testUserId;
         TransactionRepository = new CockroachDbTransactionRepository(DapperContext, Mapper, new CurrentUserContext
         {
