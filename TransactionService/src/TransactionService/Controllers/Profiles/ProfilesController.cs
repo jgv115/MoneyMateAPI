@@ -26,7 +26,7 @@ namespace TransactionService.Controllers.Profiles
         [HttpPost]
         public async Task<IActionResult> Create(CreateProfileDto createProfileDto)
         {
-            await _profileService.CreateProfile(createProfileDto.DisplayName);
+            await _profileService.CreateProfile(createProfileDto.DisplayName, false);
 
             return NoContent();
         }

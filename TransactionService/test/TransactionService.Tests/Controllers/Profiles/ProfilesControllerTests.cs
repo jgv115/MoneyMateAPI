@@ -50,7 +50,7 @@ public class ProfilesControllerTests
         var controller = new ProfilesController(_mockProfileService.Object);
 
         const string expectedNewProfileName = "new Profile 123";
-        _mockProfileService.Setup(service => service.CreateProfile(expectedNewProfileName)).Verifiable();
+        _mockProfileService.Setup(service => service.CreateProfile(expectedNewProfileName, false)).Verifiable();
 
         var response = await controller.Create(new CreateProfileDto
         {
@@ -59,6 +59,6 @@ public class ProfilesControllerTests
 
         Assert.IsType<NoContentResult>(response);
 
-        _mockProfileService.Verify(service => service.CreateProfile(expectedNewProfileName), Times.Once);
+        _mockProfileService.Verify(service => service.CreateProfile(expectedNewProfileName, false), Times.Once);
     }
 }

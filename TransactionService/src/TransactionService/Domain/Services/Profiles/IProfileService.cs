@@ -9,5 +9,6 @@ public interface IProfileService
 {
     public Task<List<Profile>> GetProfiles();
     public Task<bool> VerifyProfileBelongsToCurrentUser(Guid profileIdToBeVerified);
-    public Task CreateProfile(string profileDisplayName);
+    // Returns the UUID of the created profile
+    public Task<Guid> CreateProfile(string profileDisplayName, bool initialiseCategories);
 }

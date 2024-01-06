@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Amazon.Extensions.NETCore.Setup;
+using Amazon.Lambda;
 using Amazon.Runtime;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,6 +18,7 @@ using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Domain.Services.Profiles;
 using TransactionService.Domain.Services.Transactions;
+using TransactionService.Helpers;
 using TransactionService.Helpers.TimePeriodHelpers;
 using TransactionService.Middleware;
 using TransactionService.Profiles;
@@ -24,6 +26,7 @@ using TransactionService.Repositories;
 using TransactionService.Repositories.CockroachDb;
 using TransactionService.Repositories.CockroachDb.Profiles;
 using TransactionService.Services;
+using TransactionService.Services.Initialisation.CategoryInitialisation;
 using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Options;
 
@@ -83,6 +86,7 @@ namespace TransactionService
             services.AddScoped<IUpdateCategoryOperationFactory, UpdateCategoryOperationFactory>();
             services.AddScoped<IPayerPayeeService, PayerPayeeService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
+            services.AddScoped<ICategoryInitialiser, LambdaCategoryInitialiser>();
 
             services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile), typeof(CategoryEntityProfile));
 
@@ -95,7 +99,8 @@ namespace TransactionService
                 var awsRegion = awsSettings.GetValue<string>("Region");
                 var awsKey = awsSettings.GetValue<string>("AccessKey");
                 var awsSecret = awsSettings.GetValue<string>("SecretKey");
-                
+
+                services.AddSingleton<IAmazonLambda, MockAmazonLambdaClient>();
             }
             else
             {
@@ -103,8 +108,10 @@ namespace TransactionService
                 AWSOptions awsOptions = configuration.GetAWSOptions();
                 awsOptions.Credentials = new EnvironmentVariablesAWSCredentials();
                 services.AddDefaultAWSOptions(awsOptions);
+
+                services.AddAWSService<IAmazonLambda>();
             }
-            
+
             var cockroachDbConfigSection = Configuration.GetSection("CockroachDb");
 
             var cockroachDbConnectionString =
@@ -112,6 +119,7 @@ namespace TransactionService
 
             services.AddSingleton(_ => new DapperContext(cockroachDbConnectionString));
 
+            services.AddScoped<IUserRepository, CockroachDbUserRepository>();
             services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
             services.AddScoped<IPayerPayeeRepository, CockroachDbPayerPayeeRepository>();
             services.AddScoped<ITransactionRepository, CockroachDbTransactionRepository>();
