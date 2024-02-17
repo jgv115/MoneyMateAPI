@@ -41,6 +41,8 @@ namespace TransactionService
 
         public static IConfiguration Configuration { get; private set; }
 
+        // We still rely on Newtonsoft.Json for JSON Patch inputs. All other serialisation + deserialisation is done by System.Text.Json
+        // https://learn.microsoft.com/en-us/aspnet/core/web-api/jsonpatch?view=aspnetcore-8.0#add-support-for-json-patch-when-using-systemtextjson
         private static NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
         {
             var builder = new ServiceCollection()
@@ -62,7 +64,6 @@ namespace TransactionService
             services
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
                 .AddControllersWithViews(options => options.InputFormatters.Insert(0, GetJsonPatchInputFormatter()));
-            services.AddControllersWithViews().AddNewtonsoftJson();
 
             var auth0Settings = Configuration.GetSection("Auth0");
             services.AddAuthentication(options =>
