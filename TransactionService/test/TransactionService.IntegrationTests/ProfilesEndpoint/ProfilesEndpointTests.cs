@@ -15,7 +15,7 @@ using Xunit;
 namespace TransactionService.IntegrationTests.ProfilesEndpoint;
 
 [Collection("IntegrationTests")]
-public class ProfilesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
+public class ProfilesEndpointTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;

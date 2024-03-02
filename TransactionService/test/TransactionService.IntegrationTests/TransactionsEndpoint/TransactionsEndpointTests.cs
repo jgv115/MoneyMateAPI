@@ -17,13 +17,12 @@ using Xunit;
 namespace TransactionService.IntegrationTests.TransactionsEndpoint;
 
 [Collection("IntegrationTests")]
-public class Feature_CockroachDb_TransactionsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>,
-    IAsyncLifetime
+public class TransactionsEndpointTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
 
-    public Feature_CockroachDb_TransactionsEndpointTests(MoneyMateApiWebApplicationFactory factory)
+    public TransactionsEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
         _httpClient = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
             (_, configurationBuilder) =>

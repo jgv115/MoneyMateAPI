@@ -20,13 +20,13 @@ using Xunit;
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
 
 [Collection("IntegrationTests")]
-public class Feature_CockroachDb_PostEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
+public class PostEndpointTests :IAsyncLifetime
 {
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
     private readonly HttpClient _httpClient;
     private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
 
-    public Feature_CockroachDb_PostEndpointTests(MoneyMateApiWebApplicationFactory factory)
+    public PostEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
         _httpClient = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
             (_, configurationBuilder) =>

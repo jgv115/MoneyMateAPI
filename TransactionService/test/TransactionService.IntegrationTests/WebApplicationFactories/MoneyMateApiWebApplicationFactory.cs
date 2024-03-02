@@ -6,9 +6,15 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using TransactionService.IntegrationTests.Helpers;
+using Xunit;
 
 namespace TransactionService.IntegrationTests.WebApplicationFactories
 {
+    [CollectionDefinition("IntegrationTests")]
+    public class MoneyMateApiIntegrationTestCollection : ICollectionFixture<MoneyMateApiWebApplicationFactory>
+    {
+    }
+
     public class MoneyMateApiWebApplicationFactory : WebApplicationFactory<Startup>
     {
         private string _accessToken;
@@ -23,6 +29,7 @@ namespace TransactionService.IntegrationTests.WebApplicationFactories
 
         private string RequestAccessToken()
         {
+            Console.WriteLine("> requesting");
             using var accessTokenClient = new HttpClient();
 
             var request = new HttpRequestMessage(

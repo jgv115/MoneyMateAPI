@@ -13,7 +13,7 @@ using Xunit;
 namespace TransactionService.IntegrationTests.AnalyticsEndpoint;
 
 [Collection("IntegrationTests")]
-public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
+public class AnalyticsEndpointTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
@@ -196,7 +196,7 @@ public class AnalyticsEndpointTests : IClassFixture<MoneyMateApiWebApplicationFa
             .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory4Transactions,
                 expectedCategory3, expectedSubcategory4, subcategory4TransactionsAmount)
             .Build();
-        
+
         await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);

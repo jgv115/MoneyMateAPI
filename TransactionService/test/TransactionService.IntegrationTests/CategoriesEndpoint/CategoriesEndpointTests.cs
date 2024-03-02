@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using TransactionService.Constants;
 using TransactionService.Controllers.Categories.Dtos;
 using TransactionService.Domain.Models;
@@ -18,20 +17,14 @@ using Xunit;
 namespace TransactionService.IntegrationTests.CategoriesEndpoint;
 
 [Collection("IntegrationTests")]
-public class Feature_CockroachDb_CategoriesEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>,
-    IAsyncLifetime
+public class CategoriesEndpointTests : IAsyncLifetime
 {
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
     private readonly HttpClient _httpClient;
 
-    public Feature_CockroachDb_CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory)
+    public CategoriesEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
-        _httpClient = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
-            (_, configurationBuilder) =>
-                configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>()
-                {
-                    ["CockroachDb:Enabled"] = "true"
-                }))).CreateClient();
+        _httpClient = factory.CreateClient();
         _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 

@@ -16,13 +16,13 @@ using Xunit.Abstractions;
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
 
 [Collection("IntegrationTests")]
-public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWebApplicationFactory>, IAsyncLifetime
+public class GetEndpointTests : IAsyncLifetime
 {
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
     private readonly HttpClient _httpClient;
     private const string ExpectedAddress = "1 Hello Street Vic Australia 3123";
 
-    public Feature_CockroachDb_GetEndpointTests(MoneyMateApiWebApplicationFactory factory,
+    public GetEndpointTests(MoneyMateApiWebApplicationFactory factory,
         ITestOutputHelper testOutputHelper)
     {
         var factory2 = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
@@ -189,7 +189,7 @@ public class Feature_CockroachDb_GetEndpointTests : IClassFixture<MoneyMateApiWe
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
         await response.AssertSuccessfulStatusCode();
-        
+
         var returnedString = await response.Content.ReadAsStringAsync();
         var actualPayer = JsonSerializer.Deserialize<PayerPayeeViewModel>(returnedString, new JsonSerializerOptions
         {
