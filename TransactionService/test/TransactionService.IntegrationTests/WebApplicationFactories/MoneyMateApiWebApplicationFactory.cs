@@ -10,6 +10,7 @@ using Xunit;
 
 namespace TransactionService.IntegrationTests.WebApplicationFactories
 {
+    // This allows the WebApplicationFactory to be created once for all integration tests
     [CollectionDefinition("IntegrationTests")]
     public class MoneyMateApiIntegrationTestCollection : ICollectionFixture<MoneyMateApiWebApplicationFactory>
     {
@@ -29,7 +30,6 @@ namespace TransactionService.IntegrationTests.WebApplicationFactories
 
         private string RequestAccessToken()
         {
-            Console.WriteLine("> requesting");
             using var accessTokenClient = new HttpClient();
 
             var request = new HttpRequestMessage(
