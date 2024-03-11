@@ -33,7 +33,7 @@ public class CockroachDbCategoriesRepositoryTests : IAsyncLifetime
     public async Task
         GivenExistingProfileWithSameSubcategoryName_WhenAddSubcategoryInvoked_ThenSubcategoryIsAddedToCorrectProfile()
     {
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(new List<Category>
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(new List<Category>
         {
             new()
             {
@@ -45,7 +45,7 @@ public class CockroachDbCategoriesRepositoryTests : IAsyncLifetime
         // Insert same category with another profile
         var integrationTestHelper2 = new CockroachDbIntegrationTestHelper(Guid.NewGuid(), "other_user_identifier");
         await integrationTestHelper2.SeedRequiredData();
-        await integrationTestHelper2.WriteCategoriesIntoDb(new List<Category>
+        await integrationTestHelper2.CategoryOperations.WriteCategoriesIntoDb(new List<Category>
         {
             new()
             {
@@ -63,7 +63,7 @@ public class CockroachDbCategoriesRepositoryTests : IAsyncLifetime
 
         await repository.AddSubcategory("Travel", "Accommodation");
 
-        var category = await _cockroachDbIntegrationTestHelper.RetrieveCategory("Travel");
+        var category = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveCategory("Travel");
 
         Assert.Equal(new Category
         {

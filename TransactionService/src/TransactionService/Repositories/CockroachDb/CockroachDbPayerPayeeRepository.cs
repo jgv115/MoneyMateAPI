@@ -240,6 +240,34 @@ namespace TransactionService.Repositories.CockroachDb
         public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayee(string autocompleteQuery)
             => AutocompletePayerPayee(autocompleteQuery, "payee");
 
+        public async Task GetSuggestedPayers()
+        {
+            // TODO: might need to put a time limit in here in the future
+            var query = @"
+                WITH payerPayees AS (SELECT payerpayee_id, count(1) as count
+                     FROM transaction
+                     WHERE profile_id = '7e359a81-94cc-4b8a-bdf1-c8c795b79d34'
+                     group by payerpayee_id)
+                SELECT payerpayee.id,
+                       payerpayee.name             as name,
+                       payerpayee.external_link_id as externalLinkId,
+                       ppt.id,
+                       ppt.name                    as name,
+                       pext.id,
+                       pext.name                   as name
+                FROM payerpayees
+                        LEFT JOIN payerpayee ON payerpayee.id = payerPayees.payerpayee_id
+                         LEFT JOIN payerpayeetype ppt on payerpayee.payerpayeetype_id = ppt.id
+                         LEFT JOIN payerpayeeexternallinktype pext
+                                   on payerpayee.external_link_type_id = pext.id
+                WHERE payerpayee.profile_id = @profile_id and ppt.name = @payerPayeeType
+                order by count desc;";
+            using (var connection = _context.CreateConnection())
+            {
+                await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query, new { });
+            }
+        }
+
         public Task PutPayer(string userId)
         {
             throw new NotImplementedException();

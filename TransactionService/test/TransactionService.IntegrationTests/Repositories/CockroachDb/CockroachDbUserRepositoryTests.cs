@@ -30,7 +30,7 @@ public class CockroachDbUserRepositoryTests: IAsyncLifetime
             Id = Guid.NewGuid()
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteUsersIntoDb(new List<User>()
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteUsersIntoDb(new List<User>()
         {
             testUser
         });

@@ -59,7 +59,7 @@ public class AnalyticsEndpointTests : IAsyncLifetime
                 category3TransactionsAmount)
             .Build();
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";
@@ -123,7 +123,7 @@ public class AnalyticsEndpointTests : IAsyncLifetime
                 category3TransactionsAmount)
             .Build();
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";
@@ -197,7 +197,7 @@ public class AnalyticsEndpointTests : IAsyncLifetime
                 expectedCategory3, expectedSubcategory4, subcategory4TransactionsAmount)
             .Build();
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["category"] = expectedCategory3;
@@ -261,7 +261,7 @@ public class AnalyticsEndpointTests : IAsyncLifetime
                 expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
             .Build();
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = "expense";

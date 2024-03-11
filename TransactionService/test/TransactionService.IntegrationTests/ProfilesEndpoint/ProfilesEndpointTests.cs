@@ -76,7 +76,7 @@ public class ProfilesEndpointTests : IAsyncLifetime
 
         await response.AssertSuccessfulStatusCode();
 
-        var storedProfiles = await _cockroachDbIntegrationTestHelper.RetrieveProfiles();
+        var storedProfiles = await _cockroachDbIntegrationTestHelper.UserProfileOperations.RetrieveProfiles();
 
         storedProfiles.Sort((profile, profile1) =>
             String.Compare(profile.DisplayName, profile1.DisplayName, StringComparison.Ordinal));

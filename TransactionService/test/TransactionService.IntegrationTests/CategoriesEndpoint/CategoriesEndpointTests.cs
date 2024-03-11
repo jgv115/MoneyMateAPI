@@ -127,7 +127,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(initialData);
 
         var response = await _httpClient.GetAsync($"/api/categories{queryString}");
         var returnedString = await response.Content.ReadAsStringAsync();
@@ -149,7 +149,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
         var inputCategories = new List<string> {"category1", "category2", "category3"};
         var expectedSubcategories = new List<string> {"test1", "test2", "test4"};
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(inputCategories.Select(category => new Category()
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(inputCategories.Select(category => new Category()
         {
             CategoryName = category,
             TransactionType = TransactionType.Expense,
@@ -187,7 +187,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
 
         await response.AssertSuccessfulStatusCode();
 
-        var returnedCategories = await _cockroachDbIntegrationTestHelper.RetrieveAllCategories();
+        var returnedCategories = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveAllCategories();
 
         Assert.Collection(returnedCategories, category =>
         {
@@ -222,7 +222,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(initialData);
 
         var inputDto = new CategoryDto
         {
@@ -259,13 +259,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(initialData);
 
         var response = await _httpClient.DeleteAsync($"api/categories/{categoryName}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategories = await _cockroachDbIntegrationTestHelper.RetrieveAllCategories();
+        var returnedCategories = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveAllCategories();
 
         Assert.DoesNotContain(returnedCategories, category => category.CategoryName == categoryName);
     }
@@ -293,7 +293,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(initialData);
 
 
         var inputPatchDoc = "[{ \"op\": \"add\", \"path\": \"/subcategories/-\", \"value\": \"test subcategory\" }]";
@@ -305,7 +305,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
         await response.AssertSuccessfulStatusCode();
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategories = await _cockroachDbIntegrationTestHelper.RetrieveAllCategories();
+        var returnedCategories = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveAllCategories();
 
         var modifiedCategory = returnedCategories.Find(category => category.CategoryName == categoryName);
 
@@ -353,7 +353,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(initialData);
 
 
         var inputPatchDoc = "[{ \"op\": \"remove\", \"path\": \"/subcategories/0\"}]";
@@ -364,7 +364,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategories = await _cockroachDbIntegrationTestHelper.RetrieveAllCategories();
+        var returnedCategories = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveAllCategories();
         var modifiedCategory = returnedCategories.Find(category => category.CategoryName == categoryName);
         Assert.Equal(new Category()
         {
@@ -397,7 +397,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(initialCategories);
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(initialCategories);
 
         var transaction1 = new Transaction()
         {
@@ -441,7 +441,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
             transaction3
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var inputPatchDoc =
             "[{ \"op\": \"replace\", \"path\": \"/subcategories/0\", \"value\": \"renamed subcategory\"}]";
@@ -452,7 +452,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategory = await _cockroachDbIntegrationTestHelper.RetrieveCategory(categoryName);
+        var returnedCategory = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveCategory(categoryName);
         Assert.Equal(new Category
         {
             CategoryName = categoryName,
@@ -462,7 +462,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
 
         transaction1.Subcategory = "renamed subcategory";
         transaction3.Subcategory = "renamed subcategory";
-        var returnedTransactions = await _cockroachDbIntegrationTestHelper.GetAllTransactions();
+        var returnedTransactions = await _cockroachDbIntegrationTestHelper.TransactionOperations.GetAllTransactions();
 
         Assert.Equal(transactionList, returnedTransactions);
     }
@@ -489,7 +489,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(initialCategories);
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(initialCategories);
 
         var transaction1 = new Transaction()
         {
@@ -533,7 +533,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
             transaction3
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var inputPatchDoc =
             "[{ \"op\": \"replace\", \"path\": \"/categoryName\", \"value\": \"renamed category\"}]";
@@ -545,7 +545,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         // Test that new category exists
-        var returnedCategory = await _cockroachDbIntegrationTestHelper.RetrieveCategory("renamed category");
+        var returnedCategory = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveCategory("renamed category");
 
         Assert.Equal(new Category()
         {
@@ -555,12 +555,12 @@ public class CategoriesEndpointTests : IAsyncLifetime
         }, returnedCategory);
 
         // Test that old category does not exist
-        var oldCategory = await _cockroachDbIntegrationTestHelper.RetrieveCategory(categoryName);
+        var oldCategory = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveCategory(categoryName);
         Assert.Null(oldCategory);
 
         transaction1.Category = "renamed category";
         transaction3.Category = "renamed category";
-        var returnedTransactions = await _cockroachDbIntegrationTestHelper.GetAllTransactions();
+        var returnedTransactions = await _cockroachDbIntegrationTestHelper.TransactionOperations.GetAllTransactions();
 
         Assert.Equal(transactionList, returnedTransactions);
     }

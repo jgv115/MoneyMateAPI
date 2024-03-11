@@ -76,8 +76,8 @@ public class AutocompleteEndpointTests : IAsyncLifetime
             payee2
         };
 
-        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(initialData);
-        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee>
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayersIntoDb(new List<PayerPayee>
         {
             new()
             {
@@ -139,8 +139,8 @@ public class AutocompleteEndpointTests : IAsyncLifetime
             payee2
         };
 
-        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(initialData);
-        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee>
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayersIntoDb(new List<PayerPayee>
         {
             new()
             {
@@ -211,7 +211,7 @@ public class AutocompleteEndpointTests : IAsyncLifetime
             payer2
         };
 
-        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayersIntoDb(initialData);
 
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/autocomplete?name=test");
@@ -289,7 +289,7 @@ public class AutocompleteEndpointTests : IAsyncLifetime
             payer3
         };
 
-        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(initialData);
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayersIntoDb(initialData);
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/autocomplete?name={searchQuery}");
         await response.AssertSuccessfulStatusCode();

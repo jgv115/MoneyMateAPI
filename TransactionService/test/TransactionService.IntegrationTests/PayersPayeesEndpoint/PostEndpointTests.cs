@@ -20,7 +20,7 @@ using Xunit;
 namespace TransactionService.IntegrationTests.PayersPayeesEndpoint;
 
 [Collection("IntegrationTests")]
-public class PostEndpointTests :IAsyncLifetime
+public class PostEndpointTests : IAsyncLifetime
 {
     private readonly CockroachDbIntegrationTestHelper _cockroachDbIntegrationTestHelper;
     private readonly HttpClient _httpClient;
@@ -62,7 +62,7 @@ public class PostEndpointTests :IAsyncLifetime
         var response = await _httpClient.PostAsync("api/payerspayees/payers", httpContent);
         await response.AssertSuccessfulStatusCode();
 
-        var scanOutput = await _cockroachDbIntegrationTestHelper.RetrieveAllPayersPayees("payer");
+        var scanOutput = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payer");
         Assert.Collection(scanOutput,
             payerPayee =>
             {
@@ -99,7 +99,7 @@ public class PostEndpointTests :IAsyncLifetime
         var response = await _httpClient.PostAsync("api/payerspayees/payees", httpContent);
         await response.AssertSuccessfulStatusCode();
 
-        var scanOutput = await _cockroachDbIntegrationTestHelper.RetrieveAllPayersPayees("payee");
+        var scanOutput = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payee");
 
         Assert.Collection(scanOutput,
             payerPayee =>
@@ -141,7 +141,7 @@ public class PostEndpointTests :IAsyncLifetime
             ExternalId = expectedExternalId
         };
 
-        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee>
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(new List<PayerPayee>
         {
             payee,
             new()

@@ -76,12 +76,12 @@ public class GetEndpointTests : IAsyncLifetime
             Address = ExpectedAddress
         };
 
-        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee>
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayersIntoDb(new List<PayerPayee>
         {
             payer1,
             payer2,
         });
-        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee>
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(new List<PayerPayee>
         {
             new()
             {
@@ -138,8 +138,8 @@ public class GetEndpointTests : IAsyncLifetime
             Address = ExpectedAddress
         };
 
-        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee> {payee1, payee2});
-        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee>
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(new List<PayerPayee> {payee1, payee2});
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayersIntoDb(new List<PayerPayee>
         {
             new()
             {
@@ -185,7 +185,7 @@ public class GetEndpointTests : IAsyncLifetime
             ExternalId = payer.ExternalId,
             Address = "1 Hello Street Vic Australia 3123"
         };
-        await _cockroachDbIntegrationTestHelper.WritePayersIntoDb(new List<PayerPayee> {payer});
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayersIntoDb(new List<PayerPayee> {payer});
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/{payerPayeeId.ToString()}");
         await response.AssertSuccessfulStatusCode();
@@ -216,7 +216,7 @@ public class GetEndpointTests : IAsyncLifetime
             ExternalId = payee.ExternalId,
             Address = "1 Hello Street Vic Australia 3123"
         };
-        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee> {payee});
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(new List<PayerPayee> {payee});
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payees/{payerPayeeId.ToString()}");
         if (!response.IsSuccessStatusCode)

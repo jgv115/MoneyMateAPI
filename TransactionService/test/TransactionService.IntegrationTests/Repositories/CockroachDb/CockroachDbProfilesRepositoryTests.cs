@@ -66,14 +66,16 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteUsersIntoDb(new List<User>
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteUsersIntoDb(new List<User>
         {
             testUser,
             otherUser
         });
 
-        await _cockroachDbIntegrationTestHelper.WriteProfilesIntoDbForUser(expectedProfiles, testUser.Id);
-        await _cockroachDbIntegrationTestHelper.WriteProfilesIntoDbForUser(otherProfiles, otherUser.Id);
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteProfilesIntoDbForUser(expectedProfiles,
+            testUser.Id);
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteProfilesIntoDbForUser(otherProfiles,
+            otherUser.Id);
 
         var repository = new CockroachDbProfilesRepository(_dapperContext, new CurrentUserContext
         {
@@ -108,12 +110,12 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteUsersIntoDb(new List<User>
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteUsersIntoDb(new List<User>
         {
             testUser,
         });
 
-        await _cockroachDbIntegrationTestHelper.WriteProfilesIntoDbForUser(profiles, testUser.Id);
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteProfilesIntoDbForUser(profiles, testUser.Id);
 
         var repository = new CockroachDbProfilesRepository(_dapperContext, new CurrentUserContext
         {
@@ -165,14 +167,16 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
             }
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteUsersIntoDb(new List<User>
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteUsersIntoDb(new List<User>
         {
             testUser,
             otherUser
         });
 
-        await _cockroachDbIntegrationTestHelper.WriteProfilesIntoDbForUser(expectedProfiles, testUser.Id);
-        await _cockroachDbIntegrationTestHelper.WriteProfilesIntoDbForUser(otherProfiles, otherUser.Id);
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteProfilesIntoDbForUser(expectedProfiles,
+            testUser.Id);
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteProfilesIntoDbForUser(otherProfiles,
+            otherUser.Id);
 
 
         var repository = new CockroachDbProfilesRepository(_dapperContext, new CurrentUserContext
@@ -220,7 +224,7 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
             Id = Guid.NewGuid()
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteUsersIntoDb(new List<User>
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteUsersIntoDb(new List<User>
         {
             testUser,
             otherUser
@@ -234,7 +238,7 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
         const string expectedNewProfileName = "new profile name";
         var returnedProfileId = await repository.CreateProfile(expectedNewProfileName);
 
-        var returnedProfiles = await _cockroachDbIntegrationTestHelper.RetrieveProfiles();
+        var returnedProfiles = await _cockroachDbIntegrationTestHelper.UserProfileOperations.RetrieveProfiles();
 
         Assert.Collection(returnedProfiles, profile =>
         {
@@ -258,7 +262,7 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
             Id = Guid.NewGuid()
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteUsersIntoDb(new List<User>
+        await _cockroachDbIntegrationTestHelper.UserProfileOperations.WriteUsersIntoDb(new List<User>
         {
             testUser,
             otherUser
@@ -273,7 +277,7 @@ public class CockroachDbProfilesRepositoryTests : IAsyncLifetime
         var expectedProfileId = Guid.NewGuid();
         var returnedProfileId = await repository.CreateProfile(expectedNewProfileName, expectedProfileId);
 
-        var returnedProfiles = await _cockroachDbIntegrationTestHelper.RetrieveProfiles();
+        var returnedProfiles = await _cockroachDbIntegrationTestHelper.UserProfileOperations.RetrieveProfiles();
 
         Assert.Equal(expectedProfileId, returnedProfileId);
         Assert.Collection(returnedProfiles, profile =>

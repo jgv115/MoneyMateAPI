@@ -58,7 +58,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             Subcategory = "Salary"
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(new List<Transaction> {transaction});
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(new List<Transaction> {transaction});
 
         var response = await _httpClient.GetAsync($"/api/transactions/{transaction.TransactionId}");
         response.EnsureSuccessStatusCode();
@@ -118,7 +118,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             transaction2,
             transaction3
         };
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var response = await _httpClient.GetAsync("/api/transactions");
         response.EnsureSuccessStatusCode();
@@ -175,7 +175,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             transaction3
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["start"] = new DateTime(2021, 3, 27, 0, 0, 0, DateTimeKind.Utc).ToString("O");
@@ -249,7 +249,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             transaction4
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["end"] = new DateTime(2021, 3, 3).ToString("O");
@@ -308,7 +308,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             transaction1,
             transaction2
         };
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["type"] = transactionType;
@@ -361,7 +361,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             transaction2
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var query = HttpUtility.ParseQueryString(string.Empty);
         query["payerPayeeId"] = "";
@@ -438,7 +438,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             transaction3,
             transaction4
         };
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var queryString = "categories=Groceries&categories=Eating Out";
 
@@ -507,7 +507,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             Note = expectedNote
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(new List<Category>
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(new List<Category>
         {
             new()
             {
@@ -517,7 +517,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             }
         });
 
-        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee>
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(new List<PayerPayee>
         {
             new PayerPayee
             {
@@ -535,7 +535,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
         var response = await _httpClient.PostAsync($"/api/transactions", httpContent);
         response.EnsureSuccessStatusCode();
 
-        var returnedTransactions = await _cockroachDbIntegrationTestHelper.GetAllTransactions();
+        var returnedTransactions = await _cockroachDbIntegrationTestHelper.TransactionOperations.GetAllTransactions();
 
         Assert.Single(returnedTransactions);
         Assert.Equal(expectedAmount, returnedTransactions[0].Amount);
@@ -580,7 +580,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             transaction2
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         const decimal expectedAmount = 123M;
         const string expectedCategory = "Food";
@@ -592,7 +592,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
         const string expectedPayerPayeeName = "name123";
         const string expectedNote = "This is a new note";
 
-        await _cockroachDbIntegrationTestHelper.WriteCategoriesIntoDb(new List<Category>
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(new List<Category>
         {
             new()
             {
@@ -602,7 +602,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             }
         });
 
-        await _cockroachDbIntegrationTestHelper.WritePayeesIntoDb(new List<PayerPayee>
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(new List<PayerPayee>
         {
             new()
             {
@@ -630,7 +630,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
         response.EnsureSuccessStatusCode();
 
 
-        var returned = await _cockroachDbIntegrationTestHelper.GetAllTransactions();
+        var returned = await _cockroachDbIntegrationTestHelper.TransactionOperations.GetAllTransactions();
 
         var returnedTransaction = returned.Find(transaction => transaction.TransactionId == expectedTransactionId);
 
@@ -679,11 +679,11 @@ public class TransactionsEndpointTests : IAsyncLifetime
             transaction2
         };
 
-        await _cockroachDbIntegrationTestHelper.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
         var response = await _httpClient.DeleteAsync($"/api/transactions/{expectedTransactionId}");
         response.EnsureSuccessStatusCode();
 
-        var returnedTransaction = await _cockroachDbIntegrationTestHelper.GetTransactionById(expectedTransactionId);
+        var returnedTransaction = await _cockroachDbIntegrationTestHelper.TransactionOperations.GetTransactionById(expectedTransactionId);
         Assert.Null(returnedTransaction);
     }
 }
