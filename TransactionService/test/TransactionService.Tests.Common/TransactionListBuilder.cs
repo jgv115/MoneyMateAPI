@@ -68,7 +68,7 @@ public class TransactionListBuilder
                 TransactionTimestamp = DateTime.UtcNow.ToString("O"),
                 Subcategory = "subcategory123",
                 TransactionId = Guid.NewGuid().ToString(),
-                TransactionType = "expense",
+                TransactionType = transactionType.ToProperString(),
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = payerPayeeName
             });

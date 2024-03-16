@@ -6,6 +6,7 @@ using AutoMapper;
 using Dapper;
 using TransactionService.Domain.Models;
 using TransactionService.Repositories.CockroachDb;
+using TransactionService.Repositories.CockroachDb.Profiles;
 
 namespace TransactionService.IntegrationTests.Helpers;
 
@@ -16,15 +17,12 @@ public class CockroachDbIntegrationTestPayerPayeeOperations
     private IMapper _mapper;
 
 
-    public CockroachDbIntegrationTestPayerPayeeOperations(
-        DapperContext dapperContext,
-        Guid testUserId,
-        IMapper mapper
-    )
+    public CockroachDbIntegrationTestPayerPayeeOperations(DapperContext dapperContext, Guid testUserId)
     {
         _dapperContext = dapperContext;
         _testUserId = testUserId;
-        _mapper = mapper;
+        _mapper = new MapperConfiguration(cfg => { cfg.AddProfile<PayerPayeeEntityProfile>(); })
+            .CreateMapper();
     }
 
     public async Task<Guid> WritePayerPayeeIntoDb(PayerPayee payerPayee, string payerPayeeType)

@@ -411,7 +411,7 @@ public class PayerPayeeServiceCreatePayeeTests
         });
 
         _mockRepository.Verify(repository => repository.CreatePayee(It.Is<PayerPayee>(payerPayee =>
-            payerPayee.ExternalId == null &&
+            payerPayee.ExternalId == "" &&
             payerPayee.PayerPayeeName == expectedPayeeName &&
             !Guid.Parse(payerPayee.PayerPayeeId).Equals(Guid.Empty)
         )));
@@ -472,7 +472,7 @@ public class PayerPayeeServiceCreatePayerTests
         });
 
         _mockRepository.Verify(repository => repository.CreatePayer(It.Is<PayerPayee>(payerPayee =>
-            payerPayee.ExternalId == null &&
+            payerPayee.ExternalId == "" &&
             payerPayee.PayerPayeeName == expectedPayerName &&
             !Guid.Parse(payerPayee.PayerPayeeId).Equals(Guid.Empty)
         )));
@@ -517,7 +517,7 @@ public class PayerPayeeServiceCreatePayerTests
             Name = expectedPayerName,
         });
 
-        Assert.Null(actualPayer.ExternalId);
+        Assert.Empty(actualPayer.ExternalId);
         Assert.Equal(expectedPayerName, actualPayer.PayerPayeeName);
         Assert.NotEqual(Guid.Empty, actualPayer.PayerPayeeId);
         Assert.Null(actualPayer.Address);

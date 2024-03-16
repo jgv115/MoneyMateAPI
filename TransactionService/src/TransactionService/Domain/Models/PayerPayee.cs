@@ -4,6 +4,6 @@ namespace TransactionService.Domain.Models
     {
         public string PayerPayeeId { get; set; }
         public string PayerPayeeName { get; set; }
-        public string ExternalId { get; set; }
+        public string ExternalId { get; set; } = "";
     }
 }

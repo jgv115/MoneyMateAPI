@@ -1,20 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using TransactionService.Constants;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb;
 using TransactionService.Repositories.CockroachDb.Entities;
 using TransactionService.Repositories.CockroachDb.Profiles;
-using Category = TransactionService.Domain.Models.Category;
-using PayerPayee = TransactionService.Domain.Models.PayerPayee;
 using Profile = TransactionService.Domain.Models.Profile;
-using Transaction = TransactionService.Domain.Models.Transaction;
-using TransactionType = TransactionService.Constants.TransactionType;
 
 namespace TransactionService.IntegrationTests.Helpers;
 
@@ -77,7 +71,7 @@ public class CockroachDbIntegrationTestHelper
             transactionTypeOperations
         );
 
-        PayerPayeeOperations = new CockroachDbIntegrationTestPayerPayeeOperations(DapperContext, TestUserId, Mapper);
+        PayerPayeeOperations = new CockroachDbIntegrationTestPayerPayeeOperations(DapperContext, TestUserId);
 
         UserProfileOperations = new CockroachDbIntegrationTestUserProfileOperations(DapperContext,
             new CockroachDbProfilesRepository(DapperContext, new CurrentUserContext
