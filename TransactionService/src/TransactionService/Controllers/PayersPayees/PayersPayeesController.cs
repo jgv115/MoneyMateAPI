@@ -41,14 +41,17 @@ namespace TransactionService.Controllers.PayersPayees
         public async Task<IActionResult> GetAutocompletePayer(string name)
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(name))
-            {
                 return BadRequest();
-            }
-            else
-            {
-                var payers = await _payerPayeeService.AutocompletePayer(name);
-                return Ok(payers);
-            }
+
+            var payers = await _payerPayeeService.AutocompletePayer(name);
+            return Ok(payers);
+        }
+
+        [HttpGet("payers/suggestions")]
+        public async Task<IActionResult> GetSuggestedPayers()
+        {
+            var payers = await _payerPayeeService.GetSuggestedPayers();
+            return Ok(payers);
         }
 
         [HttpGet("payees")]
@@ -63,16 +66,21 @@ namespace TransactionService.Controllers.PayersPayees
         public async Task<IActionResult> GetAutocompletePayee(string name)
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(name))
-            {
+
                 return BadRequest();
-            }
-            else
-            {
-                var payers = await _payerPayeeService.AutocompletePayee(name);
-                return Ok(payers);
-            }
+
+            var payers = await _payerPayeeService.AutocompletePayee(name);
+            return Ok(payers);
         }
 
+        
+        [HttpGet("payees/suggestions")]
+        public async Task<IActionResult> GetSuggestedPayees()
+        {
+            var payees = await _payerPayeeService.GetSuggestedPayees();
+            return Ok(payees);
+        }
+        
         [HttpGet("payers/{payerPayeeId:guid}")]
         public async Task<IActionResult> GetPayer(Guid payerPayeeId)
         {

@@ -37,8 +37,9 @@ namespace TransactionService.Tests.Controllers
             int limit, string exceptionMessage)
         {
             var repository = new PayersPayeesController(_mockService.Object);
-            var exception = await Assert.ThrowsAsync<QueryParameterInvalidException>(() => repository.GetPayers(offset, limit));
-            
+            var exception =
+                await Assert.ThrowsAsync<QueryParameterInvalidException>(() => repository.GetPayers(offset, limit));
+
             Assert.Equal(exceptionMessage, exception.Message);
         }
 
@@ -80,11 +81,12 @@ namespace TransactionService.Tests.Controllers
             int limit, string exceptionMessage)
         {
             var repository = new PayersPayeesController(_mockService.Object);
-            var exception = await Assert.ThrowsAsync<QueryParameterInvalidException>(() => repository.GetPayees(offset, limit));
-            
+            var exception =
+                await Assert.ThrowsAsync<QueryParameterInvalidException>(() => repository.GetPayees(offset, limit));
+
             Assert.Equal(exceptionMessage, exception.Message);
         }
-        
+
         [Fact]
         public async Task GivenOffsetAndLimitNotProvided_WhenGetPayersInvoked_ThenReturns200OKWithCorrectList()
         {
@@ -166,6 +168,64 @@ namespace TransactionService.Tests.Controllers
             _mockService.Setup(service => service.GetPayees(0, 10)).ReturnsAsync(() => payees);
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.GetPayees();
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payees, objectResponse.Value);
+        }
+
+        [Fact]
+        public async Task GivenRequest_WhenGetSuggestedPayersInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var payers = new List<PayerPayeeViewModel>
+            {
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
+                },
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
+                }
+            };
+            _mockService.Setup(service => service.GetSuggestedPayers()).ReturnsAsync(payers);
+            var controller = new PayersPayeesController(_mockService.Object);
+
+            var response = await controller.GetSuggestedPayers();
+
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payers, objectResponse.Value);
+        }
+        
+        [Fact]
+        public async Task GivenRequest_WhenGetSuggestedPayeesInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var payees = new List<PayerPayeeViewModel>
+            {
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
+                },
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
+                }
+            };
+            _mockService.Setup(service => service.GetSuggestedPayees()).ReturnsAsync(payees);
+            var controller = new PayersPayeesController(_mockService.Object);
+
+            var response = await controller.GetSuggestedPayees();
+
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
