@@ -17,8 +17,8 @@ namespace TransactionService.Repositories
         public Task<IEnumerable<PayerPayee>> FindPayee(string searchQuery);
         public Task<IEnumerable<PayerPayee>> AutocompletePayer(string autocompleteQuery);
         public Task<IEnumerable<PayerPayee>> AutocompletePayee(string autocompleteQuery);
-        public Task<IEnumerable<PayerPayee>> GetSuggestedPayers(int limit);
-        public Task<IEnumerable<PayerPayee>> GetSuggestedPayees(int limit);
+        public Task<IEnumerable<PayerPayee>> GetSuggestedPayers(int limit = 20);
+        public Task<IEnumerable<PayerPayee>> GetSuggestedPayees(int limit = 20);
         public Task PutPayer(string userId);
         public Task PutPayee(string userId);
         public Task DeletePayer(string userId);

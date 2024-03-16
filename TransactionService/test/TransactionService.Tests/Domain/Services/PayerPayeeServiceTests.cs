@@ -166,7 +166,7 @@ public class PayerPayeeServiceTests
             Address = expectedAddress
         };
 
-        _mockRepository.Setup(repository => repository.GetPayer( payerPayeeId))
+        _mockRepository.Setup(repository => repository.GetPayer(payerPayeeId))
             .ReturnsAsync(() => new PayerPayee
             {
                 ExternalId = externalId,
@@ -263,7 +263,7 @@ public class PayerPayeeServiceTests
             PayerPayeeName = name
         };
 
-        _mockRepository.Setup(repository => repository.GetPayee( payerPayeeId))
+        _mockRepository.Setup(repository => repository.GetPayee(payerPayeeId))
             .ReturnsAsync(() => new PayerPayee
             {
                 PayerPayeeId = payerPayeeId.ToString(),
@@ -382,6 +382,64 @@ public class PayerPayeeServiceTests
         };
         Assert.Equal(expectedPayees, actualPayees);
     }
+
+    [Fact]
+    public async Task GivenRequest_WhenGetSuggestedPayersInvoked_ThenCorrectSuggestedPayersReturned()
+    {
+        var payers = new List<PayerPayee>
+        {
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1"
+            },
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2"
+            }
+        };
+        _mockRepository.Setup(repo => repo.GetSuggestedPayers(It.IsAny<int>())).ReturnsAsync(() => payers);
+        
+        var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
+
+        var suggestedPayers = await service.GetSuggestedPayers();
+        Assert.Equal(payers.Select(payer => new PayerPayeeViewModel
+        {
+            ExternalId = payer.ExternalId,
+            PayerPayeeName = payer.PayerPayeeName,
+            PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
+        }), suggestedPayers.ToList());
+    }
+    
+    [Fact]
+    public async Task GivenRequest_WhenGetSuggestedPayeesInvoked_ThenCorrectSuggestedPayeesReturned()
+    {
+        var payees = new List<PayerPayee>
+        {
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1"
+            },
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2"
+            }
+        };
+        _mockRepository.Setup(repo => repo.GetSuggestedPayees(It.IsAny<int>())).ReturnsAsync(() => payees);
+        
+        var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
+
+        var suggestedPayers = await service.GetSuggestedPayees();
+        Assert.Equal(payees.Select(payer => new PayerPayeeViewModel
+        {
+            ExternalId = payer.ExternalId,
+            PayerPayeeName = payer.PayerPayeeName,
+            PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
+        }), suggestedPayers.ToList());
+    }
 }
 
 public class PayerPayeeServiceCreatePayeeTests
@@ -402,7 +460,7 @@ public class PayerPayeeServiceCreatePayeeTests
         GivenValidCreatePayerPayeeDto_ThenRepositoryCalledWithCorrectPayerPayeeModel()
     {
         const string expectedPayeeName = "payee name 123";
-        
+
         var service = new PayerPayeeService(_mockRepository.Object,
             _mockPayerPayeeEnricher.Object);
         await service.CreatePayee(new CreatePayerPayeeDto
@@ -423,7 +481,7 @@ public class PayerPayeeServiceCreatePayeeTests
         const string expectedPayeeName = "payer name 123";
         const string expectedExternalId = "externalId123";
         const string expectedAddress = "1 address VIC";
-        
+
         _mockPayerPayeeEnricher.Setup(enricher => enricher.GetExtraPayerPayeeDetails(expectedExternalId))
             .ReturnsAsync(() => new ExtraPayerPayeeDetails
             {
@@ -509,7 +567,7 @@ public class PayerPayeeServiceCreatePayerTests
     public async Task GivenPayerCreatedAndExternalIdIsEmpty_ThenCorrectPayerReturned()
     {
         const string expectedPayerName = "payer name 123";
-        
+
         var service = new PayerPayeeService(_mockRepository.Object,
             _mockPayerPayeeEnricher.Object);
         var actualPayer = await service.CreatePayer(new CreatePayerPayeeDto
