@@ -22,12 +22,7 @@ public class AutocompleteEndpointTests : IAsyncLifetime
 
     public AutocompleteEndpointTests(MoneyMateApiWebApplicationFactory factory)
     {
-        _httpClient = factory.WithWebHostBuilder(builder => builder.ConfigureAppConfiguration(
-            (_, configurationBuilder) =>
-                configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>()
-                {
-                    ["CockroachDb:Enabled"] = "true"
-                }))).CreateClient();
+        _httpClient = factory.CreateClient();
         _cockroachDbIntegrationTestHelper = factory.CockroachDbIntegrationTestHelper;
     }
 
