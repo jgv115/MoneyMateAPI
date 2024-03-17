@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
 using Npgsql;
-using TransactionService.Domain.Services.PayerPayees.Specifications;
+using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb.Entities;
 using TransactionService.Repositories.Exceptions;
@@ -44,6 +44,70 @@ namespace TransactionService.Repositories.CockroachDb
             return payerPayees.Distinct();
         }
     }
+    
+    internal class PayerPayeeSuggestionQueryBuilder
+        {
+            private Dictionary<string, object> SuggestionQueryParams { get; set; } = new();
+            private string SuggestionQuery { get; set; } = "";
+
+            public PayerPayeeSuggestionQueryBuilder(Dictionary<string, object> initialQueryParams)
+            {
+                SuggestionQueryParams = SuggestionQueryParams.Concat(initialQueryParams)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value);
+            }
+
+            public PayerPayeeSuggestionQueryBuilder WithSuggestionParameters(
+                IPayerPayeeSuggestionParameters suggestionParameters)
+            {
+                // TODO: might need to put a time limit in here in the future
+                var baseQuery = @"
+                        SELECT payerpayee.id,
+                               payerpayee.name             as name,
+                               payerpayee.external_link_id as externalLinkId,
+                               ppt.id,
+                               ppt.name                    as name,
+                               pext.id,
+                               pext.name                   as name
+                        FROM groupedPayerPayees
+                                LEFT JOIN payerpayee ON payerpayee.id = groupedPayerPayees.payerpayee_id
+                                 LEFT JOIN payerpayeetype ppt on payerpayee.payerpayeetype_id = ppt.id
+                                 LEFT JOIN payerpayeeexternallinktype pext
+                                           on payerpayee.external_link_type_id = pext.id";
+
+                if (suggestionParameters is SubcategoryPayerPayeeSuggestionParameters parameters)
+                {
+                    SuggestionQuery = @"
+                                    WITH groupedPayerPayees AS (SELECT payerpayee_id, subcategory_id, count(1) as count
+                                         FROM transaction
+                                         WHERE profile_id = @profileId
+                                         group by payerpayee_id, subcategory_id)" +
+                                      baseQuery +
+                                      " LEFT JOIN categories_and_subcategories cs on cs.subcategoryid = groupedPayerPayees.subcategory_id" +
+                                      @" WHERE ppt.name = @payerPayeeType 
+                                            and cs.subcategoryname = @subcategoryName 
+                                            and cs.categoryname = @categoryName";
+
+                    SuggestionQueryParams.Add("categoryName", parameters.Category);
+                    SuggestionQueryParams.Add("subcategoryName", parameters.Subcategory);
+                }
+                else
+                {
+                    SuggestionQuery = @"
+                                    WITH groupedPayerPayees AS (SELECT payerpayee_id, subcategory_id, count(1) as count
+                                         FROM transaction
+                                         WHERE profile_id = @profileId
+                                         group by payerpayee_id, subcategory_id)" +
+                                      baseQuery +
+                                      " WHERE ppt.name = @payerPayeeType";
+                }
+
+                SuggestionQuery = SuggestionQuery + " order by count desc LIMIT @limit;";
+                return this;
+            }
+
+            public string BuildQuery() => SuggestionQuery;
+            public object BuildQueryParams() => SuggestionQueryParams;
+        }
 
     public class CockroachDbPayerPayeeRepository : IPayerPayeeRepository
     {
@@ -241,71 +305,35 @@ namespace TransactionService.Repositories.CockroachDb
         public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayee(string autocompleteQuery)
             => AutocompletePayerPayee(autocompleteQuery, "payee");
 
-        private string BuildPayerPayeeSuggestionQuery(PayerPayeeSuggestionSpecification spec)
+        private async Task<IEnumerable<Domain.Models.PayerPayee>> GetSuggestedPayerPayees(string payerPayeeType,
+            IPayerPayeeSuggestionParameters suggestionParameters, int limit)
         {
-            // TODO: might need to put a time limit in here in the future
-            var suggestionQuery = @"
-                        SELECT payerpayee.id,
-                               payerpayee.name             as name,
-                               payerpayee.external_link_id as externalLinkId,
-                               ppt.id,
-                               ppt.name                    as name,
-                               pext.id,
-                               pext.name                   as name
-                        FROM groupedPayerPayees
-                                LEFT JOIN payerpayee ON payerpayee.id = groupedPayerPayees.payerpayee_id
-                                 LEFT JOIN payerpayeetype ppt on payerpayee.payerpayeetype_id = ppt.id
-                                 LEFT JOIN payerpayeeexternallinktype pext
-                                           on payerpayee.external_link_type_id = pext.id";
-
-            if (spec.Criteria == PayerPayeeSuggestionCriteria.Subcategory)
-                suggestionQuery = @"
-                                    WITH groupedPayerPayees AS (SELECT payerpayee_id, subcategory_id, count(1) as count
-                                         FROM transaction
-                                         WHERE profile_id = @profileId
-                                         group by payerpayee_id, subcategory_id)" +
-                                  suggestionQuery +
-                                  " LEFT JOIN subcategory  sc on sc.id = groupedPayerPayees.subcategory_id" +
-                                  " WHERE ppt.name = @payerPayeeType and sc.name = @suggestionSpecValue";
-
-            else
-                suggestionQuery = @"
-                                    WITH groupedPayerPayees AS (SELECT payerpayee_id, subcategory_id, count(1) as count
-                                         FROM transaction
-                                         WHERE profile_id = @profileId
-                                         group by payerpayee_id, subcategory_id)" +
-                                  suggestionQuery +
-                                  " WHERE ppt.name = @payerPayeeType";
-
-            suggestionQuery = suggestionQuery + " order by count desc LIMIT @limit;";
-            return suggestionQuery;
-        }
-
-        public async Task<IEnumerable<Domain.Models.PayerPayee>> GetSuggestedPayerPayees(string payerPayeeType,
-            int limit)
-        {
-            var spec = new PayerPayeeSuggestionSpecification(PayerPayeeSuggestionCriteria.General, "");
             using (var connection = _context.CreateConnection())
             {
+                var dapperQueryParams = new Dictionary<string, object>();
+                dapperQueryParams.Add("profileId", _userContext.ProfileId);
+                dapperQueryParams.Add("payerPayeeType", payerPayeeType);
+                dapperQueryParams.Add("limit", limit);
+
+                var suggestionQueryBuilder =
+                    new PayerPayeeSuggestionQueryBuilder(dapperQueryParams).WithSuggestionParameters(
+                        suggestionParameters);
+
                 var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(
                     connection,
-                    BuildPayerPayeeSuggestionQuery(spec),
-                    new
-                    {
-                        profileId = _userContext.ProfileId,
-                        payerPayeeType,
-                        limit,
-                        suggestionSpecValue = spec.Value
-                    });
+                    suggestionQueryBuilder.BuildQuery(),
+                    suggestionQueryBuilder.BuildQueryParams());
                 return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.Models.PayerPayee>>(payerPayees);
             }
         }
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> GetSuggestedPayers(int limit = 20) =>
-            GetSuggestedPayerPayees("payer", limit);
+        public Task<IEnumerable<Domain.Models.PayerPayee>> GetSuggestedPayers(
+            IPayerPayeeSuggestionParameters suggestionParameters, int limit = 20) =>
+            GetSuggestedPayerPayees("payer", suggestionParameters, limit);
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> GetSuggestedPayees(int limit = 20) =>
-            GetSuggestedPayerPayees("payee", limit);
+        public Task<IEnumerable<Domain.Models.PayerPayee>> GetSuggestedPayees(
+            IPayerPayeeSuggestionParameters suggestionParameters, int limit = 20) =>
+            GetSuggestedPayerPayees("payee", suggestionParameters, limit);
 
         public Task PutPayer(string userId)
         {

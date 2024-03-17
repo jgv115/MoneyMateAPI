@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using TransactionService.Constants;
 using TransactionService.Domain.Models;
+using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb;
@@ -43,7 +44,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
     [Fact]
     public async Task
-        GivenTransactionsInDatabase_WhenGetSuggestedPayersInvoked_ThenCorrectSuggestedListOfPayersReturned()
+        GivenGeneralSuggestionSpec_WhenGetSuggestedPayersInvoked_ThenCorrectSuggestedListOfPayersReturned()
     {
         var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
         {
@@ -67,7 +68,8 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
-        var suggestedPayerPayees = await repo.GetSuggestedPayers();
+        var suggestedPayerPayees =
+            await repo.GetSuggestedPayers(new GeneralPayerPayeeSuggestionParameters());
         Assert.Equal(new List<PayerPayee>()
         {
             new()
@@ -89,6 +91,57 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
             {
                 PayerPayeeId = payer4.ToString(),
                 PayerPayeeName = "name4"
+            }
+        }, suggestedPayerPayees);
+    }
+
+    [Fact]
+    public async Task
+        GivenSubcategorySuggestionSpec_WhenGetSuggestedPayersInvoked_ThenCorrectSuggestedListOfPayersReturned()
+    {
+        var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
+        {
+            UserId = _cockroachDbIntegrationTestHelper.TestUserIdentifier,
+            ProfileId = _profileId
+        });
+
+        var transactionListBuilder = new TransactionListBuilder();
+
+        Guid payer1 = Guid.NewGuid(), payer2 = Guid.NewGuid(), payer3 = Guid.NewGuid(), payer4 = Guid.NewGuid();
+        var transactionList = transactionListBuilder
+            .WithTransactions(4, payer1.ToString(), "name", 24, TransactionType.Income, "category1", "subcategory1")
+            .WithTransactions(8, payer2.ToString(), "name2", 24, TransactionType.Income, "category1", "subcategory1")
+            .WithTransactions(6, payer3.ToString(), "name3", 24, TransactionType.Income, "category1", "subcategory1")
+            .WithTransactions(10, payer4.ToString(), "name4", 24, TransactionType.Income, "category1", "subcategory1")
+            .WithTransactions(15, payer1.ToString(), "name", 24, TransactionType.Income, "category1", "subcategory2")
+            .Build();
+
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
+
+        var suggestedPayerPayees = await repo.GetSuggestedPayers(
+            new SubcategoryPayerPayeeSuggestionParameters("category1", "subcategory1")
+        );
+        Assert.Equal(new List<PayerPayee>()
+        {
+            new()
+            {
+                PayerPayeeId = payer4.ToString(),
+                PayerPayeeName = "name4"
+            },
+            new()
+            {
+                PayerPayeeId = payer2.ToString(),
+                PayerPayeeName = "name2"
+            },
+            new()
+            {
+                PayerPayeeId = payer3.ToString(),
+                PayerPayeeName = "name3"
+            },
+            new()
+            {
+                PayerPayeeId = payer1.ToString(),
+                PayerPayeeName = "name"
             }
         }, suggestedPayerPayees);
     }
@@ -117,13 +170,15 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
-        var suggestedPayerPayees = await repo.GetSuggestedPayers(2);
+
+        var suggestedPayerPayees =
+            await repo.GetSuggestedPayers(new GeneralPayerPayeeSuggestionParameters(), 2);
         Assert.Equal(2, suggestedPayerPayees.Count());
     }
 
     [Fact]
     public async Task
-        GivenTransactionsInDatabase_WhenGetSuggestedPayeesInvoked_ThenCorrectSuggestedListOfPayeesReturned()
+        GivenGeneralSuggestionSpec_WhenGetSuggestedPayeesInvoked_ThenCorrectSuggestedListOfPayeesReturned()
     {
         var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
         {
@@ -143,7 +198,9 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
-        var suggestedPayerPayees = await repo.GetSuggestedPayees();
+        var suggestedPayerPayees =
+            await repo.GetSuggestedPayees(new GeneralPayerPayeeSuggestionParameters());
+
         Assert.Equal(new List<PayerPayee>()
         {
             new()
@@ -168,7 +225,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
             }
         }, suggestedPayerPayees);
     }
-    
+
     [Fact]
     public async Task
         GivenRequestWithLimit_WhenGetSuggestedPayeesInvoked_ThenCorrectNumberOfPayeesReturned()
@@ -192,7 +249,9 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
 
-        var suggestedPayerPayees = await repo.GetSuggestedPayees(2);
+        var suggestedPayerPayees =
+            await repo.GetSuggestedPayees(new GeneralPayerPayeeSuggestionParameters(),
+                2);
         Assert.Equal(2, suggestedPayerPayees.Count());
     }
 }

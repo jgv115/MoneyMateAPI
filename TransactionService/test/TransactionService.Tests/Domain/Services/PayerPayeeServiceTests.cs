@@ -399,8 +399,10 @@ public class PayerPayeeServiceTests
                 PayerPayeeName = "name2"
             }
         };
-        _mockRepository.Setup(repo => repo.GetSuggestedPayers(It.IsAny<int>())).ReturnsAsync(() => payers);
-        
+        _mockRepository
+            .Setup(repo => repo.GetSuggestedPayers(It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
+            .ReturnsAsync(() => payers);
+
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers = await service.GetSuggestedPayers();
@@ -411,7 +413,7 @@ public class PayerPayeeServiceTests
             PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
         }), suggestedPayers.ToList());
     }
-    
+
     [Fact]
     public async Task GivenRequest_WhenGetSuggestedPayeesInvoked_ThenCorrectSuggestedPayeesReturned()
     {
@@ -428,8 +430,10 @@ public class PayerPayeeServiceTests
                 PayerPayeeName = "name2"
             }
         };
-        _mockRepository.Setup(repo => repo.GetSuggestedPayees(It.IsAny<int>())).ReturnsAsync(() => payees);
-        
+        _mockRepository
+            .Setup(repo => repo.GetSuggestedPayees(It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
+            .ReturnsAsync(() => payees);
+
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers = await service.GetSuggestedPayees();
