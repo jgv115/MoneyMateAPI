@@ -18,59 +18,35 @@ public class TransactionListBuilder
     }
 
     public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndAmount(int number, string category,
-        decimal amount)
-    {
-        for (var i = 0; i < number; i++)
-        {
-            _transactionList.Add(new Transaction()
-            {
-                Amount = amount,
-                Category = category,
-                TransactionTimestamp = DateTime.UtcNow.ToString("O"),
-                Subcategory = "subcategory-1",
-                TransactionId = Guid.NewGuid().ToString(),
-                TransactionType = "expense",
-            });
-        }
+        decimal amount) =>
+        WithTransactions(number, null, null, amount, null, category, null);
 
-        return this;
-    }
+    public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(int number, string category,
+        string subcategory, decimal amount) =>
+        WithTransactions(number, null, null, amount, null, category, subcategory);
 
-    public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(int number,
-        string category, string subcategory,
-        decimal amount)
+    public TransactionListBuilder WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(int number,
+        string? payerPayeeId,
+        string? payerPayeeName, decimal amount, TransactionType transactionType = TransactionType.Expense) =>
+        WithTransactions(number, payerPayeeId, payerPayeeName, amount, transactionType, null, null);
+
+    public TransactionListBuilder WithTransactions(int number, string? payerPayeeId, string? payerPayeeName,
+        decimal? amount, TransactionType? transactionType, string? category, string? subcategory)
     {
         for (var i = 0; i < number; i++)
         {
             _transactionList.Add(new Transaction
             {
-                Amount = amount,
-                Category = category,
+                Amount = amount ?? 12,
+                Category = category ?? "category123",
                 TransactionTimestamp = DateTime.UtcNow.ToString("O"),
-                Subcategory = subcategory,
+                Subcategory = subcategory ?? "subcategory123",
                 TransactionId = Guid.NewGuid().ToString(),
-                TransactionType = "expense",
-            });
-        }
-
-        return this;
-    }
-
-    public TransactionListBuilder WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(int number, string? payerPayeeId,
-        string? payerPayeeName, decimal amount, TransactionType transactionType = TransactionType.Expense)
-    {
-        for (var i = 0; i < number; i++)
-        {
-            _transactionList.Add(new Transaction
-            {
-                Amount = amount,
-                Category = "category123",
-                TransactionTimestamp = DateTime.UtcNow.ToString("O"),
-                Subcategory = "subcategory123",
-                TransactionId = Guid.NewGuid().ToString(),
-                TransactionType = transactionType.ToProperString(),
-                PayerPayeeId = payerPayeeId,
-                PayerPayeeName = payerPayeeName
+                TransactionType = transactionType == null
+                    ? TransactionType.Expense.ToProperString()
+                    : transactionType.Value.ToProperString(),
+                PayerPayeeId = payerPayeeId ?? "",
+                PayerPayeeName = payerPayeeName ?? ""
             });
         }
 

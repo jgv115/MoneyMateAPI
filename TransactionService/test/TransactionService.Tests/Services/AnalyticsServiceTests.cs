@@ -692,11 +692,11 @@ namespace TransactionService.Tests.Services
                 const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
 
                 var expectedPayerPayeeId2 = Guid.NewGuid().ToString();
-                const string expectedPayerPayeeName2 = null;
+                const string expectedPayerPayeeName2 = "";
                 const int numberOfPayerPayee2Transactions = 20;
                 const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
 
-                string expectedPayerPayeeId3 = null;
+                string expectedPayerPayeeId3 = "";
                 const string expectedPayerPayeeName3 = null;
                 const int numberOfPayerPayee3Transactions = 10;
                 const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
