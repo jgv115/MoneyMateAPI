@@ -23,12 +23,8 @@ namespace TransactionService.Middleware
             var profileIdHeaderFound =
                 httpContext.Request.Headers.TryGetValue(Headers.ProfileId, out var profileId);
 
-            // TODO: this will be here temporarily
             if (!profileIdHeaderFound)
-            {
-                var profiles = await profileService.GetProfiles();
-                userContext.ProfileId = profiles.First().Id;
-            }
+                throw new InvalidProfileIdException($"{Headers.ProfileId} was not set");
             else
             {
                 var profileIdIsValidGuid = Guid.TryParse(profileId, out var profileIdGuid);

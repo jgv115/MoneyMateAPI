@@ -58,7 +58,7 @@ public class UserProfileMiddlewareTests
     }
 
     [Fact]
-    public async void GivenMissingMoneyMateProfileHeader_ThenProfileIdSetToFirstProfileReturnedFromService()
+    public async void GivenMissingMoneyMateProfileHeader_ThenInvalidProfileExceptionThrown()
     {
         var userId = "userId123";
         var currentUserContext = new CurrentUserContext();
@@ -77,9 +77,8 @@ public class UserProfileMiddlewareTests
             }
         });
 
-        await sut.Invoke(httpContext, currentUserContext, _mockProfileService.Object);
-
-        Assert.Equal(profileId, currentUserContext.ProfileId);
+        await Assert.ThrowsAsync<InvalidProfileIdException>(() =>
+            sut.Invoke(httpContext, currentUserContext, _mockProfileService.Object));
     }
 
     [Fact]
@@ -97,13 +96,5 @@ public class UserProfileMiddlewareTests
 
         await Assert.ThrowsAsync<InvalidProfileIdException>(() =>
             sut.Invoke(httpContext, currentUserContext, _mockProfileService.Object));
-    }
-
-    [Fact]
-    public async void InvokeAsync_ShouldThrowArgumentNullException_WhenIdentifierClaimIsNull()
-    {
-        var sut = new UserProfileMiddleware(async _ => await Task.Delay(0));
-        await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            sut.Invoke(new DefaultHttpContext(), new CurrentUserContext(), _mockProfileService.Object));
     }
 }

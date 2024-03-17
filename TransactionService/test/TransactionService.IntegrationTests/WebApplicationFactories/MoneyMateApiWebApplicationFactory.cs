@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using TransactionService.Constants;
 using TransactionService.IntegrationTests.Helpers;
 using Xunit;
 
@@ -69,7 +70,7 @@ namespace TransactionService.IntegrationTests.WebApplicationFactories
         {
             base.ConfigureClient(client);
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_accessToken ?? RequestAccessToken()}");
-            // client.DefaultRequestHeaders.Add(Headers.ProfileId, TestUserId.ToString());
+            client.DefaultRequestHeaders.Add(Headers.ProfileId, TestUserId.ToString());
         }
     }
 }
