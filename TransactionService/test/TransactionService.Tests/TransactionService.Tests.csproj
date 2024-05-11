@@ -2,6 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
         <EnableDefaultContentItems>False</EnableDefaultContentItems>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
         <Content Include=".\SampleRequests\*">

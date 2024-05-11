@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using TransactionService.Controllers.Analytics.ViewModels;
+using TransactionService.IntegrationTests.Extensions;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.IntegrationTests.WebApplicationFactories;
 using TransactionService.Tests.Common;
@@ -68,7 +69,8 @@ public class AnalyticsEndpointTests : IAsyncLifetime
         var queryString = query.ToString();
 
         var response = await _httpClient.GetAsync($"/api/analytics/categories?{queryString}");
-        response.EnsureSuccessStatusCode();
+
+        await response.AssertSuccessfulStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
         var actualAnalyticsCategories = JsonSerializer.Deserialize<List<AnalyticsCategory>>(returnedString,

@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,9 +49,9 @@ namespace TransactionService.Controllers.PayersPayees
         }
 
         [HttpGet("payers/suggestions")]
-        public async Task<IActionResult> GetSuggestedPayers()
+        public async Task<IActionResult> GetSuggestedPayers([FromQuery] SuggestionPromptDto suggestionPromptDto)
         {
-            var payers = await _payerPayeeService.GetSuggestedPayers();
+            var payers = await _payerPayeeService.GetSuggestedPayers(suggestionPromptDto);
             return Ok(payers);
         }
 
@@ -73,14 +74,72 @@ namespace TransactionService.Controllers.PayersPayees
             return Ok(payers);
         }
 
-        
+
         [HttpGet("payees/suggestions")]
-        public async Task<IActionResult> GetSuggestedPayees()
+        public async Task<IActionResult> GetSuggestedPayees([FromQuery] SuggestionPromptDto suggestionPromptDto)
         {
-            var payees = await _payerPayeeService.GetSuggestedPayees();
+            var validationProblemDetails = ValidateSuggestionPromptDto(suggestionPromptDto);
+
+            if (validationProblemDetails != null)
+                return BadRequest(validationProblemDetails);
+
+            var payees = await _payerPayeeService.GetSuggestedPayees(suggestionPromptDto);
             return Ok(payees);
         }
-        
+
+        private ProblemDetails? ValidateSuggestionPromptDto(SuggestionPromptDto suggestionPromptDto)
+        {
+            var problemDiscovered = false;
+            var problemDescription = "";
+            if (suggestionPromptDto.PromptType == SuggestionPromptType.All)
+            {
+                if (!string.IsNullOrEmpty(suggestionPromptDto.Category) ||
+                    !string.IsNullOrEmpty(suggestionPromptDto.Subcategory))
+                {
+                    problemDescription = "Suggestion Prompt values cannot be provided if prompt type is 'All'";
+                    problemDiscovered = true;
+                }
+            }
+
+            if (suggestionPromptDto.PromptType == SuggestionPromptType.Category)
+            {
+                if (string.IsNullOrEmpty(suggestionPromptDto.Category))
+                {
+                    problemDescription =
+                        "Suggestion Prompt value for Category cannot be empty if prompt type is 'Category'";
+                    problemDiscovered = true;
+                }
+
+                if (!string.IsNullOrEmpty(suggestionPromptDto.Subcategory))
+                {
+                    problemDescription =
+                        "Suggestion Prompt subcategory value cannot be provided if prompt type is 'Category'";
+                    problemDiscovered = true;
+                }
+            }
+
+            if (suggestionPromptDto.PromptType == SuggestionPromptType.Subcategory)
+            {
+                if (string.IsNullOrEmpty(suggestionPromptDto.Category) ||
+                    string.IsNullOrEmpty(suggestionPromptDto.Subcategory))
+                {
+                    problemDescription =
+                        "Suggestion Prompt values for Category and Subcateogry must be provided  if prompt type is 'Subcategory'";
+                    problemDiscovered = true;
+                }
+            }
+
+            if (problemDiscovered)
+                return new ProblemDetails
+                {
+                    Detail = problemDescription,
+                    Status = (int)HttpStatusCode.BadRequest,
+                    Title = "Validation Error"
+                };
+
+            return null;
+        }
+
         [HttpGet("payers/{payerPayeeId:guid}")]
         public async Task<IActionResult> GetPayer(Guid payerPayeeId)
         {

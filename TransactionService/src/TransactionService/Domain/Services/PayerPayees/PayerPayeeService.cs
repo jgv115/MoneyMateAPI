@@ -94,13 +94,17 @@ namespace TransactionService.Domain.Services.PayerPayees
             return await EnrichAndMapPayerPayeesToViewModels(payees);
         }
 
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayers() =>
-            await EnrichAndMapPayerPayeesToViewModels(
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayers(SuggestionPromptDto suggestionPromptDto)
+        {
+            return await EnrichAndMapPayerPayeesToViewModels(
                 await _repository.GetSuggestedPayers(new GeneralPayerPayeeSuggestionParameters()));
+        }
 
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayees() =>
-            await EnrichAndMapPayerPayeesToViewModels(
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayees(SuggestionPromptDto suggestionPromptDto)
+        {
+            return await EnrichAndMapPayerPayeesToViewModels(
                 await _repository.GetSuggestedPayees(new GeneralPayerPayeeSuggestionParameters()));
+        }
 
         // TODO: might be some coupling issues here - we are assuming repository will store exactly as we are inputting
         public async Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee)
