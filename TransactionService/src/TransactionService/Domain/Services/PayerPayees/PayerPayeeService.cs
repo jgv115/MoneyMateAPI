@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
@@ -94,16 +96,10 @@ namespace TransactionService.Domain.Services.PayerPayees
             return await EnrichAndMapPayerPayeesToViewModels(payees);
         }
 
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayers(SuggestionPromptDto suggestionPromptDto)
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayersOrPayees(PayerPayeeType payerPayeeType, SuggestionPromptDto suggestionPromptDto)
         {
             return await EnrichAndMapPayerPayeesToViewModels(
-                await _repository.GetSuggestedPayers(new GeneralPayerPayeeSuggestionParameters()));
-        }
-
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayees(SuggestionPromptDto suggestionPromptDto)
-        {
-            return await EnrichAndMapPayerPayeesToViewModels(
-                await _repository.GetSuggestedPayees(new GeneralPayerPayeeSuggestionParameters()));
+                await _repository.GetSuggestedPayersOrPayees(payerPayeeType, new GeneralPayerPayeeSuggestionParameters()));
         }
 
         // TODO: might be some coupling issues here - we are assuming repository will store exactly as we are inputting

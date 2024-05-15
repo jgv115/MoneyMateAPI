@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TransactionService.Constants;
 using TransactionService.Controllers.Exceptions;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Domain.Services.PayerPayees;
@@ -51,7 +52,12 @@ namespace TransactionService.Controllers.PayersPayees
         [HttpGet("payers/suggestions")]
         public async Task<IActionResult> GetSuggestedPayers([FromQuery] SuggestionPromptDto suggestionPromptDto)
         {
-            var payers = await _payerPayeeService.GetSuggestedPayers(suggestionPromptDto);
+            var validationProblemDetails = ValidateSuggestionPromptDto(suggestionPromptDto);
+
+            if (validationProblemDetails != null)
+                return BadRequest(validationProblemDetails);
+            
+            var payers = await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, suggestionPromptDto);
             return Ok(payers);
         }
 
@@ -83,7 +89,7 @@ namespace TransactionService.Controllers.PayersPayees
             if (validationProblemDetails != null)
                 return BadRequest(validationProblemDetails);
 
-            var payees = await _payerPayeeService.GetSuggestedPayees(suggestionPromptDto);
+            var payees = await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, suggestionPromptDto);
             return Ok(payees);
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TransactionService.Constants;
 using TransactionService.Domain.Models;
 using TransactionService.Domain.Services.PayerPayees;
 
@@ -19,12 +20,10 @@ namespace TransactionService.Repositories
         public Task<IEnumerable<PayerPayee>> AutocompletePayer(string autocompleteQuery);
         public Task<IEnumerable<PayerPayee>> AutocompletePayee(string autocompleteQuery);
 
-        public Task<IEnumerable<PayerPayee>> GetSuggestedPayers(IPayerPayeeSuggestionParameters suggestionParameters,
+        public Task<IEnumerable<PayerPayee>> GetSuggestedPayersOrPayees(PayerPayeeType payerpayeeType,
+            IPayerPayeeSuggestionParameters suggestionParameters,
             int limit = 20);
-
-        public Task<IEnumerable<PayerPayee>> GetSuggestedPayees(IPayerPayeeSuggestionParameters suggestionParameters,
-            int limit = 20);
-
+        
         public Task PutPayer(string userId);
         public Task PutPayee(string userId);
         public Task DeletePayer(string userId);

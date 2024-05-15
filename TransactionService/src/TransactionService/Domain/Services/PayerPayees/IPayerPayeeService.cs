@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 
@@ -15,10 +16,8 @@ namespace TransactionService.Domain.Services.PayerPayees
         public Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName);
         public Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayee(string payerName);
 
-        public Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayers(SuggestionPromptDto suggestionPromptDto);
-
-        public Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayees(SuggestionPromptDto suggestionPromptDto);
-
+        public Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayersOrPayees(PayerPayeeType payerPayeeType, SuggestionPromptDto suggestionPromptDto);
+        
         public Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee);
         public Task<PayerPayeeViewModel> CreatePayee(CreatePayerPayeeDto newPayerPayee);
     }

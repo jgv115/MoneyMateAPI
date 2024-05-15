@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using TransactionService.Controllers;
+using TransactionService.Constants;
 using TransactionService.Controllers.Exceptions;
 using TransactionService.Controllers.PayersPayees;
 using TransactionService.Controllers.PayersPayees.Dtos;
@@ -196,7 +196,8 @@ namespace TransactionService.Tests.Controllers
                 }
             };
             _mockService.Setup(service =>
-                    service.GetSuggestedPayers(new SuggestionPromptDto(SuggestionPromptType.All, null, null)))
+                    service.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
+                        new SuggestionPromptDto(SuggestionPromptType.All, null, null)))
                 .ReturnsAsync(payers);
             var controller = new PayersPayeesController(_mockService.Object);
 
@@ -233,7 +234,8 @@ namespace TransactionService.Tests.Controllers
                 }
             };
             _mockService.Setup(service =>
-                    service.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.All, null, null)))
+                    service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+                        new SuggestionPromptDto(SuggestionPromptType.All, null, null)))
                 .ReturnsAsync(payees);
             var controller = new PayersPayeesController(_mockService.Object);
 
@@ -266,7 +268,9 @@ namespace TransactionService.Tests.Controllers
                 }
             };
             _mockService.Setup(service =>
-                    service.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.Category, "test", null)))
+                    service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, new SuggestionPromptDto(
+                        SuggestionPromptType.Category, "test",
+                        null)))
                 .ReturnsAsync(payees);
             var controller = new PayersPayeesController(_mockService.Object);
 
@@ -300,7 +304,8 @@ namespace TransactionService.Tests.Controllers
                 }
             };
             _mockService.Setup(service =>
-                    service.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.Subcategory, "test",
+                    service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, new SuggestionPromptDto(
+                        SuggestionPromptType.Subcategory, "test",
                         "sub")))
                 .ReturnsAsync(payees);
             var controller = new PayersPayeesController(_mockService.Object);

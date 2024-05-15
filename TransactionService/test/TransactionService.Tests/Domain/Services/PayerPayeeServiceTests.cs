@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
+using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
@@ -390,7 +391,8 @@ public class GetSuggestionsTests
     private readonly Mock<IPayerPayeeEnricher> _mockPayerPayeeEnricher = new();
 
     [Fact]
-    public async Task GivenAllSuggestionPromptType_WhenGetSuggestedPayersInvoked_ThenCorrectSuggestedPayersReturned()
+    public async Task
+        GivenAllSuggestionPromptType_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedPayersReturned()
     {
         var payers = new List<PayerPayee>
         {
@@ -406,13 +408,15 @@ public class GetSuggestionsTests
             }
         };
         _mockRepository
-            .Setup(repo => repo.GetSuggestedPayers(It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
+            .Setup(repo => repo.GetSuggestedPayersOrPayees(It.IsAny<PayerPayeeType>(),
+                It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
             .ReturnsAsync(() => payers);
 
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers =
-            await service.GetSuggestedPayers(new SuggestionPromptDto(SuggestionPromptType.All, null, null));
+            await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+                new SuggestionPromptDto());
         Assert.Equal(payers.Select(payer => new PayerPayeeViewModel
         {
             ExternalId = payer.ExternalId,
@@ -422,7 +426,8 @@ public class GetSuggestionsTests
     }
 
     [Fact]
-    public async Task GivenSuggestionPromptDto_WhenGetSuggestedPayersInvoked_ThenCorrectSuggestedPayersReturned()
+    public async Task
+        GivenSuggestionPromptDto_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedPayersReturned()
     {
         var payers = new List<PayerPayee>
         {
@@ -438,13 +443,15 @@ public class GetSuggestionsTests
             }
         };
         _mockRepository
-            .Setup(repo => repo.GetSuggestedPayers(It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
+            .Setup(repo => repo.GetSuggestedPayersOrPayees(It.IsAny<PayerPayeeType>(),
+                It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
             .ReturnsAsync(() => payers);
 
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers =
-            await service.GetSuggestedPayers(new SuggestionPromptDto(SuggestionPromptType.All, null, null));
+            await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+                new SuggestionPromptDto());
         Assert.Equal(payers.Select(payer => new PayerPayeeViewModel
         {
             ExternalId = payer.ExternalId,
@@ -454,7 +461,8 @@ public class GetSuggestionsTests
     }
 
     [Fact]
-    public async Task GivenAllSuggestionPrompsType_WhenGetSuggestedPayeesInvoked_ThenCorrectSuggestedPayeesReturned()
+    public async Task
+        GivenAllSuggestionPromptTypes_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedPayeesReturned()
     {
         var payees = new List<PayerPayee>
         {
@@ -470,13 +478,15 @@ public class GetSuggestionsTests
             }
         };
         _mockRepository
-            .Setup(repo => repo.GetSuggestedPayees(It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
+            .Setup(repo => repo.GetSuggestedPayersOrPayees(It.IsAny<PayerPayeeType>(),
+                It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
             .ReturnsAsync(() => payees);
 
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers =
-            await service.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.All, null, null));
+            await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+                new SuggestionPromptDto());
         Assert.Equal(payees.Select(payer => new PayerPayeeViewModel
         {
             ExternalId = payer.ExternalId,

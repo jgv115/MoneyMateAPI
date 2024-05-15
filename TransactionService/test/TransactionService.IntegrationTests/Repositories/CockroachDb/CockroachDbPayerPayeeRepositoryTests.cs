@@ -44,7 +44,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
     [Fact]
     public async Task
-        GivenGeneralSuggestionSpec_WhenGetSuggestedPayersInvoked_ThenCorrectSuggestedListOfPayersReturned()
+        GivenGeneralSuggestionSpecAndPayerType_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedListOfPayersReturned()
     {
         var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
         {
@@ -69,7 +69,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var suggestedPayerPayees =
-            await repo.GetSuggestedPayers(new GeneralPayerPayeeSuggestionParameters());
+            await repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, new GeneralPayerPayeeSuggestionParameters());
         Assert.Equal(new List<PayerPayee>()
         {
             new()
@@ -97,7 +97,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
     [Fact]
     public async Task
-        GivenSubcategorySuggestionSpec_WhenGetSuggestedPayersInvoked_ThenCorrectSuggestedListOfPayersReturned()
+        GivenSubcategorySuggestionSpecAndPayerType_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedListOfPayersReturned()
     {
         var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
         {
@@ -118,7 +118,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
-        var suggestedPayerPayees = await repo.GetSuggestedPayers(
+        var suggestedPayerPayees = await repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
             new SubcategoryPayerPayeeSuggestionParameters("category1", "subcategory1")
         );
         Assert.Equal(new List<PayerPayee>()
@@ -148,7 +148,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
     [Fact]
     public async Task
-        GivenRequestWithLimit_WhenGetSuggestedPayersInvoked_ThenCorrectNumberOfPayersReturned()
+        GivenRequestWithLimitAndPayerType_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectNumberOfPayersReturned()
     {
         var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
         {
@@ -172,13 +172,13 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
 
         var suggestedPayerPayees =
-            await repo.GetSuggestedPayers(new GeneralPayerPayeeSuggestionParameters(), 2);
+            await repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, new GeneralPayerPayeeSuggestionParameters(), 2);
         Assert.Equal(2, suggestedPayerPayees.Count());
     }
 
     [Fact]
     public async Task
-        GivenGeneralSuggestionSpec_WhenGetSuggestedPayeesInvoked_ThenCorrectSuggestedListOfPayeesReturned()
+        GivenGeneralSuggestionSpecAndPayeeType_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedListOfPayeesReturned()
     {
         var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
         {
@@ -199,7 +199,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
         var suggestedPayerPayees =
-            await repo.GetSuggestedPayees(new GeneralPayerPayeeSuggestionParameters());
+            await repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, new GeneralPayerPayeeSuggestionParameters());
 
         Assert.Equal(new List<PayerPayee>()
         {
@@ -228,7 +228,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
     [Fact]
     public async Task
-        GivenRequestWithLimit_WhenGetSuggestedPayeesInvoked_ThenCorrectNumberOfPayeesReturned()
+        GivenRequestWithLimitAndPayeeType_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectNumberOfPayeesReturned()
     {
         var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
         {
@@ -250,7 +250,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
 
         var suggestedPayerPayees =
-            await repo.GetSuggestedPayees(new GeneralPayerPayeeSuggestionParameters(),
+            await repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, new GeneralPayerPayeeSuggestionParameters(),
                 2);
         Assert.Equal(2, suggestedPayerPayees.Count());
     }
