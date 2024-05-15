@@ -52,13 +52,21 @@ namespace TransactionService.Controllers.PayersPayees
         [HttpGet("payers/suggestions")]
         public async Task<IActionResult> GetSuggestedPayers([FromQuery] SuggestionPromptDto suggestionPromptDto)
         {
-            var validationProblemDetails = ValidateSuggestionPromptDto(suggestionPromptDto);
-
-            if (validationProblemDetails != null)
-                return BadRequest(validationProblemDetails);
-            
-            var payers = await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, suggestionPromptDto);
-            return Ok(payers);
+            try
+            {
+                var payers =
+                    await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, suggestionPromptDto);
+                return Ok(payers);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Detail = ex.Message,
+                    Status = 400,
+                    Title = "Invalid input"
+                });
+            }
         }
 
         [HttpGet("payees")]
@@ -84,66 +92,21 @@ namespace TransactionService.Controllers.PayersPayees
         [HttpGet("payees/suggestions")]
         public async Task<IActionResult> GetSuggestedPayees([FromQuery] SuggestionPromptDto suggestionPromptDto)
         {
-            var validationProblemDetails = ValidateSuggestionPromptDto(suggestionPromptDto);
-
-            if (validationProblemDetails != null)
-                return BadRequest(validationProblemDetails);
-
-            var payees = await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, suggestionPromptDto);
-            return Ok(payees);
-        }
-
-        private ProblemDetails? ValidateSuggestionPromptDto(SuggestionPromptDto suggestionPromptDto)
-        {
-            var problemDiscovered = false;
-            var problemDescription = "";
-            if (suggestionPromptDto.PromptType == SuggestionPromptType.All)
+            try
             {
-                if (!string.IsNullOrEmpty(suggestionPromptDto.Category) ||
-                    !string.IsNullOrEmpty(suggestionPromptDto.Subcategory))
-                {
-                    problemDescription = "Suggestion Prompt values cannot be provided if prompt type is 'All'";
-                    problemDiscovered = true;
-                }
+                var payers =
+                    await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, suggestionPromptDto);
+                return Ok(payers);
             }
-
-            if (suggestionPromptDto.PromptType == SuggestionPromptType.Category)
+            catch (ArgumentException ex)
             {
-                if (string.IsNullOrEmpty(suggestionPromptDto.Category))
+                return BadRequest(new ProblemDetails
                 {
-                    problemDescription =
-                        "Suggestion Prompt value for Category cannot be empty if prompt type is 'Category'";
-                    problemDiscovered = true;
-                }
-
-                if (!string.IsNullOrEmpty(suggestionPromptDto.Subcategory))
-                {
-                    problemDescription =
-                        "Suggestion Prompt subcategory value cannot be provided if prompt type is 'Category'";
-                    problemDiscovered = true;
-                }
+                    Detail = ex.Message,
+                    Status = 400,
+                    Title = "Invalid input"
+                });
             }
-
-            if (suggestionPromptDto.PromptType == SuggestionPromptType.Subcategory)
-            {
-                if (string.IsNullOrEmpty(suggestionPromptDto.Category) ||
-                    string.IsNullOrEmpty(suggestionPromptDto.Subcategory))
-                {
-                    problemDescription =
-                        "Suggestion Prompt values for Category and Subcateogry must be provided  if prompt type is 'Subcategory'";
-                    problemDiscovered = true;
-                }
-            }
-
-            if (problemDiscovered)
-                return new ProblemDetails
-                {
-                    Detail = problemDescription,
-                    Status = (int)HttpStatusCode.BadRequest,
-                    Title = "Validation Error"
-                };
-
-            return null;
         }
 
         [HttpGet("payers/{payerPayeeId:guid}")]

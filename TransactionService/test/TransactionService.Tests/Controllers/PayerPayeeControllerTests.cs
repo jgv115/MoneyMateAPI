@@ -216,7 +216,7 @@ namespace TransactionService.Tests.Controllers
 
         [Fact]
         public async Task
-            GivenRequestWithAllSuggestionPromptType_WhenGetSuggestedPayeesInvoked_ThenReturns200OKWithCorrectList()
+            GivenRequest_WhenGetSuggestedPayeesInvoked_ThenReturns200OKWithCorrectList()
         {
             var payees = new List<PayerPayeeViewModel>
             {
@@ -240,7 +240,7 @@ namespace TransactionService.Tests.Controllers
             var controller = new PayersPayeesController(_mockService.Object);
 
             var response =
-                await controller.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.All, null, null));
+                await controller.GetSuggestedPayees(new SuggestionPromptDto());
 
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
@@ -250,145 +250,17 @@ namespace TransactionService.Tests.Controllers
 
         [Fact]
         public async Task
-            GivenRequestWithCategorySuggestionPromptType_WhenGetSuggestedPayeesInvoked_ThenReturns200OKWithCorrectList()
+            GivenArgumentExceptionReturnedFromService_WhenGetSuggestedPayeesInvoked_ThenReturns400BadRequestReturned()
         {
-            var payees = new List<PayerPayeeViewModel>
-            {
-                new()
-                {
-                    PayerPayeeId = Guid.NewGuid(),
-                    ExternalId = "id123",
-                    PayerPayeeName = "test name1"
-                },
-                new()
-                {
-                    PayerPayeeId = Guid.NewGuid(),
-                    ExternalId = "id1234",
-                    PayerPayeeName = "test name1"
-                }
-            };
             _mockService.Setup(service =>
                     service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, new SuggestionPromptDto(
-                        SuggestionPromptType.Category, "test",
-                        null)))
-                .ReturnsAsync(payees);
-            var controller = new PayersPayeesController(_mockService.Object);
-
-            var response =
-                await controller.GetSuggestedPayees(
-                    new SuggestionPromptDto(SuggestionPromptType.Category, "test", null));
-
-            var objectResponse = Assert.IsType<OkObjectResult>(response);
-
-            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
-            Assert.Equal(payees, objectResponse.Value);
-        }
-
-        [Fact]
-        public async Task
-            GivenRequestWithSubcategorySuggestionPromptType_WhenGetSuggestedPayeesInvoked_ThenReturns200OKWithCorrectList()
-        {
-            var payees = new List<PayerPayeeViewModel>
-            {
-                new()
-                {
-                    PayerPayeeId = Guid.NewGuid(),
-                    ExternalId = "id123",
-                    PayerPayeeName = "test name1"
-                },
-                new()
-                {
-                    PayerPayeeId = Guid.NewGuid(),
-                    ExternalId = "id1234",
-                    PayerPayeeName = "test name1"
-                }
-            };
-            _mockService.Setup(service =>
-                    service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, new SuggestionPromptDto(
-                        SuggestionPromptType.Subcategory, "test",
-                        "sub")))
-                .ReturnsAsync(payees);
-            var controller = new PayersPayeesController(_mockService.Object);
-
-            var response =
-                await controller.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.Subcategory, "test",
-                    "sub"));
-
-            var objectResponse = Assert.IsType<OkObjectResult>(response);
-
-            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
-            Assert.Equal(payees, objectResponse.Value);
-        }
-
-        [Fact]
-        public async Task
-            GivenRequestWithAllSuggestionPromptType_WhenGetSuggestedPayeesInvokedWithAnyParameters_ThenReturns400BadRequest()
-        {
-            var payees = new List<PayerPayeeViewModel>
-            {
-                new()
-                {
-                    PayerPayeeId = Guid.NewGuid(),
-                    ExternalId = "id123",
-                    PayerPayeeName = "test name1"
-                },
-                new()
-                {
-                    PayerPayeeId = Guid.NewGuid(),
-                    ExternalId = "id1234",
-                    PayerPayeeName = "test name1"
-                }
-            };
+                        SuggestionPromptType.Subcategory, "test", null)))
+                .ThrowsAsync(new ArgumentException("invalid arguments"));
 
             var controller = new PayersPayeesController(_mockService.Object);
 
             var response =
-                await controller.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.All, "test", "Test"));
-
-            var objectResponse = Assert.IsType<BadRequestObjectResult>(response);
-
-            Assert.Equal(StatusCodes.Status400BadRequest, objectResponse.StatusCode);
-        }
-
-        [Fact]
-        public async Task
-            GivenRequestWithCategorySuggestionPromptType_WhenGetSuggestedPayeesInvokedWithoutCategoryValue_ThenReturns400BadRequest()
-        {
-            var controller = new PayersPayeesController(_mockService.Object);
-
-            var response =
-                await controller.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.Category, null,
-                    null));
-
-            var objectResponse = Assert.IsType<BadRequestObjectResult>(response);
-
-            Assert.Equal(StatusCodes.Status400BadRequest, objectResponse.StatusCode);
-        }
-
-        [Fact]
-        public async Task
-            GivenRequestWithCategorySuggestionPromptType_WhenGetSuggestedPayeesInvokedWithParametersBesidesCategory_ThenReturns400BadRequest()
-        {
-            var controller = new PayersPayeesController(_mockService.Object);
-
-            var response =
-                await controller.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.Category, "test",
-                    "Test"));
-
-            var objectResponse = Assert.IsType<BadRequestObjectResult>(response);
-
-            Assert.Equal(StatusCodes.Status400BadRequest, objectResponse.StatusCode);
-        }
-
-        [Fact]
-        public async Task
-            GivenRequestWithCategorySuggestionPromptType_WhenGetSuggestedPayeesInvokedWithoutCategoryOrSubcategoryValue_ThenReturns400BadRequest()
-        {
-            var controller = new PayersPayeesController(_mockService.Object);
-
-            var response =
-                await controller.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.Subcategory, "test",
-                    null));
+                await controller.GetSuggestedPayees(new SuggestionPromptDto(SuggestionPromptType.Subcategory, "test"));
 
             var objectResponse = Assert.IsType<BadRequestObjectResult>(response);
 
@@ -397,6 +269,63 @@ namespace TransactionService.Tests.Controllers
 
         #endregion
 
+        #region GetSuggestedPayers
+
+        [Fact]
+        public async Task
+            GivenRequest_WhenGetSuggestedPayersInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var payees = new List<PayerPayeeViewModel>
+            {
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
+                },
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
+                }
+            };
+            _mockService.Setup(service =>
+                    service.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
+                        new SuggestionPromptDto(SuggestionPromptType.All, null, null)))
+                .ReturnsAsync(payees);
+            var controller = new PayersPayeesController(_mockService.Object);
+
+            var response =
+                await controller.GetSuggestedPayers(new SuggestionPromptDto());
+
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payees, objectResponse.Value);
+        }
+
+        [Fact]
+        public async Task
+            GivenArgumentExceptionReturnedFromService_WhenGetSuggestedPayersInvoked_ThenReturns400BadRequestReturned()
+        {
+            _mockService.Setup(service =>
+                    service.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, new SuggestionPromptDto(
+                        SuggestionPromptType.Subcategory, "test", null)))
+                .ThrowsAsync(new ArgumentException("invalid arguments"));
+
+            var controller = new PayersPayeesController(_mockService.Object);
+
+            var response =
+                await controller.GetSuggestedPayers(new SuggestionPromptDto(SuggestionPromptType.Subcategory, "test"));
+
+            var objectResponse = Assert.IsType<BadRequestObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status400BadRequest, objectResponse.StatusCode);
+        }
+
+        #endregion
+        
         [Fact]
         public async Task GivenWhitespaceInputName_WhenGetAutocompletePayerInvoked_ThenReturns400BadRequest()
         {

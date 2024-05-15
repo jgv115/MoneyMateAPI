@@ -14,7 +14,7 @@ using TransactionService.Services.PayerPayeeEnricher;
 using TransactionService.Services.PayerPayeeEnricher.Models;
 using Xunit;
 
-namespace TransactionService.Tests.Domain.Services;
+namespace TransactionService.Tests.Domain.Services.PayersPayees;
 
 public class PayerPayeeServiceTests
 {
@@ -385,7 +385,7 @@ public class PayerPayeeServiceTests
     }
 }
 
-public class GetSuggestionsTests
+public class GetSuggestedPayersOrPayees
 {
     private readonly Mock<IPayerPayeeRepository> _mockRepository = new();
     private readonly Mock<IPayerPayeeEnricher> _mockPayerPayeeEnricher = new();
@@ -408,14 +408,14 @@ public class GetSuggestionsTests
             }
         };
         _mockRepository
-            .Setup(repo => repo.GetSuggestedPayersOrPayees(It.IsAny<PayerPayeeType>(),
-                It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
+            .Setup(repo => repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
+                new GeneralPayerPayeeSuggestionParameters(), It.IsAny<int>()))
             .ReturnsAsync(() => payers);
 
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers =
-            await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+            await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
                 new SuggestionPromptDto());
         Assert.Equal(payers.Select(payer => new PayerPayeeViewModel
         {
@@ -427,9 +427,9 @@ public class GetSuggestionsTests
 
     [Fact]
     public async Task
-        GivenSuggestionPromptDto_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedPayersReturned()
+        GivenSuggestionPromptDtoWithCategoryPromptType_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedPayersReturned()
     {
-        var payers = new List<PayerPayee>
+        var payees = new List<PayerPayee>
         {
             new()
             {
@@ -443,16 +443,54 @@ public class GetSuggestionsTests
             }
         };
         _mockRepository
-            .Setup(repo => repo.GetSuggestedPayersOrPayees(It.IsAny<PayerPayeeType>(),
-                It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
-            .ReturnsAsync(() => payers);
+            .Setup(repo => repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+                new CategoryPayerPayeeSuggestionParameters("category"), It.IsAny<int>()))
+            .ReturnsAsync(() => payees);
 
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers =
             await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
-                new SuggestionPromptDto());
-        Assert.Equal(payers.Select(payer => new PayerPayeeViewModel
+                new SuggestionPromptDto { PromptType = SuggestionPromptType.Category, Category = "category" });
+        Assert.Equal(payees.Select(payer => new PayerPayeeViewModel
+        {
+            ExternalId = payer.ExternalId,
+            PayerPayeeName = payer.PayerPayeeName,
+            PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
+        }), suggestedPayers.ToList());
+    }
+
+    [Fact]
+    public async Task
+        GivenSuggestionPromptDtoWithSubcategoryPromptType_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedPayersReturned()
+    {
+        var payees = new List<PayerPayee>
+        {
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1"
+            },
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name2"
+            }
+        };
+        _mockRepository
+            .Setup(repo => repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+                new SubcategoryPayerPayeeSuggestionParameters("category", "subcategory1"), It.IsAny<int>()))
+            .ReturnsAsync(() => payees);
+
+        var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
+
+        var suggestedPayers =
+            await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+                new SuggestionPromptDto
+                {
+                    PromptType = SuggestionPromptType.Subcategory, Category = "category", Subcategory = "subcategory1"
+                });
+        Assert.Equal(payees.Select(payer => new PayerPayeeViewModel
         {
             ExternalId = payer.ExternalId,
             PayerPayeeName = payer.PayerPayeeName,
@@ -478,7 +516,7 @@ public class GetSuggestionsTests
             }
         };
         _mockRepository
-            .Setup(repo => repo.GetSuggestedPayersOrPayees(It.IsAny<PayerPayeeType>(),
+            .Setup(repo => repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
                 It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
             .ReturnsAsync(() => payees);
 

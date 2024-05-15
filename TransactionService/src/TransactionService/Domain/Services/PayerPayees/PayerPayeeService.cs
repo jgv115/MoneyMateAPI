@@ -96,10 +96,15 @@ namespace TransactionService.Domain.Services.PayerPayees
             return await EnrichAndMapPayerPayeesToViewModels(payees);
         }
 
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayersOrPayees(PayerPayeeType payerPayeeType, SuggestionPromptDto suggestionPromptDto)
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayersOrPayees(PayerPayeeType payerPayeeType,
+            SuggestionPromptDto suggestionPromptDto)
         {
+            var suggestionFactory = new PayerPayeeSuggestionParameterFactory();
+
+            var suggestionParameters = suggestionFactory.Generate(suggestionPromptDto);
+
             return await EnrichAndMapPayerPayeesToViewModels(
-                await _repository.GetSuggestedPayersOrPayees(payerPayeeType, new GeneralPayerPayeeSuggestionParameters()));
+                await _repository.GetSuggestedPayersOrPayees(payerPayeeType, suggestionParameters));
         }
 
         // TODO: might be some coupling issues here - we are assuming repository will store exactly as we are inputting
