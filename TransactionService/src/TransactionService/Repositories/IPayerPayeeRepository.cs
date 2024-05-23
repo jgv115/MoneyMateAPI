@@ -24,8 +24,7 @@ namespace TransactionService.Repositories
             IPayerPayeeSuggestionParameters suggestionParameters,
             int limit = 20);
         
-        public Task PutPayer(string userId);
-        public Task PutPayee(string userId);
+        public Task PutPayerOrPayee(PayerPayeeType type, PayerPayee newPayerPayee);
         public Task DeletePayer(string userId);
         public Task DeletePayee(string userId);
     }

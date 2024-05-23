@@ -16,14 +16,14 @@ namespace TransactionService.Repositories.CockroachDb
     public static class CategoryDapperHelpers
     {
         public static async Task<IEnumerable<Category>> QueryAndBuildCategories(IDbConnection connection, string query,
-            object parameters = null)
+            object? parameters = null)
         {
             var categoryDictionary = new Dictionary<Guid, Category>();
 
-            var categories = await connection.QueryAsync<Category, Subcategory, Category>(query,
+            var categories = await connection.QueryAsync<Category, Subcategory?, Category>(query,
                 (category, subcategory) =>
                 {
-                    Category accumulatedCategory;
+                    Category? accumulatedCategory;
 
                     if (!categoryDictionary.TryGetValue(category.Id, out accumulatedCategory))
                     {

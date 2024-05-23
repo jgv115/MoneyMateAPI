@@ -16,15 +16,15 @@ namespace TransactionService.Repositories.CockroachDb
     public static class PayerPayeeDapperHelpers
     {
         public static async Task<IEnumerable<PayerPayee>> QueryAndBuildPayerPayees(IDbConnection connection,
-            string query, object parameters = null)
+            string query, object? parameters = null)
         {
             var payerPayeeDictionary = new Dictionary<Guid, PayerPayee>();
 
             var payerPayees =
-                await connection.QueryAsync<PayerPayee, PayerPayeeType, PayerPayeeExternalLinkType, PayerPayee>(query,
+                await connection.QueryAsync<PayerPayee, PayerPayeeType?, PayerPayeeExternalLinkType?, PayerPayee>(query,
                     (payerPayee, payerPayeeType, payerPayeeExternalLinkType) =>
                     {
-                        PayerPayee accumulatedPayerPayee;
+                        PayerPayee? accumulatedPayerPayee;
 
                         if (!payerPayeeDictionary.TryGetValue(payerPayee.Id, out accumulatedPayerPayee))
                         {
@@ -196,16 +196,18 @@ namespace TransactionService.Repositories.CockroachDb
         public Task<Domain.Models.PayerPayee> GetPayee(Guid payerPayeeId)
             => GetPayerPayee(payerPayeeId.ToString(), "payee");
 
-        private async Task CreatePayerPayee(Domain.Models.PayerPayee newPayerPayee, string payerPayeeType)
+        private async Task InsertPayerPayee(Domain.Models.PayerPayee newPayerPayee, string payerPayeeType,
+            bool enforceUnique = true)
         {
             using (var connection = _context.CreateConnection())
             {
                 var createPayerPayeeQuery =
                     @"
                         WITH ins (payerPayeeId, user_identifier, payerPayeeName, payerPayeeType, externalLinkType, externalId, profileId)
-                                 AS (VALUES (@payerPayeeId, @user_identifier, @payerPayeeName, @payerPayeeType, @externalLinkId, @externalId, @profileId))
-                        INSERT
-                        INTO payerpayee (id, user_id, name, payerPayeeType_id, external_link_type_id, external_link_id, profile_id)
+                                 AS (VALUES (@payerPayeeId, @user_identifier, @payerPayeeName, @payerPayeeType, @externalLinkId, @externalId, @profileId))"
+                    +
+                    (enforceUnique ? "INSERT" : "UPSERT") +
+                    @" INTO payerpayee (id, user_id, name, payerPayeeType_id, external_link_type_id, external_link_id, profile_id)
                         SELECT ins.payerPayeeId,
                                u.id,
                                ins.payerPayeeName,
@@ -246,11 +248,15 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        public Task CreatePayer(Domain.Models.PayerPayee newPayerPayee)
-            => CreatePayerPayee(newPayerPayee, "payer");
+        public async Task CreatePayer(Domain.Models.PayerPayee newPayerPayee)
+        {
+            await InsertPayerPayee(newPayerPayee, "payer");
+        }
 
-        public Task CreatePayee(Domain.Models.PayerPayee newPayerPayee)
-            => CreatePayerPayee(newPayerPayee, "payee");
+        public async Task CreatePayee(Domain.Models.PayerPayee newPayerPayee)
+        {
+            await InsertPayerPayee(newPayerPayee, "payee");
+        }
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> FindPayer(string searchQuery)
         {
@@ -328,14 +334,9 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        public Task PutPayer(string userId)
+        public Task PutPayerOrPayee(Constants.PayerPayeeType type, Domain.Models.PayerPayee newPayerPayee)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task PutPayee(string userId)
-        {
-            throw new NotImplementedException();
+            return InsertPayerPayee(newPayerPayee, ConvertPayerPayeeTypeEnumToString(type), enforceUnique: false);
         }
 
         public Task DeletePayer(string userId)

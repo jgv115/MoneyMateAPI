@@ -9,6 +9,7 @@ using TransactionService.Domain.Services.PayerPayees;
 using TransactionService.IntegrationTests.Helpers;
 using TransactionService.Middleware;
 using TransactionService.Repositories.CockroachDb;
+using TransactionService.Repositories.Exceptions;
 using TransactionService.Tests.Common;
 using Xunit;
 
@@ -41,6 +42,107 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
     {
         await _cockroachDbIntegrationTestHelper.ClearDbData();
     }
+
+    #region CreatePayer
+
+    [Fact]
+    public async Task GivenPayerWithNoExternalId_WhenCreatePayerInvoked_ThenCorrectPayerPayeeEntityWrittenToDb()
+    {
+        var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
+        {
+            UserId = _cockroachDbIntegrationTestHelper.TestUserIdentifier,
+            ProfileId = _profileId
+        });
+
+        var insertedPayer = new PayerPayee
+        {
+            PayerPayeeId = Guid.NewGuid().ToString(),
+            PayerPayeeName = "name",
+        };
+        await repo.CreatePayer(insertedPayer);
+
+        var payers = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payer");
+
+        Assert.Collection(payers, payer => Assert.Equal(insertedPayer, payer));
+    }
+
+    [Fact]
+    public async Task GivenPayerWithExternalId_WhenCreatePayerInvoked_ThenCorrectPayerPayeeEntityWrittenToDb()
+    {
+        var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
+        {
+            UserId = _cockroachDbIntegrationTestHelper.TestUserIdentifier,
+            ProfileId = _profileId
+        });
+
+        var insertedPayer = new PayerPayee
+        {
+            PayerPayeeId = Guid.NewGuid().ToString(),
+            PayerPayeeName = "name",
+            ExternalId = "id123"
+        };
+        await repo.CreatePayer(insertedPayer);
+
+        var payers = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payer");
+
+        Assert.Collection(payers, payer => Assert.Equal(insertedPayer, payer));
+    }
+
+
+    [Fact]
+    public async Task GivenPayerInsertedTwice_WhenCreatePayerInvoked_ThenExceptionthrown()
+    {
+        var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
+        {
+            UserId = _cockroachDbIntegrationTestHelper.TestUserIdentifier,
+            ProfileId = _profileId
+        });
+
+        var insertedPayer = new PayerPayee
+        {
+            PayerPayeeId = Guid.NewGuid().ToString(),
+            PayerPayeeName = "name",
+            ExternalId = "id123"
+        };
+        await repo.CreatePayer(insertedPayer);
+        await Assert.ThrowsAsync<RepositoryItemExistsException>(() => repo.CreatePayer(insertedPayer));
+    }
+
+    #endregion
+
+    #region PutPayerOrPayee
+
+    [Fact]
+    public async Task GivenExistingPayer_WhenPutPayerOrPayeeInvoked_ThenPayerIsUpdatedCorrectly()
+    {
+        var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
+        {
+            UserId = _cockroachDbIntegrationTestHelper.TestUserIdentifier,
+            ProfileId = _profileId
+        });
+
+        var insertedPayer = new PayerPayee
+        {
+            PayerPayeeId = Guid.NewGuid().ToString(),
+            PayerPayeeName = "name",
+            ExternalId = "id123"
+        };
+        await repo.CreatePayer(insertedPayer);
+
+        var modifiedPayer = insertedPayer with
+        {
+            ExternalId = ""
+        };
+        await repo.PutPayerOrPayee(PayerPayeeType.Payer, modifiedPayer);
+
+        var payers = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payer");
+
+        Assert.Collection(payers, payer => Assert.Equal(modifiedPayer, payer));
+    }
+
+    #endregion
+
+    #region GetSuggestedPayersOrPayees
 
     [Fact]
     public async Task
@@ -254,4 +356,6 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
                 2);
         Assert.Equal(2, suggestedPayerPayees.Count());
     }
+
+    #endregion
 }
