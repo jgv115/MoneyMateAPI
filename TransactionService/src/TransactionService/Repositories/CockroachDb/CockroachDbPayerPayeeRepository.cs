@@ -196,7 +196,8 @@ namespace TransactionService.Repositories.CockroachDb
         public Task<Domain.Models.PayerPayee> GetPayee(Guid payerPayeeId)
             => GetPayerPayee(payerPayeeId.ToString(), "payee");
 
-        private async Task InsertPayerPayee(Domain.Models.PayerPayee newPayerPayee, string payerPayeeType,
+        private async Task InsertPayerPayee(Domain.Models.PayerPayee newPayerPayee,
+            Constants.PayerPayeeType payerPayeeType,
             bool enforceUnique = true)
         {
             using (var connection = _context.CreateConnection())
@@ -223,12 +224,13 @@ namespace TransactionService.Repositories.CockroachDb
 
                 try
                 {
+                    var payerPayeeTypeString = ConvertPayerPayeeTypeEnumToString(payerPayeeType);
                     await connection.ExecuteAsync(createPayerPayeeQuery, new
                     {
                         payerPayeeId = Guid.Parse(newPayerPayee.PayerPayeeId),
                         user_identifier = _userContext.UserId,
                         payerPayeeName = newPayerPayee.PayerPayeeName,
-                        payerPayeeType,
+                        payerPayeeType = payerPayeeTypeString,
                         externalLinkId = string.IsNullOrEmpty(newPayerPayee.ExternalId) ? "Custom" : "Google",
                         externalId = newPayerPayee.ExternalId ?? "",
                         profileId = _userContext.ProfileId
@@ -248,14 +250,10 @@ namespace TransactionService.Repositories.CockroachDb
             }
         }
 
-        public async Task CreatePayer(Domain.Models.PayerPayee newPayerPayee)
+        public async Task CreatePayerOrPayee(Constants.PayerPayeeType payerPayeeType,
+            Domain.Models.PayerPayee newPayerPayee)
         {
-            await InsertPayerPayee(newPayerPayee, "payer");
-        }
-
-        public async Task CreatePayee(Domain.Models.PayerPayee newPayerPayee)
-        {
-            await InsertPayerPayee(newPayerPayee, "payee");
+            await InsertPayerPayee(newPayerPayee, payerPayeeType);
         }
 
         public Task<IEnumerable<Domain.Models.PayerPayee>> FindPayer(string searchQuery)
@@ -336,7 +334,7 @@ namespace TransactionService.Repositories.CockroachDb
 
         public Task PutPayerOrPayee(Constants.PayerPayeeType type, Domain.Models.PayerPayee newPayerPayee)
         {
-            return InsertPayerPayee(newPayerPayee, ConvertPayerPayeeTypeEnumToString(type), enforceUnique: false);
+            return InsertPayerPayee(newPayerPayee, type, enforceUnique: false);
         }
 
         public Task DeletePayer(string userId)

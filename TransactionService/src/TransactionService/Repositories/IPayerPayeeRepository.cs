@@ -13,8 +13,7 @@ namespace TransactionService.Repositories
         public Task<IEnumerable<PayerPayee>> GetPayees(PaginationSpec paginationSpec);
         public Task<PayerPayee> GetPayer(Guid payerPayeeId);
         public Task<PayerPayee> GetPayee(Guid payerPayeeId);
-        public Task CreatePayer(PayerPayee newPayerPayee);
-        public Task CreatePayee(PayerPayee newPayerPayee);
+        public Task CreatePayerOrPayee(PayerPayeeType type, PayerPayee newPayerPayee);
         public Task<IEnumerable<PayerPayee>> FindPayer(string searchQuery);
         public Task<IEnumerable<PayerPayee>> FindPayee(string searchQuery);
         public Task<IEnumerable<PayerPayee>> AutocompletePayer(string autocompleteQuery);
@@ -23,7 +22,7 @@ namespace TransactionService.Repositories
         public Task<IEnumerable<PayerPayee>> GetSuggestedPayersOrPayees(PayerPayeeType payerpayeeType,
             IPayerPayeeSuggestionParameters suggestionParameters,
             int limit = 20);
-        
+
         public Task PutPayerOrPayee(PayerPayeeType type, PayerPayee newPayerPayee);
         public Task DeletePayer(string userId);
         public Task DeletePayee(string userId);

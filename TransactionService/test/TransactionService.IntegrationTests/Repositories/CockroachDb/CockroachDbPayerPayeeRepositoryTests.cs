@@ -59,7 +59,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
             PayerPayeeId = Guid.NewGuid().ToString(),
             PayerPayeeName = "name",
         };
-        await repo.CreatePayer(insertedPayer);
+        await repo.CreatePayerOrPayee(PayerPayeeType.Payer, insertedPayer);
 
         var payers = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payer");
 
@@ -75,17 +75,18 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
             ProfileId = _profileId
         });
 
-        var insertedPayer = new PayerPayee
+        var insertedPayee = new PayerPayee
         {
             PayerPayeeId = Guid.NewGuid().ToString(),
             PayerPayeeName = "name",
             ExternalId = "id123"
         };
-        await repo.CreatePayer(insertedPayer);
 
-        var payers = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payer");
+        await repo.CreatePayerOrPayee(PayerPayeeType.Payee, insertedPayee);
 
-        Assert.Collection(payers, payer => Assert.Equal(insertedPayer, payer));
+        var payers = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payee");
+
+        Assert.Collection(payers, payer => Assert.Equal(insertedPayee, payer));
     }
 
 
@@ -104,8 +105,9 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
             PayerPayeeName = "name",
             ExternalId = "id123"
         };
-        await repo.CreatePayer(insertedPayer);
-        await Assert.ThrowsAsync<RepositoryItemExistsException>(() => repo.CreatePayer(insertedPayer));
+        await repo.CreatePayerOrPayee(PayerPayeeType.Payer, insertedPayer);
+        await Assert.ThrowsAsync<RepositoryItemExistsException>(() =>
+            repo.CreatePayerOrPayee(PayerPayeeType.Payer, insertedPayer));
     }
 
     #endregion
@@ -127,7 +129,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
             PayerPayeeName = "name",
             ExternalId = "id123"
         };
-        await repo.CreatePayer(insertedPayer);
+        await repo.CreatePayerOrPayee(PayerPayeeType.Payer, insertedPayer);
 
         var modifiedPayer = insertedPayer with
         {

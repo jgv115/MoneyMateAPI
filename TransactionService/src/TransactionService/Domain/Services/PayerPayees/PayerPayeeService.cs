@@ -111,7 +111,7 @@ namespace TransactionService.Domain.Services.PayerPayees
         public async Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee)
         {
             var payerPayeeId = Guid.NewGuid().ToString();
-            await _repository.CreatePayer(new PayerPayee
+            await _repository.CreatePayerOrPayee(PayerPayeeType.Payer, new PayerPayee
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
@@ -130,7 +130,7 @@ namespace TransactionService.Domain.Services.PayerPayees
         {
             var payerPayeeId = Guid.NewGuid().ToString();
 
-            await _repository.CreatePayee(new PayerPayee
+            await _repository.CreatePayerOrPayee(PayerPayeeType.Payee, new PayerPayee
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
