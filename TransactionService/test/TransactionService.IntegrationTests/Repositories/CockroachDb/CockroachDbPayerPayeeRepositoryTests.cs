@@ -115,7 +115,8 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
     #region PutPayerOrPayee
 
     [Fact]
-    public async Task GivenExistingPayer_WhenPutPayerOrPayeeInvoked_ThenPayerIsUpdatedCorrectly()
+    public async Task
+        GivenExistingPayerWithExternalId_WhenPutPayerOrPayeeInvokedWithPayerPayeeWithNoExternalId_ThenPayerIsUpdatedCorrectly()
     {
         var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
         {
@@ -134,6 +135,35 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
         var modifiedPayer = insertedPayer with
         {
             ExternalId = ""
+        };
+        await repo.PutPayerOrPayee(PayerPayeeType.Payer, modifiedPayer);
+
+        var payers = await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.RetrieveAllPayersPayees("payer");
+
+        Assert.Collection(payers, payer => Assert.Equal(modifiedPayer, payer));
+    }
+
+    [Fact]
+    public async Task
+        GivenExistingPayerWithExternalId_WhenPutPayerOrPayeeInvokedWithPayerPayeeWithDifferentExternalId_ThenPayerIsUpdatedCorrectly()
+    {
+        var repo = new CockroachDbPayerPayeeRepository(_dapperContext, _stubMapper, new CurrentUserContext()
+        {
+            UserId = _cockroachDbIntegrationTestHelper.TestUserIdentifier,
+            ProfileId = _profileId
+        });
+
+        var insertedPayer = new PayerPayee
+        {
+            PayerPayeeId = Guid.NewGuid().ToString(),
+            PayerPayeeName = "name",
+            ExternalId = "id123"
+        };
+        await repo.CreatePayerOrPayee(PayerPayeeType.Payer, insertedPayer);
+
+        var modifiedPayer = insertedPayer with
+        {
+            ExternalId = "id321"
         };
         await repo.PutPayerOrPayee(PayerPayeeType.Payer, modifiedPayer);
 

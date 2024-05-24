@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens;
 using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
@@ -100,11 +99,15 @@ namespace TransactionService.Domain.Services.PayerPayees
             SuggestionPromptDto suggestionPromptDto)
         {
             var suggestionFactory = new PayerPayeeSuggestionParameterFactory();
-
             var suggestionParameters = suggestionFactory.Generate(suggestionPromptDto);
 
-            return await EnrichAndMapPayerPayeesToViewModels(
-                await _repository.GetSuggestedPayersOrPayees(payerPayeeType, suggestionParameters));
+            var suggestedPayersOrPayees =
+                await _repository.GetSuggestedPayersOrPayees(payerPayeeType, suggestionParameters);
+            
+            var enrichTasks = suggestedPayersOrPayees.Select(payerPayee =>
+                _payerPayeeEnricher.EnrichPayerPayeeToViewModel(payerPayeeType, payerPayee));
+            var results = await Task.WhenAll(enrichTasks);
+            return results.ToList();
         }
 
         // TODO: might be some coupling issues here - we are assuming repository will store exactly as we are inputting

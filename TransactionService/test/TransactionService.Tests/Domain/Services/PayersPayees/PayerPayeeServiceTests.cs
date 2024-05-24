@@ -407,22 +407,34 @@ public class GetSuggestedPayersOrPayees
                 PayerPayeeName = "name2"
             }
         };
+
+        var expectedPayerViewModels = payers.Select(payer => new PayerPayeeViewModel
+        {
+            PayerPayeeName = payer.PayerPayeeName,
+            PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
+        }).ToList();
+
         _mockRepository
             .Setup(repo => repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
                 new GeneralPayerPayeeSuggestionParameters(), It.IsAny<int>()))
             .ReturnsAsync(() => payers);
+
+        _mockPayerPayeeEnricher
+            .Setup(enricher => enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payer, payers[0]))
+            .ReturnsAsync(() => expectedPayerViewModels[0]);
+
+        _mockPayerPayeeEnricher
+            .Setup(enricher => enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payer, payers[1]))
+            .ReturnsAsync(() => expectedPayerViewModels[1]);
+
 
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers =
             await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
                 new SuggestionPromptDto());
-        Assert.Equal(payers.Select(payer => new PayerPayeeViewModel
-        {
-            ExternalId = payer.ExternalId,
-            PayerPayeeName = payer.PayerPayeeName,
-            PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
-        }), suggestedPayers.ToList());
+
+        Assert.Equal(expectedPayerViewModels, suggestedPayers);
     }
 
     [Fact]
@@ -442,22 +454,33 @@ public class GetSuggestedPayersOrPayees
                 PayerPayeeName = "name2"
             }
         };
+
+        var expectedPayerViewModels = payees.Select(payee => new PayerPayeeViewModel
+        {
+            PayerPayeeName = payee.PayerPayeeName,
+            PayerPayeeId = Guid.Parse(payee.PayerPayeeId)
+        }).ToList();
+
         _mockRepository
             .Setup(repo => repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
                 new CategoryPayerPayeeSuggestionParameters("category"), It.IsAny<int>()))
             .ReturnsAsync(() => payees);
+
+        _mockPayerPayeeEnricher
+            .Setup(enricher => enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, payees[0]))
+            .ReturnsAsync(() => expectedPayerViewModels[0]);
+
+        _mockPayerPayeeEnricher
+            .Setup(enricher => enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, payees[1]))
+            .ReturnsAsync(() => expectedPayerViewModels[1]);
 
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers =
             await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
                 new SuggestionPromptDto { PromptType = SuggestionPromptType.Category, Category = "category" });
-        Assert.Equal(payees.Select(payer => new PayerPayeeViewModel
-        {
-            ExternalId = payer.ExternalId,
-            PayerPayeeName = payer.PayerPayeeName,
-            PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
-        }), suggestedPayers.ToList());
+
+        Assert.Equal(expectedPayerViewModels, suggestedPayers);
     }
 
     [Fact]
@@ -477,11 +500,26 @@ public class GetSuggestedPayersOrPayees
                 PayerPayeeName = "name2"
             }
         };
+
+        var expectedPayerViewModels = payees.Select(payee => new PayerPayeeViewModel
+        {
+            PayerPayeeName = payee.PayerPayeeName,
+            PayerPayeeId = Guid.Parse(payee.PayerPayeeId)
+        }).ToList();
+        
         _mockRepository
             .Setup(repo => repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
                 new SubcategoryPayerPayeeSuggestionParameters("category", "subcategory1"), It.IsAny<int>()))
             .ReturnsAsync(() => payees);
+        
+        _mockPayerPayeeEnricher
+            .Setup(enricher => enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, payees[0]))
+            .ReturnsAsync(() => expectedPayerViewModels[0]);
 
+        _mockPayerPayeeEnricher
+            .Setup(enricher => enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, payees[1]))
+            .ReturnsAsync(() => expectedPayerViewModels[1]);
+        
         var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
 
         var suggestedPayers =
@@ -490,47 +528,8 @@ public class GetSuggestedPayersOrPayees
                 {
                     PromptType = SuggestionPromptType.Subcategory, Category = "category", Subcategory = "subcategory1"
                 });
-        Assert.Equal(payees.Select(payer => new PayerPayeeViewModel
-        {
-            ExternalId = payer.ExternalId,
-            PayerPayeeName = payer.PayerPayeeName,
-            PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
-        }), suggestedPayers.ToList());
-    }
+        Assert.Equal(expectedPayerViewModels, suggestedPayers);
 
-    [Fact]
-    public async Task
-        GivenAllSuggestionPromptTypes_WhenGetSuggestedPayersOrPayeesInvoked_ThenCorrectSuggestedPayeesReturned()
-    {
-        var payees = new List<PayerPayee>
-        {
-            new()
-            {
-                PayerPayeeId = Guid.NewGuid().ToString(),
-                PayerPayeeName = "name1"
-            },
-            new()
-            {
-                PayerPayeeId = Guid.NewGuid().ToString(),
-                PayerPayeeName = "name2"
-            }
-        };
-        _mockRepository
-            .Setup(repo => repo.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
-                It.IsAny<IPayerPayeeSuggestionParameters>(), It.IsAny<int>()))
-            .ReturnsAsync(() => payees);
-
-        var service = new PayerPayeeService(_mockRepository.Object, _mockPayerPayeeEnricher.Object);
-
-        var suggestedPayers =
-            await service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
-                new SuggestionPromptDto());
-        Assert.Equal(payees.Select(payer => new PayerPayeeViewModel
-        {
-            ExternalId = payer.ExternalId,
-            PayerPayeeName = payer.PayerPayeeName,
-            PayerPayeeId = Guid.Parse(payer.PayerPayeeId)
-        }), suggestedPayers.ToList());
     }
 }
 
