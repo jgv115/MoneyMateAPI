@@ -8,7 +8,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using TransactionService.Constants;
 using TransactionService.Controllers.PayersPayees.Dtos;
 using TransactionService.Controllers.PayersPayees.ViewModels;
 using TransactionService.Domain.Models;
@@ -55,6 +54,7 @@ public class PostEndpointTests : IAsyncLifetime
         var cratePayerDto = new CreatePayerPayeeDto
         {
             Name = expectedPayerName,
+            ExternalId = null
         };
         var httpContent =
             new StringContent(JsonSerializer.Serialize(cratePayerDto), Encoding.UTF8, "application/json");
@@ -78,7 +78,8 @@ public class PostEndpointTests : IAsyncLifetime
         Assert.Equal(new PayerPayeeViewModel
         {
             PayerPayeeId = Guid.Parse(savedPayer.PayerPayeeId),
-            PayerPayeeName = savedPayer.PayerPayeeName
+            PayerPayeeName = savedPayer.PayerPayeeName,
+            ExternalId = ""
         }, returnedPayer);
     }
 

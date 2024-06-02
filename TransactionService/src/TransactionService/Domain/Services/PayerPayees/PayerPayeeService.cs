@@ -118,14 +118,14 @@ namespace TransactionService.Domain.Services.PayerPayees
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
-                ExternalId = newPayerPayee.ExternalId,
+                ExternalId = newPayerPayee.ExternalId ?? "",
             });
 
             return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
-                ExternalId = newPayerPayee.ExternalId,
+                ExternalId = newPayerPayee.ExternalId ?? "",
             });
         }
 
@@ -137,14 +137,14 @@ namespace TransactionService.Domain.Services.PayerPayees
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
-                ExternalId = newPayerPayee.ExternalId,
+                ExternalId = newPayerPayee.ExternalId ?? "",
             });
 
             return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
-                ExternalId = newPayerPayee.ExternalId,
+                ExternalId = newPayerPayee.ExternalId ?? "",
             });
         }
     }
