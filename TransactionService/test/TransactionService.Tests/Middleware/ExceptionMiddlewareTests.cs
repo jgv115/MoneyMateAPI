@@ -42,7 +42,10 @@ public class ExceptionMiddlewareTests
             Title = "Could not find item",
             Detail = expectedMessage
         };
-        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }), responseBodyString);
     }
 
     [Fact]
@@ -70,7 +73,10 @@ public class ExceptionMiddlewareTests
             Title = "Conflict found when trying to create repository item",
             Detail = expectedMessage
         };
-        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }), responseBodyString);
     }
 
     [Fact]
@@ -98,7 +104,10 @@ public class ExceptionMiddlewareTests
             Title = "Bad update category request",
             Detail = expectedMessage
         };
-        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }), responseBodyString);
     }
 
     [Fact]
@@ -124,9 +133,12 @@ public class ExceptionMiddlewareTests
             Detail = expectedMessage
         };
 
-        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }), responseBodyString);
     }
-    
+
     [Fact]
     public async Task GivenInvalidProfileIdExceptionThrown_ThenCorrectProblemDetailsReturned()
     {
@@ -150,7 +162,10 @@ public class ExceptionMiddlewareTests
             Detail = expectedMessage
         };
 
-        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }), responseBodyString);
     }
 
     [Fact]
@@ -176,9 +191,12 @@ public class ExceptionMiddlewareTests
             Detail = expectedMessage
         };
 
-        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }), responseBodyString);
     }
-    
+
     [Fact]
     public async Task GivenUnknownExceptionThrown_ThenCorrectProblemDetailsReturned()
     {
@@ -203,6 +221,9 @@ public class ExceptionMiddlewareTests
             Title = "Internal Server Error",
             Detail = "A problem occured"
         };
-        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody), responseBodyString);
+        Assert.Equal(JsonSerializer.Serialize(expectedResponseBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }), responseBodyString);
     }
 }

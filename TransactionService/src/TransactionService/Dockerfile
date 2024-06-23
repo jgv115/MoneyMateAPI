@@ -1,6 +1,6 @@
-FROM public.ecr.aws/lambda/dotnet:7 AS base
+FROM public.ecr.aws/lambda/dotnet:8.2024.06.19.13 AS base
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0.403-bullseye-slim as build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine as build
 WORKDIR /src
 COPY ["TransactionService.csproj", "TransactionService/"]
 RUN dotnet restore "TransactionService/TransactionService.csproj"
@@ -13,7 +13,7 @@ FROM build AS publish
 RUN dotnet publish "TransactionService.csproj" \
             --configuration Release \
             --runtime linux-x64 \
-            --self-contained false \ 
+            --self-contained false \
             --output /app/publish \
             -p:PublishReadyToRun=true  
 
