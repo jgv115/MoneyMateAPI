@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
+using TransactionService.Constants;
 using TransactionService.Domain.Services.Categories;
 using TransactionService.Domain.Services.Categories.UpdateCategoryOperations;
 using TransactionService.Domain.Services.PayerPayees;
@@ -34,12 +35,14 @@ namespace TransactionService
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             Configuration = configuration;
+            HostEnvironment = hostEnvironment;
         }
 
         public static IConfiguration Configuration { get; private set; }
+        public IHostEnvironment HostEnvironment { get; set; }
 
         // We still rely on Newtonsoft.Json for JSON Patch inputs. All other serialisation + deserialisation is done by System.Text.Json
         // https://learn.microsoft.com/en-us/aspnet/core/web-api/jsonpatch?view=aspnetcore-8.0#add-support-for-json-patch-when-using-systemtextjson
@@ -61,6 +64,23 @@ namespace TransactionService
 
         public void ConfigureServices(IServiceCollection services)
         {
+            if (HostEnvironment.EnvironmentName != "dev")
+                services.AddCors(options =>
+                {
+                    var corsAllowedOrigin = Configuration.GetValue<string>("CorsConfig:AllowedOrigin");
+
+                    if (!string.IsNullOrEmpty(corsAllowedOrigin))
+                        options.AddPolicy(CorsPolicy.MoneyMateFrontEndPolicy,
+                            builder =>
+                            {
+                                builder
+                                    .WithOrigins(corsAllowedOrigin)
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod();
+                            });
+                });
+
+            // TODO: fix fluent validation
             services
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
                 .AddControllersWithViews(options => options.InputFormatters.Insert(0, GetJsonPatchInputFormatter()));
@@ -88,6 +108,9 @@ namespace TransactionService
             services.AddScoped<IPayerPayeeService, PayerPayeeService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<ICategoryInitialiser, LambdaCategoryInitialiser>();
+            services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
+            services.Configure<GooglePlaceApiOptions>(options =>
+                Configuration.GetSection("GooglePlaceApi").Bind(options));
 
             services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile), typeof(CategoryEntityProfile));
 
@@ -124,17 +147,12 @@ namespace TransactionService
             services.AddScoped<ICategoriesRepository, CockroachDbCategoriesRepository>();
             services.AddScoped<IPayerPayeeRepository, CockroachDbPayerPayeeRepository>();
             services.AddScoped<ITransactionRepository, CockroachDbTransactionRepository>();
-
             services.AddScoped<IProfilesRepository, CockroachDbProfilesRepository>();
-
-            services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
-            services.Configure<GooglePlaceApiOptions>(options =>
-                Configuration.GetSection("GooglePlaceApi").Bind(options));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (env.IsEnvironment("dev"))
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -144,7 +162,8 @@ namespace TransactionService
             // app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            if (!env.IsEnvironment("dev"))
+                app.UseCors(CorsPolicy.MoneyMateFrontEndPolicy);
             app.UseAuthentication();
             app.UseAuthorization();
 
