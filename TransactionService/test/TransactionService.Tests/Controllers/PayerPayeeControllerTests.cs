@@ -44,7 +44,7 @@ namespace TransactionService.Tests.Controllers
         }
 
         [Fact]
-        public async Task GivenPayerPayeeServiceReturnsObject_WhenGetPayersInvoked_ThenReturns200OKWithCorrectList()
+        public async Task GivenDefaultArguments_WhenGetPayersInvoked_ThenReturns200OKWithCorrectList()
         {
             var payers = new List<PayerPayeeViewModel>
             {
@@ -64,9 +64,40 @@ namespace TransactionService.Tests.Controllers
 
             const int offset = 5;
             const int limit = 20;
-            _mockService.Setup(service => service.GetPayers(offset, limit)).ReturnsAsync(() => payers);
+            const bool includeEnrichedData = true;
+            _mockService.Setup(service => service.GetPayers(offset, limit, includeEnrichedData)).ReturnsAsync(() => payers);
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.GetPayers(offset, limit);
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payers, objectResponse.Value);
+        }
+        
+        [Fact]
+        public async Task GivenIncludeEnrichedDataIsFalse_WhenGetPayersInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var payers = new List<PayerPayeeViewModel>
+            {
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
+                },
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
+                }
+            };
+
+            const int offset = 5;
+            const int limit = 20;
+            _mockService.Setup(service => service.GetPayers(offset, limit, false)).ReturnsAsync(() => payers);
+            var controller = new PayersPayeesController(_mockService.Object);
+            var response = await controller.GetPayers(offset, limit, false);
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
@@ -106,7 +137,7 @@ namespace TransactionService.Tests.Controllers
                 }
             };
 
-            _mockService.Setup(service => service.GetPayers(0, 10)).ReturnsAsync(() => payers);
+            _mockService.Setup(service => service.GetPayers(0, 10, true)).ReturnsAsync(() => payers);
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.GetPayers();
             var objectResponse = Assert.IsType<OkObjectResult>(response);
@@ -117,7 +148,7 @@ namespace TransactionService.Tests.Controllers
 
 
         [Fact]
-        public async Task GivenPayerPayeeServiceReturnsObject_WhenGetPayeesInvoked_ThenReturns200OKWithCorrectList()
+        public async Task GivenDefaultArguments_WhenGetPayeesInvoked_ThenReturns200OKWithCorrectList()
         {
             var payees = new List<PayerPayeeViewModel>
             {
@@ -137,9 +168,39 @@ namespace TransactionService.Tests.Controllers
 
             const int offset = 5;
             const int limit = 20;
-            _mockService.Setup(service => service.GetPayees(offset, limit)).ReturnsAsync(() => payees);
+            _mockService.Setup(service => service.GetPayees(offset, limit, true)).ReturnsAsync(() => payees);
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.GetPayees(offset, limit);
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payees, objectResponse.Value);
+        }
+        
+        [Fact]
+        public async Task GivenIncludeEnrichedDataIsFalse_WhenGetPayeesInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var payees = new List<PayerPayeeViewModel>
+            {
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
+                },
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
+                }
+            };
+
+            const int offset = 5;
+            const int limit = 20;
+            _mockService.Setup(service => service.GetPayees(offset, limit, false)).ReturnsAsync(() => payees);
+            var controller = new PayersPayeesController(_mockService.Object);
+            var response = await controller.GetPayees(offset, limit, false);
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
@@ -165,7 +226,7 @@ namespace TransactionService.Tests.Controllers
                 }
             };
 
-            _mockService.Setup(service => service.GetPayees(0, 10)).ReturnsAsync(() => payees);
+            _mockService.Setup(service => service.GetPayees(0, 10, true)).ReturnsAsync(() => payees);
             var controller = new PayersPayeesController(_mockService.Object);
             var response = await controller.GetPayees();
             var objectResponse = Assert.IsType<OkObjectResult>(response);

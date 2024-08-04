@@ -51,7 +51,8 @@ namespace TransactionService.Domain.Services.PayerPayees
             };
         }
 
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayers(int offset, int limit)
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayers(int offset, int limit,
+            bool includeEnrichedData = true)
         {
             var payers = await _repository.GetPayers(new PaginationSpec
             {
@@ -61,7 +62,8 @@ namespace TransactionService.Domain.Services.PayerPayees
             return await EnrichAndMapPayerPayeesToViewModels(payers);
         }
 
-        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees(int offset, int limit)
+        public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees(int offset, int limit,
+            bool includeEnrichedData = true)
         {
             var payees = await _repository.GetPayees(new PaginationSpec
             {

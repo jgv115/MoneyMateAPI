@@ -31,11 +31,11 @@ namespace TransactionService.Controllers.PayersPayees
         }
 
         [HttpGet("payers")]
-        public async Task<IActionResult> GetPayers(int offset = 0, int limit = 10)
+        public async Task<IActionResult> GetPayers(int offset = 0, int limit = 10, bool includeEnrichedData = true)
         {
             ValidatePaginationParameters(offset, limit);
 
-            var payers = await _payerPayeeService.GetPayers(offset, limit);
+            var payers = await _payerPayeeService.GetPayers(offset, limit, includeEnrichedData);
             return Ok(payers);
         }
 
@@ -72,10 +72,10 @@ namespace TransactionService.Controllers.PayersPayees
         }
 
         [HttpGet("payees")]
-        public async Task<IActionResult> GetPayees(int offset = 0, int limit = 10)
+        public async Task<IActionResult> GetPayees(int offset = 0, int limit = 10, bool includeEnrichedData = true)
         {
             ValidatePaginationParameters(offset, limit);
-            var payees = await _payerPayeeService.GetPayees(offset, limit);
+            var payees = await _payerPayeeService.GetPayees(offset, limit, includeEnrichedData);
             return Ok(payees);
         }
 
