@@ -16,7 +16,7 @@ namespace TransactionService.Domain.Services.PayerPayees
         public Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName);
         public Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayee(string payerName);
 
-        public Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayersOrPayees(PayerPayeeType payerPayeeType, SuggestionPromptDto suggestionPromptDto);
+        public Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayersOrPayees(PayerPayeeType payerPayeeType, SuggestionPromptDto suggestionPromptDto, bool includeEnrichedData);
         
         public Task<PayerPayeeViewModel> CreatePayer(CreatePayerPayeeDto newPayerPayee);
         public Task<PayerPayeeViewModel> CreatePayee(CreatePayerPayeeDto newPayerPayee);

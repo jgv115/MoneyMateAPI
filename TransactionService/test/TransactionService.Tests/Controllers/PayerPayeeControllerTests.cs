@@ -197,12 +197,12 @@ namespace TransactionService.Tests.Controllers
             };
             _mockService.Setup(service =>
                     service.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
-                        new SuggestionPromptDto(SuggestionPromptType.All, null, null)))
+                        new SuggestionPromptDto(SuggestionPromptType.All, null, null), true))
                 .ReturnsAsync(payers);
             var controller = new PayersPayeesController(_mockService.Object);
 
             var response =
-                await controller.GetSuggestedPayers(new SuggestionPromptDto(SuggestionPromptType.All, null, null));
+                await controller.GetSuggestedPayers(new SuggestionPromptDto(SuggestionPromptType.All, null, null), true);
 
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
@@ -233,9 +233,47 @@ namespace TransactionService.Tests.Controllers
                     PayerPayeeName = "test name1"
                 }
             };
+
+            var includeEnrichedData = true;
+            
             _mockService.Setup(service =>
                     service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
-                        new SuggestionPromptDto(SuggestionPromptType.All, null, null)))
+                        new SuggestionPromptDto(SuggestionPromptType.All, null, null), includeEnrichedData))
+                .ReturnsAsync(payees);
+            var controller = new PayersPayeesController(_mockService.Object);
+
+            var response =
+                await controller.GetSuggestedPayees(new SuggestionPromptDto(), includeEnrichedData);
+
+            var objectResponse = Assert.IsType<OkObjectResult>(response);
+
+            Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            Assert.Equal(payees, objectResponse.Value);
+        }
+        
+        [Fact]
+        public async Task
+            GivenRequestWithoutIsEnrichedDataProvided_WhenGetSuggestedPayeesInvoked_ThenReturns200OKWithCorrectList()
+        {
+            var payees = new List<PayerPayeeViewModel>
+            {
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id123",
+                    PayerPayeeName = "test name1"
+                },
+                new()
+                {
+                    PayerPayeeId = Guid.NewGuid(),
+                    ExternalId = "id1234",
+                    PayerPayeeName = "test name1"
+                }
+            };
+            
+            _mockService.Setup(service =>
+                    service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee,
+                        new SuggestionPromptDto(SuggestionPromptType.All, null, null), true))
                 .ReturnsAsync(payees);
             var controller = new PayersPayeesController(_mockService.Object);
 
@@ -254,7 +292,7 @@ namespace TransactionService.Tests.Controllers
         {
             _mockService.Setup(service =>
                     service.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, new SuggestionPromptDto(
-                        SuggestionPromptType.Subcategory, "test", null)))
+                        SuggestionPromptType.Subcategory, "test", null), true))
                 .ThrowsAsync(new ArgumentException("invalid arguments"));
 
             var controller = new PayersPayeesController(_mockService.Object);
@@ -290,14 +328,17 @@ namespace TransactionService.Tests.Controllers
                     PayerPayeeName = "test name1"
                 }
             };
+
+            var includeEnrichedData = false;
+            
             _mockService.Setup(service =>
                     service.GetSuggestedPayersOrPayees(PayerPayeeType.Payer,
-                        new SuggestionPromptDto(SuggestionPromptType.All, null, null)))
+                        new SuggestionPromptDto(SuggestionPromptType.All, null, null), includeEnrichedData))
                 .ReturnsAsync(payees);
             var controller = new PayersPayeesController(_mockService.Object);
 
             var response =
-                await controller.GetSuggestedPayers(new SuggestionPromptDto());
+                await controller.GetSuggestedPayers(new SuggestionPromptDto(), includeEnrichedData);
 
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
@@ -311,13 +352,13 @@ namespace TransactionService.Tests.Controllers
         {
             _mockService.Setup(service =>
                     service.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, new SuggestionPromptDto(
-                        SuggestionPromptType.Subcategory, "test", null)))
+                        SuggestionPromptType.Subcategory, "test", null), true))
                 .ThrowsAsync(new ArgumentException("invalid arguments"));
 
             var controller = new PayersPayeesController(_mockService.Object);
 
             var response =
-                await controller.GetSuggestedPayers(new SuggestionPromptDto(SuggestionPromptType.Subcategory, "test"));
+                await controller.GetSuggestedPayers(new SuggestionPromptDto(SuggestionPromptType.Subcategory, "test"), true);
 
             var objectResponse = Assert.IsType<BadRequestObjectResult>(response);
 

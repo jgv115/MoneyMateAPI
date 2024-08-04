@@ -96,18 +96,27 @@ namespace TransactionService.Domain.Services.PayerPayees
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayersOrPayees(PayerPayeeType payerPayeeType,
-            SuggestionPromptDto suggestionPromptDto)
+            SuggestionPromptDto suggestionPromptDto, bool includeEnrichedData = false)
         {
             var suggestionFactory = new PayerPayeeSuggestionParameterFactory();
             var suggestionParameters = suggestionFactory.Generate(suggestionPromptDto);
 
             var suggestedPayersOrPayees =
                 await _repository.GetSuggestedPayersOrPayees(payerPayeeType, suggestionParameters);
-            
-            var enrichTasks = suggestedPayersOrPayees.Select(payerPayee =>
-                _payerPayeeEnricher.EnrichPayerPayeeToViewModel(payerPayeeType, payerPayee));
-            var results = await Task.WhenAll(enrichTasks);
-            return results.ToList();
+
+            if (includeEnrichedData)
+            {
+                var enrichTasks = suggestedPayersOrPayees.Select(payerPayee =>
+                    _payerPayeeEnricher.EnrichPayerPayeeToViewModel(payerPayeeType, payerPayee));
+                var results = await Task.WhenAll(enrichTasks);
+                return results.ToList();
+            }
+
+            return suggestedPayersOrPayees.Select(payerPayee => new PayerPayeeViewModel
+            {
+                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
+                PayerPayeeName = payerPayee.PayerPayeeName
+            }).ToList();
         }
 
         // TODO: might be some coupling issues here - we are assuming repository will store exactly as we are inputting

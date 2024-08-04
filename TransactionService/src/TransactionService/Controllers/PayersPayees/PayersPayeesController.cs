@@ -50,12 +50,14 @@ namespace TransactionService.Controllers.PayersPayees
         }
 
         [HttpGet("payers/suggestions")]
-        public async Task<IActionResult> GetSuggestedPayers([FromQuery] SuggestionPromptDto suggestionPromptDto)
+        public async Task<IActionResult> GetSuggestedPayers([FromQuery] SuggestionPromptDto suggestionPromptDto,
+            [FromQuery] bool includeEnrichedData = true)
         {
             try
             {
                 var payers =
-                    await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, suggestionPromptDto);
+                    await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payer, suggestionPromptDto,
+                        includeEnrichedData);
                 return Ok(payers);
             }
             catch (ArgumentException ex)
@@ -90,12 +92,14 @@ namespace TransactionService.Controllers.PayersPayees
 
 
         [HttpGet("payees/suggestions")]
-        public async Task<IActionResult> GetSuggestedPayees([FromQuery] SuggestionPromptDto suggestionPromptDto)
+        public async Task<IActionResult> GetSuggestedPayees([FromQuery] SuggestionPromptDto suggestionPromptDto,
+            bool includeEnrichedData = true)
         {
             try
             {
                 var payers =
-                    await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, suggestionPromptDto);
+                    await _payerPayeeService.GetSuggestedPayersOrPayees(PayerPayeeType.Payee, suggestionPromptDto,
+                        includeEnrichedData);
                 return Ok(payers);
             }
             catch (ArgumentException ex)

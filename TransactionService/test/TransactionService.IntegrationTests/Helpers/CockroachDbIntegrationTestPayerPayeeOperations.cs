@@ -46,7 +46,7 @@ public class CockroachDbIntegrationTestPayerPayeeOperations
                                      FROM ins
                                               JOIN payerpayeetype p ON p.name = ins.payerPayeeType
                                               JOIN payerpayeeexternallinktype p2 on p2.name = ins.externalLinkType
-                                     ON CONFLICT DO NOTHING
+                                     ON CONFLICT (id) DO UPDATE SET id = payerPayee.id
                                      RETURNING payerpayee.id)
                     SELECT *
                     FROM e
