@@ -93,6 +93,47 @@ public class PayerPayeeServiceTests
         });
         Assert.Equal(payerViewModels, response);
     }
+    
+    [Fact]
+    public async Task GivenIncludeEnrichedDataIsFalse_WhenGetPayersInvoked_CorrectIEnumerableReturned()
+    {
+        const int limit = 25;
+        const int offset = 2;
+        var payers = new List<PayerPayee>
+        {
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name123",
+                ExternalId = "id123"
+            },
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name123",
+                ExternalId = "id1234"
+            }
+        };
+        _mockRepository.Setup(repository => repository.GetPayers(new PaginationSpec
+            {
+                Limit = limit,
+                Offset = offset
+            }))
+            .ReturnsAsync(() => payers);
+        
+        var service = new PayerPayeeService(_mockRepository.Object,
+            _mockPayerPayeeEnricher.Object);
+
+        var response = await service.GetPayers(offset, limit, false);
+
+        var payerViewModels = payers.Select((payer, index) => new PayerPayeeViewModel
+        {
+            ExternalId = payer.ExternalId,
+            PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
+            PayerPayeeName = payer.PayerPayeeName,
+        });
+        Assert.Equal(payerViewModels, response);
+    }
 
     [Fact]
     public async Task GivenOffsetAndLimit_WhenGetPayeesInvoked_CorrectPayerPayeeModelsReturned()
@@ -148,6 +189,47 @@ public class PayerPayeeServiceTests
             PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
             PayerPayeeName = payee.PayerPayeeName,
             Address = addresses[index]
+        });
+        Assert.Equal(payeeViewModels, response);
+    }
+    
+    [Fact]
+    public async Task GivenIncludeEnrichedDataIsFalse_WhenGetPayeesInvoked_CorrectPayerPayeeModelsReturned()
+    {
+        const int limit = 25;
+        const int offset = 2;
+        var payees = new List<PayerPayee>
+        {
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name123",
+                ExternalId = "id123"
+            },
+            new()
+            {
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name123",
+                ExternalId = "id1234"
+            }
+        };
+        _mockRepository.Setup(repository => repository.GetPayees(new PaginationSpec
+            {
+                Limit = limit,
+                Offset = offset
+            }))
+            .ReturnsAsync(() => payees);
+
+        var service = new PayerPayeeService(_mockRepository.Object,
+            _mockPayerPayeeEnricher.Object);
+
+        var response = await service.GetPayees(offset, limit, false);
+
+        var payeeViewModels = payees.Select((payee, index) => new PayerPayeeViewModel
+        {
+            ExternalId = payee.ExternalId,
+            PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
+            PayerPayeeName = payee.PayerPayeeName,
         });
         Assert.Equal(payeeViewModels, response);
     }

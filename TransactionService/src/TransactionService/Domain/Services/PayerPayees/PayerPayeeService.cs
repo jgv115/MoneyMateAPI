@@ -59,7 +59,15 @@ namespace TransactionService.Domain.Services.PayerPayees
                 Limit = limit,
                 Offset = offset
             });
-            return await EnrichAndMapPayerPayeesToViewModels(payers);
+            if (includeEnrichedData)
+                return await EnrichAndMapPayerPayeesToViewModels(payers);
+            else
+                return payers.Select(payer => new PayerPayeeViewModel
+                {
+                    PayerPayeeName = payer.PayerPayeeName,
+                    PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
+                    ExternalId = payer.ExternalId
+                });
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees(int offset, int limit,
@@ -70,7 +78,16 @@ namespace TransactionService.Domain.Services.PayerPayees
                 Limit = limit,
                 Offset = offset
             });
-            return await EnrichAndMapPayerPayeesToViewModels(payees);
+
+            if (includeEnrichedData)
+                return await EnrichAndMapPayerPayeesToViewModels(payees);
+            else
+                return payees.Select(payee => new PayerPayeeViewModel
+                {
+                    PayerPayeeName = payee.PayerPayeeName,
+                    PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
+                    ExternalId = payee.ExternalId
+                });
         }
 
         public async Task<PayerPayeeViewModel> GetPayer(Guid payerPayeeId)
