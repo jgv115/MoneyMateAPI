@@ -134,7 +134,7 @@ namespace TransactionService.Repositories.CockroachDb
                          LEFT JOIN category c on sc.category_id = c.id
                          LEFT JOIN payerpayee pp on transaction.payerpayee_id = pp.id
                  WHERE transaction.profile_id = @profile_id
-                   AND transaction_timestamp > @start_timestamp AND transaction_timestamp < @end_timestamp
+                   AND transaction_timestamp >= @start_timestamp AND transaction_timestamp < @end_timestamp
                 ORDER BY transaction.transaction_timestamp
                  ";
 
