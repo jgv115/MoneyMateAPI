@@ -22,7 +22,7 @@ jobs:
       AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Run terraform apply
         run: ./batect -f Auth0/batect.yml terraform_apply
 
@@ -41,7 +41,7 @@ jobs:
       AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Run terraform apply
         run: ./batect -f Auth0/batect.yml terraform_apply
 
@@ -60,6 +60,6 @@ jobs:
       AUTH0_ADMIN_USER_PASSWORD: ${{ secrets.AUTH0_ADMIN_USER_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Run terraform apply
         run: ./batect -f Auth0/batect.yml terraform_apply
