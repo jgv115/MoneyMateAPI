@@ -221,6 +221,12 @@ public class MockAmazonLambdaClient : IAmazonLambda
         throw new System.NotImplementedException();
     }
 
+    public Task<GetFunctionRecursionConfigResponse> GetFunctionRecursionConfigAsync(GetFunctionRecursionConfigRequest request,
+        CancellationToken cancellationToken = new CancellationToken())
+    {
+        throw new System.NotImplementedException();
+    }
+
     public Task<GetFunctionUrlConfigResponse> GetFunctionUrlConfigAsync(GetFunctionUrlConfigRequest request,
         CancellationToken cancellationToken = new CancellationToken())
     {
@@ -384,6 +390,12 @@ public class MockAmazonLambdaClient : IAmazonLambda
 
     public Task<PutFunctionEventInvokeConfigResponse> PutFunctionEventInvokeConfigAsync(
         PutFunctionEventInvokeConfigRequest request,
+        CancellationToken cancellationToken = new CancellationToken())
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task<PutFunctionRecursionConfigResponse> PutFunctionRecursionConfigAsync(PutFunctionRecursionConfigRequest request,
         CancellationToken cancellationToken = new CancellationToken())
     {
         throw new System.NotImplementedException();
