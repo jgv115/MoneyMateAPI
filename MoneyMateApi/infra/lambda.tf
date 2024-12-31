@@ -1,16 +1,12 @@
-resource "aws_ecr_repository" "moneymate_api_image_repository" {
-  name                 = "moneymate_api"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
+// This is created manually
+data "aws_ecr_repository" moneymate_api_image_repository {
+  name = "moneymate/moneymate_api"
 }
 
+
 resource "aws_lambda_function" moneymate_api_lambda {
-  depends_on = [aws_ecr_repository.moneymate_api_image_repository]
   function_name = local.moneymate_api_lambda_name
-  image_uri = "${aws_ecr_repository.moneymate_api_image_repository.repository_url}:${var.MONEYMATE_API_LAMBDA_IMAGE_TAG}"
+  image_uri = "${data.aws_ecr_repository.moneymate_api_image_repository.repository_url}:${var.MONEYMATE_API_LAMBDA_IMAGE_TAG}"
   image_config {
     command = ["MoneyMateApi::MoneyMateApi.LambdaEntryPoint::FunctionHandlerAsync"]
     entry_point = ["/lambda-entrypoint.sh"]
