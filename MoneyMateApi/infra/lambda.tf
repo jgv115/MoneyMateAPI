@@ -8,6 +8,7 @@ resource "aws_ecr_repository" "moneymate_api_image_repository" {
 }
 
 resource "aws_lambda_function" moneymate_api_lambda {
+  depends_on = [aws_ecr_repository.moneymate_api_image_repository]
   function_name = local.moneymate_api_lambda_name
   image_uri = "${aws_ecr_repository.moneymate_api_image_repository.repository_url}:${var.MONEYMATE_API_LAMBDA_IMAGE_TAG}"
   image_config {
