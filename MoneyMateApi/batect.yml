@@ -1,0 +1,37 @@
+project_name: moneymate_api
+
+.aws_creds_envs: &aws_creds_envs
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  AWS_REGION: ${AWS_REGION:-}
+
+containers:
+  terraform_env:
+    image: hashicorp/terraform:latest
+    environment:
+      <<: *aws_creds_envs
+      TF_WORKSPACE: $ENVIRONMENT
+      TF_VAR_MONEYMATE_API_LAMBDA_IMAGE_TAG: $IMAGE_TAG
+      TF_VAR_CLOUDFLARE_EMAIL: $CLOUDFLARE_EMAIL
+      TF_VAR_CLOUDFLARE_API_KEY: $CLOUDFLARE_API_KEY
+    volumes:
+      - local: .
+        container: /code
+        options: cached
+    working_directory: /code/infra
+
+tasks:
+
+  terraform_plan:
+    description: Runs terraform plan
+    group: Terraform
+    run:
+      container: terraform_env
+      entrypoint: ../scripts/plan_terraform.sh
+
+  terraform_apply:
+    description: Runs terraform apply
+    group: Terraform
+    run:
+      container: terraform_env
+      entrypoint: ../scripts/apply_terraform.sh

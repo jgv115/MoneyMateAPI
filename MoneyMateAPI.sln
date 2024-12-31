@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService.Tests", "TransactionService\test\TransactionService.Tests\TransactionService.Tests.csproj", "{05153ACE-37A0-4342-9EC8-1396BFC1CCD1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoneyMateApi.Tests", "MoneyMateApi\test\MoneyMateApi.Tests\MoneyMateApi.Tests.csproj", "{05153ACE-37A0-4342-9EC8-1396BFC1CCD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService", "TransactionService\src\TransactionService\TransactionService.csproj", "{ACC2F89E-186F-400A-93E8-7E2EE0DE98EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoneyMateApi", "MoneyMateApi\src\MoneyMateApi.csproj", "{ACC2F89E-186F-400A-93E8-7E2EE0DE98EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService.IntegrationTests", "TransactionService\test\TransactionService.IntegrationTests\TransactionService.IntegrationTests.csproj", "{E981C473-FD1C-4511-9127-47DAA771BDFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoneyMateApi.IntegrationTests", "MoneyMateApi\test\MoneyMateApi.IntegrationTests\MoneyMateApi.IntegrationTests.csproj", "{E981C473-FD1C-4511-9127-47DAA771BDFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService.Tests.Common", "TransactionService\test\TransactionService.Tests.Common\TransactionService.Tests.Common.csproj", "{35ED049E-D88B-4B4B-9EFF-668A77C61F60}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoneyMateApi.Tests.Common", "MoneyMateApi\test\MoneyMateApi.Tests.Common\MoneyMateApi.Tests.Common.csproj", "{35ED049E-D88B-4B4B-9EFF-668A77C61F60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
