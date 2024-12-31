@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'MoneymateApi/**'
+      - 'MoneyMateApi/**'
       - '.github/workflows/moneymate_api.yml'
 
 jobs: 
