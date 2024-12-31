@@ -5,7 +5,7 @@ WORKDIR /src
 COPY ["MoneyMateApi.csproj", "MoneyMateApi/"]
 RUN dotnet restore "MoneyMateApi/MoneyMateApi.csproj"
 
-WORKDIR "/src"
+WORKDIR "/MoneyMateApi"
 COPY . .
 RUN dotnet build "MoneyMateApi.csproj" --configuration Release --output /app/build
 
