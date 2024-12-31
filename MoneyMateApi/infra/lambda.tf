@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "moneymate_api_image_repository" {
-  name                 = "moneymate/moneymate_api"
+  name                 = "moneymate_api"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
