@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Lambda;
 using Amazon.Runtime;
@@ -18,6 +19,7 @@ using MoneyMateApi.Domain.Services.Categories;
 using MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations;
 using MoneyMateApi.Domain.Services.PayerPayees;
 using MoneyMateApi.Domain.Services.Profiles;
+using MoneyMateApi.Domain.Services.Tags;
 using MoneyMateApi.Domain.Services.Transactions;
 using MoneyMateApi.Helpers;
 using MoneyMateApi.Helpers.TimePeriodHelpers;
@@ -108,7 +110,9 @@ namespace MoneyMateApi
             services.AddScoped<IPayerPayeeService, PayerPayeeService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<ICategoryInitialiser, LambdaCategoryInitialiser>();
+            services.AddScoped<ITagService, TagService>();
             services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
+            
             services.Configure<GooglePlaceApiOptions>(options =>
                 Configuration.GetSection("GooglePlaceApi").Bind(options));
 
@@ -148,6 +152,7 @@ namespace MoneyMateApi
             services.AddScoped<IPayerPayeeRepository, CockroachDbPayerPayeeRepository>();
             services.AddScoped<ITransactionRepository, CockroachDbTransactionRepository>();
             services.AddScoped<IProfilesRepository, CockroachDbProfilesRepository>();
+            services.AddScoped<ITagRepository, CockroachDbTagRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

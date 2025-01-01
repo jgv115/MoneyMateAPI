@@ -240,7 +240,7 @@ namespace MoneyMateApi.Repositories.CockroachDb
                 {
                     if (ex.SqlState == "23505")
                     {
-                        throw new RepositoryItemExistsException("Exists");
+                        throw new RepositoryItemExistsException("Payer or Payee already exists");
                     }
                     else
                     {

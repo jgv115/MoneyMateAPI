@@ -25,7 +25,7 @@ public class CockroachDbIntegrationTestHelper
     public CockroachDbIntegrationTestCategoryOperations CategoryOperations { get; init; }
     public CockroachDbIntegrationTestPayerPayeeOperations PayerPayeeOperations { get; init; }
     public CockroachDbIntegrationTestUserProfileOperations UserProfileOperations { get; init; }
-
+    public CockroachDbIntegrationTestTagOperations TagOperations { get; init; }
 
     public CockroachDbIntegrationTestHelper(Guid testUserId) : this(testUserId, "auth0|moneymatetest")
     {
@@ -51,6 +51,7 @@ public class CockroachDbIntegrationTestHelper
                 cfg.AddProfile<CategoryEntityProfile>();
                 cfg.AddProfile<PayerPayeeEntityProfile>();
                 cfg.AddProfile<TransactionEntityProfile>();
+                cfg.AddProfile<TagEntityProfile>();
             })
             .CreateMapper();
 
@@ -79,6 +80,13 @@ public class CockroachDbIntegrationTestHelper
                 UserId = TestUserIdentifier,
                 ProfileId = TestUserId
             }));
+
+        TagOperations = new CockroachDbIntegrationTestTagOperations(DapperContext, new CockroachDbTagRepository(
+            DapperContext, Mapper, new CurrentUserContext
+            {
+                UserId = TestUserIdentifier,
+                ProfileId = TestUserId
+            }), TestUserId);
 
         TransactionOperations = new CockroachDbIntegrationTestTransactionOperations(
             DapperContext,
