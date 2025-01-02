@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MoneyMateApi.Repositories.CockroachDb.Entities
 {
@@ -17,5 +18,7 @@ namespace MoneyMateApi.Repositories.CockroachDb.Entities
         
         public Guid PayerPayeeId { get; set; }
         public string PayerPayeeName { get; set; }
+
+        public List<Tag> Tags { get; set; } = new();
     }
 }

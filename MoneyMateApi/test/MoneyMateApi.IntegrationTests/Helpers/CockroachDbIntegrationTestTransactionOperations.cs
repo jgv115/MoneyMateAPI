@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using MoneyMateApi.Constants;
@@ -17,6 +18,7 @@ public class CockroachDbIntegrationTestTransactionOperations
     private readonly CockroachDbIntegrationTestTransactionTypeOperations _transactionTypeOperations;
     private readonly CockroachDbIntegrationTestCategoryOperations _categoryOperations;
     private readonly CockroachDbIntegrationTestPayerPayeeOperations _payerPayeeOperations;
+    private readonly CockroachDbIntegrationTestTagOperations _tagOperations;
 
     private readonly Guid _testUserId;
     private readonly DapperContext _dapperContext;
@@ -26,13 +28,15 @@ public class CockroachDbIntegrationTestTransactionOperations
         Guid testUserId,
         CockroachDbIntegrationTestTransactionTypeOperations transactionTypeOperations,
         CockroachDbIntegrationTestCategoryOperations categoryOperations,
-        CockroachDbIntegrationTestPayerPayeeOperations payerPayeeOperations)
+        CockroachDbIntegrationTestPayerPayeeOperations payerPayeeOperations,
+        CockroachDbIntegrationTestTagOperations tagOperations)
     {
         _transactionRepository = transactionRepository;
         _testUserId = testUserId;
         _transactionTypeOperations = transactionTypeOperations;
         _categoryOperations = categoryOperations;
         _payerPayeeOperations = payerPayeeOperations;
+        _tagOperations = tagOperations;
         _dapperContext = dapperContext;
     }
 
@@ -73,8 +77,7 @@ public class CockroachDbIntegrationTestTransactionOperations
                 parameters.Add("amount", transaction.Amount);
                 parameters.Add("notes", transaction.Note);
 
-                TransactionType parsedTransactionType;
-                Enum.TryParse(transaction.TransactionType, out parsedTransactionType);
+                Enum.TryParse(transaction.TransactionType, out TransactionType parsedTransactionType);
                 var categoryId = await _categoryOperations.WriteCategoryIntoDb(connection, new Category
                 {
                     TransactionType = parsedTransactionType,
@@ -100,6 +103,15 @@ public class CockroachDbIntegrationTestTransactionOperations
                 }
 
                 await connection.ExecuteAsync(createTransactionQuery, parameters);
+                
+                if (transaction.Tags.Count > 0)
+                {
+                    // TODO: need to write tags into transactiontags so that the tag can be associated with the transaction
+                    await _tagOperations.WriteTagsIntoDb(transaction.Tags);
+
+                    foreach (var transactionTag in transaction.Tags)
+                        await _tagOperations.AssociateTagWithTransaction(transaction.TransactionId, transactionTag.Id);
+                }
             }
         }
     }

@@ -19,19 +19,28 @@ public class TransactionListBuilder
 
     public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndAmount(int number, string category,
         decimal amount) =>
-        WithTransactions(number, null, null, amount, null, category, null);
+        WithTransactions(number, null, null, amount, null, category, null, null);
 
     public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(int number, string category,
         string subcategory, decimal amount) =>
-        WithTransactions(number, null, null, amount, null, category, subcategory);
+        WithTransactions(number, null, null, amount, null, category, subcategory, null);
 
     public TransactionListBuilder WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(int number,
         string? payerPayeeId,
         string? payerPayeeName, decimal amount, TransactionType transactionType = TransactionType.Expense) =>
-        WithTransactions(number, payerPayeeId, payerPayeeName, amount, transactionType, null, null);
+        WithTransactions(number, payerPayeeId, payerPayeeName, amount, transactionType, null, null, null);
 
-    public TransactionListBuilder WithTransactions(int number, string? payerPayeeId, string? payerPayeeName,
-        decimal? amount, TransactionType? transactionType, string? category, string? subcategory)
+    public TransactionListBuilder WithTransactions(
+        int number,
+        string? payerPayeeId = null,
+        string? payerPayeeName = null,
+        decimal? amount = null,
+        TransactionType? transactionType = null,
+        string? category = null,
+        string? subcategory = null,
+        string? note = null,
+        List<Tag>? tags = null
+    )
     {
         for (var i = 0; i < number; i++)
         {
@@ -46,7 +55,9 @@ public class TransactionListBuilder
                     ? TransactionType.Expense.ToProperString()
                     : transactionType.Value.ToProperString(),
                 PayerPayeeId = payerPayeeId ?? "",
-                PayerPayeeName = payerPayeeName ?? ""
+                PayerPayeeName = payerPayeeName ?? "",
+                Note = note ?? "",
+                Tags = tags ?? []
             });
         }
 

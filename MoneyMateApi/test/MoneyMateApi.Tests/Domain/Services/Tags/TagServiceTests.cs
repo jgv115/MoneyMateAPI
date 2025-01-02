@@ -18,7 +18,7 @@ public class TagServiceTests
         var tagService = new TagService(_mockRepository.Object);
 
         var tagName = "tagname";
-        var expectedTag = new Tag(Guid.NewGuid().ToString(), tagName);
+        var expectedTag = new Tag(Guid.NewGuid(), tagName);
         _mockRepository.Setup(repository => repository.CreateTag(tagName))
             .ReturnsAsync(() => expectedTag);
         

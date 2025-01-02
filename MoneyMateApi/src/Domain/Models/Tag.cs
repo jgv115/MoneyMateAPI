@@ -1,3 +1,5 @@
+using System;
+
 namespace MoneyMateApi.Domain.Models;
 
-public record Tag(string Id, string Name);
+public record Tag(Guid Id, string Name);

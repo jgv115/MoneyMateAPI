@@ -21,9 +21,10 @@ namespace MoneyMateApi.Repositories.CockroachDb
 
             var transactions =
                 await connection
-                    .QueryAsync<Transaction, TransactionType, Category, Subcategory, PayerPayee, Transaction>(query,
+                    .QueryAsync<Transaction, TransactionType, Category, Subcategory, PayerPayee, Tag, Transaction>(
+                        query,
                         (
-                            transaction, transactionType, category, subcategory, payerPayee) =>
+                            transaction, transactionType, category, subcategory, payerPayee, tag) =>
                         {
                             Transaction accumulatedTransaction;
 
@@ -47,6 +48,11 @@ namespace MoneyMateApi.Repositories.CockroachDb
                             {
                                 accumulatedTransaction.PayerPayeeId = payerPayee.Id;
                                 accumulatedTransaction.PayerPayeeName = payerPayee.Name;
+                            }
+
+                            if (tag != null && tag.Id != Guid.Empty)
+                            {
+                                accumulatedTransaction.Tags.Add(tag);
                             }
 
                             return accumulatedTransaction;
@@ -88,22 +94,27 @@ namespace MoneyMateApi.Repositories.CockroachDb
                         
                         pp.id,
                         pp.name             as name,
-                        pp.external_link_id as externalLinkId
+                        pp.external_link_id as externalLinkId,
+
+                        tag.id,
+                        tag.name as name
                  FROM transaction
                          LEFT JOIN transactiontype tt on transaction.transaction_type_id = tt.id
                          LEFT JOIN subcategory sc on transaction.subcategory_id = sc.id 
                          LEFT JOIN category c on sc.category_id = c.id
                          LEFT JOIN payerpayee pp on transaction.payerpayee_id = pp.id
+                         LEFT JOIN transactiontags ttags on transaction.id = ttags.transaction_id
+                         LEFT JOIN tag on ttags.tag_id = tag.id
                  WHERE transaction.profile_id = @profile_id and transaction.id = @transactionId
                  ";
 
             using (var connection = _context.CreateConnection())
             {
                 var transactions = await TransactionDapperHelpers.QueryAndBuildTransactions(connection, query,
-                    new {profile_id = _userContext.ProfileId, transactionId});
+                    new { profile_id = _userContext.ProfileId, transactionId });
 
                 return _mapper.Map<Transaction, Domain.Models.Transaction>(
-                    transactions.FirstOrDefault((Transaction) null));
+                    transactions.FirstOrDefault((Transaction)null));
             }
         }
 
@@ -127,12 +138,21 @@ namespace MoneyMateApi.Repositories.CockroachDb
                         
                         pp.id,
                         pp.name             as name,
-                        pp.external_link_id as externalLinkId
+                        pp.external_link_id as externalLinkId,
+                        
+                        tag.id,
+                        tag.name as name
+                        
                  FROM transaction
                          LEFT JOIN transactiontype tt on transaction.transaction_type_id = tt.id
+                     
                          LEFT JOIN subcategory sc on transaction.subcategory_id = sc.id 
                          LEFT JOIN category c on sc.category_id = c.id
+                     
                          LEFT JOIN payerpayee pp on transaction.payerpayee_id = pp.id
+                     
+                         LEFT JOIN transactiontags ttags on transaction.id = ttags.transaction_id
+                         LEFT JOIN tag on ttags.tag_id = tag.id
                  WHERE transaction.profile_id = @profile_id
                    AND transaction_timestamp >= @start_timestamp AND transaction_timestamp < @end_timestamp
                 ORDER BY transaction.transaction_timestamp
@@ -196,7 +216,7 @@ namespace MoneyMateApi.Repositories.CockroachDb
                     subcategory = newTransaction.Subcategory,
                     payerpayeeid = Guid.TryParse(newTransaction.PayerPayeeId, out var payerPayeeId)
                         ? payerPayeeId
-                        : (Guid?) null,
+                        : (Guid?)null,
                     notes = newTransaction.Note,
                     profile_id = _userContext.ProfileId
                 });

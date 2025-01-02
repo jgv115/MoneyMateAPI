@@ -25,7 +25,7 @@ public class TagControllerTests
             Name = tagName
         };
 
-        var expectedTag = new Tag(Guid.NewGuid().ToString(), tagName);
+        var expectedTag = new Tag(Guid.NewGuid(), tagName);
         _mockTagService.Setup(service => service.CreateTag(tagName)).ReturnsAsync(expectedTag);
 
         var result = await controller.CreateTag(createTagDto);

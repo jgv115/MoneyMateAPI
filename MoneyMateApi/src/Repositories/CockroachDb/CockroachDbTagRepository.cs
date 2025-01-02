@@ -38,7 +38,7 @@ public class CockroachDbTagRepository : ITagRepository
         }
     }
 
-    public async Task<Tag> GetTag(string id)
+    public async Task<Tag> GetTag(Guid id)
     {
         var query =
             @"
@@ -64,7 +64,7 @@ public class CockroachDbTagRepository : ITagRepository
             {
                 var storedId =
                     await connection.QuerySingleAsync<Guid>(query, new { Name = name, _userContext.ProfileId });
-                return new Tag(storedId.ToString(), name);
+                return new Tag(storedId, name);
             }
             catch (PostgresException ex)
             {

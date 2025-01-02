@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Transactions.Dtos;
 using MoneyMateApi.Domain.Models;
+using MoneyMateApi.IntegrationTests.Extensions;
 using MoneyMateApi.IntegrationTests.Helpers;
 using MoneyMateApi.IntegrationTests.WebApplicationFactories;
 using Xunit;
@@ -61,7 +62,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(new List<Transaction> {transaction});
 
         var response = await _httpClient.GetAsync($"/api/transactions/{transaction.TransactionId}");
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
         var returnedTransaction = JsonSerializer.Deserialize<Transaction>(returnedString,

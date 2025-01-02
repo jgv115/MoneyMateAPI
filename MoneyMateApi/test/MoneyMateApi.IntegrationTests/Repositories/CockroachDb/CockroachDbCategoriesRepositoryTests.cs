@@ -11,6 +11,7 @@ using Xunit;
 
 namespace MoneyMateApi.IntegrationTests.Repositories.CockroachDb;
 
+[Collection("IntegrationTests")]
 public class CockroachDbCategoriesRepositoryTests : IAsyncLifetime
 {
     private readonly DapperContext _dapperContext;

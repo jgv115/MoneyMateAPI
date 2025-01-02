@@ -10,6 +10,7 @@ using MoneyMateApi.Repositories.CockroachDb.Entities;
 using MoneyMateApi.Repositories.Exceptions;
 using Xunit;
 using Profile = MoneyMateApi.Domain.Models.Profile;
+using Tag = MoneyMateApi.Domain.Models.Tag;
 
 namespace MoneyMateApi.IntegrationTests.Repositories.CockroachDb;
 
@@ -40,14 +41,16 @@ public class CockroachDbTagRepositoryTests : IAsyncLifetime
         var tagRepository = new CockroachDbTagRepository(_dapperContext, _stubMapper,
             new CurrentUserContext { UserId = _profileId.ToString(), ProfileId = _profileId });
 
-        var insertedTags = await _cockroachDbIntegrationTestHelper.TagOperations.WriteTagsIntoDb(new List<string>
-            { "tag1", "tag2", "tag3" });
+        var tag1 = new Tag(Guid.NewGuid(), "tag1");
+        var tag2 = new Tag(Guid.NewGuid(), "tag2");
+        var tag3 = new Tag(Guid.NewGuid(), "tag3");
+        var insertedTags = await _cockroachDbIntegrationTestHelper.TagOperations.WriteTagsIntoDb([tag1, tag2, tag3]);
 
         // Act
         var tags = await tagRepository.GetTags();
 
-        insertedTags.Sort((x, y) => string.Compare(x.Id, y.Id, StringComparison.Ordinal));
-        tags.Sort((x, y) => string.Compare(x.Id, y.Id, StringComparison.Ordinal));
+        insertedTags.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
+        tags.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
         // Assert
         Assert.Equal(insertedTags, tags);
     }
@@ -59,11 +62,13 @@ public class CockroachDbTagRepositoryTests : IAsyncLifetime
         var tagRepository = new CockroachDbTagRepository(_dapperContext, _stubMapper,
             new CurrentUserContext { UserId = _profileId.ToString(), ProfileId = _profileId });
 
-        var insertedTags = await _cockroachDbIntegrationTestHelper.TagOperations.WriteTagsIntoDb(new List<string>
-            { "tag1", "tag2", "tag3" });
+        var tag1 = new Tag(Guid.NewGuid(), "tag1");
+        var tag2 = new Tag(Guid.NewGuid(), "tag2");
+        var tag3 = new Tag(Guid.NewGuid(), "tag3");
+        var insertedTags = await _cockroachDbIntegrationTestHelper.TagOperations.WriteTagsIntoDb([tag1, tag2, tag3]);
 
         // Act
-        var returnedTag = await tagRepository.GetTag(insertedTags[0].Id);
+        var returnedTag = await tagRepository.GetTag(tag1.Id);
 
         // Assert
         Assert.Equal(insertedTags[0], returnedTag);
@@ -85,7 +90,7 @@ public class CockroachDbTagRepositoryTests : IAsyncLifetime
         Assert.Single(retrievedTags);
         Assert.Collection(retrievedTags, tag =>
         {
-            Assert.Equal(storedTag.Id, tag.Id.ToString());
+            Assert.Equal(storedTag.Id, tag.Id);
 
             // Ensure tag name is saved correctly
             Assert.Equal(storedTag.Name, tag.Name);
@@ -129,7 +134,7 @@ public class CockroachDbTagRepositoryTests : IAsyncLifetime
                 UserIdentifier = userId.ToString()
             }
         });
-        
+
         // create two profiles for user
         var profileId1 = Guid.NewGuid();
         var profileId2 = Guid.NewGuid();

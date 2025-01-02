@@ -23,24 +23,43 @@ public class CockroachDbIntegrationTestTagOperations
         _profileId = profileId;
     }
 
-    public async Task<List<Tag>> WriteTagsIntoDb(List<string> tagNames)
+    public async Task<List<Tag>> WriteTagsIntoDb(List<Tag> tags)
     {
         using (var connection = _dapperContext.CreateConnection())
         {
-            var insertTagsQuery = @"INSERT INTO tag (name, profile_id) VALUES (@name, @profile_id) RETURNING id";
+            const string insertTagsQuery = """
+                                           WITH inserted AS (
+                                               INSERT INTO tag (id, name, profile_id)
+                                               VALUES (@id, @name, @profile_id)
+                                               ON CONFLICT DO NOTHING
+                                               RETURNING id
+                                           )
+                                           SELECT * FROM inserted
+                                           UNION
+                                           SELECT id FROM tag WHERE name = @name AND profile_id = @profile_id
+                                           """;
 
             var insertedTags = new List<Tag>();
-            foreach (var tagName in tagNames)
+            foreach (var tag in tags)
             {
                 var insertedId = await connection.QuerySingleAsync<Guid>(insertTagsQuery,
-                    new { name = tagName, profile_id = _profileId });
+                    new { id = tag.Id, name = tag.Name, profile_id = _profileId });
 
-                insertedTags.Add(new Tag(insertedId.ToString(), tagName));
+                insertedTags.Add(tag);
             }
-
 
             return insertedTags;
         }
+    }
+
+    public async Task AssociateTagWithTransaction(string transactionId, Guid tagId)
+    {
+        using var connection = _dapperContext.CreateConnection();
+        const string insertTransactionTagQuery =
+            @"INSERT INTO transactiontags (transaction_id, tag_id) VALUES (@transaction_id, @tag_id)";
+
+        await connection.ExecuteAsync(insertTransactionTagQuery,
+            new { transaction_id = transactionId, tag_id = tagId });
     }
 
     public async Task<List<MoneyMateApi.Repositories.CockroachDb.Entities.Tag>> GetTagsForProfile()
@@ -55,7 +74,7 @@ public class CockroachDbIntegrationTestTagOperations
             return tagEntities.ToList();
         }
     }
-    
+
     public async Task<List<MoneyMateApi.Repositories.CockroachDb.Entities.Tag>> GetAllTagsFromDb()
     {
         using (var connection = _dapperContext.CreateConnection())

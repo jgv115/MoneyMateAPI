@@ -97,7 +97,8 @@ public class CockroachDbIntegrationTestHelper
             }), TestUserId,
             transactionTypeOperations,
             CategoryOperations,
-            PayerPayeeOperations
+            PayerPayeeOperations,
+            TagOperations
         );
     }
 
