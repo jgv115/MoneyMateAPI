@@ -132,10 +132,24 @@ namespace MoneyMateApi.Tests.Controllers.Transactions
         public async Task GivenValidInputDto_WhenPostIsInvoked_Then200OkIsReturned()
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
-            var response = await controller.Post(new StoreTransactionDto());
+
+            var dto = new StoreTransactionDto
+            {
+                Amount = (decimal)1.0,
+                Category = "category-1",
+                TransactionTimestamp = DateTime.Now.ToString("O"),
+                Subcategory = "subcategory-1",
+                TransactionType = "expense",
+                PayerPayeeId = Guid.NewGuid().ToString(),
+                PayerPayeeName = "name1",
+                Note = "note1",
+                TagIds = []
+            };
+            var response = await controller.Post(dto);
 
             var objectResponse = Assert.IsType<OkResult>(response);
             Assert.Equal(StatusCodes.Status200OK, objectResponse.StatusCode);
+            _mockTransactionHelperService.Verify(service => service.StoreTransaction(dto));
         }
 
         [Fact]

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using FluentValidation;
 using MoneyMateApi.Controllers.Transactions.Dtos;
 
@@ -40,13 +41,13 @@ namespace MoneyMateApi.Controllers.Transactions.Validators
             RuleFor(dto => dto.TransactionType).NotEmpty().Must(transactionType =>
             {
                 var validTransactionTypes = new List<string> { "expense", "income" };
-                if (validTransactionTypes.Contains(transactionType))
-                    return true;
-                return false;
+                return validTransactionTypes.Contains(transactionType);
             });
             RuleFor(dto => dto.Amount).NotEmpty();
             RuleFor(dto => dto.Category).NotEmpty();
             RuleFor(dto => dto.Subcategory).NotEmpty();
+            RuleFor(dto => dto.TagIds).Must(tagIds => tagIds.Distinct().Count() == tagIds.Count)
+                .WithMessage("TagIds must be unique");
         }
     }
 }

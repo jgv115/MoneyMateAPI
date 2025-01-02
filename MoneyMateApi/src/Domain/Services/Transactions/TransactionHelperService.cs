@@ -35,6 +35,8 @@ namespace MoneyMateApi.Domain.Services.Transactions
             var spec = _specificationFactory.Create(queryParams);
 
             var filteredTransactions = await _repository.GetTransactions(dateRange, spec);
+            
+            // TODO: need to build a way to populate a TransactionViewModel with tag name
             return filteredTransactions;
         }
 

@@ -19,6 +19,6 @@ namespace MoneyMateApi.Repositories.CockroachDb.Entities
         public Guid PayerPayeeId { get; set; }
         public string PayerPayeeName { get; set; }
 
-        public List<Tag> Tags { get; set; } = new();
+        public List<Guid> TagIds { get; init; } = new();
     }
 }

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace MoneyMateApi.Controllers.Transactions.Dtos
 {
     public class StoreTransactionDto
@@ -10,5 +13,6 @@ namespace MoneyMateApi.Controllers.Transactions.Dtos
         public string PayerPayeeId { get; set; }
         public string PayerPayeeName { get; set; }
         public string Note { get; init; }
+        public List<Guid> TagIds { get; init; } = new();
     }
 }

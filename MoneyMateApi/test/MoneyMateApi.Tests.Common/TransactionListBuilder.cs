@@ -39,7 +39,7 @@ public class TransactionListBuilder
         string? category = null,
         string? subcategory = null,
         string? note = null,
-        List<Tag>? tags = null
+        List<Guid>? tagIds = null
     )
     {
         for (var i = 0; i < number; i++)
@@ -57,7 +57,7 @@ public class TransactionListBuilder
                 PayerPayeeId = payerPayeeId ?? "",
                 PayerPayeeName = payerPayeeName ?? "",
                 Note = note ?? "",
-                Tags = tags ?? []
+                TagIds = tagIds ?? []
             });
         }
 

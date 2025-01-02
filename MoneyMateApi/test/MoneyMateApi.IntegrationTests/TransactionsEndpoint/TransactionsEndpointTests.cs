@@ -520,7 +520,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
 
         await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(new List<PayerPayee>
         {
-            new PayerPayee
+            new()
             {
                 PayerPayeeId = expectedPayerPayeeId,
                 PayerPayeeName = expectedPayerPayeeName,
@@ -530,7 +530,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
 
         string inputDtoString = JsonSerializer.Serialize(inputDto);
 
-        StringContent httpContent =
+        var httpContent =
             new StringContent(inputDtoString, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync($"/api/transactions", httpContent);
@@ -548,6 +548,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
         Assert.Equal(expectedPayerPayeeId, returnedTransactions[0].PayerPayeeId);
         Assert.Equal(expectedPayerPayeeName, returnedTransactions[0].PayerPayeeName);
         Assert.Equal(expectedNote, returnedTransactions[0].Note);
+        Assert.Equal(new List<Guid>(), returnedTransactions[0].TagIds);
     }
 
     [Fact]

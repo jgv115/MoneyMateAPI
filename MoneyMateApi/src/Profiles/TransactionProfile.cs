@@ -1,10 +1,11 @@
+using System.Linq;
 using MoneyMateApi.Controllers.Transactions.Dtos;
 using MoneyMateApi.Domain.Models;
 using Profile = AutoMapper.Profile;
 
 namespace MoneyMateApi.Profiles
 {
-    public class TransactionProfile: Profile
+    public class TransactionProfile : Profile
     {
         public TransactionProfile()
         {

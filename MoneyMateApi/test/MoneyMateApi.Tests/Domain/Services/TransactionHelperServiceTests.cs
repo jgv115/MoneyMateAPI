@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Moq;
@@ -166,7 +167,8 @@ namespace MoneyMateApi.Tests.Domain.Services
                     TransactionType = "transaction-type-1",
                     PayerPayeeId = Guid.NewGuid().ToString(),
                     PayerPayeeName = "name1",
-                    Note = "this is a note123"
+                    Note = "this is a note123",
+                    TagIds = [Guid.NewGuid(), Guid.NewGuid()]
                 };
 
                 var service = new TransactionHelperService(
@@ -185,7 +187,8 @@ namespace MoneyMateApi.Tests.Domain.Services
                         transaction.TransactionType == inputDto.TransactionType &&
                         transaction.PayerPayeeId == inputDto.PayerPayeeId &&
                         transaction.PayerPayeeName == inputDto.PayerPayeeName &&
-                        transaction.Note == inputDto.Note))
+                        transaction.Note == inputDto.Note &&
+                        transaction.TagIds.SequenceEqual(inputDto.TagIds)))
                 );
             }
         }

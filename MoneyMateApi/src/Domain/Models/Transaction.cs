@@ -20,7 +20,7 @@ namespace MoneyMateApi.Domain.Models
         public string PayerPayeeId { get; set; }
         public string PayerPayeeName { get; set; }
         public string Note { get; init; }
-        public List<Tag> Tags { get; set; } = new();
+        public List<Guid> TagIds { get; set; } = new();
 
         public virtual bool Equals(Transaction other)
         {
@@ -28,7 +28,8 @@ namespace MoneyMateApi.Domain.Models
             if (ReferenceEquals(this, other)) return true;
 
             return TransactionId == other.TransactionId &&
-                   TransactionTimestamp == other.TransactionTimestamp &&
+                   // TODO: modify this if we change type of transaction timestamp
+                   DateTime.Parse(TransactionTimestamp) == DateTime.Parse(other.TransactionTimestamp) &&
                    TransactionType == other.TransactionType &&
                    Amount == other.Amount &&
                    Category == other.Category &&
@@ -36,12 +37,12 @@ namespace MoneyMateApi.Domain.Models
                    PayerPayeeId == other.PayerPayeeId &&
                    PayerPayeeName == other.PayerPayeeName &&
                    Note == other.Note &&
-                   Tags.SequenceEqual(other.Tags);
+                   TagIds.SequenceEqual(other.TagIds);
         }
 
         public override int GetHashCode()
         {
-            var tagsHashCode = Tags.Aggregate(0, HashCode.Combine);
+            var tagsHashCode = TagIds.Aggregate(0, HashCode.Combine);
             var hash1 = HashCode.Combine(TransactionId, TransactionTimestamp, TransactionType, Amount);
             var hash2 = HashCode.Combine(Category, Subcategory, PayerPayeeId, PayerPayeeName, Note);
             return HashCode.Combine(hash1, hash2, tagsHashCode);
