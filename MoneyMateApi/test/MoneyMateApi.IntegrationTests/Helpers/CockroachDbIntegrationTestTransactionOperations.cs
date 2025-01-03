@@ -57,10 +57,10 @@ public class CockroachDbIntegrationTestTransactionOperations
     {
         var transactionTypeIds = _transactionTypeOperations.GetTransactionTypeIds();
         using var connection = _dapperContext.CreateConnection();
-        const string createTransactionQuery = @"
-                INSERT INTO transaction (id, user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerpayee_id, notes, profile_id)
-                VALUES (@transactionId, @userId, @timestamp, @transactionTypeId, @amount, @subcategoryId, @payerpayeeId, @notes, @profileId)
-            ";
+        const string createTransactionQuery = """
+                                              INSERT INTO transaction (id, user_id, transaction_timestamp, transaction_type_id, amount, subcategory_id, payerpayee_id, notes, profile_id)
+                                              VALUES (@transactionId, @userId, @timestamp, @transactionTypeId, @amount, @subcategoryId, @payerpayeeId, @notes, @profileId)
+                                              """;
 
         foreach (var transaction in transactions)
         {

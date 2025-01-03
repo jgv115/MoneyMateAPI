@@ -244,15 +244,15 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
 
         Guid payer1 = Guid.NewGuid(), payer2 = Guid.NewGuid(), payer3 = Guid.NewGuid(), payer4 = Guid.NewGuid();
         var transactionList = transactionListBuilder
-            .WithTransactions(4, payer1.ToString(), "name", 24, TransactionType.Income, "category1", "subcategory1",
+            .WithTransactions(4, null, payer1.ToString(), "name", 24, TransactionType.Income, "category1", "subcategory1",
                 null)
-            .WithTransactions(8, payer2.ToString(), "name2", 24, TransactionType.Income, "category1", "subcategory1",
+            .WithTransactions(8, null, payer2.ToString(), "name2", 24, TransactionType.Income, "category1", "subcategory1",
                 null)
-            .WithTransactions(6, payer3.ToString(), "name3", 24, TransactionType.Income, "category1", "subcategory1",
+            .WithTransactions(6, null, payer3.ToString(), "name3", 24, TransactionType.Income, "category1", "subcategory1",
                 null)
-            .WithTransactions(10, payer4.ToString(), "name4", 24, TransactionType.Income, "category1", "subcategory1",
+            .WithTransactions(10,null,  payer4.ToString(), "name4", 24, TransactionType.Income, "category1", "subcategory1",
                 null)
-            .WithTransactions(15, payer1.ToString(), "name", 24, TransactionType.Income, "category1", "subcategory2",
+            .WithTransactions(15, null, payer1.ToString(), "name", 24, TransactionType.Income, "category1", "subcategory2",
                 null)
             .BuildDomainModels();
 

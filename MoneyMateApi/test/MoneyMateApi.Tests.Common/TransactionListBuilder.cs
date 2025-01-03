@@ -40,19 +40,20 @@ public class TransactionListBuilder
 
     public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndAmount(int number, string category,
         decimal amount) =>
-        WithTransactions(number, null, null, amount, null, category, null, null);
+        WithTransactions(number, null, null, null, amount, null, category, null, null);
 
     public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(int number, string category,
         string subcategory, decimal amount) =>
-        WithTransactions(number, null, null, amount, null, category, subcategory, null);
+        WithTransactions(number, null, null, null, amount, null, category, subcategory, null);
 
     public TransactionListBuilder WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(int number,
         string? payerPayeeId,
         string? payerPayeeName, decimal amount, TransactionType transactionType = TransactionType.Expense) =>
-        WithTransactions(number, payerPayeeId, payerPayeeName, amount, transactionType, null, null, null);
+        WithTransactions(number, null, payerPayeeId, payerPayeeName, amount, transactionType, null, null, null);
 
     public TransactionListBuilder WithTransactions(
         int number,
+        string? transactionId = null,
         string? payerPayeeId = null,
         string? payerPayeeName = null,
         decimal? amount = null,
@@ -69,9 +70,9 @@ public class TransactionListBuilder
             {
                 Amount = amount ?? 12,
                 Category = category ?? "category123",
-                TransactionTimestamp = DateTime.UtcNow.ToString("O"),
+                TransactionTimestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 Subcategory = subcategory ?? "subcategory123",
-                TransactionId = Guid.NewGuid().ToString(),
+                TransactionId = transactionId ?? Guid.NewGuid().ToString(),
                 TransactionType = transactionType == null
                     ? TransactionType.Expense.ToProperString()
                     : transactionType.Value.ToProperString(),

@@ -116,6 +116,7 @@ namespace MoneyMateApi.Tests.Domain.Services
                 var transactionListBuilder = builder
                     .WithTransactions(
                         1,
+                        null, 
                         Guid.NewGuid().ToString(),
                         "name1",
                         1,
@@ -125,6 +126,7 @@ namespace MoneyMateApi.Tests.Domain.Services
                         [tagId1, tagId2])
                     .WithTransactions(
                         1,
+                        null, 
                         Guid.NewGuid().ToString(),
                         "name1",
                         1,

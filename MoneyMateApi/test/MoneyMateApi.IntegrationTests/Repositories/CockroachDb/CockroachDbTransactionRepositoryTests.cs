@@ -60,9 +60,9 @@ public class CockroachDbTransactionRepositoryTests : IAsyncLifetime
         var tagId2 = Guid.NewGuid();
 
         var transactionList = transactionListBuilder
-            .WithTransactions(1, payee1.ToString(), "payee_name_1", 24, TransactionType.Expense,
+            .WithTransactions(1, "8504f165-29f9-4873-97d5-84ad005dda60", payee1.ToString(), "payee_name_1", 24, TransactionType.Expense,
                 "category1", "subcategory1", "note", [tagId1])
-            .WithTransactions(1, payee2.ToString(), "payee_name_2", 50, TransactionType.Expense,
+            .WithTransactions(1, "9504f165-29f9-4873-97d5-84ad005dda60", payee2.ToString(), "payee_name_2", 50, TransactionType.Expense,
                 "category2", "subcategory2", null, [tagId1, tagId2])
             .BuildDomainModels();
 

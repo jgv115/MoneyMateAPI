@@ -385,13 +385,13 @@ public class TransactionsEndpointTests : IAsyncLifetime
         GivenCategoriesParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfCategoryAreReturned()
     {
         var transactionListBuilder = new TransactionListBuilder()
-            .WithTransactions(1, Guid.NewGuid().ToString(), "name1", 123.45M, TransactionType.Expense, "Groceries",
+            .WithTransactions(1, null, Guid.NewGuid().ToString(), "name1", 123.45M, TransactionType.Expense, "Groceries",
                 "Meat", "this is a note123")
-            .WithTransactions(1, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Expense, "Groceries",
+            .WithTransactions(1, null, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Expense, "Groceries",
                 "vegetables", tagIds: [Guid.NewGuid()])
-            .WithTransactions(1, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Income, "Income",
+            .WithTransactions(1, null, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Income, "Income",
                 "Salary")
-            .WithTransactions(1, Guid.NewGuid().ToString(), "name3", 123.45M, TransactionType.Expense, "Eating Out",
+            .WithTransactions(1,null,  Guid.NewGuid().ToString(), "name3", 123.45M, TransactionType.Expense, "Eating Out",
                 "Dinner", tagIds: [Guid.NewGuid()]);
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionListBuilder
@@ -410,8 +410,17 @@ public class TransactionsEndpointTests : IAsyncLifetime
             });
 
         var transactionDtos = transactionListBuilder.BuildOutputDtos();
+        var expectedDtos = new List<TransactionOutputDto>
+        {
+            transactionDtos[0],
+            transactionDtos[1],
+            transactionDtos[3]
+        };
+        transactionDtos.Sort((x, y) => string.Compare(x.TransactionId, y.TransactionId, StringComparison.Ordinal));
+        expectedDtos.Sort((x, y) =>
+            string.Compare(x.TransactionId, y.TransactionId, StringComparison.Ordinal));
         Assert.Equal(
-            [transactionDtos[0], transactionDtos[1], transactionDtos[3]],
+            expectedDtos,
             returnedTransactionList);
     }
 
