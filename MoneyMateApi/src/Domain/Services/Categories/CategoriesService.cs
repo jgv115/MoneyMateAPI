@@ -48,7 +48,7 @@ namespace MoneyMateApi.Domain.Services.Categories
             else
                 returnedCategories = await _repository.GetAllCategories();
 
-            return returnedCategories.OrderBy(category => category.CategoryName).ToList();
+            return returnedCategories.OrderBy(category => category.CategoryName);
         }
 
         public Task CreateCategory(CategoryDto categoryDto)

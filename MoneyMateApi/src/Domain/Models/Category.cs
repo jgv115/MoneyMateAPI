@@ -9,7 +9,7 @@ namespace MoneyMateApi.Domain.Models
     {
         public string CategoryName { get; set; }
         public TransactionType TransactionType { get; set; }
-        public List<string> Subcategories { get; set; } = new();
+        public IEnumerable<string> Subcategories { get; set; } = new List<string>();
 
         public virtual bool Equals(Category? other)
         {

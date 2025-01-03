@@ -46,10 +46,10 @@ public class CockroachDbIntegrationTestTransactionOperations
         return await _transactionRepository.GetTransactionById(transactionId);
     }
 
-    public async Task<List<Transaction>> GetAllTransactions()
+    public async Task<IList<Transaction>> GetAllTransactions()
     {
-        return await _transactionRepository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
-            new AndSpec(new List<ITransactionSpecification>()));
+        return (await _transactionRepository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
+            new AndSpec(new List<ITransactionSpecification>()))).ToList();
     }
 
 
@@ -103,7 +103,7 @@ public class CockroachDbIntegrationTestTransactionOperations
 
             await connection.ExecuteAsync(createTransactionQuery, parameters);
 
-            if (transaction.TagIds.Count > 0)
+            if (transaction.TagIds.Any())
             {
                 // for the purposes of testing, we will simply use the tagId as the tag name
                 await _tagOperations.WriteTagsIntoDb(

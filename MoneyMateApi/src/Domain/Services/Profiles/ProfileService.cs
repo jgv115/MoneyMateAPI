@@ -30,7 +30,7 @@ public class ProfileService : IProfileService
         _userRepository = userRepository;
     }
 
-    public Task<List<Profile>> GetProfiles()
+    public Task<IEnumerable<Profile>> GetProfiles()
     {
         return _profilesRepository.GetProfiles();
     }

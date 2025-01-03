@@ -50,5 +50,5 @@ public class CockroachDbIntegrationTestUserProfileOperations
         }
     }
 
-    public Task<List<Profile>> RetrieveProfiles() => _profilesRepository.GetProfiles();
+    public Task<IEnumerable<Profile>> RetrieveProfiles() => _profilesRepository.GetProfiles();
 }

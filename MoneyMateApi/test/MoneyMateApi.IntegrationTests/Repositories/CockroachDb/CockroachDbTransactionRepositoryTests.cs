@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using MoneyMateApi.Constants;
@@ -60,9 +61,11 @@ public class CockroachDbTransactionRepositoryTests : IAsyncLifetime
         var tagId2 = Guid.NewGuid();
 
         var transactionList = transactionListBuilder
-            .WithTransactions(1, "8504f165-29f9-4873-97d5-84ad005dda60", payee1.ToString(), "payee_name_1", 24, TransactionType.Expense,
+            .WithTransactions(1, "8504f165-29f9-4873-97d5-84ad005dda60", payee1.ToString(), "payee_name_1", 24,
+                TransactionType.Expense,
                 "category1", "subcategory1", "note", [tagId1])
-            .WithTransactions(1, "9504f165-29f9-4873-97d5-84ad005dda60", payee2.ToString(), "payee_name_2", 50, TransactionType.Expense,
+            .WithTransactions(1, "9504f165-29f9-4873-97d5-84ad005dda60", payee2.ToString(), "payee_name_2", 50,
+                TransactionType.Expense,
                 "category2", "subcategory2", null, [tagId1, tagId2])
             .BuildDomainModels();
 
@@ -87,7 +90,7 @@ public class CockroachDbTransactionRepositoryTests : IAsyncLifetime
                 Assert.Equal("note", transaction.Note);
 
                 Assert.Single(transaction.TagIds);
-                Assert.Equal(tagId1, transaction.TagIds[0]);
+                Assert.Equal(tagId1, transaction.TagIds.First());
             },
             transaction =>
             {
@@ -104,10 +107,8 @@ public class CockroachDbTransactionRepositoryTests : IAsyncLifetime
                 Assert.Equal("payee_name_2", transaction.PayerPayeeName);
                 Assert.Equal("", transaction.Note);
 
-                transaction.TagIds.Sort((x, y) => x.CompareTo(y));
                 var expectedTags = new List<Guid> { tagId1, tagId2 };
-                expectedTags.Sort((x, y) => x.CompareTo(y));
-                Assert.Equal(expectedTags, transaction.TagIds);
+                Assert.Equal(expectedTags.OrderBy(x => x), transaction.TagIds.OrderBy(x => x));
             });
     }
 
@@ -130,7 +131,7 @@ public class CockroachDbTransactionRepositoryTests : IAsyncLifetime
         var expectedPayerPayeeId = Guid.NewGuid().ToString();
         const string expectedPayerPayeeName = "name1";
         const string expectedNote = "this is a note123";
-        
+
         var tagId1 = Guid.Parse("59a5b67d-e01a-4d35-8028-cdd7ac5cb868");
         var tagId2 = Guid.Parse("c6eae8c1-2514-4e21-9841-785db172ee35");
         var inputTransaction = new Transaction

@@ -115,7 +115,7 @@ namespace MoneyMateApi.Repositories.CockroachDb
             }
         }
 
-        public async Task<List<Domain.Models.Transaction>> GetTransactions(DateRange dateRange,
+        public async Task<IEnumerable<Domain.Models.Transaction>> GetTransactions(DateRange dateRange,
             ITransactionSpecification spec)
         {
             var query =
@@ -166,9 +166,9 @@ namespace MoneyMateApi.Repositories.CockroachDb
                     });
 
                 var mappedTransactions =
-                    _mapper.Map<List<Transaction>, List<Domain.Models.Transaction>>(transactions.ToList());
+                    _mapper.Map<IEnumerable<Transaction>, IEnumerable<Domain.Models.Transaction>>(transactions);
 
-                return mappedTransactions.Where(transaction => spec.IsSatisfied(transaction)).ToList();
+                return mappedTransactions.Where(spec.IsSatisfied).ToList();
             }
         }
 

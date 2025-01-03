@@ -104,12 +104,12 @@ public class CockroachDbIntegrationTestCategoryOperations
     }
 
 
-    public async Task<List<Category>> RetrieveAllCategories()
+    public async Task<IEnumerable<Category>> RetrieveAllCategories()
     {
         return (await _categoriesRepository.GetAllCategories()).ToList();
     }
 
-    public async Task<Category> RetrieveCategory(string categoryName)
+    public async Task<Category?> RetrieveCategory(string categoryName)
     {
         return (await _categoriesRepository.GetAllCategories()).FirstOrDefault(category =>
             category.CategoryName == categoryName);

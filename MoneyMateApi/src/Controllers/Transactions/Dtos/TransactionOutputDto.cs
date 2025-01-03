@@ -16,7 +16,7 @@ public record TransactionOutputDto
     public string? PayerPayeeId { get; set; }
     public string? PayerPayeeName { get; set; }
     public string? Note { get; init; }
-    public List<Tag> Tags { get; set; } = new();
+    public IEnumerable<Tag> Tags { get; set; } = new List<Tag>();
 
     public virtual bool Equals(TransactionOutputDto? other)
     {

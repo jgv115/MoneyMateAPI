@@ -9,7 +9,7 @@ namespace MoneyMateApi.Repositories
     public interface ITransactionRepository
     {
         public Task<Transaction> GetTransactionById(string transactionId);
-        public Task<List<Transaction>> GetTransactions(DateRange dateRange,
+        public Task<IEnumerable<Transaction>> GetTransactions(DateRange dateRange,
             ITransactionSpecification spec);
 
         public Task StoreTransaction(Transaction newTransaction);

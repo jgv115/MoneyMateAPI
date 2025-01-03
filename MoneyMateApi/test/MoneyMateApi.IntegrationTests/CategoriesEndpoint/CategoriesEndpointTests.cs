@@ -49,13 +49,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
                     new()
                     {
                         CategoryName = "category1",
-                        Subcategories = new List<string> {"subcategory1", "subcategory2"},
+                        Subcategories = new List<string> { "subcategory1", "subcategory2" },
                         TransactionType = TransactionType.Expense
                     },
                     new()
                     {
                         CategoryName = "category2",
-                        Subcategories = new List<string> {"subcategory3", "subcategory4"},
+                        Subcategories = new List<string> { "subcategory3", "subcategory4" },
                         TransactionType = TransactionType.Income
                     },
                     new()
@@ -74,7 +74,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
                     new()
                     {
                         CategoryName = "category1",
-                        Subcategories = new List<string> {"subcategory1", "subcategory2"},
+                        Subcategories = new List<string> { "subcategory1", "subcategory2" },
                         TransactionType = TransactionType.Expense
                     }
                 }
@@ -87,7 +87,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
                     new()
                     {
                         CategoryName = "category2",
-                        Subcategories = new List<string> {"subcategory3", "subcategory4"},
+                        Subcategories = new List<string> { "subcategory3", "subcategory4" },
                         TransactionType = TransactionType.Income
                     },
                     new()
@@ -112,13 +112,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
             {
                 CategoryName = "category1",
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> { "subcategory1", "subcategory2" }
             },
             new()
             {
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
-                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> { "subcategory3", "subcategory4" }
             },
             new()
             {
@@ -146,15 +146,16 @@ public class CategoriesEndpointTests : IAsyncLifetime
     [Fact]
     public async Task GivenValidRequest_WhenGetSubcategoriesIsCalled_ThenAllSubcategoriesAreReturned()
     {
-        var inputCategories = new List<string> {"category1", "category2", "category3"};
-        var expectedSubcategories = new List<string> {"test1", "test2", "test4"};
+        var inputCategories = new List<string> { "category1", "category2", "category3" };
+        var expectedSubcategories = new List<string> { "test1", "test2", "test4" };
 
-        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(inputCategories.Select(category => new Category()
-        {
-            CategoryName = category,
-            TransactionType = TransactionType.Expense,
-            Subcategories = expectedSubcategories
-        }).ToList());
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(inputCategories
+            .Select(category => new Category()
+            {
+                CategoryName = category,
+                TransactionType = TransactionType.Expense,
+                Subcategories = expectedSubcategories
+            }).ToList());
 
         var response = await _httpClient.GetAsync("/api/categories/category1");
         var returnedString = await response.Content.ReadAsStringAsync();
@@ -173,7 +174,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
     {
         const string inputCategoryName = "category123";
         var inputCategoryType = TransactionType.Expense;
-        var expectedSubcategories = new List<string> {"test1", "test2"};
+        var expectedSubcategories = new List<string> { "test1", "test2" };
 
         var inputDto = new CategoryDto
         {
@@ -192,9 +193,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
         Assert.Collection(returnedCategories, category =>
         {
             Assert.Equal(inputCategoryName, category.CategoryName);
-            expectedSubcategories.Sort();
-            category.Subcategories.Sort();
-            Assert.Equal(expectedSubcategories, category.Subcategories);
+            Assert.Equal(category.Subcategories.OrderBy(s => s), expectedSubcategories.OrderBy(s => s));
         });
     }
 
@@ -212,13 +211,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
             {
                 CategoryName = duplicateCategoryName,
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> { "subcategory1", "subcategory2" }
             },
             new()
             {
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
-                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> { "subcategory3", "subcategory4" }
             }
         };
 
@@ -228,7 +227,7 @@ public class CategoriesEndpointTests : IAsyncLifetime
         {
             CategoryName = duplicateCategoryName,
             TransactionType = duplicateTransactionType,
-            Subcategories = new List<string> {"subcategory1", "subcategory2"}
+            Subcategories = new List<string> { "subcategory1", "subcategory2" }
         };
 
         var httpContent = new StringContent(JsonSerializer.Serialize(inputDto), Encoding.UTF8, "application/json");
@@ -249,13 +248,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
             {
                 CategoryName = categoryName,
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> { "subcategory1", "subcategory2" }
             },
             new()
             {
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
-                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> { "subcategory3", "subcategory4" }
             }
         };
 
@@ -283,13 +282,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
             {
                 CategoryName = categoryName,
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> { "subcategory1", "subcategory2" }
             },
             new()
             {
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
-                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> { "subcategory3", "subcategory4" }
             }
         };
 
@@ -307,13 +306,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
 
         var returnedCategories = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveAllCategories();
 
-        var modifiedCategory = returnedCategories.Find(category => category.CategoryName == categoryName);
+        var modifiedCategory = returnedCategories.First(category => category.CategoryName == categoryName);
 
         Assert.Equal(new Category()
         {
             CategoryName = categoryName,
             TransactionType = TransactionType.Expense,
-            Subcategories = new List<string> {"subcategory1", "subcategory2", "test subcategory"}
+            Subcategories = new List<string> { "subcategory1", "subcategory2", "test subcategory" }
         }, modifiedCategory);
     }
 
@@ -343,13 +342,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
             {
                 CategoryName = categoryName,
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> { "subcategory1", "subcategory2" }
             },
             new()
             {
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
-                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> { "subcategory3", "subcategory4" }
             }
         };
 
@@ -365,12 +364,12 @@ public class CategoriesEndpointTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var returnedCategories = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveAllCategories();
-        var modifiedCategory = returnedCategories.Find(category => category.CategoryName == categoryName);
+        var modifiedCategory = returnedCategories.First(category => category.CategoryName == categoryName);
         Assert.Equal(new Category()
         {
             CategoryName = categoryName,
             TransactionType = TransactionType.Expense,
-            Subcategories = new List<string> {"subcategory2"}
+            Subcategories = new List<string> { "subcategory2" }
         }, modifiedCategory);
     }
 
@@ -387,13 +386,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
             {
                 CategoryName = categoryName,
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {existingSubcategoryName, "subcategory2"}
+                Subcategories = new List<string> { existingSubcategoryName, "subcategory2" }
             },
             new()
             {
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
-                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> { "subcategory3", "subcategory4" }
             }
         };
 
@@ -452,12 +451,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var returnedCategory = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveCategory(categoryName);
+        var returnedCategory =
+            await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveCategory(categoryName);
         Assert.Equal(new Category
         {
             CategoryName = categoryName,
             TransactionType = TransactionType.Expense,
-            Subcategories = new List<string> {"renamed subcategory", "subcategory2"}
+            Subcategories = new List<string> { "renamed subcategory", "subcategory2" }
         }, returnedCategory);
 
         transaction1.Subcategory = "renamed subcategory";
@@ -479,13 +479,13 @@ public class CategoriesEndpointTests : IAsyncLifetime
             {
                 CategoryName = categoryName,
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string> {"subcategory1", "subcategory2"}
+                Subcategories = new List<string> { "subcategory1", "subcategory2" }
             },
             new()
             {
                 CategoryName = "category2",
                 TransactionType = TransactionType.Income,
-                Subcategories = new List<string> {"subcategory3", "subcategory4"}
+                Subcategories = new List<string> { "subcategory3", "subcategory4" }
             }
         };
 
@@ -545,13 +545,14 @@ public class CategoriesEndpointTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         // Test that new category exists
-        var returnedCategory = await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveCategory("renamed category");
+        var returnedCategory =
+            await _cockroachDbIntegrationTestHelper.CategoryOperations.RetrieveCategory("renamed category");
 
         Assert.Equal(new Category()
         {
             CategoryName = "renamed category",
             TransactionType = TransactionType.Expense,
-            Subcategories = new List<string> {"subcategory1", "subcategory2"}
+            Subcategories = new List<string> { "subcategory1", "subcategory2" }
         }, returnedCategory);
 
         // Test that old category does not exist

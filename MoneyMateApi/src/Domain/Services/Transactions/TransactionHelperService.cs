@@ -27,7 +27,7 @@ namespace MoneyMateApi.Domain.Services.Transactions
                 PayerPayeeId = transaction.PayerPayeeId,
                 PayerPayeeName = transaction.PayerPayeeName,
                 Note = transaction.Note,
-                Tags = transaction.TagIds.ConvertAll(tagId => tagLookup[tagId])
+                Tags = transaction.TagIds.Select(tagId => tagLookup[tagId])
             };
         }
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
@@ -78,10 +79,8 @@ public class ProfilesEndpointTests : IAsyncLifetime
 
         var storedProfiles = await _cockroachDbIntegrationTestHelper.UserProfileOperations.RetrieveProfiles();
 
-        storedProfiles.Sort((profile, profile1) =>
-            String.Compare(profile.DisplayName, profile1.DisplayName, StringComparison.Ordinal));
-
-        Assert.Collection(storedProfiles, profile => Assert.Equal("Default Profile", profile.DisplayName),
+        Assert.Collection(storedProfiles.OrderBy(profile => profile.DisplayName),
+            profile => Assert.Equal("Default Profile", profile.DisplayName),
             profile => Assert.Equal(expectedProfileName, profile.DisplayName));
     }
 }

@@ -43,7 +43,7 @@ public class CockroachDbProfilesRepository : IProfilesRepository
         }
     }
 
-    public async Task<List<Profile>> GetProfiles()
+    public async Task<IEnumerable<Profile>> GetProfiles()
     {
         var query =
             @"SELECT p.id, p.display_name as displayName FROM userprofile up

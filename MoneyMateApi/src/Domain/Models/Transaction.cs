@@ -20,7 +20,7 @@ namespace MoneyMateApi.Domain.Models
         public string PayerPayeeId { get; set; }
         public string PayerPayeeName { get; set; }
         public string Note { get; init; }
-        public List<Guid> TagIds { get; set; } = new();
+        public IEnumerable<Guid> TagIds { get; set; } = new List<Guid>();
 
         public virtual bool Equals(Transaction other)
         {

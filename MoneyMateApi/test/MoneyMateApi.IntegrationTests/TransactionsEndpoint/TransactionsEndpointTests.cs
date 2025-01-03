@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -385,13 +387,16 @@ public class TransactionsEndpointTests : IAsyncLifetime
         GivenCategoriesParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfCategoryAreReturned()
     {
         var transactionListBuilder = new TransactionListBuilder()
-            .WithTransactions(1, null, Guid.NewGuid().ToString(), "name1", 123.45M, TransactionType.Expense, "Groceries",
+            .WithTransactions(1, null, Guid.NewGuid().ToString(), "name1", 123.45M, TransactionType.Expense,
+                "Groceries",
                 "Meat", "this is a note123")
-            .WithTransactions(1, null, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Expense, "Groceries",
+            .WithTransactions(1, null, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Expense,
+                "Groceries",
                 "vegetables", tagIds: [Guid.NewGuid()])
             .WithTransactions(1, null, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Income, "Income",
                 "Salary")
-            .WithTransactions(1,null,  Guid.NewGuid().ToString(), "name3", 123.45M, TransactionType.Expense, "Eating Out",
+            .WithTransactions(1, null, Guid.NewGuid().ToString(), "name3", 123.45M, TransactionType.Expense,
+                "Eating Out",
                 "Dinner", tagIds: [Guid.NewGuid()]);
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionListBuilder
@@ -502,9 +507,10 @@ public class TransactionsEndpointTests : IAsyncLifetime
         var response = await _httpClient.PostAsync($"/api/transactions", httpContent);
         response.EnsureSuccessStatusCode();
 
-        var returnedTransactions = await _cockroachDbIntegrationTestHelper.TransactionOperations.GetAllTransactions();
+        var returnedTransactions =
+            (await _cockroachDbIntegrationTestHelper.TransactionOperations.GetAllTransactions()).ToList();
 
-        Assert.Single(returnedTransactions);
+        Assert.Single((IEnumerable)returnedTransactions);
         Assert.Equal(expectedAmount, returnedTransactions[0].Amount);
         Assert.Equal(expectedCategory, returnedTransactions[0].Category);
         Assert.Equal(expectedSubcategory, returnedTransactions[0].Subcategory);
@@ -598,7 +604,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
 
         var returned = await _cockroachDbIntegrationTestHelper.TransactionOperations.GetAllTransactions();
 
-        var returnedTransaction = returned.Find(transaction => transaction.TransactionId == expectedTransactionId);
+        var returnedTransaction = returned.First(transaction => transaction.TransactionId == expectedTransactionId);
 
         var expectedTransaction = new Transaction()
         {
