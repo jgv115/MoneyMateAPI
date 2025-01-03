@@ -392,7 +392,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             .WithTransactions(1, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Income, "Income",
                 "Salary")
             .WithTransactions(1, Guid.NewGuid().ToString(), "name3", 123.45M, TransactionType.Expense, "Eating Out",
-                "Dinner", tagIds: [Guid.NewGuid(), Guid.NewGuid()]);
+                "Dinner", tagIds: [Guid.NewGuid()]);
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionListBuilder
             .BuildDomainModels());
