@@ -7,8 +7,8 @@ using Moq;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Transactions;
 using MoneyMateApi.Controllers.Transactions.Dtos;
-using MoneyMateApi.Domain.Models;
 using MoneyMateApi.Domain.Services.Transactions;
+using MoneyMateApi.Tests.Common;
 using Xunit;
 
 namespace MoneyMateApi.Tests.Controllers.Transactions
@@ -23,12 +23,13 @@ namespace MoneyMateApi.Tests.Controllers.Transactions
         }
 
         [Fact]
-        public async Task GivenValidTransactinoId_WhenGetByIdIsInvoked_ThenReturns200Ok()
+        public async Task GivenValidTransactionId_WhenGetByIdIsInvoked_ThenReturns200Ok()
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
 
+            var transactionList = new TransactionListBuilder().WithTransactions(1).BuildOutputDtos();
             _mockTransactionHelperService.Setup(service => service.GetTransactionById("id123"))
-                .ReturnsAsync(new Transaction());
+                .ReturnsAsync(transactionList[0]);
 
             var response = await controller.GetById("id123");
             var objectResponse = Assert.IsType<OkObjectResult>(response);
@@ -41,7 +42,7 @@ namespace MoneyMateApi.Tests.Controllers.Transactions
         {
             var controller = new TransactionsController(_mockTransactionHelperService.Object);
 
-            var expectedTransaction = new Transaction
+            var expectedTransaction = new TransactionOutputDto
             {
                 Amount = (decimal) 1.0,
                 Category = "category-1",
@@ -58,7 +59,7 @@ namespace MoneyMateApi.Tests.Controllers.Transactions
             var response = await controller.GetById("id123");
             var objectResponse = Assert.IsType<OkObjectResult>(response);
 
-            Assert.Equal(expectedTransaction, objectResponse.Value as Transaction);
+            Assert.Equal(expectedTransaction, objectResponse.Value as TransactionOutputDto);
         }
 
         [Fact]
@@ -75,7 +76,7 @@ namespace MoneyMateApi.Tests.Controllers.Transactions
         [Fact]
         public async Task GivenValidQueryParams_WhenGetIsInvoked_ThenReturnsAListOfTransactions()
         {
-            var transaction1 = new Transaction
+            var transaction1 = new TransactionOutputDto()
             {
                 Amount = (decimal) 1.0,
                 Category = "category-1",
@@ -87,7 +88,7 @@ namespace MoneyMateApi.Tests.Controllers.Transactions
                 PayerPayeeName = "name1",
             };
 
-            var transaction2 = new Transaction
+            var transaction2 = new TransactionOutputDto
             {
                 Amount = (decimal) 2.0,
                 Category = "category-2",
@@ -99,7 +100,7 @@ namespace MoneyMateApi.Tests.Controllers.Transactions
                 PayerPayeeName = "name2",
             };
 
-            var expectedTransactionList = new List<Transaction>
+            var expectedTransactionList = new List<TransactionOutputDto>
             {
                 transaction1, transaction2
             };
@@ -123,7 +124,7 @@ namespace MoneyMateApi.Tests.Controllers.Transactions
 
             var objectResult = Assert.IsType<OkObjectResult>(response);
 
-            var transactionList = objectResult.Value as List<Transaction>;
+            var transactionList = objectResult.Value as List<TransactionOutputDto>;
             Assert.NotNull(transactionList);
             Assert.Equal(expectedTransactionList, transactionList);
         }

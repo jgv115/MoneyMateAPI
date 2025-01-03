@@ -13,6 +13,7 @@ using MoneyMateApi.Domain.Models;
 using MoneyMateApi.IntegrationTests.Extensions;
 using MoneyMateApi.IntegrationTests.Helpers;
 using MoneyMateApi.IntegrationTests.WebApplicationFactories;
+using MoneyMateApi.Tests.Common;
 using Xunit;
 
 namespace MoneyMateApi.IntegrationTests.TransactionsEndpoint;
@@ -59,7 +60,8 @@ public class TransactionsEndpointTests : IAsyncLifetime
             Subcategory = "Salary"
         };
 
-        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(new List<Transaction> {transaction});
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(new List<Transaction>
+            { transaction });
 
         var response = await _httpClient.GetAsync($"/api/transactions/{transaction.TransactionId}");
         await response.AssertSuccessfulStatusCode();
@@ -269,10 +271,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
         returnedTransactionList!.Sort((transaction, transaction5) =>
             String.CompareOrdinal(transaction.TransactionId, transaction5.TransactionId));
 
-        Assert.Equal(new List<Transaction>
-        {
-            transaction1, transaction2, transaction3
-        }, returnedTransactionList);
+        Assert.Equal([transaction1, transaction2, transaction3], returnedTransactionList);
     }
 
 
@@ -325,7 +324,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.Equal(new List<Transaction> {transaction1},
+        Assert.Equal(new List<Transaction> { transaction1 },
             returnedTransactionList);
     }
 
@@ -378,83 +377,41 @@ public class TransactionsEndpointTests : IAsyncLifetime
                 PropertyNameCaseInsensitive = true
             });
 
-        Assert.Equal(new List<Transaction> {transaction2}, returnedTransactionList);
+        Assert.Equal(new List<Transaction> { transaction2 }, returnedTransactionList);
     }
 
     [Fact]
     public async Task
         GivenCategoriesParameter_WhenGetTransactionsIsCalled_ThenAllTransactionsOfCategoryAreReturned()
     {
-        var transactionType = "expense";
-        var transaction1 = new Transaction()
-        {
-            TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915a",
-            TransactionTimestamp = new DateTime(2020, 02, 01, 0, 0, 0, 0, DateTimeKind.Utc).ToString("o"),
-            TransactionType = transactionType,
-            Amount = 123.45M,
-            Category = "Groceries",
-            Subcategory = "Meat",
-            PayerPayeeId = Guid.NewGuid().ToString(),
-            PayerPayeeName = "name1",
-            Note = "this is a note123"
-        };
-        var transaction2 = new Transaction
-        {
-            TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915b",
-            TransactionTimestamp = new DateTime(2020, 02, 01, 0, 0, 0, 0, DateTimeKind.Utc).ToString("o"),
-            TransactionType = "expense",
-            Amount = 123.45M,
-            Category = "Groceries",
-            PayerPayeeId = Guid.NewGuid().ToString(),
-            PayerPayeeName = "name2",
-            Subcategory = "Salary"
-        };
-        var transaction3 = new Transaction
-        {
-            TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915c",
-            TransactionTimestamp = new DateTime(2020, 02, 01, 0, 0, 0, 0, DateTimeKind.Utc).ToString("o"),
-            TransactionType = "income",
-            Amount = 123.45M,
-            Category = "Income",
-            PayerPayeeId = Guid.NewGuid().ToString(),
-            PayerPayeeName = "name2",
-            Subcategory = "Salary"
-        };
-        var transaction4 = new Transaction
-        {
-            TransactionId = "fa00567c-468e-4ccf-af4c-fca1c731915d",
-            TransactionTimestamp = new DateTime(2020, 02, 01, 0, 0, 0, 0, DateTimeKind.Utc).ToString("o"),
-            TransactionType = "expense",
-            Amount = 123.45M,
-            Category = "Eating Out",
-            PayerPayeeId = Guid.NewGuid().ToString(),
-            PayerPayeeName = "name3",
-            Subcategory = "Dinner"
-        };
+        var transactionListBuilder = new TransactionListBuilder()
+            .WithTransactions(1, Guid.NewGuid().ToString(), "name1", 123.45M, TransactionType.Expense, "Groceries",
+                "Meat", "this is a note123")
+            .WithTransactions(1, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Expense, "Groceries",
+                "vegetables", tagIds: [Guid.NewGuid()])
+            .WithTransactions(1, Guid.NewGuid().ToString(), "name2", 123.45M, TransactionType.Income, "Income",
+                "Salary")
+            .WithTransactions(1, Guid.NewGuid().ToString(), "name3", 123.45M, TransactionType.Expense, "Eating Out",
+                "Dinner", tagIds: [Guid.NewGuid(), Guid.NewGuid()]);
 
-        var transactionList = new List<Transaction>
-        {
-            transaction1,
-            transaction2,
-            transaction3,
-            transaction4
-        };
-        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
+        await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionListBuilder
+            .BuildDomainModels());
 
         var queryString = "categories=Groceries&categories=Eating Out";
 
         var response = await _httpClient.GetAsync($"/api/transactions?{queryString}");
-        response.EnsureSuccessStatusCode();
+        await response.AssertSuccessfulStatusCode();
 
         var returnedString = await response.Content.ReadAsStringAsync();
-        var returnedTransactionList = JsonSerializer.Deserialize<List<Transaction>>(returnedString,
+        var returnedTransactionList = JsonSerializer.Deserialize<List<TransactionOutputDto>>(returnedString,
             new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
+        var transactionDtos = transactionListBuilder.BuildOutputDtos();
         Assert.Equal(
-            new List<Transaction> {transaction1, transaction2, transaction4},
+            [transactionDtos[0], transactionDtos[1], transactionDtos[3]],
             returnedTransactionList);
     }
 
@@ -513,7 +470,7 @@ public class TransactionsEndpointTests : IAsyncLifetime
             new()
             {
                 TransactionType = TransactionTypeExtensions.ConvertToTransactionType(expectedTransactionType),
-                Subcategories = new List<string> {expectedSubcategory},
+                Subcategories = new List<string> { expectedSubcategory },
                 CategoryName = expectedCategory
             }
         });
@@ -594,24 +551,22 @@ public class TransactionsEndpointTests : IAsyncLifetime
         const string expectedPayerPayeeName = "name123";
         const string expectedNote = "This is a new note";
 
-        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb(new List<Category>
-        {
+        await _cockroachDbIntegrationTestHelper.CategoryOperations.WriteCategoriesIntoDb([
             new()
             {
                 TransactionType = TransactionTypeExtensions.ConvertToTransactionType("expense"),
-                Subcategories = new List<string> {expectedSubcategory},
+                Subcategories = new List<string> { expectedSubcategory },
                 CategoryName = expectedCategory
             }
-        });
+        ]);
 
-        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb(new List<PayerPayee>
-        {
+        await _cockroachDbIntegrationTestHelper.PayerPayeeOperations.WritePayeesIntoDb([
             new()
             {
                 PayerPayeeId = expectedPayerPayeeId,
                 PayerPayeeName = expectedPayerPayeeName,
             }
-        });
+        ]);
 
         var inputDto = new PutTransactionDto
         {
@@ -625,8 +580,8 @@ public class TransactionsEndpointTests : IAsyncLifetime
             Note = expectedNote
         };
 
-        string inputDtoString = JsonSerializer.Serialize(inputDto);
-        StringContent httpContent = new StringContent(inputDtoString, Encoding.UTF8, "application/json");
+        var inputDtoString = JsonSerializer.Serialize(inputDto);
+        var httpContent = new StringContent(inputDtoString, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PutAsync($"/api/transactions/{expectedTransactionId}", httpContent);
         response.EnsureSuccessStatusCode();
@@ -685,7 +640,8 @@ public class TransactionsEndpointTests : IAsyncLifetime
         var response = await _httpClient.DeleteAsync($"/api/transactions/{expectedTransactionId}");
         response.EnsureSuccessStatusCode();
 
-        var returnedTransaction = await _cockroachDbIntegrationTestHelper.TransactionOperations.GetTransactionById(expectedTransactionId);
+        var returnedTransaction =
+            await _cockroachDbIntegrationTestHelper.TransactionOperations.GetTransactionById(expectedTransactionId);
         Assert.Null(returnedTransaction);
     }
 }

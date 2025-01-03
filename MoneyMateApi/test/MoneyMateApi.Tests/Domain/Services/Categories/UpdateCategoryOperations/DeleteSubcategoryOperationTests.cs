@@ -8,6 +8,7 @@ using MoneyMateApi.Domain.Services.Categories.Exceptions;
 using MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations;
 using MoneyMateApi.Domain.Services.Transactions;
 using MoneyMateApi.Repositories;
+using MoneyMateApi.Tests.Common;
 using Xunit;
 
 namespace MoneyMateApi.Tests.Domain.Services.Categories.UpdateCategoryOperations;
@@ -25,7 +26,7 @@ public class DeleteSubcategoryOperationTests
             _transactionServiceMock.Object, categoryName, 0);
 
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
-            .ReturnsAsync((Category) null);
+            .ReturnsAsync((Category)null!);
 
         await Assert.ThrowsAsync<UpdateCategoryOperationException>(() => operation.ExecuteOperation());
     }
@@ -40,7 +41,7 @@ public class DeleteSubcategoryOperationTests
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
             .ReturnsAsync(new Category()
             {
-                Subcategories = new List<string>() {"hello1", "hello2"}
+                Subcategories = ["hello1", "hello2"]
             });
 
         await Assert.ThrowsAsync<UpdateCategoryOperationException>(() => operation.ExecuteOperation());
@@ -57,28 +58,14 @@ public class DeleteSubcategoryOperationTests
         _categoriesRepositoryMock.Setup(repository => repository.GetCategory(categoryName))
             .ReturnsAsync(new Category()
             {
-                Subcategories = new List<string>() {"hello1", "hello2", subcategoryName}
+                Subcategories = ["hello1", "hello2", subcategoryName]
             });
 
         _transactionServiceMock.Setup(service => service.GetTransactionsAsync(new GetTransactionsQuery
         {
-            Categories = new List<string> {categoryName},
-            Subcategories = new List<string> {subcategoryName}
-        })).ReturnsAsync(() => new List<Transaction>
-        {
-            new()
-            {
-                TransactionId = "id123",
-                Amount = 123,
-                Subcategory = "subcategory"
-            },
-            new()
-            {
-                TransactionId = "id1234",
-                Amount = 123,
-                Subcategory = "subcategory"
-            }
-        });
+            Categories = new List<string> { categoryName },
+            Subcategories = new List<string> { subcategoryName }
+        })).ReturnsAsync(() => new TransactionListBuilder().WithTransactions(2).BuildOutputDtos());
 
         await Assert.ThrowsAsync<UpdateCategoryOperationException>(() => operation.ExecuteOperation());
     }
@@ -96,14 +83,14 @@ public class DeleteSubcategoryOperationTests
             {
                 CategoryName = categoryName,
                 TransactionType = TransactionType.Expense,
-                Subcategories = new List<string>() {"hello1", "hello2", subcategoryName}
+                Subcategories = ["hello1", "hello2", subcategoryName]
             });
 
         _transactionServiceMock.Setup(service => service.GetTransactionsAsync(new GetTransactionsQuery
         {
-            Categories = new List<string> {categoryName},
-            Subcategories = new List<string> {subcategoryName}
-        })).ReturnsAsync(() => new List<Transaction>());
+            Categories = new List<string> { categoryName },
+            Subcategories = new List<string> { subcategoryName }
+        })).ReturnsAsync(() => new List<TransactionOutputDto>());
 
         await operation.ExecuteOperation();
 

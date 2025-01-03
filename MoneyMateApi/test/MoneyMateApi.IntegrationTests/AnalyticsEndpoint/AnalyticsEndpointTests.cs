@@ -58,7 +58,7 @@ public class AnalyticsEndpointTests : IAsyncLifetime
                 category2TransactionsAmount)
             .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
                 category3TransactionsAmount)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
@@ -123,7 +123,7 @@ public class AnalyticsEndpointTests : IAsyncLifetime
                 category2TransactionsAmount)
             .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
                 category3TransactionsAmount)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
@@ -197,7 +197,7 @@ public class AnalyticsEndpointTests : IAsyncLifetime
                 expectedCategory3, expectedSubcategory3, subcategory3TransactionsAmount)
             .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory4Transactions,
                 expectedCategory3, expectedSubcategory4, subcategory4TransactionsAmount)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
@@ -261,7 +261,7 @@ public class AnalyticsEndpointTests : IAsyncLifetime
                 expectedPayerPayeeId2, expectedPayerPayeeName2, payerPayee2TransactionsAmount)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee3Transactions,
                 expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 

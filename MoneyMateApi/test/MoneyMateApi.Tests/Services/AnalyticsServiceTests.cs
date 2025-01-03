@@ -64,7 +64,7 @@ namespace MoneyMateApi.Tests.Services
                 _mockTransactionService
                     .Setup(helperService =>
                         helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>())).ReturnsAsync(() =>
-                        new List<Transaction>
+                        new List<TransactionOutputDto>
                         {
                             new()
                             {
@@ -97,15 +97,15 @@ namespace MoneyMateApi.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal) 34.5;
+                const decimal category1TransactionsAmount = (decimal)34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal) 34.5;
+                const decimal category2TransactionsAmount = (decimal)34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal) 34.5;
+                const decimal category3TransactionsAmount = (decimal)34.5;
 
                 var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
@@ -114,7 +114,7 @@ namespace MoneyMateApi.Tests.Services
                         category2TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
                         category3TransactionsAmount)
-                    .Build();
+                    .BuildOutputDtos();
 
                 _mockTransactionService
                     .Setup(helperService =>
@@ -157,15 +157,15 @@ namespace MoneyMateApi.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal) 34.5;
+                const decimal category1TransactionsAmount = (decimal)34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal) 34.5;
+                const decimal category2TransactionsAmount = (decimal)34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal) 34.5;
+                const decimal category3TransactionsAmount = (decimal)34.5;
 
                 var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
@@ -174,7 +174,7 @@ namespace MoneyMateApi.Tests.Services
                         category2TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
                         category3TransactionsAmount)
-                    .Build();
+                    .BuildOutputDtos();
 
                 _mockTransactionService
                     .Setup(helperService =>
@@ -232,9 +232,9 @@ namespace MoneyMateApi.Tests.Services
                 _mockTransactionService
                     .Setup(helperService =>
                         helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>())).ReturnsAsync(() =>
-                        new List<Transaction>
+                        new List<TransactionOutputDto>
                         {
-                            new Transaction
+                            new()
                             {
                                 Amount = 123M,
                                 Category = "category",
@@ -266,15 +266,15 @@ namespace MoneyMateApi.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal) 34.5;
+                const decimal category1TransactionsAmount = (decimal)34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal) 34.5;
+                const decimal category2TransactionsAmount = (decimal)34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal) 34.5;
+                const decimal category3TransactionsAmount = (decimal)34.5;
 
                 var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory1Transactions, expectedCategory1,
@@ -283,7 +283,7 @@ namespace MoneyMateApi.Tests.Services
                         category2TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
                         category3TransactionsAmount)
-                    .Build();
+                    .BuildOutputDtos();
 
                 _mockTimePeriodHelper.Setup(helper => helper.ResolveDateRange(timePeriod)).Returns(dateRange);
 
@@ -330,15 +330,15 @@ namespace MoneyMateApi.Tests.Services
 
                 const string expectedCategory1 = "category1";
                 const int numberOfCategory1Transactions = 24;
-                const decimal category1TransactionsAmount = (decimal) 34.5;
+                const decimal category1TransactionsAmount = (decimal)34.5;
 
                 const string expectedCategory2 = "category2";
                 const int numberOfCategory2Transactions = 20;
-                const decimal category2TransactionsAmount = (decimal) 34.5;
+                const decimal category2TransactionsAmount = (decimal)34.5;
 
                 const string expectedCategory3 = "category3";
                 const int numberOfCategory3Transactions = 10;
-                const decimal category3TransactionsAmount = (decimal) 34.5;
+                const decimal category3TransactionsAmount = (decimal)34.5;
 
                 _mockTimePeriodHelper.Setup(helper => helper.ResolveDateRange(timePeriod)).Returns(dateRange);
 
@@ -349,7 +349,7 @@ namespace MoneyMateApi.Tests.Services
                         category2TransactionsAmount)
                     .WithNumberOfTransactionsOfCategoryAndAmount(numberOfCategory3Transactions, expectedCategory3,
                         category3TransactionsAmount)
-                    .Build();
+                    .BuildOutputDtos();
 
                 _mockTransactionService
                     .Setup(helperService =>
@@ -405,7 +405,7 @@ namespace MoneyMateApi.Tests.Services
                         helperService.GetTransactionsAsync(
                             It.IsAny<GetTransactionsQuery>()
                         ))
-                    .ReturnsAsync(() => new List<Transaction>
+                    .ReturnsAsync(() => new List<TransactionOutputDto>
                     {
                         new()
                         {
@@ -424,7 +424,7 @@ namespace MoneyMateApi.Tests.Services
                 _mockTransactionService.Verify(
                     transactionService => transactionService.GetTransactionsAsync(
                         It.Is<GetTransactionsQuery>(query =>
-                            query.Categories.SequenceEqual(new List<string> {expectedCategoryName})
+                            query.Categories.SequenceEqual(new List<string> { expectedCategoryName })
                             && query.Start == start && query.End == end
                         )));
             }
@@ -439,15 +439,15 @@ namespace MoneyMateApi.Tests.Services
 
                 const string expectedSubcategory1 = "subcategory1";
                 const int numberOfSubcategory1Transactions = 24;
-                const decimal subcategory1TransactionsAmount = (decimal) 34.5;
+                const decimal subcategory1TransactionsAmount = (decimal)34.5;
 
                 const string expectedSubcategory2 = "subcategory2";
                 const int numberOfSubcategory2Transactions = 20;
-                const decimal subcategory2TransactionsAmount = (decimal) 34.5;
+                const decimal subcategory2TransactionsAmount = (decimal)34.5;
 
                 const string expectedSubcategory3 = "subcategory3";
                 const int numberOfSubcategory3Transactions = 10;
-                const decimal subcategory3TransactionsAmount = (decimal) 34.5;
+                const decimal subcategory3TransactionsAmount = (decimal)34.5;
 
 
                 var transactionList = new TransactionListBuilder()
@@ -460,7 +460,7 @@ namespace MoneyMateApi.Tests.Services
                     .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory3Transactions,
                         expectedCategoryName, expectedSubcategory3,
                         subcategory3TransactionsAmount)
-                    .Build();
+                    .BuildOutputDtos();
 
                 _mockTransactionService
                     .Setup(helperService =>
@@ -509,15 +509,15 @@ namespace MoneyMateApi.Tests.Services
 
                 const string expectedSubcategory1 = "subcategory1";
                 const int numberOfSubcategory1Transactions = 24;
-                const decimal subcategory1TransactionsAmount = (decimal) 34.5;
+                const decimal subcategory1TransactionsAmount = (decimal)34.5;
 
                 const string expectedSubcategory2 = "subcategory2";
                 const int numberOfSubcategory2Transactions = 20;
-                const decimal subcategory2TransactionsAmount = (decimal) 34.5;
+                const decimal subcategory2TransactionsAmount = (decimal)34.5;
 
                 const string expectedSubcategory3 = "subcategory3";
                 const int numberOfSubcategory3Transactions = 10;
-                const decimal subcategory3TransactionsAmount = (decimal) 34.5;
+                const decimal subcategory3TransactionsAmount = (decimal)34.5;
 
                 var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory1Transactions,
@@ -529,7 +529,7 @@ namespace MoneyMateApi.Tests.Services
                     .WithNumberOfTransactionsOfCategoryAndSubcategoryAndAmount(numberOfSubcategory3Transactions,
                         expectedCategoryName, expectedSubcategory3,
                         subcategory3TransactionsAmount)
-                    .Build();
+                    .BuildOutputDtos();
 
                 _mockTransactionService
                     .Setup(helperService =>
@@ -590,7 +590,7 @@ namespace MoneyMateApi.Tests.Services
                 _mockTransactionService
                     .Setup(helperService =>
                         helperService.GetTransactionsAsync(It.IsAny<GetTransactionsQuery>())).ReturnsAsync(() =>
-                        new List<Transaction>
+                        new List<TransactionOutputDto>
                         {
                             new()
                             {
@@ -624,17 +624,17 @@ namespace MoneyMateApi.Tests.Services
                 var expectedPayerPayeeId1 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName1 = "name1";
                 const int numberOfPayerPayee1Transactions = 24;
-                const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
+                const decimal payerPayee1TransactionsAmount = (decimal)34.5;
 
                 var expectedPayerPayeeId2 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName2 = "name2";
                 const int numberOfPayerPayee2Transactions = 20;
-                const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
+                const decimal payerPayee2TransactionsAmount = (decimal)34.5;
 
                 var expectedPayerPayeeId3 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName3 = "name3";
                 const int numberOfPayerPayee3Transactions = 10;
-                const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
+                const decimal payerPayee3TransactionsAmount = (decimal)34.5;
 
                 var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee1Transactions,
@@ -643,7 +643,7 @@ namespace MoneyMateApi.Tests.Services
                         expectedPayerPayeeId2, expectedPayerPayeeName2, payerPayee2TransactionsAmount)
                     .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee3Transactions,
                         expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
-                    .Build();
+                    .BuildOutputDtos();
 
                 _mockTransactionService
                     .Setup(helperService =>
@@ -689,17 +689,17 @@ namespace MoneyMateApi.Tests.Services
                 var expectedPayerPayeeId1 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName1 = "name1";
                 const int numberOfPayerPayee1Transactions = 24;
-                const decimal payerPayee1TransactionsAmount = (decimal) 34.5;
+                const decimal payerPayee1TransactionsAmount = (decimal)34.5;
 
                 var expectedPayerPayeeId2 = Guid.NewGuid().ToString();
                 const string expectedPayerPayeeName2 = "";
                 const int numberOfPayerPayee2Transactions = 20;
-                const decimal payerPayee2TransactionsAmount = (decimal) 34.5;
+                const decimal payerPayee2TransactionsAmount = (decimal)34.5;
 
                 string expectedPayerPayeeId3 = "";
                 const string expectedPayerPayeeName3 = null;
                 const int numberOfPayerPayee3Transactions = 10;
-                const decimal payerPayee3TransactionsAmount = (decimal) 34.5;
+                const decimal payerPayee3TransactionsAmount = (decimal)34.5;
 
                 var transactionList = new TransactionListBuilder()
                     .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee1Transactions,
@@ -708,7 +708,7 @@ namespace MoneyMateApi.Tests.Services
                         expectedPayerPayeeId2, expectedPayerPayeeName2, payerPayee2TransactionsAmount)
                     .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(numberOfPayerPayee3Transactions,
                         expectedPayerPayeeId3, expectedPayerPayeeName3, payerPayee3TransactionsAmount)
-                    .Build();
+                    .BuildOutputDtos();
 
                 _mockTransactionService
                     .Setup(helperService =>

@@ -79,7 +79,7 @@ public class SuggestionEndpointTests : IAsyncLifetime
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(5, payer2.ToString(), "name2", 20,
                 TransactionType.Income)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(7, payee1.ToString(), "name2", 20)
-            .Build();
+            .BuildDomainModels();
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactions);
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/suggestions");
@@ -151,7 +151,7 @@ public class SuggestionEndpointTests : IAsyncLifetime
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(5, payer2.ToString(), "name2", 20,
                 TransactionType.Income)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(7, payee1.ToString(), "name2", 20)
-            .Build();
+            .BuildDomainModels();
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactions);
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payers/suggestions?includeEnrichedData=false");
@@ -218,7 +218,7 @@ public class SuggestionEndpointTests : IAsyncLifetime
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(5, payee2.ToString(), "name2", 20)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(7, payer1.ToString(), "name2", 20,
                 TransactionType.Income)
-            .Build();
+            .BuildDomainModels();
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactions);
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payees/suggestions");
@@ -291,7 +291,7 @@ public class SuggestionEndpointTests : IAsyncLifetime
                 TransactionType.Expense)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(7, payer1.ToString(), "name2", 20,
                 TransactionType.Income)
-            .Build();
+            .BuildDomainModels();
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactions);
 
         var response = await _httpClient.GetAsync($"/api/payerspayees/payees/suggestions?includeEnrichedData=false");

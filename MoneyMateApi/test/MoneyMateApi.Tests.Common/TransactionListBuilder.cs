@@ -1,20 +1,41 @@
 ﻿using MoneyMateApi.Constants;
+using MoneyMateApi.Controllers.Transactions.Dtos;
 using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Services.Transactions;
 
 namespace MoneyMateApi.Tests.Common;
 
+/// <summary>
+/// This class is responsible for building Transaction domain models and DTOs for testing purposes
+/// </summary>
 public class TransactionListBuilder
 {
     private readonly List<Transaction> _transactionList;
+    private readonly HashSet<Guid> _tagIds = [];
 
     public TransactionListBuilder()
     {
         _transactionList = new List<Transaction>();
     }
 
-    public List<Transaction> Build()
+    public List<Transaction> BuildDomainModels()
     {
         return _transactionList;
+    }
+
+    /// <summary>
+    /// Builds a list of TransactionOutputDto objects from the list of transactions.
+    /// Defaults tag names to the tag id.
+    /// </summary>
+    /// <returns></returns>
+    public List<TransactionOutputDto> BuildOutputDtos()
+    {
+        return _transactionList
+            .Select(t => t.ToTransactionOutputDto(
+                _tagIds.ToDictionary(
+                    id => id,
+                    id => new Tag(id, id.ToString()))
+            )).ToList();
     }
 
     public TransactionListBuilder WithNumberOfTransactionsOfCategoryAndAmount(int number, string category,
@@ -59,6 +80,8 @@ public class TransactionListBuilder
                 Note = note ?? "",
                 TagIds = tagIds ?? []
             });
+
+            _tagIds.UnionWith(tagIds ?? []);
         }
 
         return this;

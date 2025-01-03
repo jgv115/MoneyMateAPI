@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using MoneyMateApi.Domain.Models;
 using MoneyMateApi.IntegrationTests.Helpers;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories.CockroachDb;
@@ -47,7 +47,7 @@ public class CockroachDbTagRepositoryTests : IAsyncLifetime
         var insertedTags = await _cockroachDbIntegrationTestHelper.TagOperations.WriteTagsIntoDb([tag1, tag2, tag3]);
 
         // Act
-        var tags = await tagRepository.GetTags();
+        var tags = (await tagRepository.GetTags()).ToList();
 
         insertedTags.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
         tags.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
@@ -55,6 +55,29 @@ public class CockroachDbTagRepositoryTests : IAsyncLifetime
         Assert.Equal(insertedTags, tags);
     }
 
+    [Fact]
+    public async Task GivenListOfTagIds_WhenGetTagsInvoked_ThenCorrectTagsReturned()
+    {
+        // Arrange
+        var tagRepository = new CockroachDbTagRepository(_dapperContext, _stubMapper,
+            new CurrentUserContext { UserId = _profileId.ToString(), ProfileId = _profileId });
+
+        var tag1 = new Tag(Guid.Parse("c6eae8c1-2514-4e21-9841-785db172ee35"), "tag1");
+        var tag2 = new Tag(Guid.Parse("c6eae8c1-2514-4e21-9841-785db172ee36"), "tag2");
+        var tag3 = new Tag(Guid.Parse("c6eae8c1-2514-4e21-9841-785db172ee37"), "tag3");
+        await _cockroachDbIntegrationTestHelper.TagOperations.WriteTagsIntoDb([tag1, tag2, tag3]);
+
+        // Act
+        var tags = await tagRepository.GetTags([tag1.Id, tag3.Id]);
+
+        // Assert
+        Assert.Equal(new Dictionary<Guid, Tag>
+        {
+            { tag1.Id, tag1 },
+            { tag3.Id, tag3 }
+        }, tags);
+    }
+    
     [Fact]
     public async Task GivenProfileIdAndTagId_WhenGetTagInvoked_ThenCorrectTagReturned()
     {

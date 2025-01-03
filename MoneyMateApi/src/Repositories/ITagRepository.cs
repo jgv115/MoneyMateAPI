@@ -7,7 +7,8 @@ namespace MoneyMateApi.Repositories;
 
 public interface ITagRepository
 {
-    public Task<List<Tag>> GetTags();
+    public Task<IEnumerable<Tag>> GetTags();
+    public Task<IDictionary<Guid, Tag>> GetTags(IEnumerable<Guid> tagIds);
     public Task<Tag> GetTag(Guid id);
     public Task<Tag> CreateTag(string name);
 }

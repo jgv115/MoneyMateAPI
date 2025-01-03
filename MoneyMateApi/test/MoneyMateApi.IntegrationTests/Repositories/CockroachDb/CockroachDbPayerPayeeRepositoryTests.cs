@@ -199,7 +199,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
                 TransactionType.Income)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(2, payer4.ToString(), "name4", 50,
                 TransactionType.Income)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
@@ -254,7 +254,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
                 null)
             .WithTransactions(15, payer1.ToString(), "name", 24, TransactionType.Income, "category1", "subcategory2",
                 null)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
@@ -306,7 +306,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
                 TransactionType.Income)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(5, payer3.ToString(), "name3", 50,
                 TransactionType.Income)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
@@ -334,7 +334,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(6, payee2.ToString(), "name2", 50)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(5, payee3.ToString(), "name3", 50)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(2, payee4.ToString(), "name4", 50)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
@@ -384,7 +384,7 @@ public class CockroachDbPayerPayeeRepositoryTests : IAsyncLifetime
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(6, payee2.ToString(), "name2", 50)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(5, payee3.ToString(), "name3", 50)
             .WithNumberOfTransactionsOfPayerPayeeIdAndPayerPayeeName(2, payee4.ToString(), "name4", 50)
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 

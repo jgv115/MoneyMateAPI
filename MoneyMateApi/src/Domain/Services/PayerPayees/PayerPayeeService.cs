@@ -26,9 +26,9 @@ namespace MoneyMateApi.Domain.Services.PayerPayees
         private async Task<IEnumerable<PayerPayeeViewModel>> EnrichAndMapPayerPayeesToViewModels(
             IEnumerable<PayerPayee> payerPayees)
         {
-            var enrichTasks = payerPayees.Select(payerPayee => EnrichAndMapPayerPayeeToViewModel(payerPayee));
+            var enrichTasks = payerPayees.Select(EnrichAndMapPayerPayeeToViewModel);
             var results = await Task.WhenAll(enrichTasks);
-            return results.ToList();
+            return results;
         }
 
         private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee payerPayee)
@@ -128,14 +128,14 @@ namespace MoneyMateApi.Domain.Services.PayerPayees
                 var enrichTasks = suggestedPayersOrPayees.Select(payerPayee =>
                     _payerPayeeEnricher.EnrichPayerPayeeToViewModel(payerPayeeType, payerPayee));
                 var results = await Task.WhenAll(enrichTasks);
-                return results.ToList();
+                return results;
             }
 
             return suggestedPayersOrPayees.Select(payerPayee => new PayerPayeeViewModel
             {
                 PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
                 PayerPayeeName = payerPayee.PayerPayeeName
-            }).ToList();
+            });
         }
 
         // TODO: might be some coupling issues here - we are assuming repository will store exactly as we are inputting

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
@@ -23,7 +24,7 @@ public class CockroachDbTagRepository : ITagRepository
         _context = context;
     }
 
-    public async Task<List<Tag>> GetTags()
+    public async Task<IEnumerable<Tag>> GetTags()
     {
         var query =
             @"
@@ -31,10 +32,19 @@ public class CockroachDbTagRepository : ITagRepository
             WHERE profile_id = @ProfileId   
             ";
 
+        using var connection = _context.CreateConnection();
+        var tags = await connection.QueryAsync<Entities.Tag>(query, new { _userContext.ProfileId });
+        return _mapper.Map<List<Tag>>(tags);
+    }
+
+    public async Task<IDictionary<Guid, Tag>> GetTags(IEnumerable<Guid> tagIds)
+    {
+        var query = "SELECT id, name FROM tag where id = ANY(@TagIds) and profile_id = @ProfileId";
+
         using (var connection = _context.CreateConnection())
         {
-            var tags = await connection.QueryAsync<Entities.Tag>(query, new { _userContext.ProfileId });
-            return _mapper.Map<List<Tag>>(tags);
+            var tags = await connection.QueryAsync<Entities.Tag>(query, new { TagIds = tagIds.ToList(), _userContext.ProfileId });
+            return tags.ToDictionary(tagEntity => tagEntity.Id, tagEntity => _mapper.Map<Tag>(tagEntity));
         }
     }
 

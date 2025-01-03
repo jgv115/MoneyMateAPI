@@ -64,7 +64,7 @@ public class CockroachDbTransactionRepositoryTests : IAsyncLifetime
                 "category1", "subcategory1", "note", [tagId1])
             .WithTransactions(1, payee2.ToString(), "payee_name_2", 50, TransactionType.Expense,
                 "category2", "subcategory2", null, [tagId1, tagId2])
-            .Build();
+            .BuildDomainModels();
 
         await _cockroachDbIntegrationTestHelper.TransactionOperations.WriteTransactionsIntoDb(transactionList);
 
