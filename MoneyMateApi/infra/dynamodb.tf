@@ -5,7 +5,7 @@ resource "aws_dynamodb_table" transaction_db {
   billing_mode = "PAY_PER_REQUEST"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
   
   point_in_time_recovery {
