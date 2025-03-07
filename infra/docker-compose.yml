@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  terraform_apply:
+    image: hashicorp/terraform:latest
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_REGION=${AWS_REGION:-}
+      - TF_WORKSPACE=${ENVIRONMENT}
+      - TF_VAR_CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - TF_VAR_CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+      - COCKROACH_API_KEY=${COCKROACH_API_KEY}
+      - TF_DIGITAL_OCEAN_TOKEN=${DIGITAL_OCEAN_TOKEN}
+    volumes:
+      - .:/code:cached
+    working_dir: /code
+    entrypoint: "terraform init && terraform apply -auto-approve"
+    

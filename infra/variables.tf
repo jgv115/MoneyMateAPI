@@ -17,3 +17,7 @@ variable cockroach_db_cluster_id {
   description = "Hard coded cluster Id from Cockroach DB console"
   default = "c879b140-a509-49fd-ac61-ee5a5c381026"
 }
+
+variable DIGITAL_OCEAN_TOKEN {
+  description = "Token to provision Digital Ocean resources"
+}

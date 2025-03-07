@@ -20,11 +20,13 @@ jobs:
       CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
       CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
       COCKROACH_API_KEY: ${{secrets.COCKROACH_DB_API_KEY}}
+      DIGITAL_OCEAN_TOKEN: ${{secrets.DIGITAL_OCEAN_TOKEN}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run terraform apply
-        run: ./batect terraform_apply
+        run: docker compose run terraform_apply 
+        working-directory: ./infra
 
   provision_infra_prod:
     name: Provision Infra for Prod
@@ -38,8 +40,10 @@ jobs:
       CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
       CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
       COCKROACH_API_KEY: ${{secrets.COCKROACH_DB_API_KEY}}
+      DIGITAL_OCEAN_TOKEN: ${{secrets.DIGITAL_OCEAN_TOKEN}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run terraform apply
-        run: ./batect terraform_apply
+        run: docker compose run terraform_apply
+        working-directory: ./infra
