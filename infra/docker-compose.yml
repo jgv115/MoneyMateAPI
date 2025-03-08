@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   terraform_apply:
     image: hashicorp/terraform:latest
@@ -15,5 +13,5 @@ services:
     volumes:
       - .:/code
     working_dir: /code
-    command: "terraform init && terraform apply -auto-approve"
+    command: "init && apply -auto-approve"
     
