@@ -3,4 +3,5 @@ resource digitalocean_container_registry moneymate_registry {
   
   name = "moneymate-api"
   subscription_tier_slug = "starter"
+  region = "SYD1"
 }
