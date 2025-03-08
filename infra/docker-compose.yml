@@ -13,5 +13,5 @@ services:
     volumes:
       - .:/code
     working_dir: /code
-    command: sh -c "terraform init && terraform apply -auto-approve"
+    entrypoint: terraform init && terraform apply -auto-approve
     
