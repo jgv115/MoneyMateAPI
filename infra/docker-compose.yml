@@ -13,7 +13,7 @@ services:
       - COCKROACH_API_KEY=${COCKROACH_API_KEY}
       - TF_DIGITAL_OCEAN_TOKEN=${DIGITAL_OCEAN_TOKEN}
     volumes:
-      - .:/code:cached
+      - .:/code
     working_dir: /code
-    entrypoint: "terraform init && terraform apply -auto-approve"
+    command: "terraform init && terraform apply -auto-approve"
     
