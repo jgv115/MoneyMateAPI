@@ -8,7 +8,7 @@ on:
       - 'MoneyMateApi/**'
       - '.github/workflows/moneymate_api.yml'
 
-jobs: 
+jobs:
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -45,7 +45,7 @@ jobs:
 
   build_and_push_to_ecr:
     name: Build image and push to ECR
-    needs: [unit_tests, integration_tests]
+    needs: [ unit_tests, integration_tests ]
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
@@ -67,11 +67,33 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG MoneyMateApi/src
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        
+
+  build_and_push_to_digital_ocean:
+    name: Build image and push to Digital Ocean
+    needs: [ unit_tests, integration_tests ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Digital Ocean Registry
+        id: login-ecr
+        uses: docker/login-action@v3
+        with:
+          registry: registry.digitalocean.com
+          username: ${{ secrets.DIGITAL_OCEAN_EMAIL }}
+          password: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6.5.0
+        with:
+          context: ./MoneyMateApi/src
+          push: true
+          tags: registry.digitalocean.com/moneymate-api:${{github.sha}}
+  
+  
   provision_infra_test:
     name: Provision Infra for Test
-    needs: 
-      - build_and_push_to_ecr
+    needs: [ build_and_push_to_ecr, build_and_push_to_digital_ocean ]
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: test
@@ -86,7 +108,7 @@ jobs:
       - name: Run terraform apply
         run: docker compose run terraform_apply
         working-directory: ./MoneyMateApi
-        
+  
   provision_infra_prod:
     name: Provision Infra for Prod
     needs:
