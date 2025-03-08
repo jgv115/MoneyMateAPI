@@ -40,7 +40,7 @@ services:
       - TF_VAR_MONEYMATE_API_LAMBDA_IMAGE_TAG=${IMAGE_TAG}
 #      - TF_VAR_DIGITAL_OCEAN_TOKEN=${DIGITAL_OCEAN_TOKEN}
     volumes:
-      - .:/code
+      - ./infra:/code
     working_dir: /code
     entrypoint: ["/bin/sh", "-c", "terraform init && terraform apply -auto-approve"]
     
