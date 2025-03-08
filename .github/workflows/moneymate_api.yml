@@ -84,7 +84,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run terraform apply
-        run: ./batect -f MoneyMateApi/batect.yml terraform_apply
+        run: docker compose run terraform_apply
+        working-directory: ./MoneyMateApi
         
   provision_infra_prod:
     name: Provision Infra for Prod
@@ -102,4 +103,5 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run terraform apply
-        run: ./batect -f MoneyMateApi/batect.yml terraform_apply
+        run: docker compose run terraform_apply
+        working-directory: ./MoneyMateApi

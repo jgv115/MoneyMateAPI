@@ -1,4 +1,3 @@
-version: '3'
 services:
   localstack:
     image: localstack/localstack:1.3.0
@@ -28,3 +27,20 @@ services:
       FLASK_DEBUG: 1
     ports:
       - "6001:5000"
+
+  terraform_apply:
+    image: hashicorp/terraform:latest
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_REGION=${AWS_REGION:-}
+      - TF_WORKSPACE=${ENVIRONMENT}
+      - TF_VAR_CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - TF_VAR_CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
+      - TF_VAR_MONEYMATE_API_LAMBDA_IMAGE_TAG=${IMAGE_TAG}
+#      - TF_VAR_DIGITAL_OCEAN_TOKEN=${DIGITAL_OCEAN_TOKEN}
+    volumes:
+      - .:/code
+    working_dir: /code
+    entrypoint: ["/bin/sh", "-c", "terraform init && terraform apply -auto-approve"]
+    
