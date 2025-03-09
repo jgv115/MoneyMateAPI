@@ -25,4 +25,4 @@ COPY --from=publish /app/publish .
 EXPOSE 8080
 
 #ENTRYPOINT ["dotnet", "MoneyMateApi.dll"]
-ENTRYPOINT ["./MoneyMateApi"]
+ENTRYPOINT ["./MoneyMateApi", "MoneyMateApi.LocalEntryPoint::Main"]

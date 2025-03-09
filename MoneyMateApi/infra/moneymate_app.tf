@@ -21,8 +21,7 @@ resource "digitalocean_app" "moneymate_api" {
       # Reference to container registry
       image {
         registry_type = "DOCR"
-        registry      = data.digitalocean_container_registry.moneymate_api_registry[count.index].name
-        repository    = "moneymate-api"
+        repository    = data.digitalocean_container_registry.moneymate_api_registry[count.index].name
         tag           = var.MONEYMATE_API_LAMBDA_IMAGE_TAG
         deploy_on_push {
           enabled = true

@@ -48,14 +48,13 @@ namespace MoneyMateApi.Services.PayerPayeeEnricher
             var queryParameters = new Dictionary<string, string>
             {
                 { "key", _placeApiOptions.ApiKey },
-                { "place_id", placeId },
                 { "fields", string.Join(",", fields) }
             };
 
             var dictFormUrlEncoded = new FormUrlEncodedContent(queryParameters);
             var queryString = await dictFormUrlEncoded.ReadAsStringAsync();
             var url = new Uri(new Uri(_placeApiOptions.PlaceDetailsBaseUri, UriKind.Absolute),
-                new Uri($"maps/api/place/details/json?{queryString}", UriKind.Relative));
+                new Uri($"v1/places/{placeId}?{queryString}", UriKind.Relative));
 
             var response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
