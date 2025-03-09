@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Formatting.Json;
@@ -20,6 +21,15 @@ namespace MoneyMateApi
                 .UseSerilog((context, configuration) =>
                 {
                     configuration.MinimumLevel.Information().WriteTo.Console(new JsonFormatter());
+                })
+                .ConfigureAppConfiguration((context, builder) =>
+                {
+                    var environment = context.HostingEnvironment.EnvironmentName;
+                    if (environment != "dev")
+                    {
+                        builder.AddSystemsManager("/");
+                        builder.AddSystemsManager($"/{environment}");
+                    }
                 })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }

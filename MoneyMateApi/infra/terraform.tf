@@ -2,7 +2,12 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 5.0"
+    }
+
+    digitalocean = {
+      source = "digitalocean/digitalocean"
+      version = "2.49.1"
     }
     
     cloudflare = {
@@ -26,4 +31,9 @@ provider "aws" {
 provider "cloudflare" {
   email   = var.CLOUDFLARE_EMAIL
   api_key = var.CLOUDFLARE_API_KEY
+}
+
+# Configure the DigitalOcean Provider
+provider "digitalocean" {
+  token = var.DIGITAL_OCEAN_TOKEN
 }

@@ -11,7 +11,7 @@ FROM build AS publish
 RUN dotnet publish "MoneyMateApi.csproj" \
             --configuration Release \
             # We need to specify a musl runtime 
-            --runtime linux-musl-arm64 \
+            --runtime linux-musl-amd64 \
             --self-contained true \
             --output /app/publish \
             -p:PublishReadyToRun=true \

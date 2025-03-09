@@ -104,3 +104,35 @@ resource "aws_iam_policy_attachment" moneymate_api_lambda_parameter_store {
     aws_iam_role.moneymate_api_lambda.name]
   policy_arn = aws_iam_policy.moneymate_api_lambda_parameter_store.arn
 }
+
+# MoneyMate API Policy + user attachment
+resource "aws_iam_policy" moneymate_api_policy {
+  count = terraform.workspace == "prod" ? 1 : 0
+  
+  name        = "moneymate_api_policy"
+  description = "Policy for granting permissions for MoneyMate API"
+
+  policy = data.aws_iam_policy_document.moneymate_api[count.index].json
+}
+
+data "aws_iam_policy_document" moneymate_api {
+  count = terraform.workspace == "prod" ? 1 : 0
+  
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParametersByPath"
+    ]
+    resources = [
+      "*"
+    ]
+  }
+}
+
+resource "aws_iam_user_policy_attachment" "user_policy_attach" {
+  count = terraform.workspace == "prod" ? 1 : 0
+  
+  user       = aws_iam_user.moneymate_api_user[count.index].name
+  policy_arn = aws_iam_policy.moneymate_api_policy[count.index].arn
+}

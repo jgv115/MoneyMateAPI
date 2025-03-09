@@ -38,9 +38,9 @@ services:
       - TF_VAR_CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
       - TF_VAR_CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY}
       - TF_VAR_MONEYMATE_API_LAMBDA_IMAGE_TAG=${IMAGE_TAG}
-#      - TF_VAR_DIGITAL_OCEAN_TOKEN=${DIGITAL_OCEAN_TOKEN}
+      - TF_VAR_DIGITAL_OCEAN_TOKEN=${DIGITAL_OCEAN_TOKEN}
     volumes:
       - ./infra:/code
     working_dir: /code
-    entrypoint: ["/bin/sh", "-c", "terraform init && terraform apply -auto-approve"]
+    entrypoint: ["/bin/sh", "-c", "terraform init && terraform apply"]
     
