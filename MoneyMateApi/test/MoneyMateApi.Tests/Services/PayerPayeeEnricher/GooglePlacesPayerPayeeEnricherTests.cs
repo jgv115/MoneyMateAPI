@@ -106,7 +106,7 @@ public class GooglePlacesPayerPayeeEnricherTests
 
         var stubHttpClient = new MockHttpClientBuilder()
             .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=formatted_address",
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
                 HttpStatusCode.OK,
                 new GooglePlaceDetailsResponse
                 {
@@ -152,14 +152,14 @@ public class GooglePlacesPayerPayeeEnricherTests
 
         var stubHttpClient = new MockHttpClientBuilder()
             .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=formatted_address",
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
                 HttpStatusCode.OK,
                 new GooglePlaceDetailsResponse
                 {
                     Status = GooglePlacesApiStatus.NotFound
                 })
             .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=place_id%2Cformatted_address",
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=place_id%2Cformatted_address",
                 HttpStatusCode.OK,
                 new GooglePlaceDetailsResponse
                 {
@@ -216,14 +216,14 @@ public class GooglePlacesPayerPayeeEnricherTests
 
         var stubHttpClient = new MockHttpClientBuilder()
             .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=formatted_address",
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
                 HttpStatusCode.OK,
                 new GooglePlaceDetailsResponse
                 {
                     Status = "NOT_FOUND"
                 })
             .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=place_id%2Cformatted_address",
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=place_id%2Cformatted_address",
                 HttpStatusCode.OK,
                 new GooglePlaceDetailsResponse
                 {
@@ -273,7 +273,7 @@ public class GooglePlacesPayerPayeeEnricherTests
 
         var stubHttpClient = new MockHttpClientBuilder()
             .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/maps/api/place/details/json?key=key&place_id={expectedIdentifier}&fields=formatted_address",
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
                 HttpStatusCode.InternalServerError,
                 "failed")
             .Build();
