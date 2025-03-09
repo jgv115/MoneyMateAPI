@@ -103,6 +103,7 @@ jobs:
       IMAGE_TAG: ${{ github.sha }}
       CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
       CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+      DIGITAL_OCEAN_TOKEN: ${{serets.DIGITAL_OCEAN_TOKEN}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -122,6 +123,7 @@ jobs:
       IMAGE_TAG: ${{ github.sha }}
       CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
       CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+      DIGITAL_OCEAN_TOKEN: ${{serets.DIGITAL_OCEAN_TOKEN}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
