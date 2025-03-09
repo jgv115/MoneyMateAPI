@@ -10,7 +10,7 @@ namespace MoneyMateApi.Services.PayerPayeeEnricher.Models
 
     public record GooglePlaceDetailsResult
     {
-        [JsonPropertyName("formatted_address")]
+        [JsonPropertyName("formattedAddress")]
         public string FormattedAddress { get; set; }
 
         [JsonPropertyName("place_id")]

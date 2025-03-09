@@ -24,7 +24,7 @@ namespace MoneyMateApi.Services.PayerPayeeEnricher
     public static class GooglePlacesApiFields
     {
         public const string FormattedAddress = "formatted_address";
-        public const string PlaceId = "place_id";
+        public const string PlaceId = "id";
     }
 
     public class GooglePlacesPayerPayeeEnricher : IPayerPayeeEnricher

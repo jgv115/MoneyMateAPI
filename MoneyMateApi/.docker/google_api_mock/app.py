@@ -6,7 +6,7 @@ app = Flask(__name__)
 def get_place_details(placeId):
     return {
         "result": {
-            "formatted_address": "1 Hello Street Vic Australia 3123",
-            "place_id": "place_id_123"
+            "formattedAddress": "1 Hello Street Vic Australia 3123",
+            "id": "place_id_123"
         }
     }
