@@ -159,7 +159,7 @@ public class GooglePlacesPayerPayeeEnricherTests
                     Status = GooglePlacesApiStatus.NotFound
                 })
             .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=place_id%2Cformatted_address",
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=id%2Cformatted_address",
                 HttpStatusCode.OK,
                 new GooglePlaceDetailsResponse
                 {
@@ -223,7 +223,7 @@ public class GooglePlacesPayerPayeeEnricherTests
                     Status = "NOT_FOUND"
                 })
             .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=place_id%2Cformatted_address",
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=id%2Cformatted_address",
                 HttpStatusCode.OK,
                 new GooglePlaceDetailsResponse
                 {
