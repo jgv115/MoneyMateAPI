@@ -7,9 +7,6 @@ services:
       AWS_SECRET_ACCESS_KEY: fake
     volumes:
       - type: bind
-        source: ./.docker/localstack/localstack-bootstrap.sh
-        target: /docker-entrypoint-initaws.d/localstack-bootstrap.sh
-      - type: bind
         source: ./.docker/localstack/healthcheck.sh
         target: /app/healthcheck.sh
     ports:

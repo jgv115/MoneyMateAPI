@@ -16,7 +16,7 @@ namespace MoneyMateApi.Controllers.Transactions.Dtos
         [FromQuery(Name = "subcategory")] public List<string> Subcategories { get; set; } = new();
         [FromQuery(Name = "payerPayeeId")] public List<string> PayerPayeeIds { get; set; } = new();
 
-        public virtual bool Equals(GetTransactionsQuery other)
+        public virtual bool Equals(GetTransactionsQuery? other)
         {
             return other != null && Type.Equals(other.Type) && Start.Equals(other.Start) && End.Equals(other.End) &&
                    Categories.SequenceEqual(other.Categories) && Subcategories.SequenceEqual(other.Subcategories) &&
