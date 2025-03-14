@@ -34,20 +34,14 @@
     </ItemGroup>
     <ItemGroup>
       <Compile Remove="infra\**" />
-      <Compile Remove=".batect\localstack\**" />
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Remove="infra\**" />
-      <EmbeddedResource Remove=".batect\localstack\**" />
     </ItemGroup>
     <ItemGroup>
       <None Remove="infra\**" />
-      <None Remove=".batect\localstack\**" />
     </ItemGroup>
     <ItemGroup>
       <Content Remove="infra\**" />
-      <Content Include=".batect\localstack\healthcheck.sh" />
-      <Content Include=".batect\localstack\localstack-bootstrap.sh" />
-      <Content Remove=".batect\localstack\**" />
     </ItemGroup>
 </Project>

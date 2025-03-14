@@ -23,34 +23,6 @@ namespace MoneyMateApi.Domain.Services.PayerPayees
             _payerPayeeEnricher = payerPayeeEnricher;
         }
 
-        private async Task<IEnumerable<PayerPayeeViewModel>> EnrichAndMapPayerPayeesToViewModels(
-            IEnumerable<PayerPayee> payerPayees)
-        {
-            var enrichTasks = payerPayees.Select(EnrichAndMapPayerPayeeToViewModel);
-            var results = await Task.WhenAll(enrichTasks);
-            return results;
-        }
-
-        private async Task<PayerPayeeViewModel> EnrichAndMapPayerPayeeToViewModel(PayerPayee payerPayee)
-        {
-            if (string.IsNullOrEmpty(payerPayee.ExternalId))
-                return new PayerPayeeViewModel
-                {
-                    ExternalId = payerPayee.ExternalId,
-                    PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
-                    PayerPayeeName = payerPayee.PayerPayeeName
-                };
-
-            var details = await _payerPayeeEnricher.GetExtraPayerPayeeDetails(payerPayee.ExternalId);
-            return new PayerPayeeViewModel
-            {
-                ExternalId = payerPayee.ExternalId,
-                PayerPayeeId = Guid.Parse(payerPayee.PayerPayeeId),
-                PayerPayeeName = payerPayee.PayerPayeeName,
-                Address = details.Address
-            };
-        }
-
         public async Task<IEnumerable<PayerPayeeViewModel>> GetPayers(int offset, int limit,
             bool includeEnrichedData = true)
         {
@@ -60,14 +32,15 @@ namespace MoneyMateApi.Domain.Services.PayerPayees
                 Offset = offset
             });
             if (includeEnrichedData)
-                return await EnrichAndMapPayerPayeesToViewModels(payers);
-            else
-                return payers.Select(payer => new PayerPayeeViewModel
-                {
-                    PayerPayeeName = payer.PayerPayeeName,
-                    PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
-                    ExternalId = payer.ExternalId
-                });
+                return await Task.WhenAll(payers.Select(payer =>
+                    _payerPayeeEnricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payer, payer)));
+
+            return payers.Select(payer => new PayerPayeeViewModel
+            {
+                PayerPayeeName = payer.PayerPayeeName,
+                PayerPayeeId = Guid.Parse(payer.PayerPayeeId),
+                ExternalId = payer.ExternalId
+            });
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> GetPayees(int offset, int limit,
@@ -80,38 +53,43 @@ namespace MoneyMateApi.Domain.Services.PayerPayees
             });
 
             if (includeEnrichedData)
-                return await EnrichAndMapPayerPayeesToViewModels(payees);
-            else
-                return payees.Select(payee => new PayerPayeeViewModel
-                {
-                    PayerPayeeName = payee.PayerPayeeName,
-                    PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
-                    ExternalId = payee.ExternalId
-                });
+                return await Task.WhenAll(payees.Select(payee =>
+                    _payerPayeeEnricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, payee)));
+
+            return payees.Select(payee => new PayerPayeeViewModel
+            {
+                PayerPayeeName = payee.PayerPayeeName,
+                PayerPayeeId = Guid.Parse(payee.PayerPayeeId),
+                ExternalId = payee.ExternalId
+            });
         }
 
         public async Task<PayerPayeeViewModel> GetPayer(Guid payerPayeeId)
         {
             var payer = await _repository.GetPayer(payerPayeeId);
-            return await EnrichAndMapPayerPayeeToViewModel(payer);
+            return await _payerPayeeEnricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payer, payer);
         }
 
         public async Task<PayerPayeeViewModel> GetPayee(Guid payerPayeeId)
         {
             var payee = await _repository.GetPayee(payerPayeeId);
-            return await EnrichAndMapPayerPayeeToViewModel(payee);
+            return await _payerPayeeEnricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, payee);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayer(string payerName)
         {
             var payers = await _repository.AutocompletePayer(payerName);
-            return await EnrichAndMapPayerPayeesToViewModels(payers);
+            var enrichTasks = payers.Select(payer =>
+                _payerPayeeEnricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payer, payer));
+
+            return await Task.WhenAll(enrichTasks);
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> AutocompletePayee(string payeeName)
         {
             var payees = await _repository.AutocompletePayee(payeeName);
-            return await EnrichAndMapPayerPayeesToViewModels(payees);
+            return await Task.WhenAll(payees.Select(payee =>
+                _payerPayeeEnricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, payee)));
         }
 
         public async Task<IEnumerable<PayerPayeeViewModel>> GetSuggestedPayersOrPayees(PayerPayeeType payerPayeeType,
@@ -149,7 +127,7 @@ namespace MoneyMateApi.Domain.Services.PayerPayees
                 ExternalId = newPayerPayee.ExternalId ?? "",
             });
 
-            return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
+            return await _payerPayeeEnricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payer, new PayerPayee
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,
@@ -168,7 +146,7 @@ namespace MoneyMateApi.Domain.Services.PayerPayees
                 ExternalId = newPayerPayee.ExternalId ?? "",
             });
 
-            return await EnrichAndMapPayerPayeeToViewModel(new PayerPayee
+            return await _payerPayeeEnricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, new PayerPayee
             {
                 PayerPayeeId = payerPayeeId,
                 PayerPayeeName = newPayerPayee.Name,

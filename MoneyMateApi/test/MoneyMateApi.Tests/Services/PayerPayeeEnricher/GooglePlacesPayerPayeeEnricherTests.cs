@@ -1,81 +1,32 @@
 using System;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using MoneyMateApi.Connectors.GooglePlaces;
+using MoneyMateApi.Connectors.GooglePlaces.Models;
 using Moq;
-using Moq.Protected;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.PayersPayees.ViewModels;
 using MoneyMateApi.Domain.Models;
 using MoneyMateApi.Repositories;
 using MoneyMateApi.Services.PayerPayeeEnricher;
 using MoneyMateApi.Services.PayerPayeeEnricher.Exceptions;
-using MoneyMateApi.Services.PayerPayeeEnricher.Models;
-using MoneyMateApi.Services.PayerPayeeEnricher.Options;
 using Xunit;
 
 namespace MoneyMateApi.Tests.Services.PayerPayeeEnricher;
-
-public class MockHttpClientBuilder
-{
-    private readonly Mock<HttpMessageHandler> _httpMessageHandlerMock;
-
-    public MockHttpClientBuilder()
-    {
-        _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-    }
-
-    public MockHttpClientBuilder SetupMockResponse<TResponse>(
-        HttpMethod method,
-        string uri,
-        HttpStatusCode responseStatusCode,
-        TResponse responseObject
-    )
-    {
-        _httpMessageHandlerMock.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
-                ItExpr.Is<HttpRequestMessage>(message =>
-                    message.Method == HttpMethod.Get &&
-                    message.RequestUri.ToString() == uri),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = responseStatusCode,
-                Content = new StringContent(JsonSerializer.Serialize(responseObject))
-            });
-
-        return this;
-    }
-
-    public HttpClient Build() => new(_httpMessageHandlerMock.Object);
-}
 
 public class GooglePlacesPayerPayeeEnricherTests
 {
     private readonly Mock<ILogger<GooglePlacesPayerPayeeEnricher>> _mockLogger = new();
     private readonly Mock<IPayerPayeeRepository> _mockPayerPayeeRepository = new();
-
-    private IOptions<GooglePlaceApiOptions> GetStubGooglePlaceApiOptions()
-    {
-        return Options.Create(new GooglePlaceApiOptions
-        {
-            PlaceDetailsBaseUri = "http://base-uri/",
-            ApiKey = "key"
-        });
-    }
+    private readonly Mock<IGooglePlacesConnector> _mockGooglePlacesConnector = new();
 
     [Fact]
     public async Task
         GivenPayerOrPayeeWithNoExternalId_WhenEnrichAndMapPayerPayeeToViewModelInvoked_ThenViewModelReturnedWithNoAdditionalInfo()
     {
-        var stubHttpClient = new MockHttpClientBuilder().Build();
         var enricher =
-            new GooglePlacesPayerPayeeEnricher(stubHttpClient, GetStubGooglePlaceApiOptions(), _mockLogger.Object,
-                _mockPayerPayeeRepository.Object);
+            new GooglePlacesPayerPayeeEnricher(_mockLogger.Object, _mockPayerPayeeRepository.Object,
+                _mockGooglePlacesConnector.Object);
 
         var initialPayerPayee = new PayerPayee
         {
@@ -98,28 +49,18 @@ public class GooglePlacesPayerPayeeEnricherTests
         GivenPayerOrPayeeWithExternalId_WhenEnrichAndMapPayerPayeeToViewModelInvoked_ThenCorrectPayerPayeeViewModelReturned()
     {
         const string expectedIdentifier = "external-id-123";
-        var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
-        {
-            PlaceDetailsBaseUri = "http://base-uri/",
-            ApiKey = "key"
-        });
 
-        var stubHttpClient = new MockHttpClientBuilder()
-            .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
-                HttpStatusCode.OK,
-                new GooglePlaceDetailsResponse
-                {
-                    Result = new()
-                    {
-                        FormattedAddress = "address123"
-                    },
-                    Status = "OK"
-                })
-            .Build();
+        _mockGooglePlacesConnector.Setup(connector =>
+            connector.GetGooglePlaceDetails(expectedIdentifier, "formatted_address")).ReturnsAsync(() =>
+            new GooglePlaceDetails
+            {
+                Id = expectedIdentifier,
+                FormattedAddress = "address123"
+            });
 
-        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions, _mockLogger.Object,
-            _mockPayerPayeeRepository.Object);
+        var enricher =
+            new GooglePlacesPayerPayeeEnricher(_mockLogger.Object, _mockPayerPayeeRepository.Object,
+                _mockGooglePlacesConnector.Object);
 
         var initialPayerPayee = new PayerPayee
         {
@@ -143,58 +84,41 @@ public class GooglePlacesPayerPayeeEnricherTests
     public async Task
         GivenInputIdentifierNotFound_WhenEnrichAndMapPayerPayeeToViewModelInvoked_ThenAddressWithNewPlaceIdRequestedAndStored()
     {
-        const string expectedIdentifier = "external-id-123";
-        var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
-        {
-            PlaceDetailsBaseUri = "http://base-uri/",
-            ApiKey = "key"
-        });
+        const string oldPlaceId = "external-id-123";
+        const string newPlaceId = "new-place-id";
 
-        var stubHttpClient = new MockHttpClientBuilder()
-            .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
-                HttpStatusCode.OK,
-                new GooglePlaceDetailsResponse
-                {
-                    Status = GooglePlacesApiStatus.NotFound
-                })
-            .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=id%2Cformatted_address",
-                HttpStatusCode.OK,
-                new GooglePlaceDetailsResponse
-                {
-                    Result = new()
-                    {
-                        PlaceId = "new-place-id-123",
-                        FormattedAddress = "address123"
-                    },
-                    Status = GooglePlacesApiStatus.Ok
-                })
-            .Build();
+        _mockGooglePlacesConnector.Setup(connector =>
+            connector.GetGooglePlaceDetails(oldPlaceId, "formatted_address")).ReturnsAsync(() =>
+            new GooglePlaceDetails
+            {
+                Id = newPlaceId,
+                FormattedAddress = "address123"
+            });
 
         var initialPayerPayee = new PayerPayee
         {
-            ExternalId = expectedIdentifier,
+            ExternalId = oldPlaceId,
             PayerPayeeId = Guid.NewGuid().ToString(),
             PayerPayeeName = "name"
         };
 
         var expectedNewPayerPayee = initialPayerPayee with
         {
-            ExternalId = "new-place-id-123"
+            ExternalId = newPlaceId
         };
         _mockPayerPayeeRepository.Setup(repository => repository.PutPayerOrPayee(PayerPayeeType.Payee,
             expectedNewPayerPayee));
 
-        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions, _mockLogger.Object,
-            _mockPayerPayeeRepository.Object);
+        var enricher =
+            new GooglePlacesPayerPayeeEnricher(_mockLogger.Object, _mockPayerPayeeRepository.Object,
+                _mockGooglePlacesConnector.Object);
 
         var returnedPayeeViewModel =
             await enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, initialPayerPayee);
 
         Assert.Equal(new PayerPayeeViewModel
         {
-            ExternalId = initialPayerPayee.ExternalId,
+            ExternalId = newPlaceId,
             PayerPayeeId = Guid.Parse(initialPayerPayee.PayerPayeeId),
             PayerPayeeName = initialPayerPayee.PayerPayeeName,
             Address = "address123"
@@ -205,31 +129,13 @@ public class GooglePlacesPayerPayeeEnricherTests
 
     [Fact]
     public async Task
-        GivenInputIdentifierThatCannotBeRefreshed_WhenEnrichAndMapPayerPayeeToViewModelInvoked_ThenExternalIdRemovedFromDbAndCorrectModelReturned()
+        GivenInputIdentifierThatIsDefunct_WhenEnrichAndMapPayerPayeeToViewModelInvoked_ThenExternalIdRemovedFromDbAndCorrectModelReturned()
     {
         const string expectedIdentifier = "external-id-123";
-        var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
-        {
-            PlaceDetailsBaseUri = "http://base-uri/",
-            ApiKey = "key"
-        });
 
-        var stubHttpClient = new MockHttpClientBuilder()
-            .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
-                HttpStatusCode.OK,
-                new GooglePlaceDetailsResponse
-                {
-                    Status = "NOT_FOUND"
-                })
-            .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=id%2Cformatted_address",
-                HttpStatusCode.OK,
-                new GooglePlaceDetailsResponse
-                {
-                    Status = "NOT_FOUND",
-                })
-            .Build();
+        _mockGooglePlacesConnector.Setup(connector =>
+                connector.GetGooglePlaceDetails(expectedIdentifier, "formatted_address"))
+            .ThrowsAsync(new ExternalLinkIdDefunctException("defunct!"));
 
         var initialPayerPayee = new PayerPayee
         {
@@ -238,17 +144,18 @@ public class GooglePlacesPayerPayeeEnricherTests
             PayerPayeeName = "name"
         };
 
-        _mockPayerPayeeRepository.Setup(repository => repository.PutPayerOrPayee(PayerPayeeType.Payee, new PayerPayee
+        _mockPayerPayeeRepository.Setup(repository => repository.PutPayerOrPayee(PayerPayeeType.Payer, new PayerPayee
         {
             ExternalId = "",
             PayerPayeeId = initialPayerPayee.PayerPayeeId,
             PayerPayeeName = initialPayerPayee.PayerPayeeName
         }));
 
-        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions, _mockLogger.Object,
-            _mockPayerPayeeRepository.Object);
+        var enricher =
+            new GooglePlacesPayerPayeeEnricher(_mockLogger.Object, _mockPayerPayeeRepository.Object,
+                _mockGooglePlacesConnector.Object);
 
-        var returnedViewModel = await enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, initialPayerPayee);
+        var returnedViewModel = await enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payer, initialPayerPayee);
 
         _mockPayerPayeeRepository.VerifyAll();
 
@@ -257,39 +164,5 @@ public class GooglePlacesPayerPayeeEnricherTests
             PayerPayeeId = Guid.Parse(initialPayerPayee.PayerPayeeId),
             PayerPayeeName = "name"
         }, returnedViewModel);
-    }
-
-    [Fact]
-    public async Task
-        GivenApiReturnsUnsuccessfulResponse_WhenEnrichAndMapPayerPayeeToViewModelInvoked_ThenPayerPayeeEnricherExceptionThrown()
-    {
-        const string expectedIdentifier = "external-id-123";
-
-        var googlePlaceOptions = Options.Create(new GooglePlaceApiOptions
-        {
-            PlaceDetailsBaseUri = "http://base-uri/",
-            ApiKey = "key"
-        });
-
-        var stubHttpClient = new MockHttpClientBuilder()
-            .SetupMockResponse(HttpMethod.Get,
-                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
-                HttpStatusCode.InternalServerError,
-                "failed")
-            .Build();
-
-        var enricher = new GooglePlacesPayerPayeeEnricher(stubHttpClient, googlePlaceOptions, _mockLogger.Object,
-            _mockPayerPayeeRepository.Object);
-
-        var thrownException =
-            await Assert.ThrowsAsync<PayerPayeeEnricherException>(() =>
-                enricher.EnrichPayerPayeeToViewModel(PayerPayeeType.Payee, new PayerPayee
-                {
-                    ExternalId = expectedIdentifier,
-                    PayerPayeeId = Guid.NewGuid().ToString(),
-                    PayerPayeeName = "name"
-                }));
-
-        Assert.Contains("failed", thrownException.Message);
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
+using MoneyMateApi.Connectors.GooglePlaces;
+using MoneyMateApi.Connectors.GooglePlaces.Options;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Domain.Services.Categories;
 using MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations;
@@ -31,7 +33,6 @@ using MoneyMateApi.Repositories.CockroachDb.Profiles;
 using MoneyMateApi.Services;
 using MoneyMateApi.Services.Initialisation.CategoryInitialisation;
 using MoneyMateApi.Services.PayerPayeeEnricher;
-using MoneyMateApi.Services.PayerPayeeEnricher.Options;
 
 namespace MoneyMateApi
 {
@@ -111,7 +112,9 @@ namespace MoneyMateApi
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<ICategoryInitialiser, LambdaCategoryInitialiser>();
             services.AddScoped<ITagService, TagService>();
-            services.AddHttpClient<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
+
+            services.AddHttpClient<IGooglePlacesConnector, GooglePlacesConnector>();
+            services.AddScoped<IPayerPayeeEnricher, GooglePlacesPayerPayeeEnricher>();
             
             services.Configure<GooglePlaceApiOptions>(options =>
                 Configuration.GetSection("GooglePlaceApi").Bind(options));
