@@ -100,6 +100,7 @@ namespace MoneyMateApi
                 options.SaveToken = true;
             });
 
+            services.AddMemoryCache();
             services.AddSingleton<ISystemClock, SystemClock>();
             services.AddSingleton<ITimePeriodHelper, TimePeriodHelper>();
 
