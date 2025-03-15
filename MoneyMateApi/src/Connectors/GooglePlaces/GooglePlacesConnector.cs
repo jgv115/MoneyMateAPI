@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoneyMateApi.Connectors.GooglePlaces.Dtos;
 using MoneyMateApi.Connectors.GooglePlaces.Exceptions;
@@ -27,18 +30,30 @@ public static class GooglePlacesApiFields
 
 public class GooglePlacesConnector : IGooglePlacesConnector
 {
+    private readonly ILogger<GooglePlacesConnector> _logger;
     private readonly HttpClient _httpClient;
     private readonly GooglePlaceApiOptions _placeApiOptions;
+    private readonly IMemoryCache _cache;
 
-    public GooglePlacesConnector(HttpClient httpClient, IOptions<GooglePlaceApiOptions> placeApiOptions)
+    public GooglePlacesConnector(ILogger<GooglePlacesConnector> logger, HttpClient httpClient,
+        IOptions<GooglePlaceApiOptions> placeApiOptions, IMemoryCache cache)
     {
         _httpClient = httpClient;
+        _cache = cache;
+        _logger = logger;
         _placeApiOptions = placeApiOptions.Value;
     }
 
     private async Task<(bool Success, GooglePlaceDetailsResponse ResponseBody)> MakeGooglePlaceRequest(string placeId,
         params string[] fields)
     {
+        var cacheKey = $"GooglePlace_{placeId}_{string.Join("_", fields.Order())}";
+        if (_cache.TryGetValue(cacheKey, out (bool Success, GooglePlaceDetailsResponse ResponseBody) cachedResult))
+        {
+            _logger.LogInformation("Got a cache hit with key: {CacheKey}", cacheKey);
+            return cachedResult;
+        }
+
         var queryParameters = new Dictionary<string, string>
         {
             { "key", _placeApiOptions.ApiKey },
@@ -49,14 +64,21 @@ public class GooglePlacesConnector : IGooglePlacesConnector
         var queryString = await dictFormUrlEncoded.ReadAsStringAsync();
         var url = new Uri(new Uri(_placeApiOptions.PlaceDetailsBaseUri, UriKind.Absolute),
             new Uri($"v1/places/{placeId}?{queryString}", UriKind.Relative));
-
         var response = await _httpClient.GetAsync(url);
-        var responseBody = await response.Content.ReadFromJsonAsync<GooglePlaceDetailsResponse>();
 
+        var responseBody = await response.Content.ReadFromJsonAsync<GooglePlaceDetailsResponse>();
         if (responseBody == null)
             throw new GooglePlacesConnectorException("Response from Google Place API is null");
 
-        return (response.IsSuccessStatusCode, responseBody);
+        var returnValue = (response.IsSuccessStatusCode, responseBody);
+
+        // Hard code cache expiry to 10 minutes only if the response was successful
+        if (response.IsSuccessStatusCode)
+        {
+            _cache.Set(cacheKey, returnValue, TimeSpan.FromMinutes(10));
+        }
+
+        return returnValue;
     }
 
 

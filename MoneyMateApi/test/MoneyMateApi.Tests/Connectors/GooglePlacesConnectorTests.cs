@@ -3,6 +3,8 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoneyMateApi.Connectors.GooglePlaces;
 using MoneyMateApi.Connectors.GooglePlaces.Dtos;
@@ -36,6 +38,7 @@ public class MockHttpClientBuilder
             .Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.Is<HttpRequestMessage>(message =>
                     message.Method == HttpMethod.Get &&
+                    message.RequestUri != null &&
                     message.RequestUri.ToString() == uri),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
@@ -52,6 +55,8 @@ public class MockHttpClientBuilder
 
 public class GooglePlacesConnectorTests
 {
+    private readonly Mock<ILogger<GooglePlacesConnector>> _mockLogger = new();
+
     private IOptions<GooglePlaceApiOptions> GetStubGooglePlaceApiOptions()
     {
         return Options.Create(new GooglePlaceApiOptions
@@ -60,6 +65,8 @@ public class GooglePlacesConnectorTests
             ApiKey = "key"
         });
     }
+
+    private readonly IMemoryCache _stubMemoryCache = new MemoryCache(new MemoryCacheOptions());
 
     [Fact]
     public async Task GivenPlaceIdAndFields_WhenGetGooglePlaceDetailsInvoked_ThenCorrectResponseIsReturnedOnSuccess()
@@ -76,7 +83,7 @@ public class GooglePlacesConnectorTests
                 })
             .Build();
 
-        var connector = new GooglePlacesConnector(stubHttpClient, GetStubGooglePlaceApiOptions());
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
 
         var response = await connector.GetGooglePlaceDetails(expectedIdentifier, "formatted_address");
 
@@ -85,6 +92,95 @@ public class GooglePlacesConnectorTests
             Id = expectedIdentifier,
             FormattedAddress = "address123"
         }, response);
+    }
+
+    [Fact]
+    public async Task
+        GivenPlaceIdAndFieldsWithCachePopulated_WhenGetGooglePlaceDetailsInvoked_ThenCorrectResponseIsReturnedOnSuccess()
+    {
+        const string expectedIdentifier = "external-id-123";
+
+        _stubMemoryCache.Set($"GooglePlace_{expectedIdentifier}_formatted_address", (true,
+            new GooglePlaceDetailsResponse
+            {
+                FormattedAddress = "address123"
+            }));
+
+        var stubHttpClient = new MockHttpClientBuilder()
+            .Build();
+
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
+
+        var response = await connector.GetGooglePlaceDetails(expectedIdentifier, "formatted_address");
+
+        Assert.Equal(new GooglePlaceDetails
+        {
+            Id = expectedIdentifier,
+            FormattedAddress = "address123"
+        }, response);
+    }
+
+    [Fact]
+    public async Task
+        GivenPlaceIdAndFieldsAndCachePopulatedForAnotherId_WhenGetGooglePlaceDetailsInvoked_ThenCorrectResponseIsReturnedOnSuccess()
+    {
+        const string expectedIdentifier = "external-id-123";
+
+        _stubMemoryCache.Set($"GooglePlace_another_id_formatted_address", (true,
+            new GooglePlaceDetailsResponse
+            {
+                FormattedAddress = "address432"
+            }));
+
+
+        var stubHttpClient = new MockHttpClientBuilder()
+            .SetupMockResponse(HttpMethod.Get,
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
+                HttpStatusCode.OK,
+                new GooglePlaceDetailsResponse
+                {
+                    FormattedAddress = "address123"
+                })
+            .Build();
+
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
+
+        var response = await connector.GetGooglePlaceDetails(expectedIdentifier, "formatted_address");
+
+        Assert.Equal(new GooglePlaceDetails
+        {
+            Id = expectedIdentifier,
+            FormattedAddress = "address123"
+        }, response);
+    }
+
+
+    [Fact]
+    public async Task GivenPlaceIdAndFields_WhenGetGooglePlaceDetailsInvoked_ThenCacheIsNotPopulatedWhenRequestFails()
+    {
+        const string expectedIdentifier = "external-id-123";
+
+        var stubHttpClient = new MockHttpClientBuilder()
+            .SetupMockResponse(HttpMethod.Get,
+                $"http://base-uri/v1/places/{expectedIdentifier}?key=key&fields=formatted_address",
+                HttpStatusCode.NotFound,
+                new GooglePlaceDetailsResponse
+                {
+                    Error = new GooglePlaceDetailsError
+                    {
+                        Status = "RANDOM_ERROR",
+                        Message = "random error"
+                    }
+                })
+            .Build();
+
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
+
+        await Assert.ThrowsAsync<GooglePlacesConnectorException>(() =>
+            connector.GetGooglePlaceDetails(expectedIdentifier, "formatted_address"));
+
+        var cachePopulated = _stubMemoryCache.TryGetValue($"GooglePlace_{expectedIdentifier}_formatted_address", out _);
+        Assert.False(cachePopulated);
     }
 
     [Fact]
@@ -99,7 +195,7 @@ public class GooglePlacesConnectorTests
                 (GooglePlaceDetailsResponse)null!)
             .Build();
 
-        var connector = new GooglePlacesConnector(stubHttpClient, GetStubGooglePlaceApiOptions());
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
 
         await Assert.ThrowsAsync<GooglePlacesConnectorException>(() =>
             connector.GetGooglePlaceDetails(expectedIdentifier, "formatted_address"));
@@ -140,7 +236,7 @@ public class GooglePlacesConnectorTests
                 })
             .Build();
 
-        var connector = new GooglePlacesConnector(stubHttpClient, GetStubGooglePlaceApiOptions());
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
 
         var response = await connector.GetGooglePlaceDetails(oldExternalId, "formatted_address");
         Assert.Equal(new GooglePlaceDetails
@@ -179,10 +275,9 @@ public class GooglePlacesConnectorTests
                         Message = "The provided Place ID is no longer valid."
                     }
                 })
-
             .Build();
 
-        var connector = new GooglePlacesConnector(stubHttpClient, GetStubGooglePlaceApiOptions());
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
 
         var exception = await Assert.ThrowsAsync<ExternalLinkIdDefunctException>(() =>
             connector.GetGooglePlaceDetails(oldExternalId, "formatted_address"));
@@ -217,7 +312,7 @@ public class GooglePlacesConnectorTests
                 })
             .Build();
 
-        var connector = new GooglePlacesConnector(stubHttpClient, GetStubGooglePlaceApiOptions());
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
 
         var exception = await Assert.ThrowsAsync<GooglePlacesConnectorException>(() =>
             connector.GetGooglePlaceDetails(oldExternalId, "formatted_address"));
@@ -245,7 +340,7 @@ public class GooglePlacesConnectorTests
                 })
             .Build();
 
-        var connector = new GooglePlacesConnector(stubHttpClient, GetStubGooglePlaceApiOptions());
+        var connector = new GooglePlacesConnector(_mockLogger.Object,stubHttpClient, GetStubGooglePlaceApiOptions(), _stubMemoryCache);
 
         var exception = await Assert.ThrowsAsync<GooglePlacesConnectorException>(() =>
             connector.GetGooglePlaceDetails(expectedIdentifier, "formatted_address"));
