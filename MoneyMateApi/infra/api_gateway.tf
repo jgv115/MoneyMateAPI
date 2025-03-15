@@ -41,12 +41,6 @@ data "cloudflare_zones" benong_zones {
     name = "benong.id.au"
   }
 }
-resource "cloudflare_record" moneymate_cloudflare_record {
-  name = lookup(var.cloudflare_dns_entry_name, terraform.workspace, "")
-  type = "CNAME"
-  value = aws_apigatewayv2_domain_name.moneymate_api_custom_domain.domain_name_configuration.0.target_domain_name
-  zone_id = data.cloudflare_zones.benong_zones.zones[0].id
-}
 
 # API Routes
 resource "aws_apigatewayv2_route" moneymate_api_proxy_route {
