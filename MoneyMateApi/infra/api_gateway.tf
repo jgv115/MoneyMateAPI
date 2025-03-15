@@ -35,13 +35,6 @@ resource "aws_apigatewayv2_integration" moneymate_api_lambda_integration {
   payload_format_version = "2.0"
 }
 
-# Cloudflare DNS record for custom domain name
-data "cloudflare_zones" benong_zones {
-  filter {
-    name = "benong.id.au"
-  }
-}
-
 # API Routes
 resource "aws_apigatewayv2_route" moneymate_api_proxy_route {
   depends_on = [aws_apigatewayv2_integration.moneymate_api_lambda_integration]

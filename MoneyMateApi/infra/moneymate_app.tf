@@ -1,19 +1,19 @@
 # Create DigitalOcean App
 
 data "digitalocean_container_registry" moneymate_api_registry {
-  name = "moneymate-api"
+  name  = "moneymate-api"
   count = terraform.workspace == "prod" ? 1 : 0
 }
 
 resource "digitalocean_app" "moneymate_api" {
   count = terraform.workspace == "prod" ? 1 : 0
-  
+
   spec {
     name   = "moneymate-app"
     region = "syd1"
 
     service {
-      name               = "moneymate-api"
+      name = "moneymate-api"
       # environment_slug   = "dotnet"
       instance_count     = 1
       instance_size_slug = "basic-xxs"
@@ -45,12 +45,12 @@ resource "digitalocean_app" "moneymate_api" {
         key   = "AWS_REGION"
         value = "ap-southeast-2"
       }
-      
+
       # Application environment variables
       env {
-        key = "ASPNETCORE_ENVIRONMENT"
+        key   = "ASPNETCORE_ENVIRONMENT"
         value = terraform.workspace
-        type = "GENERAL"
+        type  = "GENERAL"
       }
     }
   }
