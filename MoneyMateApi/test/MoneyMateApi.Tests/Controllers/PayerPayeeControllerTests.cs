@@ -26,7 +26,7 @@ namespace MoneyMateApi.Tests.Controllers
         [Fact]
         public void GivenNullPayerPayeeService_WhenConstructorInvoked_ThenThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new PayersPayeesController(null));
+            Assert.Throws<ArgumentNullException>(() => new PayersPayeesController(null!));
         }
 
         [Theory]

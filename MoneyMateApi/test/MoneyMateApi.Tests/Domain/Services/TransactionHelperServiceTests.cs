@@ -197,7 +197,7 @@ namespace MoneyMateApi.Tests.Domain.Services
                 var service = new TransactionHelperService(
                     _mockTransactionRepository.Object, _mockTagRepository.Object, _mockMapper.Object);
 
-                ITransactionSpecification calledWithSpecification = null;
+                ITransactionSpecification calledWithSpecification = null!;
                 _mockTransactionRepository
                     .Setup(repository => repository.GetTransactions(new DateRange(DateTime.MinValue, DateTime.MaxValue),
                         It.IsAny<ITransactionSpecification>()))

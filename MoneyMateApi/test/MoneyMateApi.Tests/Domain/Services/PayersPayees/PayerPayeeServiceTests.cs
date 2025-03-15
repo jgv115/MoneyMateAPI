@@ -32,7 +32,7 @@ public class PayerPayeeServiceTests
     public void GivenNullRepository_WhenConstructorInvoked_ThenArgumentNullExceptionThrown()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new PayerPayeeService(null, _mockPayerPayeeEnricher.Object));
+            new PayerPayeeService(null!, _mockPayerPayeeEnricher.Object));
     }
 
     [Fact]

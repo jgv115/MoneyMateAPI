@@ -58,7 +58,7 @@ public class AddSubcategoryOperationTests
 
         _mockCategoriesRepository
             .Setup(repository => repository.GetCategory(existingCategoryName))
-            .ReturnsAsync((Category) null);
+            .ReturnsAsync((Category) null!);
 
         await Assert.ThrowsAsync<UpdateCategoryOperationException>(() => handler.ExecuteOperation());
     }

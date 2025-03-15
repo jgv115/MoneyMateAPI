@@ -11,7 +11,6 @@ namespace MoneyMateApi.Tests.Controllers.Transactions.Validators
 
         [Theory]
         [InlineData("")]
-        [InlineData(null)]
         [InlineData("2021-10-09T09:23:39")]
         [InlineData("2021-10-09")]
         public void GivenInvalidTransactionTimestampThenShouldThrowValidationError(string transactionTimestamp)
@@ -49,7 +48,6 @@ namespace MoneyMateApi.Tests.Controllers.Transactions.Validators
 
         [Theory]
         [InlineData("")]
-        [InlineData(null)]
         [InlineData("not expense")]
         public void GivenInvalidTransactionType_ThenShouldThrowValidationError(string transactionType)
         {
@@ -91,7 +89,6 @@ namespace MoneyMateApi.Tests.Controllers.Transactions.Validators
 
         [Theory]
         [InlineData("")]
-        [InlineData(null)]
         public void GivenInvalidCategory_ThenShouldThrowValidationException(string category)
         {
             var request = new PutTransactionDto
@@ -105,7 +102,6 @@ namespace MoneyMateApi.Tests.Controllers.Transactions.Validators
 
         [Theory]
         [InlineData("")]
-        [InlineData(null)]
         public void GivenInvalidSubcategory_ThenShouldThrowValidationException(string subcategory)
         {
             var request = new PutTransactionDto

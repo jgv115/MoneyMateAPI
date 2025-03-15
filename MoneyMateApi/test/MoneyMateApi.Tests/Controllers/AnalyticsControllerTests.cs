@@ -26,7 +26,7 @@ public class AnalyticsControllerTests
     [Fact]
     public void GivenNullService_WhenConstructorInvoked_ThenArgumentNullExceptionThrown()
     {
-        Assert.Throws<ArgumentNullException>(() => new AnalyticsController(null));
+        Assert.Throws<ArgumentNullException>(() => new AnalyticsController(null!));
     }
 
     [Fact]

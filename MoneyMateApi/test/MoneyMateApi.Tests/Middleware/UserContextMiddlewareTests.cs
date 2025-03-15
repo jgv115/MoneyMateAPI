@@ -10,7 +10,7 @@ namespace MoneyMateApi.Tests.Middleware
     public class UserContextMiddlewareTests
     {
         [Fact]
-        public async void GivenUserIdInHttpContext_ThenUserIdSetInCurrentUserContext()
+        public async Task GivenUserIdInHttpContext_ThenUserIdSetInCurrentUserContext()
         {
             var userId = "userId123";
             var profileId = Guid.NewGuid();
@@ -26,7 +26,7 @@ namespace MoneyMateApi.Tests.Middleware
         }
 
         [Fact]
-        public async void InvokeAsync_ShouldThrowArgumentNullException_WhenIdentifierClaimIsNull()
+        public async Task InvokeAsync_ShouldThrowArgumentNullException_WhenIdentifierClaimIsNull()
         {
             var sut = new UserContextMiddleware(async _ => await Task.Delay(0));
             await Assert.ThrowsAsync<ArgumentNullException>(() =>

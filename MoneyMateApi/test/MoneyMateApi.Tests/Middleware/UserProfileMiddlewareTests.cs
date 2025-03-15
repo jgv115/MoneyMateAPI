@@ -17,7 +17,7 @@ public class UserProfileMiddlewareTests
     private readonly Mock<IProfileService> _mockProfileService = new();
 
     [Fact]
-    public async void GivenMoneyMateProfileHeaderAndProfileBelongsToUser_ThenProfileIdSetInCurrentUserContext()
+    public async Task GivenMoneyMateProfileHeaderAndProfileBelongsToUser_ThenProfileIdSetInCurrentUserContext()
     {
         var userId = "userId123";
         var profileId = Guid.NewGuid();
@@ -38,7 +38,7 @@ public class UserProfileMiddlewareTests
     }
 
     [Fact]
-    public async void GivenMoneyMateProfileHeaderAndProfileDoesNotBelongToUser_ThenProfileIdForbiddenExceptionThrown()
+    public async Task GivenMoneyMateProfileHeaderAndProfileDoesNotBelongToUser_ThenProfileIdForbiddenExceptionThrown()
     {
         var userId = "userId123";
         var profileId = Guid.NewGuid();
@@ -58,7 +58,7 @@ public class UserProfileMiddlewareTests
     }
 
     [Fact]
-    public async void GivenMissingMoneyMateProfileHeader_ThenInvalidProfileExceptionThrown()
+    public async Task GivenMissingMoneyMateProfileHeader_ThenInvalidProfileExceptionThrown()
     {
         var userId = "userId123";
         var currentUserContext = new CurrentUserContext();
@@ -82,7 +82,7 @@ public class UserProfileMiddlewareTests
     }
 
     [Fact]
-    public async void GivenInvalidMateProfileHeader_ThenInvalidProfileIdExceptionThrown()
+    public async Task GivenInvalidMateProfileHeader_ThenInvalidProfileIdExceptionThrown()
     {
         var userId = "userId123";
         var currentUserContext = new CurrentUserContext();

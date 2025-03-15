@@ -26,7 +26,7 @@ public class CategoriesControllerTests
     [Fact]
     public void GivenNullCategoriesService_WhenConstructorInvoked_ThenArgumentNullExceptionThrown()
     {
-        Assert.Throws<ArgumentNullException>(() => new CategoriesController(null));
+        Assert.Throws<ArgumentNullException>(() => new CategoriesController(null!));
     }
 
     [Fact]

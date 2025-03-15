@@ -22,7 +22,7 @@ public class UpdateSubcategoryNameOperationTests
             "newsubcategory");
 
         _mockCategoryRepository.Setup(repository => repository.GetCategory("categoryName"))
-            .ReturnsAsync((Category) null);
+            .ReturnsAsync((Category) null!);
 
         await Assert.ThrowsAsync<UpdateCategoryOperationException>(() => operation.ExecuteOperation());
     }

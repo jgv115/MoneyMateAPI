@@ -31,13 +31,13 @@ namespace MoneyMateApi.Tests.Services
             [Fact]
             public void GivenNullTransactionService_ThenArgumentNullExceptionThrown()
             {
-                Assert.Throws<ArgumentNullException>(() => new AnalyticsService(null, _mockTimePeriodHelper.Object));
+                Assert.Throws<ArgumentNullException>(() => new AnalyticsService(null!, _mockTimePeriodHelper.Object));
             }
 
             [Fact]
             public void GivenNullTimePeriodHelper_ThenArgumentNullExceptionThrown()
             {
-                Assert.Throws<ArgumentNullException>(() => new AnalyticsService(_mockTransactionService.Object, null));
+                Assert.Throws<ArgumentNullException>(() => new AnalyticsService(_mockTransactionService.Object, null!));
             }
         }
 
@@ -696,8 +696,8 @@ namespace MoneyMateApi.Tests.Services
                 const int numberOfPayerPayee2Transactions = 20;
                 const decimal payerPayee2TransactionsAmount = (decimal)34.5;
 
-                string expectedPayerPayeeId3 = "";
-                const string expectedPayerPayeeName3 = null;
+                const string expectedPayerPayeeId3 = "";
+                const string expectedPayerPayeeName3 = null!;
                 const int numberOfPayerPayee3Transactions = 10;
                 const decimal payerPayee3TransactionsAmount = (decimal)34.5;
 
