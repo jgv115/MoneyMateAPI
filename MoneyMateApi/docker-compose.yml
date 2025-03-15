@@ -39,5 +39,5 @@ services:
     volumes:
       - ./infra:/code
     working_dir: /code
-    entrypoint: ["/bin/sh", "-c", "terraform init && terraform apply "]
+    entrypoint: ["/bin/sh", "-c", "terraform init && terraform apply -auto-approve"]
     
