@@ -22,7 +22,9 @@ resource "cloudflare_dns_record" "moneymate_cloudflare_record_prod" {
 
   zone_id = data.cloudflare_zones.benong_zones.result.0.id
   name = lookup(var.cloudflare_dns_entry_name, terraform.workspace, "")
-  content = digitalocean_app.moneymate_api[count.index].live_domain
+  
+  // Default ingress from the Digital Ocean app will include https://. Replace it to get the proper hostname
+  content = replace(digitalocean_app.moneymate_api[count.index].default_ingress, "https://", "")
   type = "CNAME"
   ttl = 3600
   proxied = false

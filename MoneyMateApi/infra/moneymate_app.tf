@@ -11,6 +11,10 @@ resource "digitalocean_app" "moneymate_api" {
   spec {
     name   = "moneymate-app"
     region = "syd1"
+    domain {
+      name = lookup(var.domain_names, terraform.workspace, "")
+      type = "ALIAS"
+    }
 
     service {
       name = "moneymate-api"
