@@ -26,6 +26,7 @@
         <PackageReference Include="FluentDateTime" Version="3.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.11" />
         <PackageReference Include="Npgsql" Version="9.0.2" />
+        <PackageReference Include="OpenAI" Version="2.3.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     </ItemGroup>
     <ItemGroup>
@@ -43,5 +44,8 @@
     </ItemGroup>
     <ItemGroup>
       <Content Remove="infra\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Domain\Services\" />
     </ItemGroup>
 </Project>

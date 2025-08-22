@@ -4,8 +4,17 @@
     "MoneyMateApi": {
       "commandName": "Project",
       "launchBrowser": false,
+      "applicationUrl": "http://localhost:5760",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "dev"
+      }
+    },
+    "MoneyMateApi_Test": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5760",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "test"
       }
     }
   }

@@ -138,7 +138,7 @@ namespace MoneyMateApi
             {
                 IConfigurationRoot configuration = new ConfigurationBuilder().Build();
                 AWSOptions awsOptions = configuration.GetAWSOptions();
-                awsOptions.Credentials = new EnvironmentVariablesAWSCredentials();
+                // awsOptions.Credentials = new EnvironmentVariablesAWSCredentials();
                 services.AddDefaultAWSOptions(awsOptions);
 
                 services.AddAWSService<IAmazonLambda>();
