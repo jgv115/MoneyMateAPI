@@ -45,7 +45,4 @@
     <ItemGroup>
       <Content Remove="infra\**" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Domain\Services\" />
-    </ItemGroup>
 </Project>
