@@ -5,11 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
-using MoneyMateApi.Domain.Services.PayerPayees;
+using MoneyMateApi.Domain.PayerPayees;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories.CockroachDb.Entities;
 using MoneyMateApi.Repositories.Exceptions;
 using Npgsql;
+using PayerPayee = MoneyMateApi.Repositories.CockroachDb.Entities.PayerPayee;
 
 namespace MoneyMateApi.Repositories.CockroachDb
 {
@@ -122,7 +123,7 @@ namespace MoneyMateApi.Repositories.CockroachDb
             _userContext = userContext;
         }
 
-        private async Task<IEnumerable<Domain.Models.PayerPayee>> GetPayersPayees(string payerPayeeType,
+        private async Task<IEnumerable<Domain.PayerPayees.PayerPayee>> GetPayersPayees(string payerPayeeType,
             PaginationSpec paginationSpec)
         {
             var query =
@@ -147,11 +148,11 @@ namespace MoneyMateApi.Repositories.CockroachDb
                 var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
                     new { profile_id = _userContext.ProfileId, payerPayeeType });
 
-                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.Models.PayerPayee>>(payerPayees);
+                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.PayerPayees.PayerPayee>>(payerPayees);
             }
         }
 
-        private async Task<Domain.Models.PayerPayee> GetPayerPayee(string payerPayeeId, string payerPayeeType)
+        private async Task<Domain.PayerPayees.PayerPayee> GetPayerPayee(string payerPayeeId, string payerPayeeType)
         {
             var query =
                 @"
@@ -177,26 +178,26 @@ namespace MoneyMateApi.Repositories.CockroachDb
                 var payerPayees = await PayerPayeeDapperHelpers.QueryAndBuildPayerPayees(connection, query,
                     new { profile_id = _userContext.ProfileId, payerPayeeType, payerPayeeId });
 
-                return _mapper.Map<PayerPayee, Domain.Models.PayerPayee>(
+                return _mapper.Map<PayerPayee, Domain.PayerPayees.PayerPayee>(
                     payerPayees.FirstOrDefault((PayerPayee)null));
             }
         }
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> GetPayers(PaginationSpec paginationSpec)
+        public Task<IEnumerable<Domain.PayerPayees.PayerPayee>> GetPayers(PaginationSpec paginationSpec)
             => GetPayersPayees("payer", paginationSpec);
 
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> GetPayees(PaginationSpec paginationSpec)
+        public Task<IEnumerable<Domain.PayerPayees.PayerPayee>> GetPayees(PaginationSpec paginationSpec)
             => GetPayersPayees("payee", paginationSpec);
 
 
-        public Task<Domain.Models.PayerPayee> GetPayer(Guid payerPayeeId)
+        public Task<Domain.PayerPayees.PayerPayee> GetPayer(Guid payerPayeeId)
             => GetPayerPayee(payerPayeeId.ToString(), "payer");
 
-        public Task<Domain.Models.PayerPayee> GetPayee(Guid payerPayeeId)
+        public Task<Domain.PayerPayees.PayerPayee> GetPayee(Guid payerPayeeId)
             => GetPayerPayee(payerPayeeId.ToString(), "payee");
 
-        private async Task InsertPayerPayee(Domain.Models.PayerPayee newPayerPayee,
+        private async Task InsertPayerPayee(Domain.PayerPayees.PayerPayee newPayerPayee,
             Constants.PayerPayeeType payerPayeeType,
             bool enforceUnique = true)
         {
@@ -251,23 +252,23 @@ namespace MoneyMateApi.Repositories.CockroachDb
         }
 
         public async Task CreatePayerOrPayee(Constants.PayerPayeeType payerPayeeType,
-            Domain.Models.PayerPayee newPayerPayee)
+            Domain.PayerPayees.PayerPayee newPayerPayee)
         {
             await InsertPayerPayee(newPayerPayee, payerPayeeType);
         }
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> FindPayer(string searchQuery)
+        public Task<IEnumerable<Domain.PayerPayees.PayerPayee>> FindPayer(string searchQuery)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> FindPayee(string searchQuery)
+        public Task<IEnumerable<Domain.PayerPayees.PayerPayee>> FindPayee(string searchQuery)
         {
             throw new NotImplementedException();
         }
 
 
-        private async Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayerPayee(string autocompleteQuery,
+        private async Task<IEnumerable<Domain.PayerPayees.PayerPayee>> AutocompletePayerPayee(string autocompleteQuery,
             string payerPayeeType)
         {
             var query =
@@ -299,17 +300,17 @@ namespace MoneyMateApi.Repositories.CockroachDb
                         payerPayeeName = autocompleteQuery
                     });
 
-                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.Models.PayerPayee>>(payerPayees);
+                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.PayerPayees.PayerPayee>>(payerPayees);
             }
         }
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayer(string autocompleteQuery)
+        public Task<IEnumerable<Domain.PayerPayees.PayerPayee>> AutocompletePayer(string autocompleteQuery)
             => AutocompletePayerPayee(autocompleteQuery, "payer");
 
-        public Task<IEnumerable<Domain.Models.PayerPayee>> AutocompletePayee(string autocompleteQuery)
+        public Task<IEnumerable<Domain.PayerPayees.PayerPayee>> AutocompletePayee(string autocompleteQuery)
             => AutocompletePayerPayee(autocompleteQuery, "payee");
 
-        public async Task<IEnumerable<Domain.Models.PayerPayee>> GetSuggestedPayersOrPayees(
+        public async Task<IEnumerable<Domain.PayerPayees.PayerPayee>> GetSuggestedPayersOrPayees(
             Constants.PayerPayeeType payerPayeeType, IPayerPayeeSuggestionParameters suggestionParameters,
             int limit = 20)
         {
@@ -328,11 +329,11 @@ namespace MoneyMateApi.Repositories.CockroachDb
                     connection,
                     suggestionQueryBuilder.BuildQuery(),
                     suggestionQueryBuilder.BuildQueryParams());
-                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.Models.PayerPayee>>(payerPayees);
+                return _mapper.Map<IEnumerable<PayerPayee>, IEnumerable<Domain.PayerPayees.PayerPayee>>(payerPayees);
             }
         }
 
-        public Task PutPayerOrPayee(Constants.PayerPayeeType type, Domain.Models.PayerPayee newPayerPayee)
+        public Task PutPayerOrPayee(Constants.PayerPayeeType type, Domain.PayerPayees.PayerPayee newPayerPayee)
         {
             return InsertPayerPayee(newPayerPayee, type, enforceUnique: false);
         }

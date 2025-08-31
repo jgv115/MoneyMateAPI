@@ -1,7 +1,7 @@
 using System;
 using MoneyMateApi.Controllers.PayersPayees.Dtos;
 
-namespace MoneyMateApi.Domain.Services.PayerPayees;
+namespace MoneyMateApi.Domain.PayerPayees;
 
 public record CategoryPayerPayeeSuggestionParameters(string Category)
     : IPayerPayeeSuggestionParameters;

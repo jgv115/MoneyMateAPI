@@ -5,12 +5,11 @@ using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Categories.Dtos;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations;
+using MoneyMateApi.Domain.Categories.UpdateCategoryOperations;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories;
 
-namespace MoneyMateApi.Domain.Services.Categories
+namespace MoneyMateApi.Domain.Categories
 {
     public class CategoriesService : ICategoriesService
     {

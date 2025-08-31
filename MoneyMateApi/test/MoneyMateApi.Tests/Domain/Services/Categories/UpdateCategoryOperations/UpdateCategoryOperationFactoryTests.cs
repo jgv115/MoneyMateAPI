@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Moq;
 using MoneyMateApi.Controllers.Categories.Dtos;
-using MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations;
-using MoneyMateApi.Domain.Services.Transactions;
+using MoneyMateApi.Domain.Categories.UpdateCategoryOperations;
+using MoneyMateApi.Domain.Transactions;
 using MoneyMateApi.Repositories;
 using Xunit;
 

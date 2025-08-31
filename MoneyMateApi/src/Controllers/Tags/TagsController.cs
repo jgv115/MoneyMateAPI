@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MoneyMateApi.Controllers.Tags.Dtos;
-using MoneyMateApi.Domain.Services.Tags;
+using MoneyMateApi.Domain.Tags;
 
 namespace MoneyMateApi.Controllers.Tags;
 

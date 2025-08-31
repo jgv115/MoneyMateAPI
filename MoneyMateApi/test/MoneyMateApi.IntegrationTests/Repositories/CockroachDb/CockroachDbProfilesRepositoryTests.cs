@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Profiles;
 using MoneyMateApi.IntegrationTests.Helpers;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories.CockroachDb;

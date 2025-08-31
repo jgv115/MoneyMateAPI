@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MoneyMateApi.Domain.Models
+namespace MoneyMateApi.Domain.Transactions
 {
     public record Transaction
     {

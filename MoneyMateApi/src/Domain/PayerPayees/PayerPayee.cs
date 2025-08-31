@@ -1,4 +1,4 @@
-namespace MoneyMateApi.Domain.Models
+namespace MoneyMateApi.Domain.PayerPayees
 {
     public record PayerPayee
     {

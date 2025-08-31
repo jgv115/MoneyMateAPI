@@ -56,7 +56,7 @@ namespace MoneyMateApi.Repositories.CockroachDb
         }
 
 
-        public async Task<Domain.Models.Category> GetCategory(string categoryName)
+        public async Task<Domain.Categories.Category> GetCategory(string categoryName)
         {
             var query =
                 @"SELECT c.Id, c.name as Name, tt.name as TransactionType, s.Id, s.Name as Name FROM category c
@@ -69,11 +69,11 @@ namespace MoneyMateApi.Repositories.CockroachDb
             {
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
                     new {profile_id = _userContext.ProfileId, categoryName});
-                return _mapper.Map<Category, Domain.Models.Category>(categories.FirstOrDefault((Category) null));
+                return _mapper.Map<Category, Domain.Categories.Category>(categories.FirstOrDefault((Category) null));
             }
         }
 
-        public async Task<IEnumerable<Domain.Models.Category>> GetAllCategories()
+        public async Task<IEnumerable<Domain.Categories.Category>> GetAllCategories()
         {
             var query =
                 @"SELECT c.id, c.name as Name, tt.name as TransactionType, s.Id, s.name as Name FROM category c
@@ -86,11 +86,11 @@ namespace MoneyMateApi.Repositories.CockroachDb
             {
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
                     new {profile_id = _userContext.ProfileId});
-                return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories);
+                return _mapper.Map<IEnumerable<Category>, List<Domain.Categories.Category>>(categories);
             }
         }
 
-        public async Task<IEnumerable<Domain.Models.Category>> GetAllCategoriesForTransactionType(
+        public async Task<IEnumerable<Domain.Categories.Category>> GetAllCategoriesForTransactionType(
             Constants_TransactionType transactionType)
         {
             var query =
@@ -105,11 +105,11 @@ namespace MoneyMateApi.Repositories.CockroachDb
                 var categories = await CategoryDapperHelpers.QueryAndBuildCategories(connection, query,
                     new {profile_id = _userContext.ProfileId, transaction_type = transactionType.ToProperString()});
 
-                return _mapper.Map<IEnumerable<Category>, List<Domain.Models.Category>>(categories);
+                return _mapper.Map<IEnumerable<Category>, List<Domain.Categories.Category>>(categories);
             }
         }
 
-        public async Task CreateCategory(Domain.Models.Category newCategory)
+        public async Task CreateCategory(Domain.Categories.Category newCategory)
         {
             using (var connection = _context.CreateConnection())
             {
@@ -166,7 +166,7 @@ namespace MoneyMateApi.Repositories.CockroachDb
             }
         }
 
-        public async Task UpdateCategoryName(Domain.Models.Category category, string newCategoryName)
+        public async Task UpdateCategoryName(Domain.Categories.Category category, string newCategoryName)
         {
             using (var connection = _context.CreateConnection())
             {

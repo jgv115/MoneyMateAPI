@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Profiles;
 
 namespace MoneyMateApi.Repositories;
 

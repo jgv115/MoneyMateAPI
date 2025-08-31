@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Tags;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories.Exceptions;
 using Npgsql;

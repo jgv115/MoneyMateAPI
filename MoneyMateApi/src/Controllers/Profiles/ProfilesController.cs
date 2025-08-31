@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MoneyMateApi.Controllers.Profiles.Dtos;
-using MoneyMateApi.Domain.Services.Profiles;
+using MoneyMateApi.Domain.Profiles;
 
 namespace MoneyMateApi.Controllers.Profiles
 {

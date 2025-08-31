@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MoneyMateApi.Controllers.Exceptions;
-using MoneyMateApi.Domain.Services.Categories.Exceptions;
+using MoneyMateApi.Domain.Categories.Exceptions;
 using MoneyMateApi.Middleware.Exceptions;
 using MoneyMateApi.Repositories.Exceptions;
 

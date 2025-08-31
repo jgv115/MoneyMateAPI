@@ -7,7 +7,7 @@ namespace MoneyMateApi.Repositories.CockroachDb.Profiles
     {
         public TransactionEntityProfile()
         {
-            CreateMap<Transaction, Domain.Models.Transaction>()
+            CreateMap<Transaction, Domain.Transactions.Transaction>()
                 .ForMember(transaction => transaction.TransactionId,
                     opt => opt.MapFrom(transaction => transaction.Id))
                 .ForMember(transaction => transaction.TransactionTimestamp,

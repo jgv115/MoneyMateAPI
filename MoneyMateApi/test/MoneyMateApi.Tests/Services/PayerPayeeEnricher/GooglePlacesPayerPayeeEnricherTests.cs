@@ -6,7 +6,7 @@ using MoneyMateApi.Connectors.GooglePlaces.Models;
 using Moq;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.PayersPayees.ViewModels;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.PayerPayees;
 using MoneyMateApi.Repositories;
 using MoneyMateApi.Services.PayerPayeeEnricher;
 using MoneyMateApi.Services.PayerPayeeEnricher.Exceptions;

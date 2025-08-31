@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Analytics.ViewModels;
 using MoneyMateApi.Controllers.Transactions.Dtos;
-using MoneyMateApi.Domain.Services.Transactions;
 using MoneyMateApi.Helpers.TimePeriodHelpers;
-using MoneyMateApi.Domain.Services;
+using MoneyMateApi.Domain.Transactions;
 
 namespace MoneyMateApi.Services
 {

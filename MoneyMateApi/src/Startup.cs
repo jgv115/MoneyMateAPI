@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ClientModel;
 using System.Linq;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Lambda;
@@ -16,13 +17,17 @@ using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 using MoneyMateApi.Connectors.GooglePlaces;
 using MoneyMateApi.Connectors.GooglePlaces.Options;
+using MoneyMateApi.Connectors.LanguageModels;
+using MoneyMateApi.Connectors.LanguageModels.Options;
 using MoneyMateApi.Constants;
-using MoneyMateApi.Domain.Services.Categories;
-using MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations;
-using MoneyMateApi.Domain.Services.PayerPayees;
-using MoneyMateApi.Domain.Services.Profiles;
-using MoneyMateApi.Domain.Services.Tags;
-using MoneyMateApi.Domain.Services.Transactions;
+using MoneyMateApi.Domain.Automation;
+using MoneyMateApi.Domain.Automation.BankStatementParser;
+using MoneyMateApi.Domain.Categories;
+using MoneyMateApi.Domain.Categories.UpdateCategoryOperations;
+using MoneyMateApi.Domain.PayerPayees;
+using MoneyMateApi.Domain.Profiles;
+using MoneyMateApi.Domain.Tags;
+using MoneyMateApi.Domain.Transactions;
 using MoneyMateApi.Helpers;
 using MoneyMateApi.Helpers.TimePeriodHelpers;
 using MoneyMateApi.Middleware;
@@ -33,6 +38,8 @@ using MoneyMateApi.Repositories.CockroachDb.Profiles;
 using MoneyMateApi.Services;
 using MoneyMateApi.Services.Initialisation.CategoryInitialisation;
 using MoneyMateApi.Services.PayerPayeeEnricher;
+using OpenAI;
+using OpenAI.Chat;
 
 namespace MoneyMateApi
 {
@@ -120,6 +127,26 @@ namespace MoneyMateApi
             services.Configure<GooglePlaceApiOptions>(options =>
                 Configuration.GetSection("GooglePlaceApi").Bind(options));
 
+            services.AddSingleton<IBankStatementParser, LlmBankStatementParser>();
+            
+            // Add LanguageModels
+            services.AddSingleton<OpenAiCompatibleLanguageModel>(provider =>
+            {
+                // Only allow single provider config for now. Could potentially make a model switcher class in the future
+                var openAiSdkOptions = Configuration.GetValue<OpenAiSdkOptions>("OpenAiSdk");
+                if (openAiSdkOptions is null)
+                    throw new NullReferenceException("OpenAiSdkOptions is null, cannot start application");
+                
+                var chatClient = new ChatClient(openAiSdkOptions.ModelName,
+                    new ApiKeyCredential(openAiSdkOptions.ApiKey), new OpenAIClientOptions
+                    {
+                        Endpoint = new Uri("https://generativelanguage.googleapis.com/v1beta/openai/")
+                    });
+                
+                return new OpenAiCompatibleLanguageModel(openAiSdkOptions.ModelName, chatClient);
+            });
+
+            
             services.AddAutoMapper(typeof(TransactionProfile), typeof(CategoryProfile), typeof(CategoryEntityProfile));
 
             var awsSettings = Configuration.GetSection("AWS");

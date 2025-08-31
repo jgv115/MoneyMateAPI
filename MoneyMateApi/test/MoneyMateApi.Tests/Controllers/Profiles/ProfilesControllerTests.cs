@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using MoneyMateApi.Controllers.Profiles;
 using MoneyMateApi.Controllers.Profiles.Dtos;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Profiles;
+using MoneyMateApi.Domain.Profiles;
 using Xunit;
 
 namespace MoneyMateApi.Tests.Controllers.Profiles;

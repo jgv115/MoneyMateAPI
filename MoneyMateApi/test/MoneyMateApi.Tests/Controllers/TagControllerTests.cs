@@ -3,8 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MoneyMateApi.Controllers.Tags;
 using MoneyMateApi.Controllers.Tags.Dtos;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Tags;
+using MoneyMateApi.Domain.Tags;
 using Moq;
 using Xunit;
 

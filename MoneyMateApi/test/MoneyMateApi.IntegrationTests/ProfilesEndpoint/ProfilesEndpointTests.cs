@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using MoneyMateApi.Controllers.Profiles.Dtos;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Profiles;
 using MoneyMateApi.IntegrationTests.Extensions;
 using MoneyMateApi.IntegrationTests.Helpers;
 using MoneyMateApi.IntegrationTests.WebApplicationFactories;

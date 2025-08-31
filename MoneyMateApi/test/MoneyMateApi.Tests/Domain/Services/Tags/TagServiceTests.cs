@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Tags;
+using MoneyMateApi.Domain.Tags;
 using MoneyMateApi.Repositories;
 using Moq;
 using Xunit;

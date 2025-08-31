@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using MoneyMateApi.Controllers.PayersPayees.Dtos;
 using MoneyMateApi.Controllers.PayersPayees.ViewModels;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.PayerPayees;
 using MoneyMateApi.IntegrationTests.Extensions;
 using MoneyMateApi.IntegrationTests.Helpers;
 using MoneyMateApi.IntegrationTests.WebApplicationFactories;

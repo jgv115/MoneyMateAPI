@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MoneyMateApi.Constants;
 
-namespace MoneyMateApi.Domain.Models
+namespace MoneyMateApi.Domain.Categories
 {
     public record Category
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.PayerPayees;
 using MoneyMateApi.Repositories.CockroachDb;
 using MoneyMateApi.Repositories.CockroachDb.Profiles;
 

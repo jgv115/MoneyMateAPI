@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Dapper;
-using MoneyMateApi.Domain.Services.Transactions.Specifications;
+using MoneyMateApi.Domain.Transactions.Specifications;
 using MoneyMateApi.Helpers.TimePeriodHelpers;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories.CockroachDb.Entities;
@@ -74,7 +74,7 @@ namespace MoneyMateApi.Repositories.CockroachDb
             _userContext = userContext;
         }
 
-        public async Task<Domain.Models.Transaction> GetTransactionById(string transactionId)
+        public async Task<Domain.Transactions.Transaction> GetTransactionById(string transactionId)
         {
             var query =
                 @"SELECT transaction.id,
@@ -110,12 +110,12 @@ namespace MoneyMateApi.Repositories.CockroachDb
                 var transactions = await TransactionDapperHelpers.QueryAndBuildTransactions(connection, query,
                     new { profile_id = _userContext.ProfileId, transactionId });
 
-                return _mapper.Map<Transaction, Domain.Models.Transaction>(
+                return _mapper.Map<Transaction, Domain.Transactions.Transaction>(
                     transactions.FirstOrDefault((Transaction)null));
             }
         }
 
-        public async Task<IEnumerable<Domain.Models.Transaction>> GetTransactions(DateRange dateRange,
+        public async Task<IEnumerable<Domain.Transactions.Transaction>> GetTransactions(DateRange dateRange,
             ITransactionSpecification spec)
         {
             var query =
@@ -166,13 +166,13 @@ namespace MoneyMateApi.Repositories.CockroachDb
                     });
 
                 var mappedTransactions =
-                    _mapper.Map<IEnumerable<Transaction>, IEnumerable<Domain.Models.Transaction>>(transactions);
+                    _mapper.Map<IEnumerable<Transaction>, IEnumerable<Domain.Transactions.Transaction>>(transactions);
 
                 return mappedTransactions.Where(spec.IsSatisfied).ToList();
             }
         }
 
-        public async Task StoreTransaction(Domain.Models.Transaction newTransaction)
+        public async Task StoreTransaction(Domain.Transactions.Transaction newTransaction)
         {
             const string insertTransactionQuery = @"
                 WITH ins (transaction_id, user_identifier, timestamp, transaction_type, amount, category, subcategory, payerpayeeid, notes, profile_id) AS
@@ -235,7 +235,7 @@ namespace MoneyMateApi.Repositories.CockroachDb
             }
         }
 
-        public Task PutTransaction(Domain.Models.Transaction newTransaction)
+        public Task PutTransaction(Domain.Transactions.Transaction newTransaction)
         {
             return StoreTransaction(newTransaction);
         }

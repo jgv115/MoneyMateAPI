@@ -8,8 +8,7 @@ using Moq;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Categories;
 using MoneyMateApi.Controllers.Categories.Dtos;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Categories;
+using MoneyMateApi.Domain.Categories;
 using Xunit;
 
 namespace MoneyMateApi.Tests.Controllers.Categories;

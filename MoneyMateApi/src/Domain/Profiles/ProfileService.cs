@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MoneyMateApi.Domain.Models;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories;
 using MoneyMateApi.Services.Initialisation.CategoryInitialisation;
 
-namespace MoneyMateApi.Domain.Services.Profiles;
+namespace MoneyMateApi.Domain.Profiles;
 
 public class ProfileService : IProfileService
 {

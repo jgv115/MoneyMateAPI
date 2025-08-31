@@ -1,5 +1,5 @@
 using MoneyMateApi.Controllers.Categories.Dtos;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Categories;
 using Profile = AutoMapper.Profile;
 
 namespace MoneyMateApi.Profiles

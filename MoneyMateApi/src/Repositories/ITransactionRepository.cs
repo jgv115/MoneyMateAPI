@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Transactions.Specifications;
+using MoneyMateApi.Domain.Transactions;
+using MoneyMateApi.Domain.Transactions.Specifications;
 using MoneyMateApi.Helpers.TimePeriodHelpers;
 
 namespace MoneyMateApi.Repositories

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MoneyMateApi.Constants;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Categories;
 
 namespace MoneyMateApi.Repositories
 {

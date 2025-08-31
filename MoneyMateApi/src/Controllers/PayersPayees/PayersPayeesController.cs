@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Exceptions;
 using MoneyMateApi.Controllers.PayersPayees.Dtos;
-using MoneyMateApi.Domain.Services.PayerPayees;
+using MoneyMateApi.Domain.PayerPayees;
 
 namespace MoneyMateApi.Controllers.PayersPayees
 {

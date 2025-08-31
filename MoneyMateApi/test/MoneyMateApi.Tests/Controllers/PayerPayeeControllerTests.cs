@@ -9,7 +9,7 @@ using MoneyMateApi.Controllers.Exceptions;
 using MoneyMateApi.Controllers.PayersPayees;
 using MoneyMateApi.Controllers.PayersPayees.Dtos;
 using MoneyMateApi.Controllers.PayersPayees.ViewModels;
-using MoneyMateApi.Domain.Services.PayerPayees;
+using MoneyMateApi.Domain.PayerPayees;
 using Xunit;
 
 namespace MoneyMateApi.Tests.Controllers

@@ -1,6 +1,6 @@
 using System;
 
-namespace MoneyMateApi.Domain.Models
+namespace MoneyMateApi.Domain.Profiles
 {
     public record Profile
     {

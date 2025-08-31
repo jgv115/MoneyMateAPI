@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MoneyMateApi.Controllers.Transactions.Dtos;
 
-namespace MoneyMateApi.Domain.Services.Transactions.Specifications
+namespace MoneyMateApi.Domain.Transactions.Specifications
 {
     public class TransactionSpecificationFactory
     {

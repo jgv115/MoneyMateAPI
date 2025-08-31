@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MoneyMateApi.Constants;
-using MoneyMateApi.Domain.Services.Profiles;
+using MoneyMateApi.Domain.Profiles;
 using MoneyMateApi.Middleware.Exceptions;
 
 namespace MoneyMateApi.Middleware

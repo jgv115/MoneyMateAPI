@@ -13,6 +13,9 @@
         <Content Include="appsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Content Include="bank_statement_parser_system_prompt.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Amazon.Lambda.TestUtilities" Version="2.0.0" />
@@ -28,5 +31,9 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\MoneyMateApi.csproj" />
         <ProjectReference Include="..\MoneyMateApi.Tests.Common\MoneyMateApi.Tests.Common.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Domain\Services\Automation\" />
     </ItemGroup>
 </Project>

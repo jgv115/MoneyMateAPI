@@ -5,11 +5,10 @@ using System.Threading.Tasks;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.PayersPayees.Dtos;
 using MoneyMateApi.Controllers.PayersPayees.ViewModels;
-using MoneyMateApi.Domain.Models;
 using MoneyMateApi.Repositories;
 using MoneyMateApi.Services.PayerPayeeEnricher;
 
-namespace MoneyMateApi.Domain.Services.PayerPayees
+namespace MoneyMateApi.Domain.PayerPayees
 {
     public class PayerPayeeService : IPayerPayeeService
     {

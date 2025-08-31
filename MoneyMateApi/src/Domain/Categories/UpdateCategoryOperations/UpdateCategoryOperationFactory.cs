@@ -2,10 +2,10 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using MoneyMateApi.Controllers.Categories.Dtos;
-using MoneyMateApi.Domain.Services.Transactions;
+using MoneyMateApi.Domain.Transactions;
 using MoneyMateApi.Repositories;
 
-namespace MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations
+namespace MoneyMateApi.Domain.Categories.UpdateCategoryOperations
 {
     public interface IUpdateCategoryOperationFactory
     {

@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations
+namespace MoneyMateApi.Domain.Categories.UpdateCategoryOperations
 {
     public interface IUpdateCategoryOperation
     {

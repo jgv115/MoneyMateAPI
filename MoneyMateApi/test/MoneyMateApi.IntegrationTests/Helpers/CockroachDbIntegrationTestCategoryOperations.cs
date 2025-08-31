@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using MoneyMateApi.Constants;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Categories;
 using MoneyMateApi.Repositories;
 using MoneyMateApi.Repositories.CockroachDb;
 

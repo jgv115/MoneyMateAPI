@@ -1,6 +1,6 @@
 using System;
 using MoneyMateApi.Controllers.PayersPayees.Dtos;
-using MoneyMateApi.Domain.Services.PayerPayees;
+using MoneyMateApi.Domain.PayerPayees;
 using Xunit;
 
 namespace MoneyMateApi.Tests.Domain.Services.PayersPayees;

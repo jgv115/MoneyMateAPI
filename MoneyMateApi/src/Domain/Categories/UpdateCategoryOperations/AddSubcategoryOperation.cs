@@ -2,10 +2,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using MoneyMateApi.Controllers.Categories.Dtos;
-using MoneyMateApi.Domain.Services.Categories.Exceptions;
+using MoneyMateApi.Domain.Categories.Exceptions;
 using MoneyMateApi.Repositories;
 
-namespace MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations
+namespace MoneyMateApi.Domain.Categories.UpdateCategoryOperations
 {
     public class AddSubcategoryOperation : IUpdateCategoryOperation
     {

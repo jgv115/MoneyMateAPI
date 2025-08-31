@@ -6,7 +6,7 @@ namespace MoneyMateApi.Repositories.CockroachDb.Profiles
     {
         public PayerPayeeEntityProfile()
         {
-            CreateMap<PayerPayee, Domain.Models.PayerPayee>()
+            CreateMap<PayerPayee, Domain.PayerPayees.PayerPayee>()
                 .ForMember(payerPayee => payerPayee.PayerPayeeId, opt =>
                     opt.MapFrom(
                         payerPayee => payerPayee.Id))

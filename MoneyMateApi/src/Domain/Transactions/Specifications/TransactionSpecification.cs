@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MoneyMateApi.Constants;
-using MoneyMateApi.Domain.Models;
 
-namespace MoneyMateApi.Domain.Services.Transactions.Specifications
+namespace MoneyMateApi.Domain.Transactions.Specifications
 {
     public class AndSpec : ITransactionSpecification
     {

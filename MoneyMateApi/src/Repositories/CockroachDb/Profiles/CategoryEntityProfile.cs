@@ -7,7 +7,7 @@ namespace MoneyMateApi.Repositories.CockroachDb.Profiles
     {
         public CategoryEntityProfile()
         {
-            CreateMap<Category, Domain.Models.Category>()
+            CreateMap<Category, Domain.Categories.Category>()
                 .ForMember(category => category.Subcategories, opt =>
                     opt.MapFrom(
                         category => category.Subcategories.Select(subcategory => subcategory.Name)))

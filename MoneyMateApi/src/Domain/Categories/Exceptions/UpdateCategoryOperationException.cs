@@ -1,6 +1,6 @@
 using System;
 
-namespace MoneyMateApi.Domain.Services.Categories.Exceptions
+namespace MoneyMateApi.Domain.Categories.Exceptions
 {
     public class UpdateCategoryOperationException : Exception
     {

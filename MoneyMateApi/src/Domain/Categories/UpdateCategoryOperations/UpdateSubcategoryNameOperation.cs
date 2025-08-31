@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
-using MoneyMateApi.Domain.Services.Categories.Exceptions;
+using MoneyMateApi.Domain.Categories.Exceptions;
 using MoneyMateApi.Repositories;
 
-namespace MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations
+namespace MoneyMateApi.Domain.Categories.UpdateCategoryOperations
 {
     public class UpdateSubcategoryNameOperation : IUpdateCategoryOperation
     {

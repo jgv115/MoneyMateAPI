@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MoneyMateApi.Domain.Models;
 
-namespace MoneyMateApi.Domain.Services.Profiles;
+namespace MoneyMateApi.Domain.Profiles;
 
 public interface IProfileService
 {

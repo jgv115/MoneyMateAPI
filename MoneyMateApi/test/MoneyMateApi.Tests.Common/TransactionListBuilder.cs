@@ -1,7 +1,7 @@
 ﻿using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Transactions.Dtos;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Transactions;
+using MoneyMateApi.Domain.Tags;
+using MoneyMateApi.Domain.Transactions;
 
 namespace MoneyMateApi.Tests.Common;
 

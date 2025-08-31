@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MoneyMateApi.Controllers.Transactions.Dtos;
 
-namespace MoneyMateApi.Domain.Services.Transactions
+namespace MoneyMateApi.Domain.Transactions
 {
     public interface ITransactionHelperService
     {

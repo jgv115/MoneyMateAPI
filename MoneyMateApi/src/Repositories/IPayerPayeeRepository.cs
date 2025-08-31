@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MoneyMateApi.Constants;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.PayerPayees;
+using MoneyMateApi.Domain.PayerPayees;
 
 namespace MoneyMateApi.Repositories
 {

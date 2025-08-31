@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using MoneyMateApi.Connectors.GooglePlaces;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.PayersPayees.ViewModels;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.PayerPayees;
 using MoneyMateApi.Repositories;
 using MoneyMateApi.Services.PayerPayeeEnricher.Exceptions;
 

@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Categories.Dtos;
-using MoneyMateApi.Domain.Models;
 
-namespace MoneyMateApi.Domain.Services.Categories
+namespace MoneyMateApi.Domain.Categories
 {
     public interface ICategoriesService
     {

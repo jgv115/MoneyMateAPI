@@ -9,8 +9,8 @@ using MoneyMateApi.Repositories.CockroachDb;
 using MoneyMateApi.Repositories.CockroachDb.Entities;
 using MoneyMateApi.Repositories.Exceptions;
 using Xunit;
-using Profile = MoneyMateApi.Domain.Models.Profile;
-using Tag = MoneyMateApi.Domain.Models.Tag;
+using Profile = MoneyMateApi.Domain.Profiles.Profile;
+using Tag = MoneyMateApi.Domain.Tags.Tag;
 
 namespace MoneyMateApi.IntegrationTests.Repositories.CockroachDb;
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Categories.Dtos;
-using MoneyMateApi.Domain.Services.Categories;
+using MoneyMateApi.Domain.Categories;
 
 namespace MoneyMateApi.Controllers.Categories
 {

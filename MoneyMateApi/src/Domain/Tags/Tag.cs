@@ -1,5 +1,5 @@
 using System;
 
-namespace MoneyMateApi.Domain.Models;
+namespace MoneyMateApi.Domain.Tags;
 
 public record Tag(Guid Id, string Name);

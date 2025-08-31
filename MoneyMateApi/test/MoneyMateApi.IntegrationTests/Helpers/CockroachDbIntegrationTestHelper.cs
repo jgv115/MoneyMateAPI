@@ -8,7 +8,7 @@ using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories.CockroachDb;
 using MoneyMateApi.Repositories.CockroachDb.Entities;
 using MoneyMateApi.Repositories.CockroachDb.Profiles;
-using Profile = MoneyMateApi.Domain.Models.Profile;
+using Profile = MoneyMateApi.Domain.Profiles.Profile;
 
 namespace MoneyMateApi.IntegrationTests.Helpers;
 

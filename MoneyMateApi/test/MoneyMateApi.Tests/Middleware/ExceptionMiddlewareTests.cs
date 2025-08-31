@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using MoneyMateApi.Controllers.Exceptions;
-using MoneyMateApi.Domain.Services.Categories.Exceptions;
+using MoneyMateApi.Domain.Categories.Exceptions;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Middleware.Exceptions;
 using MoneyMateApi.Repositories.Exceptions;

@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
-using MoneyMateApi.Domain.Models;
 
-namespace MoneyMateApi.Domain.Services.Tags;
+namespace MoneyMateApi.Domain.Tags;
 
 public interface ITagService
 {

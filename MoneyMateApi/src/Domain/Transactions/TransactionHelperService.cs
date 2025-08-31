@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using MoneyMateApi.Controllers.Transactions.Dtos;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Transactions.Specifications;
+using MoneyMateApi.Domain.Tags;
+using MoneyMateApi.Domain.Transactions.Specifications;
 using MoneyMateApi.Helpers.TimePeriodHelpers;
 using MoneyMateApi.Repositories;
 
-namespace MoneyMateApi.Domain.Services.Transactions
+namespace MoneyMateApi.Domain.Transactions
 {
     public static class TransactionMappers
     {

@@ -7,7 +7,7 @@ using Moq;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Transactions;
 using MoneyMateApi.Controllers.Transactions.Dtos;
-using MoneyMateApi.Domain.Services.Transactions;
+using MoneyMateApi.Domain.Transactions;
 using MoneyMateApi.Tests.Common;
 using Xunit;
 

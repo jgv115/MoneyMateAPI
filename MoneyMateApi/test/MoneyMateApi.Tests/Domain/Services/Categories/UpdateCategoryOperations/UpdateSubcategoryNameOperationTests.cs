@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using MoneyMateApi.Constants;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Categories.Exceptions;
-using MoneyMateApi.Domain.Services.Categories.UpdateCategoryOperations;
+using MoneyMateApi.Domain.Categories;
+using MoneyMateApi.Domain.Categories.Exceptions;
+using MoneyMateApi.Domain.Categories.UpdateCategoryOperations;
 using MoneyMateApi.Repositories;
 using Xunit;
 

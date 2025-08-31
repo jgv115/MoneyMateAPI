@@ -1,4 +1,4 @@
-namespace MoneyMateApi.Domain.Services.PayerPayees;
+namespace MoneyMateApi.Domain.PayerPayees;
 
 public interface IPayerPayeeSuggestionParameters
 {

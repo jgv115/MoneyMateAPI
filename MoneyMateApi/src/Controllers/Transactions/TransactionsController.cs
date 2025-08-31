@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MoneyMateApi.Controllers.Transactions.Dtos;
-using MoneyMateApi.Domain.Services.Transactions;
+using MoneyMateApi.Domain.Transactions;
 
 namespace MoneyMateApi.Controllers.Transactions
 {

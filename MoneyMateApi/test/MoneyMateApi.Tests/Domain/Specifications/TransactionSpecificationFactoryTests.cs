@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using MoneyMateApi.Constants;
 using MoneyMateApi.Controllers.Transactions.Dtos;
-using MoneyMateApi.Domain.Models;
-using MoneyMateApi.Domain.Services.Transactions.Specifications;
+using MoneyMateApi.Domain.Transactions;
+using MoneyMateApi.Domain.Transactions.Specifications;
 using Xunit;
 
 namespace MoneyMateApi.Tests.Domain.Specifications;

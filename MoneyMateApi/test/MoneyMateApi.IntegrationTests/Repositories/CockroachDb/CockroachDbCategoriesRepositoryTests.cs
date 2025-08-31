@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using MoneyMateApi.Constants;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Categories;
 using MoneyMateApi.IntegrationTests.Helpers;
 using MoneyMateApi.Middleware;
 using MoneyMateApi.Repositories.CockroachDb;

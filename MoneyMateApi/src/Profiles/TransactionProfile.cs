@@ -1,6 +1,6 @@
 using System.Linq;
 using MoneyMateApi.Controllers.Transactions.Dtos;
-using MoneyMateApi.Domain.Models;
+using MoneyMateApi.Domain.Transactions;
 using Profile = AutoMapper.Profile;
 
 namespace MoneyMateApi.Profiles
